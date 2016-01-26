@@ -60,8 +60,6 @@ for run in list_of_runs:
         output_data.append(replication('end', int(run), reps + 1, now, seed))
         reps += 1
 
-
-
     output_data.sort(key=lambda x: type(x).__name__)
 
     for k, g in groupby(output_data, lambda x: type(x).__name__):

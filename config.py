@@ -53,7 +53,7 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
         for key in list_of_keys:
             data[str(start_id)] = data.pop(key)
-            data[str(start_id)]['description'] = 'paper_prop10'
+            data[str(start_id)]['description'] = 'paper_prop95'
 
             '''then go through each entry in the dict until you find the right key then update'''
             update_v(data[str(start_id)], find_key, new_value)
@@ -62,7 +62,7 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
             start_id += 1
 
-        out_file = open('paper_prop10.JSON', "w")
+        out_file = open('paper_prop95.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -75,7 +75,7 @@ if len(file_name) < 1:
 
 #update_run_id(file_name, 1, 'allow_paper', 0)
 #update_run_id(file_name, 1, 'FU_on', 1)
-update_run_id(file_name, 20, 'paper_prop', 10)
+update_run_id(file_name, 343, 'paper_prop', 95)
 
 
 # loads the selected config file
