@@ -1,0 +1,5 @@
+letter_type,resp_level,help_level,refuse_level
+reminder,5,0,0
+firm reminder,10,0,0
+warning,15,0,0
+final warning,25,0,0
