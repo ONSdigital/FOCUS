@@ -27,6 +27,8 @@ def update_v(input_data, find_key, new_value):
                     '''next dict'''
                     update_v(value, find_key, new_value)
 
+
+
 '''cycle through all the hh'''
 def create_households(input_dict):
 
@@ -45,18 +47,22 @@ def update_run_id(input_file, start_id, find_key, new_value):
     with open(input_file) as data_file:
         data = json.load(data_file)  # dict of the whole file
 
+        update_v(data, find_key, new_value) # check the top level first
+
         list_of_keys = sorted(list(data.keys()), key=int)  # top level keys only
 
         for key in list_of_keys:
             data[str(start_id)] = data.pop(key)
-            data[str(start_id)]['description'] = 'default'
+            data[str(start_id)]['description'] = 'paper_prop10'
 
             '''then go through each entry in the dict until you find the right key then update'''
             update_v(data[str(start_id)], find_key, new_value)
 
+
+
             start_id += 1
 
-        out_file = open('default2.JSON', "w")
+        out_file = open('paper_prop10.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -67,8 +73,9 @@ file_name = input('Enter file name: ')
 if len(file_name) < 1:
     file_name = 'data.JSON'
 
-update_run_id(file_name, 1, 'paper_prop', 5)
-
+#update_run_id(file_name, 1, 'allow_paper', 0)
+#update_run_id(file_name, 1, 'FU_on', 1)
+update_run_id(file_name, 20, 'paper_prop', 10)
 
 
 # loads the selected config file
