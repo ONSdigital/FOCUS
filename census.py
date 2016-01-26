@@ -25,10 +25,20 @@ def print_resp(run):
 
     visit_counter = 0
     call_counter = 0
+    total_dig_resp = 0
+    total_pap_resp = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
             htc_resp[item[4]] += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps and item[7] == 'digital':
+            total_dig_resp += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps and item[7] == 'paper':
+            total_pap_resp += 1
 
     for item in run.output_data:
         if type(item).__name__ == 'Visit' and item[0] == run.run and item[1] == run.reps:
@@ -42,23 +52,27 @@ def print_resp(run):
     print(run.run, run.reps)
     for key, value in sorted(htc_resp.items()):  # sort the dictionary for output purposes
         try:
-            data = [(run.run),
-                  (run.reps),
-                  (run.input_data['households'][key]['default_resp']),
-                  (run.input_data['households'][key]['paper_prop']),
-                  (run.input_data['households'][key]['allow_paper']),
-                  (run.input_data['households'][key]['FU_start_time']),
-                  (run.input_data['households'][key]['dig_assist_eff']),
-                  (run.input_data['households'][key]['dig_assist_flex']),
-                  (run.input_data['district_area']),
-                  (run.input_data['households'][key]['max_visits']),
-                  (run.total_enu_instances),
-                  ((value / run.hh_count[key])),
-                  (visit_counter),
-                  (call_counter)]
+            data = [run.run,
+                    (run.input_data['households'][key]['allow_paper']),
+                    (run.input_data['households'][key]['FU_on']),
+                    (run.input_data['letters_on']),
+                    run.reps,
+                    (run.input_data['households'][key]['default_resp']),
+                    (run.input_data['households'][key]['paper_prop']),
+                    (run.input_data['households'][key]['FU_start_time']),
+                    (run.input_data['households'][key]['dig_assist_eff']),
+                    (run.input_data['households'][key]['dig_assist_flex']),
+                    (run.input_data['district_area']),
+                    (run.input_data['households'][key]['max_visits']),
+                    run.total_enu_instances,
+                    (value / run.hh_count[key]),
+                    total_dig_resp,
+                    total_pap_resp,
+                    visit_counter,
+                    call_counter]
 
             # add code to print to a file instead/as well
-            with open('RAW_output.csv', 'a', newline='') as csv_file:
+            with open('outputs/RAW_output.csv', 'a', newline='') as csv_file:
                 output_file = csv.writer(csv_file, delimiter=',')
                 #for item in data:
 

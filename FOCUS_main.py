@@ -65,7 +65,7 @@ for run in list_of_runs:
     output_data.sort(key=lambda x: type(x).__name__)
 
     for k, g in groupby(output_data, lambda x: type(x).__name__):
-        with open('outputs/{}.csv'.format(k), 'a', newline='') as f_output:  # use a for append
+        with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
             csv_output = csv.writer(f_output)
             rows = list(g)
             csv_output.writerow(list(rows[0]._fields))
