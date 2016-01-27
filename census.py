@@ -13,6 +13,7 @@ visit = namedtuple('Visit', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_out = namedtuple('Visit_out', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_contact = namedtuple('Visit_contact', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_wasted = namedtuple('Visit_wasted', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit_unnecessary = namedtuple('Visit_unnecessary', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_success = namedtuple('Visit_success', ['run', 'reps', 'Time', 'Household', 'Type'])
 enu_util = namedtuple('Enu_util', ['run', 'reps', 'Time', 'Count'])  # enumerator usage over time
 enu_travel = namedtuple('Enu_travel', ['run', 'reps', 'Enu_id', 'Time', 'Distance', 'Travel_time'])
@@ -27,6 +28,8 @@ def print_resp(run):
     call_counter = 0
     total_dig_resp = 0
     total_pap_resp = 0
+    visit_unnecessary_counter  = 0
+    visit_wasted_counter = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
@@ -48,6 +51,14 @@ def print_resp(run):
         if type(item).__name__ == 'Phone_call' and item[0] == run.run and item[1] == run.reps:
             call_counter += 1
 
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_unnecessary' and item[0] == run.run and item[1] == run.reps:
+            visit_unnecessary_counter += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_wasted' and item[0] == run.run and item[1] == run.reps:
+            visit_wasted_counter += 1
+
     #print("response rates at time %0.2f" % run.env.now)
     print(run.run, run.reps)
     for key, value in sorted(htc_resp.items()):  # sort the dictionary for output purposes
@@ -65,10 +76,13 @@ def print_resp(run):
                     (run.input_data['district_area']),
                     (run.input_data['households'][key]['max_visits']),
                     run.total_enu_instances,
+                    (run.input_data['households'][key]['conversion_rate']),
                     (value / run.hh_count[key]),
                     total_dig_resp,
                     total_pap_resp,
                     visit_counter,
+                    visit_unnecessary_counter,
+                    visit_wasted_counter,
                     call_counter]
 
             # add code to print to a file instead/as well
@@ -303,6 +317,11 @@ class Enumerator(object):
             self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
             yield self.env.timeout((5 / 60) + self.run.travel_time)
             # don't put them back in for another visit
+
+        #in not replied yet but would have done so if not visited
+        if current_hh.resp_planned is True and current_hh.resp_sent is False:
+            # add unn visit but otherwise carry on
+            self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
 
         # in and respond - there and then
         if current_hh.resp_sent is False and hh_responds is True:

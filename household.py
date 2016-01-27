@@ -53,8 +53,6 @@ class Household(object):
         self.resp_type = self.set_preference()  # needs to be set based on inputs
         self.fu_start = self.input_data['FU_start_time']
 
-        # add a tag to capture that they intend to respond
-
         self.status = 'initialised'  # current status of household
         self.resp_planned = False  # records if a response is planned
         self.resp_sent = False  # records if a response has been sent
