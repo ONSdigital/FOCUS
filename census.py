@@ -164,7 +164,7 @@ class Coordinator(object):
             self.run.visit_list = []
 
             for household in self.run.district:
-                if household.resp_rec is False and household.fu_start <= self.env.now and household.FU_on is True:
+                if household.resp_rec is False and household.fu_start <= self.env.now and household.FU_on is True and household.visits < household.max_visits:
                     self.run.visit_list.append(household)
 
             """sort what is left by pri - lower numbers first"""
@@ -264,9 +264,6 @@ class Enumerator(object):
                         current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
 
                         self.env.process(current_hh.action())
-
-
-
 
                     # transfer enumerator back to available list
                     self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))

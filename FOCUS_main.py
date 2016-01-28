@@ -30,43 +30,47 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 
 for run in list_of_runs:
 
-    output_data = []  # for output...
+    try:
 
-    sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
-    sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
-    sim_days = (sim_end - sim_start).days
+        output_data = []  # for output...
 
-    replications = input_data[run]['replications']
+        sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
+        sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
+        sim_days = (sim_end - sim_start).days
 
-    reps = 0
-   # print(input_data[run]['description'])
+        replications = input_data[run]['replications']
 
-    for reps in range(replications):
-        #print('Run: ', run, ' replication: ', reps + 1)
-        now = datetime.datetime.now()
-        seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
-        seed = abs(now - seed_date).total_seconds() + int(run)
-        rnd = random.Random()
-        rnd.seed(seed)
-        env = simpy.Environment()
-        output_data.append(replication('start', int(run), reps + 1, now, seed))
-        current_run = initialize.Run(env, input_data[run], output_data, sim_start, sim_days, enu_shifts, letter_input,
-                                     letter_data_file, adviser_shifts, adviser_chat_shifts, rnd, run, reps + 1)
+        reps = 0
+       # print(input_data[run]['description'])
 
-        env.run(until=sim_days*24)
+        for reps in range(replications):
+            #print('Run: ', run, ' replication: ', reps + 1)
+            now = datetime.datetime.now()
+            seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
+            seed = abs(now - seed_date).total_seconds() + int(run)
+            rnd = random.Random()
+            rnd.seed(seed)
+            env = simpy.Environment()
+            output_data.append(replication('start', int(run), reps + 1, now, seed))
+            current_run = initialize.Run(env, input_data[run], output_data, sim_start, sim_days, enu_shifts, letter_input,
+                                         letter_data_file, adviser_shifts, adviser_chat_shifts, rnd, run, reps + 1)
 
-        now = datetime.datetime.now()
-        output_data.append(replication('end', int(run), reps + 1, now, seed))
-        reps += 1
+            env.run(until=sim_days*24)
 
-    output_data.sort(key=lambda x: type(x).__name__)
+            now = datetime.datetime.now()
+            output_data.append(replication('end', int(run), reps + 1, now, seed))
+            reps += 1
 
-    for k, g in groupby(output_data, lambda x: type(x).__name__):
-        with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
-            csv_output = csv.writer(f_output)
-            rows = list(g)
-            csv_output.writerow(list(rows[0]._fields))
-            for row in rows:
-                csv_output.writerow(list(row))
+        output_data.sort(key=lambda x: type(x).__name__)
+
+        for k, g in groupby(output_data, lambda x: type(x).__name__):
+            with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
+                csv_output = csv.writer(f_output)
+                rows = list(g)
+                csv_output.writerow(list(rows[0]._fields))
+                for row in rows:
+                    csv_output.writerow(list(row))
+    except:
+        pass
 
 
