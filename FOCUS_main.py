@@ -32,7 +32,6 @@ for run in list_of_runs:
 
     output_data = []  # for output...
 
-
     sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
     sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_days = (sim_end - sim_start).days

@@ -101,7 +101,7 @@
         "dig_assist_eff": 20,
         "alt_refuse": 0,
         "paper_prop": 5,
-        "allow_paper": "0",
+        "allow_paper": 0,
         "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 10,
@@ -113,7 +113,7 @@
         "contact_rate": 30,
         "default_refuse": 0,
         "conversion_rate": 35,
-        "FU_on": "1"
+        "FU_on": 1
       }
     },
     "start_date": "2011, 3, 7, 0, 0, 0",

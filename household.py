@@ -354,7 +354,7 @@ class Household(object):
                 """do these need to be followed up by a dedicated team?"""
 
             else:
-                self.run.total_responses += 1
+                #self.run.total_responses += 1
                 self.resp_sent = True
                 self.resp_time = self.env.now
                 # add to event log
@@ -362,9 +362,9 @@ class Household(object):
                                                        self.hh_type, self.calls, self.visits, self.resp_type))
 
                 if self.delay == 0:
-                    self.env.process(census.resp_rec(self.env, self))
+                    self.env.process(census.resp_rec(self.env, self, self.run))
                 else:
-                    start_delayed(self.env, census.resp_rec(self.env, self), delay)
+                    start_delayed(self.env, census.resp_rec(self.env, self, self.run), delay)
 
                 yield self.env.timeout((self.run.sim_days*24) - self.env.now)  # do nothing more until sim ends
 

@@ -140,8 +140,9 @@ def pop_advisers(run, input_dict, storage_list, store):
     yield run.env.timeout(0)
 
 
-def resp_rec(env, hh):
+def resp_rec(env, hh, run):
     hh.resp_rec = True
+    run.total_responses += 1
 
     yield env.timeout(0)
 
@@ -171,8 +172,11 @@ class Coordinator(object):
 
             # re-calculates travel time based on households left to visit in area
             # so based on what is left in district
-            self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                                                                          len(self.run.district))))
+            try:
+                self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
+                                                                              len(self.run.district))))
+            except:
+                self.current_hh_sep = 0
             self.run.travel_time = self.current_hh_sep / self.run.input_data['travel_speed']
 
             yield self.env.timeout(self.repeat_update*24)  # sorted at 00:00 each day. What time would this happen?
@@ -220,8 +224,12 @@ class Enumerator(object):
                 current_hh.visits += 1  # increase visits to that hh by 1
                 self.visits += 1
 
-                self.distance_travelled += self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                                                                      len(self.run.district))))
+                try:
+                    self.distance_travelled += self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
+                                                                                       len(self.run.district))))
+                except:
+                    self.distance_travelled = 0
+
                 self.travel_time += self.run.travel_time
                 self.run.output_data.append(enu_travel(self.run.run, self.run.reps, self.id_num, self.env.now,
                                                        self.distance_travelled, self.travel_time))
@@ -249,6 +257,16 @@ class Enumerator(object):
                     # then put back in the list at the end if below max_visit number
                     if current_hh.visits < current_hh.max_visits:
                         self.run.visit_list.append(current_hh)
+                    else:
+                        current_hh.paper_allowed = True
+                        current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
+                        current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
+                        current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
+
+                        self.env.process(current_hh.action())
+
+
+
 
                     # transfer enumerator back to available list
                     self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
