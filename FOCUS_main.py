@@ -50,10 +50,11 @@ for run in list_of_runs:
             seed = abs(now - seed_date).total_seconds() + int(run)
             rnd = random.Random()
             rnd.seed(seed)
+
             env = simpy.Environment()
             output_data.append(replication('start', int(run), reps + 1, now, seed))
             current_run = initialize.Run(env, input_data[run], output_data, sim_start, sim_days, enu_shifts, letter_input,
-                                         letter_data_file, adviser_shifts, adviser_chat_shifts, rnd, run, reps + 1)
+                                         letter_data_file, adviser_shifts, adviser_chat_shifts, rnd, run, reps + 1, seed)
 
             env.run(until=sim_days*24)
 

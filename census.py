@@ -17,10 +17,12 @@ visit_unnecessary = namedtuple('Visit_unnecessary', ['run', 'reps', 'Time', 'Hou
 visit_success = namedtuple('Visit_success', ['run', 'reps', 'Time', 'Household', 'Type'])
 enu_util = namedtuple('Enu_util', ['run', 'reps', 'Time', 'Count'])  # enumerator usage over time
 enu_travel = namedtuple('Enu_travel', ['run', 'reps', 'Enu_id', 'Time', 'Distance', 'Travel_time'])
+visit_assist = namedtuple('Visit_assist', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit_paper = namedtuple('Visit_paper', ['run', 'reps', 'Time', 'Household', 'Type'])
 
 
 def print_resp(run):
-    """ returns the responses received to date for the current run"""
+    """ returns the responses received to date for the current run and other counters"""
 
     htc_resp = {'htc1': 0, 'htc2': 0, 'htc3': 0, 'htc4': 0, 'htc5': 0}
 
@@ -28,8 +30,13 @@ def print_resp(run):
     call_counter = 0
     total_dig_resp = 0
     total_pap_resp = 0
-    visit_unnecessary_counter  = 0
+    visit_unnecessary_counter = 0
     visit_wasted_counter = 0
+    visit_out_counter = 0
+    visit_success_counter = 0
+    visit_contact_counter = 0
+    visit_assist_counter = 0
+    visit_paper_counter = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
@@ -59,7 +66,26 @@ def print_resp(run):
         if type(item).__name__ == 'Visit_wasted' and item[0] == run.run and item[1] == run.reps:
             visit_wasted_counter += 1
 
-    #print("response rates at time %0.2f" % run.env.now)
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_out' and item[0] == run.run and item[1] == run.reps:
+            visit_out_counter += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_success' and item[0] == run.run and item[1] == run.reps:
+            visit_success_counter += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_contact' and item[0] == run.run and item[1] == run.reps:
+            visit_contact_counter += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_assist' and item[0] == run.run and item[1] == run.reps:
+            visit_assist_counter += 1
+
+    for item in run.output_data:
+        if type(item).__name__ == 'Visit_paper' and item[0] == run.run and item[1] == run.reps:
+            visit_paper_counter += 1
+
     print(run.run, run.reps)
     for key, value in sorted(htc_resp.items()):  # sort the dictionary for output purposes
         try:
@@ -83,17 +109,19 @@ def print_resp(run):
                     visit_counter,
                     visit_unnecessary_counter,
                     visit_wasted_counter,
-                    call_counter]
+                    visit_out_counter,
+                    visit_success_counter,
+                    visit_contact_counter,
+                    visit_assist_counter,
+                    visit_paper_counter,
+                    call_counter,
+                    run.seed]
 
             # add code to print to a file instead/as well
             with open('outputs/RAW_output.csv', 'a', newline='') as csv_file:
                 output_file = csv.writer(csv_file, delimiter=',')
-                #for item in data:
-
                 output_file.writerow(data)
-
                 output_file.close()
-
         except:
             pass
 
@@ -237,6 +265,11 @@ class Enumerator(object):
                 self.run.output_data.append(visit(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
                                                   current_hh.hh_type))
 
+                # visited but will reply have done so if not visited
+                if current_hh.resp_planned is True and current_hh.resp_sent is False:
+                    # add record of a visit that was not required but otherwise carry on
+                    self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
+
                 hh_in = False  # contact rate
 
                 if self.run.rnd.uniform(0, 100) <= self.input_data[current_hh.hh_type]['contact_rate']:
@@ -249,6 +282,7 @@ class Enumerator(object):
                 elif hh_in is True and current_hh.paper_allowed is True:
                     yield self.env.process(self.fu_visit_outcome(current_hh))
                 else:
+                    # not in
                     self.run.output_data.append(visit_out(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
                     yield self.env.timeout((3 / 60) + self.run.travel_time)  # travel time spent
@@ -258,6 +292,9 @@ class Enumerator(object):
                     if current_hh.visits < current_hh.max_visits:
                         self.run.visit_list.append(current_hh)
                     else:
+                        '''add event to give paper if max visits received - but what will the HH then do?'''
+                        self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                                                          current_hh.hh_type))
                         current_hh.paper_allowed = True
                         current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                         current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
@@ -307,6 +344,7 @@ class Enumerator(object):
                 # suggests another form of digital assist - another visit in this case
                 """how long would suggesting different forms of digital assist take?"""
                 yield self.env.timeout(0.2 + self.run.travel_time)
+                self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
                 current_hh.pri -= 5  # they have asked for help so raise the priority of the hh
                 # so put hh back in the list to visit if max visits not reached
                 if current_hh.visits < current_hh.max_visits:
@@ -331,22 +369,19 @@ class Enumerator(object):
         if current_hh.resp_sent is True:
             self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
             yield self.env.timeout((5 / 60) + self.run.travel_time)
-            # don't put them back in for another visit
-
-        #in not replied yet but would have done so if not visited
-        if current_hh.resp_planned is True and current_hh.resp_sent is False:
-            # add unn visit but otherwise carry on
-            self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
 
         # in and respond - there and then
         if current_hh.resp_sent is False and hh_responds is True:
-            self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
+            self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                                                      current_hh.hh_type))
+            current_hh.resp_planned = True
             yield self.env.timeout((12 / 60) + self.run.travel_time)
             self.env.process(current_hh.respond(True, current_hh.delay))
 
         # in but no immediate response
         if current_hh.resp_sent is False and hh_responds is False:
-            self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
+            self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                                                      current_hh.hh_type))
             yield self.env.timeout((5 / 60) + self.run.travel_time)
             """After a visit where they don't respond what do hh then do"""
             current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
@@ -357,6 +392,7 @@ class Enumerator(object):
             if current_hh.visits < current_hh.max_visits:
                 self.run.visit_list.append(current_hh)
 
+            '''comment out the below? As the hh should really just do whatever they were going to?'''
             self.env.process(current_hh.action())
 
         # transfer enumerator back to available list

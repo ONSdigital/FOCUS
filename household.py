@@ -77,7 +77,7 @@ class Household(object):
         the process loops back to the COA event and a new response is chosen from a new more appropriate
         distribution"""
 
-        while True and self.resp_sent is False:
+        while True and self.resp_sent is False and self.resp_planned is False:
             """action based upon the current values for resp for individual households"""
 
             action_test = self.run.rnd.uniform(0, 100)  # represents the "decision".
@@ -427,7 +427,8 @@ def response_profiles(run, dist_name):
 
     """what distributions should be used to represent the below?"""
     if dist_name == "HH_resp_time":
-        return (run.rnd.betavariate(1, 2))*(run.sim_days*24)
+        #return (run.rnd.betavariate(1, 2))*(run.sim_days*24
+        return (run.rnd.betavariate(1, 2))*((run.sim_days*24) - run.env.now)
     elif dist_name == "Refuse":
         return run.rnd.uniform(9, (run.sim_days*24) - run.env.now)
     else:

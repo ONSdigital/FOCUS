@@ -47,13 +47,13 @@ def update_run_id(input_file, start_id, find_key, new_value):
     with open(input_file) as data_file:
         data = json.load(data_file)  # dict of the whole file
 
-        update_v(data, find_key, new_value) # check the top level first
+        update_v(data, find_key, new_value)  # check the top level first
 
         list_of_keys = sorted(list(data.keys()), key=int)  # top level keys only
 
         for key in list_of_keys:
             data[str(start_id)] = data.pop(key)
-            data[str(start_id)]['description'] = 'FU_all_visits_3'
+            data[str(start_id)]['description'] = 'FU_all_visits_all_enu_20'
 
             '''then go through each entry in the dict until you find the right key then update'''
             update_v(data[str(start_id)], find_key, new_value)
@@ -62,7 +62,7 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
             start_id += 1
 
-        out_file = open('FU_all_visits_3.JSON', "w")
+        out_file = open('FU_all_visits_all_enu_20.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -73,7 +73,7 @@ file_name = input('Enter file name: ')
 if len(file_name) < 1:
     file_name = 'data.JSON'
 
-update_run_id(file_name, 2167, 'max_visits', 3)
+update_run_id(file_name, 3250, 'district_area', 1750)
 #update_run_id(file_name, 1, 'FU_on', 1)
 #update_run_id(file_name, 362, 'paper_prop', 95)
 
