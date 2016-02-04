@@ -53,16 +53,14 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
         for key in list_of_keys:
             data[str(start_id)] = data.pop(key)
-            data[str(start_id)]['description'] = 'FU_all_visits_all_enu_20'
+            data[str(start_id)]['description'] = 'FU_all_visits_3_enu_10_paper_on.JSON'
 
             '''then go through each entry in the dict until you find the right key then update'''
             update_v(data[str(start_id)], find_key, new_value)
 
-
-
             start_id += 1
 
-        out_file = open('FU_all_visits_all_enu_20.JSON', "w")
+        out_file = open('FU_all_visits_3_enu_10_paper_on.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -72,10 +70,11 @@ def update_run_id(input_file, start_id, find_key, new_value):
 file_name = input('Enter file name: ')
 if len(file_name) < 1:
     file_name = 'data.JSON'
+    #file_name = 'FU_all_visits_1.JSON'
 
-update_run_id(file_name, 3250, 'district_area', 1750)
-#update_run_id(file_name, 1, 'FU_on', 1)
-#update_run_id(file_name, 362, 'paper_prop', 95)
+update_run_id(file_name, 7582, 'max_visits', 3)
+#update_run_id(file_name, 3250, 'letters_on', 0)
+#update_run_id(file_name, 4333, 'max_visits', 2)
 
 
 # loads the selected config file

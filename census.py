@@ -123,6 +123,7 @@ def print_resp(run):
                 output_file.writerow(data)
                 output_file.close()
         except:
+            # skip any that cause errors
             pass
 
     yield run.env.timeout(0)

@@ -377,7 +377,7 @@ class Household(object):
             # record wasted letter but otherwise do nothing more
             self.output_data.append(letter_wasted(self.run.run, self.run.reps, self.env.now, self.id_num, letter_type))
             yield self.env.timeout(0)
-        elif self.resp_sent is False:
+        elif self.resp_sent is False and self.resp_type == 'digital':
             self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, letter_type))
 
             """how effective are letters? Does effectiveness change the more you send? Do different letters
