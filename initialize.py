@@ -169,6 +169,31 @@ class Run(object):
 
         return input_date
 
+    def create_alt_enu_instances(self, input_dict, input_date):
+
+        id_num = 0
+        for key, value in input_dict.items():
+            if isinstance(value, dict):
+
+                self.create_alt_enu_instances(value, key)
+            else:
+                for i in range(int(input_dict["number"])):
+
+                    self.enu_avail.append(census.alt_Enumerator(self,
+                                                            id_num,
+                                                            input_dict["start_time"],
+                                                            input_dict["end_time"],
+                                                            input_dict["start_date"],
+                                                            input_dict["end_date"],
+                                                            input_dict["enu_type"],
+                                                            input_dict["travel_speed"],
+                                                            self.input_data['households'],  # households to visit
+                                                            self.FU_on))
+                    id_num += 1
+                    self.total_enu_instances = id_num
+
+        return input_date
+
     """schedule processes that updates how many instances of the adviser classes exists for the current day"""
     def create_adviser_instances(self):
         # create all the advisers here and place in list
@@ -197,7 +222,7 @@ class Run(object):
 
         if len(self.letters) > 0 and self.send_letters is True:
             for row in self.letters:
-                start_delayed(self.env, census.letter_startup(self, self.env, self.copy_district, self.output_data,
+                start_delayed(self.env, census.letter_startup(self, self.env, self.district, self.output_data,
                                                               self.sim_days, str2bool(row[1]), row[2], row[3]), int(row[0]))
 
     """Prints the percentage of responses received by group at past delay"""

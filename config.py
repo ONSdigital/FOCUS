@@ -28,7 +28,6 @@ def update_v(input_data, find_key, new_value):
                     update_v(value, find_key, new_value)
 
 
-
 '''cycle through all the hh'''
 def create_households(input_dict):
 
@@ -53,14 +52,14 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
         for key in list_of_keys:
             data[str(start_id)] = data.pop(key)
-            data[str(start_id)]['description'] = 'FU_all_visits_3_enu_10_paper_on.JSON'
+            data[str(start_id)]['description'] = 'FU_all_visits_1_enu_10_letters_on.JSON'
 
             '''then go through each entry in the dict until you find the right key then update'''
             update_v(data[str(start_id)], find_key, new_value)
 
             start_id += 1
 
-        out_file = open('FU_all_visits_3_enu_10_paper_on.JSON', "w")
+        out_file = open('FU_all_visits_1_enu_10_letters_on.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -72,8 +71,8 @@ if len(file_name) < 1:
     file_name = 'data.JSON'
     #file_name = 'FU_all_visits_1.JSON'
 
-update_run_id(file_name, 7582, 'max_visits', 3)
-#update_run_id(file_name, 3250, 'letters_on', 0)
+update_run_id(file_name, 1, 'letters_on', 1)
+update_run_id(file_name, 1, 'description', 'FU_all_visits_1_enu_10_letters_on.JSON')
 #update_run_id(file_name, 4333, 'max_visits', 2)
 
 

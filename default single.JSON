@@ -2,18 +2,34 @@
   "1": {
     "end_date": "2011, 4, 5, 0, 0, 0",
     "replications": 10,
-    "collector": {
-      "default": {
+    "collectors": {
+      "Walking": {
+        "travel_speed": 5,
         "availability": {
-          "2011, 3, 8, 0, 0, 0": {
-            "9,0,0": 0,
-            "0,0,0": 0,
-            "17,0,0": 0
+          "2011, 3, 8, 9, 0, 0": {
+            "number": 10,
+            "end_time": 17,
+            "end_date":"2011, 4, 5, 0, 0, 0"
           },
           "2011, 3, 7, 0, 0, 0": {
-            "9,0,0": 0,
-            "0,0,0": 0,
-            "17,0,0": 0
+            "number": 1,
+            "end_time": 17,
+            "end_date":"2011, 4, 5, 0, 0, 0"
+          }
+        }
+      },
+      "cycling":{
+        "travel_speed": 20,
+        "availability": {
+          "2011, 3, 8, 9, 0, 0": {
+            "number": 1,
+            "end_time": 17,
+            "end_date":"2011, 4, 5, 0, 0, 0"
+          },
+          "2011, 3, 7, 0, 0, 0": {
+            "number": 1,
+            "end_time": 17,
+            "end_date":"2011, 4, 5, 0, 0, 0"
           }
         }
       }
@@ -117,7 +133,6 @@
       }
     },
     "start_date": "2011, 3, 7, 0, 0, 0",
-    "travel_speed": 5,
     "description": "default",
     "letters_on": "0",
     "district_area": 1750

@@ -72,6 +72,9 @@ for run in list_of_runs:
                 for row in rows:
                     csv_output.writerow(list(row))
     except:
+        # skip runs that cause errors
+        # give more detail in an error log at some stage
         pass
+
 
 
