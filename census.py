@@ -583,23 +583,26 @@ class AdviserIncomplete(object):
 class alt_Enumerator(object):
     """represents an individual enumerator. Each instance can be different"""
     # need to add tracking to here....
-    def __init__(self, run, id_num, time_start, time_end, from_date, input_data, do_visits):
-        self.env = run.env
+    def __init__(self, run, id_num, start_time, end_time, start_date, end_date, enu_type, travel_speed, input_data,
+                 visits_on):
+
         self.run = run
         self.id_num = id_num
-        #self.district = run.district
-        self.sim_start = run.sim_start
-        self.time_start = time_start
-        self.time_end = time_end
-        self.from_date = from_date
+        self.start_time = start_time
+        self.end_time = end_time
+        self.start_date = start_date
+        self.end_date = end_date
+        self.enu_type = enu_type
+        self.travel_speed = travel_speed
         self.input_data = input_data
-        self.do_visits = do_visits
+        self.visits_on = visits_on
+
         self.distance_travelled = 0
         self.travel_time = 0
         self.visits = 0
 
-        if self.do_visits is True:
-            run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
+        #if self.do_visits is True:
+           # run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
 
     def fu_visit_contact(self):
         """does the enumerator make contact with the hh"""
@@ -629,16 +632,17 @@ class alt_Enumerator(object):
                     self.distance_travelled = 0
 
                 self.travel_time += self.run.travel_time
-                self.run.output_data.append(enu_travel(self.run.run, self.run.reps, self.id_num, self.env.now,
+                self.run.output_data.append(enu_travel(self.run.run, self.run.reps, self.id_num, self.run.env.now,
                                                        self.distance_travelled, self.travel_time))
 
-                self.run.output_data.append(visit(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                self.run.output_data.append(visit(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                   current_hh.hh_type))
 
                 # visited but will reply have done so if not visited
                 if current_hh.resp_planned is True and current_hh.resp_sent is False:
                     # add record of a visit that was not required but otherwise carry on
-                    self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
+                    self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.run.env.now,
+                                                                  current_hh.id_num, current_hh.hh_type))
 
                 hh_in = False  # contact rate
 
@@ -646,16 +650,16 @@ class alt_Enumerator(object):
                     hh_in = True
 
                 if hh_in is True and (current_hh.resp_type == 'paper' and current_hh.paper_allowed is False):
-                    yield self.env.process(self.fu_visit_assist(current_hh))
+                    yield self.run.env.process(self.fu_visit_assist(current_hh))
                 elif hh_in is True and (current_hh.resp_type == 'digital' and current_hh.paper_allowed is False):
-                    yield self.env.process(self.fu_visit_outcome(current_hh))
+                    yield self.run.env.process(self.fu_visit_outcome(current_hh))
                 elif hh_in is True and current_hh.paper_allowed is True:
-                    yield self.env.process(self.fu_visit_outcome(current_hh))
+                    yield self.run.env.process(self.fu_visit_outcome(current_hh))
                 else:
                     # not in
-                    self.run.output_data.append(visit_out(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                    self.run.output_data.append(visit_out(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
-                    yield self.env.timeout((3 / 60) + self.run.travel_time)  # travel time spent
+                    yield self.run.env.timeout((3 / 60) + self.run.travel_time)  # travel time spent
                     # will need to add back to the overall list with an update pri
                     current_hh.pri += 1
                     # then put back in the list at the end if below max_visit number
@@ -663,26 +667,26 @@ class alt_Enumerator(object):
                         self.run.visit_list.append(current_hh)
                     else:
                         '''add event to give paper if max visits received - but what will the HH then do?'''
-                        self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+                        self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
                         current_hh.paper_allowed = True
                         current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                         current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
                         current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
 
-                        self.env.process(current_hh.action())
+                        self.run.env.process(current_hh.action())
 
                     # transfer enumerator back to available list
-                    self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                    self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
                     self.run.enu_working.remove(self)
                     self.run.enu_avail.append(self)
-                    self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                    self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
             elif self.working_test() is False and len(self.run.visit_list) != 0:
                     # not yet at work, time out until the next time they are due to start work
-                yield self.env.timeout(self.hold_until())
+                yield self.run.env.timeout(self.hold_until())
             else:
-                yield self.env.timeout(24)  # should be start of next day instead if this does not do that already...
+                yield self.run.env.timeout(24)  # should be start of next day instead if this does not do that already...
                 # yield self.env.timeout((self.run.sim_days * 24) - self.env.now)
 
     def fu_visit_assist(self, current_hh):
@@ -695,38 +699,38 @@ class alt_Enumerator(object):
                 current_hh.resp_type = 'digital'
                 current_hh.delay = 0
                 """how long would it take to change their minds?"""
-                yield self.env.timeout(0.2 + self.run.travel_time)
-                yield self.env.process(self.fu_visit_outcome(current_hh))
+                yield self.run.env.timeout(0.2 + self.run.travel_time)
+                yield self.run.env.process(self.fu_visit_outcome(current_hh))
 
             elif current_hh.input_data['dig_assist_eff'] <= dig_assist_test <\
                     (current_hh.input_data['dig_assist_eff'] + current_hh.input_data['dig_assist_flex'])\
                     or current_hh.visits == current_hh.max_visits:
                 # allows hh to use paper to respond
                 """how long to get to the point of letting them have paper?"""
-                yield self.env.timeout(0.2 + self.run.travel_time)
+                yield self.run.env.timeout(0.2 + self.run.travel_time)
                 current_hh.paper_allowed = True
                 current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                 current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
                 current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
-                yield self.env.process(self.fu_visit_outcome(current_hh))
+                yield self.run.env.process(self.fu_visit_outcome(current_hh))
 
             else:
                 # suggests another form of digital assist - another visit in this case
                 """how long would suggesting different forms of digital assist take?"""
-                yield self.env.timeout(0.2 + self.run.travel_time)
-                self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
+                yield self.run.env.timeout(0.2 + self.run.travel_time)
+                self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
                 current_hh.pri -= 5  # they have asked for help so raise the priority of the hh
                 # so put hh back in the list to visit if max visits not reached
                 if current_hh.visits < current_hh.max_visits:
                     self.run.visit_list.append(current_hh)
                 # transfer enumerator back to available list
-                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
                 self.run.enu_working.remove(self)
                 self.run.enu_avail.append(self)
-                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
         else:
-            yield self.env.process(self.fu_visit_outcome(current_hh))
+            yield self.run.env.process(self.fu_visit_outcome(current_hh))
 
     def fu_visit_outcome(self, current_hh):
 
@@ -737,23 +741,23 @@ class alt_Enumerator(object):
 
         # in but already replied
         if current_hh.resp_sent is True:
-            self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.env.now, current_hh.id_num, current_hh.hh_type))
-            yield self.env.timeout((5 / 60) + self.run.travel_time)
+            self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
+            yield self.run.env.timeout((5 / 60) + self.run.travel_time)
 
         # in and respond - there and then
         if current_hh.resp_sent is False and hh_responds is True:
-            self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+            self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
             current_hh.resp_planned = True
-            yield self.env.timeout((12 / 60) + self.run.travel_time)
-            self.env.process(current_hh.respond(True, current_hh.delay))
+            yield self.run.env.timeout((12 / 60) + self.run.travel_time)
+            self.run.env.process(current_hh.respond(True, current_hh.delay))
 
         # in but no immediate response
         if current_hh.resp_sent is False and hh_responds is False:
-            self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.env.now, current_hh.id_num,
+            self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
-            yield self.env.timeout((5 / 60) + self.run.travel_time)
-            """After a visit where they don't respond what do hh then do"""
+            yield self.run.env.timeout((5 / 60) + self.run.travel_time)
+            """After a visit where they don't respond what do hh then do?"""
             current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
             current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
             current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
@@ -763,34 +767,35 @@ class alt_Enumerator(object):
                 self.run.visit_list.append(current_hh)
 
             '''comment out the below? As the hh should really just do whatever they were going to?'''
-            self.env.process(current_hh.action())
+            self.run.env.process(current_hh.action())
 
         # transfer enumerator back to available list
-        self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+        self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
         self.run.enu_working.remove(self)
         self.run.enu_avail.append(self)
-        self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+        self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
     def hold_until(self):
 
-        if self.current_day() < self.from_date:
-            date_1 = datetime.datetime.strptime(self.current_day(), '%Y-%m-%d').date()
-            date_2 = datetime.datetime.strptime(self.from_date, '%Y-%m-%d').date()
+        if self.current_date() < self.start_date:
+            date_1 = datetime.datetime.strptime(self.current_date(), '%Y-%m-%d').date()
+            date_2 = datetime.datetime.strptime(self.start_date, '%Y-%m-%d').date()
             diff = (date_2 - date_1).days * 24
-            return diff + self.time_start
-        elif self.current_day() >= self.from_date:
-            if self.env.now % 24 < self.time_start:
-                return self.time_start - self.env.now % 24
-            elif self.env.now % 24 >= self.time_end:
-                return self.time_start + (24 - self.env.now % 24)
+            return diff + self.start_time
+        elif self.current_date() >= self.start_date:
+            if self.run.env.now % 24 < self.start_time:
+                return self.start_time - self.run.env.now % 24
+            elif self.run.env.now % 24 >= self.end_time:
+                return self.start_time + (24 - self.run.env.now % 24)
 
-    def current_day(self):
-        return str((self.sim_start + datetime.timedelta(hours=self.env.now)).date())
+    def current_date(self):
+        return str((self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date())
 
     def working_test(self):
         """returns true or false to depending on whether or not an enumerator is available"""
 
-        if self.current_day() >= self.from_date and (self.time_start <= self.env.now % 24 < self.time_end):
+        if (self.start_date <= self.current_date() <= self.end_date) \
+                and (self.start_time <= self.run.env.now % 24 < self.end_time):
             return True
         else:
             return False

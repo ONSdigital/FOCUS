@@ -1,59 +1,48 @@
 {
   "1": {
+    "district": "UK average",
+    "district_area": 1750,
+    "description": "default",
+    "start_date": "2011, 3, 7, 0, 0, 0",
     "end_date": "2011, 4, 5, 0, 0, 0",
     "replications": 10,
     "collectors": {
-      "Walking": {
+      "walking": {
+        "number": 10,
         "travel_speed": 5,
-        "availability": {
-          "2011, 3, 8, 9, 0, 0": {
-            "number": 10,
-            "end_time": 17,
-            "end_date":"2011, 4, 5, 0, 0, 0"
-          },
-          "2011, 3, 7, 0, 0, 0": {
-            "number": 1,
-            "end_time": 17,
-            "end_date":"2011, 4, 5, 0, 0, 0"
-          }
-        }
+        "start_date": "2011, 3, 8, 0, 0, 0",
+        "end_date": "2011, 4, 5, 0, 0, 0",
+        "start_time": 9,
+        "end_time": 17
       },
-      "cycling":{
+      "cycling": {
+        "number": 1,
         "travel_speed": 20,
-        "availability": {
-          "2011, 3, 8, 9, 0, 0": {
-            "number": 1,
-            "end_time": 17,
-            "end_date":"2011, 4, 5, 0, 0, 0"
-          },
-          "2011, 3, 7, 0, 0, 0": {
-            "number": 1,
-            "end_time": 17,
-            "end_date":"2011, 4, 5, 0, 0, 0"
-          }
-        }
+        "start_date": "2011, 3, 8, 0, 0, 0",
+        "end_date": "2011, 4, 5, 0, 0, 0",
+        "start_time": 9,
+        "end_time": 17
       }
     },
-    "district": "UK average",
     "households": {
-      "htc3": {
+      "htc1": {
         "default_help": 5,
         "dig_assist_eff": 20,
         "alt_refuse": 0,
-        "paper_prop": 5,
-        "allow_paper": "false",
-        "number": 0,
+        "paper_prop": 25,
+        "allow_paper": 0,
+        "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 10,
-        "alt_help": 25,
-        "priority": 3,
-        "max_visits": 1,
+        "alt_help": 55,
+        "priority": 5,
+        "max_visits": 2,
         "alt_resp": 0,
-        "default_resp": 20,
-        "contact_rate": 25,
+        "default_resp": 50,
+        "contact_rate": 30,
         "default_refuse": 0,
-        "conversion_rate": 31,
-        "FU_on": "True"
+        "conversion_rate": 35,
+        "FU_on": 1
       },
       "htc2": {
         "default_help": 5,
@@ -72,6 +61,25 @@
         "contact_rate": 29,
         "default_refuse": 0,
         "conversion_rate": 33,
+        "FU_on": "True"
+      },
+      "htc3": {
+        "default_help": 5,
+        "dig_assist_eff": 20,
+        "alt_refuse": 0,
+        "paper_prop": 5,
+        "allow_paper": "false",
+        "number": 0,
+        "FU_start_time": 72,
+        "dig_assist_flex": 10,
+        "alt_help": 25,
+        "priority": 3,
+        "max_visits": 1,
+        "alt_resp": 0,
+        "default_resp": 20,
+        "contact_rate": 25,
+        "default_refuse": 0,
+        "conversion_rate": 31,
         "FU_on": "True"
       },
       "htc4": {
@@ -111,30 +119,8 @@
         "default_refuse": 0,
         "conversion_rate": 29,
         "FU_on": "True"
-      },
-      "htc1": {
-        "default_help": 5,
-        "dig_assist_eff": 20,
-        "alt_refuse": 0,
-        "paper_prop": 25,
-        "allow_paper": 0,
-        "number": 5000,
-        "FU_start_time": 72,
-        "dig_assist_flex": 10,
-        "alt_help": 55,
-        "priority": 5,
-        "max_visits": 2,
-        "alt_resp": 0,
-        "default_resp": 50,
-        "contact_rate": 30,
-        "default_refuse": 0,
-        "conversion_rate": 35,
-        "FU_on": 1
       }
     },
-    "start_date": "2011, 3, 7, 0, 0, 0",
-    "description": "default",
-    "letters_on": "0",
-    "district_area": 1750
+    "letters_on": "0"
   }
 }
