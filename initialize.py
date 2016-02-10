@@ -69,6 +69,7 @@ class Run(object):
         self.calc_fu_start()  # must run before enumerators are created
         self.start_fu_visits()  # places events in event list to enable coordinator to update visits list
         self.create_enu_instances(self.enu_dict, self.sim_start)
+        #self.create_alt_enu_instances(self.input_data["collectors"], self.sim_start)
         self.create_adviser_instances()
         self.start_letters()  # places events in event list to send letters
         #self.resp_day(10*24)  # simple outputs by day
@@ -169,7 +170,7 @@ class Run(object):
 
         return input_date
 
-    def create_alt_enu_instances(self, input_dict, input_date):
+    def create_alt_enu_instances(self, input_dict, input_key):
 
         id_num = 0
         for key, value in input_dict.items():
@@ -180,19 +181,19 @@ class Run(object):
                 for i in range(int(input_dict["number"])):
 
                     self.enu_avail.append(census.alt_Enumerator(self,
-                                                            id_num,
-                                                            input_dict["start_time"],
-                                                            input_dict["end_time"],
-                                                            input_dict["start_date"],
-                                                            input_dict["end_date"],
-                                                            input_dict["enu_type"],
-                                                            input_dict["travel_speed"],
-                                                            self.input_data['households'],  # households to visit
-                                                            self.FU_on))
+                                                                id_num,
+                                                                input_dict['start_time'],
+                                                                input_dict['end_time'],
+                                                                input_dict['start_date'],
+                                                                input_dict['end_date'],
+                                                                input_key,
+                                                                input_dict['travel_speed'],
+                                                                self.input_data['households'],  # households to visit
+                                                                self.FU_on))
                     id_num += 1
                     self.total_enu_instances = id_num
 
-        return input_date
+        return input_key
 
     """schedule processes that updates how many instances of the adviser classes exists for the current day"""
     def create_adviser_instances(self):

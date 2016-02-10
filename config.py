@@ -59,7 +59,7 @@ def update_run_id(input_file, start_id, find_key, new_value):
 
             start_id += 1
 
-        out_file = open('FU_all_visits_1_enu_10_letters_on.JSON', "w")
+        out_file = open('FU_all_visits_3_enu_10_letters_on.JSON', "w")
         json.dump(data, out_file, indent=4)
 
 # Close the file
@@ -71,9 +71,9 @@ if len(file_name) < 1:
     file_name = 'data.JSON'
     #file_name = 'FU_all_visits_1.JSON'
 
-update_run_id(file_name, 1, 'letters_on', 1)
-update_run_id(file_name, 1, 'description', 'FU_all_visits_1_enu_10_letters_on.JSON')
-#update_run_id(file_name, 4333, 'max_visits', 2)
+#update_run_id(file_name, 1, 'letters_on', 1)
+#update_run_id(file_name, 1, 'description', 'FU_all_visits_1_enu_10_letters_on.JSON')
+update_run_id(file_name, 1, 'max_visits', 3)
 
 
 # loads the selected config file

@@ -41,15 +41,13 @@ def print_resp(run):
     letter_wasted_counter = 0
     letter_received_counter = 0
 
-
-
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
             htc_resp[item[4]] += 1
-        elif type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps and item[7] == 'digital':
-            total_dig_resp += 1
-        elif type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps and item[7] == 'paper':
-            total_pap_resp += 1
+            if item[7] == 'digital':
+                total_dig_resp += 1
+            elif item[7] == 'paper':
+                total_pap_resp += 1
         elif type(item).__name__ == 'Visit' and item[0] == run.run and item[1] == run.reps:
             visit_counter += 1
         elif type(item).__name__ == 'Phone_call' and item[0] == run.run and item[1] == run.reps:
@@ -112,7 +110,7 @@ def print_resp(run):
                     run.seed]
 
             # add code to print to a file instead/as well
-            with open('outputs/RAW_output.csv', 'a', newline='') as csv_file:
+            with open('outputs/RAW_output4.csv', 'a', newline='') as csv_file:
                 output_file = csv.writer(csv_file, delimiter=',')
                 output_file.writerow(data)
                 output_file.close()
@@ -590,8 +588,8 @@ class alt_Enumerator(object):
         self.id_num = id_num
         self.start_time = start_time
         self.end_time = end_time
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        self.end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
         self.enu_type = enu_type
         self.travel_speed = travel_speed
         self.input_data = input_data
@@ -601,8 +599,8 @@ class alt_Enumerator(object):
         self.travel_time = 0
         self.visits = 0
 
-        #if self.do_visits is True:
-           # run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
+        if self.visits_on is True:
+           run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
 
     def fu_visit_contact(self):
         """does the enumerator make contact with the hh"""
@@ -610,11 +608,11 @@ class alt_Enumerator(object):
         while True:
             if self.working_test() is True and len(self.run.visit_list) != 0:
 
-                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
                 # transfer to working list
                 self.run.enu_working.append(self)
                 self.run.enu_avail.remove(self)
-                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.env.now, len(self.run.enu_working)))
+                self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
                 # visit
                 current_hh = self.run.visit_list.pop(0)  # get next household to visit - and remove from master list
@@ -682,7 +680,7 @@ class alt_Enumerator(object):
                     self.run.enu_avail.append(self)
                     self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
-            elif self.working_test() is False and len(self.run.visit_list) != 0:
+            elif self.working_test() is False:
                     # not yet at work, time out until the next time they are due to start work
                 yield self.run.env.timeout(self.hold_until())
             else:
@@ -776,6 +774,13 @@ class alt_Enumerator(object):
         self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
 
     def hold_until(self):
+
+        # date comparison not working!!!! Convert date strings to seconds and compare?
+        test1 = datetime.datetime.strptime(self.current_date(), '%Y-%m-%d').date()
+        test2 = datetime.datetime.strptime(self.start_date, '%Y-%m-%d').date()
+        testdelta = (test2 - test1).total_seconds()
+
+
 
         if self.current_date() < self.start_date:
             date_1 = datetime.datetime.strptime(self.current_date(), '%Y-%m-%d').date()
