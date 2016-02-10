@@ -68,9 +68,10 @@ class Run(object):
         self.create_households(self.input_data['households'])
         self.calc_fu_start()  # must run before enumerators are created
         self.start_fu_visits()  # places events in event list to enable coordinator to update visits list
-        self.create_enu_instances(self.enu_dict, self.sim_start)
-        #self.create_alt_enu_instances(self.input_data["collectors"], self.sim_start)
-        self.create_adviser_instances()
+        #self.create_enu_instances(self.enu_dict, self.sim_start)
+        self.create_alt_enu_instances(self.input_data["collectors"], self.sim_start)
+        #self.create_adviser_instances()
+        self.alt_create_adviser_instances(self.input_data["advisers"], self.sim_start)
         self.start_letters()  # places events in event list to send letters
         #self.resp_day(10*24)  # simple outputs by day
         #self.resp_day(self.fu_start)  # simple outputs by day
@@ -170,24 +171,25 @@ class Run(object):
 
         return input_date
 
-    def create_alt_enu_instances(self, input_dict, input_key):
+    def create_alt_enu_instances(self, input_data, input_key):
 
         id_num = 0
-        for key, value in input_dict.items():
+        for key, value in input_data.items():
             if isinstance(value, dict):
 
                 self.create_alt_enu_instances(value, key)
-            else:
-                for i in range(int(input_dict["number"])):
+            elif key == "number":
+                #print(int(input_data["number"]))
+                for i in range(int(input_data["number"])):
 
                     self.enu_avail.append(census.alt_Enumerator(self,
                                                                 id_num,
-                                                                input_dict['start_time'],
-                                                                input_dict['end_time'],
-                                                                input_dict['start_date'],
-                                                                input_dict['end_date'],
+                                                                input_data['start_time'],
+                                                                input_data['end_time'],
+                                                                input_data['start_date'],
+                                                                input_data['end_date'],
                                                                 input_key,
-                                                                input_dict['travel_speed'],
+                                                                input_data['travel_speed'],
                                                                 self.input_data['households'],  # households to visit
                                                                 self.FU_on))
                     id_num += 1
@@ -197,7 +199,9 @@ class Run(object):
 
     """schedule processes that updates how many instances of the adviser classes exists for the current day"""
     def create_adviser_instances(self):
-        # create all the advisers here and place in list
+        # create all the advisers here
+        # then as part of the initiation start a process that adds them to the store at the right time
+        # and then removes them at the right time
         for i in range(self.adviser_cap):
             self.ad_storage_list.append(census.Adviser(self, i, self.call_FU_on))  # set to true to do FU_calls
 
@@ -217,6 +221,45 @@ class Run(object):
                 start_delayed(self.env, census.pop_advisers(self, self.adviser_chat_dict,
                                                             self.ad_chat_storage_list, self.adviser_chat_store),
                               delay)
+
+    def alt_create_adviser_instances(self, input_data, input_key):
+
+        # create the advisers
+        id_num = 0
+        for key, value in input_data.items():
+            if isinstance(value, dict):
+
+                self.alt_create_adviser_instances(value, key)
+            elif key == "number":
+                for i in range(int(input_data["number"])):
+
+                    self.ad_storage_list.append(census.Adviser(self,
+                                                               id_num,
+                                                               input_data["start_time"],
+                                                               input_data["end_time"],
+                                                               input_data["start_date"],
+                                                               input_data["end_date"],
+                                                               input_key,
+                                                               input_data["FU_on"]))
+                    id_num += 1
+
+        return input_key
+
+        # create all the advisers here
+        # then as part of the initiation start a process that adds them to the store at the right time
+        # and then removes them at the right time
+         # set to true to do FU_calls
+
+        # schedule update processes here - updates to the number of advisers in the store
+        for day in range(self.sim_days):
+            delay = day*24
+            if delay == 0:
+                self.env.process(census.pop_advisers(self, self.adviser_dict, self.ad_storage_list, self.adviser_store))
+
+            else:
+                start_delayed(self.env, census.pop_advisers(self, self.adviser_dict, self.ad_storage_list,
+                                                            self.adviser_store), delay)
+
 
     """scheduling of events to start the posting of letters at defined times"""
     def start_letters(self):

@@ -19,7 +19,7 @@ adviser_chat_shifts = 'in_adviser_chat_shifts.csv'
 # allow user to select desired configuration file
 file_name = input('Enter file name: ')
 if len(file_name) < 1:
-    file_name = 'data_alt.JSON'
+    file_name = 'default single.JSON'
 
 # loads the selected config file
 with open(file_name) as data_file:

@@ -10,18 +10,36 @@
       "walking": {
         "number": 1,
         "travel_speed": 5,
-        "start_date": "2011, 3, 8, 0, 0, 0",
-        "end_date": "2011, 4, 5, 0, 0, 0",
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
         "start_time": 9,
         "end_time": 17
       },
       "cycling": {
         "number": 1,
         "travel_speed": 20,
-        "start_date": "2011, 3, 8, 0, 0, 0",
-        "end_date": "2011, 4, 5, 0, 0, 0",
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
         "start_time": 9,
         "end_time": 17
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 1,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      },
+      "web chat": {
+        "number": 1,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
       }
     },
     "households": {
@@ -31,7 +49,7 @@
         "alt_refuse": 0,
         "paper_prop": 25,
         "allow_paper": 0,
-        "number": 100,
+        "number": 10,
         "FU_start_time": 72,
         "dig_assist_flex": 10,
         "alt_help": 55,

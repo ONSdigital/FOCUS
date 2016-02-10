@@ -185,7 +185,8 @@ class Coordinator(object):
             self.run.visit_list = []
 
             for household in self.run.district:
-                if household.resp_rec is False and household.fu_start <= self.env.now and household.FU_on is True and household.visits < household.max_visits:
+                if household.resp_rec is False and household.fu_start <= self.env.now and household.FU_on is True and\
+                                household.visits < household.max_visits:
                     self.run.visit_list.append(household)
 
             """sort what is left by pri - lower numbers first"""
@@ -198,7 +199,7 @@ class Coordinator(object):
                                                                               len(self.run.district))))
             except:
                 self.current_hh_sep = 0
-            self.run.travel_time = self.current_hh_sep / self.run.input_data['travel_speed']
+                self.run.travel_time = 0
 
             yield self.env.timeout(self.repeat_update*24)  # sorted at 00:00 each day. What time would this happen?
 
@@ -222,7 +223,7 @@ class Enumerator(object):
         self.visits = 0
 
         if self.do_visits is True:
-            run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
+            self.run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
 
     def fu_visit_contact(self):
         """does the enumerator make contact with the hh"""
@@ -458,22 +459,53 @@ class LetterPhase(object):
 class Adviser(object):
     """Call centre adviser - multitasking"""
 
-    def __init__(self, run, id_num, do_fu_calls):
+    def __init__(self, run, id_num, start_time, end_time, start_date, end_date, ad_type, do_fu_calls):
+
         self.env = run.env
         self.run = run
         self.id_num = id_num
         self.do_fu_calls = do_fu_calls
-        self.district = run.district
-        self.sim_start = run.sim_start
-        self.time_start = 8
-        self.time_end = 20
+        self.start_time = start_time
+        self.end_time = end_time
+        self.start_date = datetime.datetime.strptime(start_date, '%Y, %m, %d').date()
+        self.end_date = datetime.datetime.strptime(end_date, '%Y, %m, %d').date()
+        self.ad_type = ad_type
+
         self.avail = False
         self.time_answered = 0
         self.length_of_call = 0
         self.current_hh = 0
+
+        # add a process that adds the adviser to the store at the passed time
+        # and removes later and so on until the end of the sim
+        # while out of the store place in a storage list/store?
+        # test how quick this turns out to be???
+        temp_switch = 1
+        if temp_switch == 1:
+            # do the new stuff
+            self.run.env.process(self.set_availability())  # starts the process which runs the visits
+
         if self.do_fu_calls is True:
             # add a switch to turn this on or off
-            run.env.process(self.fu_call())  # starts the process which runs the visits
+            run.env.process(self.fu_call())  # starts the process which runs the vi
+
+    def set_availability(self):
+
+        delay = self.start_time + 24*(self.start_date - self.run.sim_start.date()).days
+        print(self.ad_type, delay)
+
+        yield self.run.env.timeot(0)
+
+        # so you know the numbers of days to delay
+        #add the start time
+        #  create the events that add and remove the adviser from the adviser store
+        #  loop through from start to end date and create event at start and end time
+        #  calc start delayed time
+        #  timedelta (date - startdate)
+
+
+
+
 
     def fu_call(self):
 
@@ -588,8 +620,8 @@ class alt_Enumerator(object):
         self.id_num = id_num
         self.start_time = start_time
         self.end_time = end_time
-        self.start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-        self.end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+        self.start_date = datetime.datetime.strptime(start_date, '%Y, %m, %d').date()
+        self.end_date = datetime.datetime.strptime(end_date, '%Y, %m, %d').date()
         self.enu_type = enu_type
         self.travel_speed = travel_speed
         self.input_data = input_data
@@ -600,12 +632,13 @@ class alt_Enumerator(object):
         self.visits = 0
 
         if self.visits_on is True:
-           run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
+            run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
 
     def fu_visit_contact(self):
         """does the enumerator make contact with the hh"""
 
         while True:
+
             if self.working_test() is True and len(self.run.visit_list) != 0:
 
                 self.run.output_data.append(enu_util(self.run.run, self.run.reps, self.run.env.now, len(self.run.enu_working)))
@@ -684,7 +717,7 @@ class alt_Enumerator(object):
                     # not yet at work, time out until the next time they are due to start work
                 yield self.run.env.timeout(self.hold_until())
             else:
-                yield self.run.env.timeout(24)  # should be start of next day instead if this does not do that already...
+                yield self.run.env.timeout(24)
                 # yield self.env.timeout((self.run.sim_days * 24) - self.env.now)
 
     def fu_visit_assist(self, current_hh):
@@ -775,17 +808,8 @@ class alt_Enumerator(object):
 
     def hold_until(self):
 
-        # date comparison not working!!!! Convert date strings to seconds and compare?
-        test1 = datetime.datetime.strptime(self.current_date(), '%Y-%m-%d').date()
-        test2 = datetime.datetime.strptime(self.start_date, '%Y-%m-%d').date()
-        testdelta = (test2 - test1).total_seconds()
-
-
-
         if self.current_date() < self.start_date:
-            date_1 = datetime.datetime.strptime(self.current_date(), '%Y-%m-%d').date()
-            date_2 = datetime.datetime.strptime(self.start_date, '%Y-%m-%d').date()
-            diff = (date_2 - date_1).days * 24
+            diff = (self.start_date - self.current_date()).days * 24
             return diff + self.start_time
         elif self.current_date() >= self.start_date:
             if self.run.env.now % 24 < self.start_time:
@@ -794,10 +818,12 @@ class alt_Enumerator(object):
                 return self.start_time + (24 - self.run.env.now % 24)
 
     def current_date(self):
-        return str((self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date())
+        return (self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date()
 
     def working_test(self):
         """returns true or false to depending on whether or not an enumerator is available"""
+
+        # return current data as date time object
 
         if (self.start_date <= self.current_date() <= self.end_date) \
                 and (self.start_time <= self.run.env.now % 24 < self.end_time):
