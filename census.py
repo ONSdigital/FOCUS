@@ -5,6 +5,7 @@ from collections import namedtuple
 import datetime
 import math
 import csv
+from simpy.util import start_delayed
 
 
 FU_start = namedtuple('FU_start', ['Time'])
@@ -491,10 +492,39 @@ class Adviser(object):
 
     def set_availability(self):
 
-        delay = self.start_time + 24*(self.start_date - self.run.sim_start.date()).days
-        print(self.ad_type, delay)
+        start_delay = self.start_time + 24*(self.start_date - self.run.sim_start.date()).days
+        end_delay = self.end_time + 24*(self.start_date - self.run.sim_start.date()).days
+        repeat = (self.end_date - self.start_date).days + 1
 
-        yield self.run.env.timeot(0)
+        for i in range(repeat):
+
+            start_delayed(self.run.env, self.add_to_store(), start_delay)
+            start_delayed(self.run.env, self.remove_from_store(), end_delay)
+            print(start_delay)
+            start_delay += 24
+            end_delay += 24
+
+
+        yield self.run.env.timeout(0)
+
+    def add_to_store(self):
+
+        print("add")
+
+        self.run.ad_storage_list.remove(self)
+        self.run.adviser_store.put(self)
+        print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
+        yield self.run.env.timeout(0)
+
+    def remove_from_store(self):
+        print("remove")
+
+
+        current_ad = yield self.run.adviser_store.get(lambda item: item.id_num == self.id_num)
+        self.run.ad_storage_list.append(current_ad)
+        print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
+        yield self.run.env.timeout(0)
+
 
         # so you know the numbers of days to delay
         #add the start time#

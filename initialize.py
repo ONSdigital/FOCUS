@@ -249,16 +249,7 @@ class Run(object):
         # then as part of the initiation start a process that adds them to the store at the right time
         # and then removes them at the right time
          # set to true to do FU_calls
-
         # schedule update processes here - updates to the number of advisers in the store
-        for day in range(self.sim_days):
-            delay = day*24
-            if delay == 0:
-                self.env.process(census.pop_advisers(self, self.adviser_dict, self.ad_storage_list, self.adviser_store))
-
-            else:
-                start_delayed(self.env, census.pop_advisers(self, self.adviser_dict, self.ad_storage_list,
-                                                            self.adviser_store), delay)
 
 
     """scheduling of events to start the posting of letters at defined times"""

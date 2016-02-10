@@ -5,7 +5,7 @@
     "description": "default",
     "start_date": "2011, 3, 7, 0, 0, 0",
     "end_date": "2011, 4, 5, 0, 0, 0",
-    "replications": 10,
+    "replications": 1,
     "collectors": {
       "walking": {
         "number": 1,
@@ -28,7 +28,7 @@
       "telephone": {
         "number": 1,
         "start_date": "2011, 3, 8",
-        "end_date": "2011, 4, 5",
+        "end_date": "2011, 3, 10",
         "start_time": 9,
         "end_time": 17,
         "FU_on": 0
@@ -36,7 +36,7 @@
       "web chat": {
         "number": 1,
         "start_date": "2011, 3, 8",
-        "end_date": "2011, 4, 5",
+        "end_date": "2011, 3, 10",
         "start_time": 9,
         "end_time": 17,
         "FU_on": 0
