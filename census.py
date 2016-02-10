@@ -497,7 +497,7 @@ class Adviser(object):
         yield self.run.env.timeot(0)
 
         # so you know the numbers of days to delay
-        #add the start time
+        #add the start time#
         #  create the events that add and remove the adviser from the adviser store
         #  loop through from start to end date and create event at start and end time
         #  calc start delayed time
