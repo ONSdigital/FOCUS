@@ -48,8 +48,6 @@ class Household(object):
         self.time_called = 0  # time of phone call
         self.max_visits = self.input_data['max_visits']
         self.pri = self.input_data['priority']  # set FU priority. Lower numbers have higher priority
-        self.delay = 0  # time between hh responding and census knowing
-        self.resp_type = 'digital'  # by default
         self.resp_type = self.set_preference()  # needs to be set based on inputs
         self.fu_start = self.input_data['FU_start_time']
 
@@ -66,7 +64,6 @@ class Household(object):
 
         self.resp_level = self.decision_level(self.input_data, 'resp')
         self.help_level = self.resp_level + self.decision_level(self.input_data, 'help')
-        self.refuse_level = self.help_level + self.decision_level(self.input_data, 'refuse')
 
         self.check = env.process(self.action())
 
@@ -82,35 +79,31 @@ class Household(object):
 
             action_test = self.run.rnd.uniform(0, 100)  # represents the "decision".
 
+
             # below is the decision tree that will use the set values
             if action_test <= self.resp_level:
+
                 # they respond
                 self.resp_planned = True
                 response_time = response_profiles(self.run, "HH_resp_time")
+                print(self.id_num, "respond", response_time)
                 self.status = "Responding"
                 yield self.env.timeout(response_time)  # wait until time
                 yield self.env.process(self.respond(True, self.delay))
 
             elif self.resp_level < action_test <= self.help_level:
                 # ask for help
-                assist_time = response_profiles(self.run, "assist")
+                contact_time = response_profiles(self.run, "contact")
+                print(self.id_num, "contact", contact_time)
                 self.status = "assist"
-                yield self.env.timeout(assist_time)
-                yield self.env.process(self.contact())
-
-            elif self.help_level < action_test <= self.refuse_level:
-                # actively refuse - straight to follow-up list or treat as do nothing with higher priority for FU?
-                refuse_time = response_profiles(self.run, "refuse")
-                self.status = "refuse"
-                yield self.env.timeout(refuse_time)
-                # so they make contact - pass/modify values to the contact function to determine what happens here
-                # it won't be the default behaviour that occurs from asking for assist
+                yield self.env.timeout(contact_time)
                 yield self.env.process(self.contact())
 
             else:
                 # do nothing
                 self.output_data.append(do_nothing(self.run.run, self.run.reps, self.env.now, self.id_num))
                 self.status = "Do nothing"
+                print(self.id_num,"nothing")
                 yield self.env.timeout((self.run.sim_days*24) - self.env.now)  # do nothing so pause until end of sim
 
     # HH requires assistance so pick an option to use - need data.JSON on this or can test impact of variation
@@ -129,6 +122,7 @@ class Household(object):
         # completion events
         # and so on
 
+    # will need to update this to use the new store and JSON data
     def webchat(self):
         """live web chat"""
         """need to add some event tracking"""
@@ -136,7 +130,7 @@ class Household(object):
         if self.resp_sent is False:
 
             # get current day and extract number of call centre staff and time they are available for that day
-            temp_date = str((self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date())
+            temp_date = str((self.run.start_date + datetime.timedelta(hours=self.run.env.now)).date())
             day_cap = int(self.run.adviser_chat_dict[temp_date]['capacity'])
             start_time = int((self.run.adviser_dict[temp_date]['time']).split('-')[0])
             end_time = int((self.run.adviser_dict[temp_date]['time']).split('-')[1])
@@ -189,6 +183,7 @@ class Household(object):
                 self.refuse_level = self.help_level + 0
                 yield self.env.process(self.action())
 
+    # will need to update this to use the new store and JSON data
     def online(self):
         """other online request for help, e.g, e-mail, web form, text"""
 
@@ -214,21 +209,18 @@ class Household(object):
 
         if self.resp_sent is False:
 
-            # get current day and extract number of call centre staff and time they are available for that day
-            temp_date = str((self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date())
-            day_cap = int(self.run.adviser_dict[temp_date]['capacity'])
-            start_time = int((self.run.adviser_dict[temp_date]['time']).split('-')[0])
-            end_time = int((self.run.adviser_dict[temp_date]['time']).split('-')[1])
 
-            # if current time is between the above times
-            if start_time <= self.env.now % 24 < end_time:
+           # if start_time <= self.env.now % 24 < end_time:
                 # try and connect to an adviser
                 self.time_called = self.env.now
                 self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
-                temp_result = day_cap - len(self.run.adviser_store.items)
-                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
+                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, len(self.run.ad_working), self.id_num))
+                # to get util here divide by the store contents
                 current_ad = yield self.run.adviser_store.get()  # gets an adviser from the store...
+                self.run.ad_working.append(current_ad) # and puts it in a working list
+
                 current_ad.current_hh = self.id_num
+
 
                 wait_time = self.env.now - self.time_called  # calc time a hh would have spent waiting if never hung up
 
@@ -239,30 +231,32 @@ class Household(object):
                 # if greater than renege time for that hh then hang up
                 if wait_time >= self.call_renege:
 
+                    self.run.ad_working.remove(current_ad)
                     yield self.run.adviser_store.put(current_ad)
                     self.output_data.append(hung_up(self.run.run, self.run.reps, self.time_called + self.call_renege, self.id_num))
                     """after failing to get through what does a hh do?"""
                     self.resp_level = 0
                     self.help_level = self.resp_level + 50
-                    self.refuse_level = self.help_level + 0
+
                     yield self.env.process(self.action())
 
                 # if not then connect the call
                 elif wait_time < self.call_renege:
+                    self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
                     current_ad.time_answered = self.time_called + wait_time  # sets the time this adviser last answered
 
                     # connected what is the outcome
-                    yield self.env.process(self.phone_call_assist(current_ad, day_cap))
+                    yield self.env.process(self.phone_call_assist(current_ad))
 
-            else:
+            #else:
                 # called when the lines are closed. Will be dealt with by automated line
                 """Need to understand how people respond when they do not get through?"""
-                self.resp_level = 0
-                self.help_level = self.resp_level + 80
-                self.refuse_level = self.help_level + 0
-                yield self.env.process(self.action())
+               # self.resp_level = 0
+               # self.help_level = self.resp_level + 80
+              #  self.refuse_level = self.help_level + 0
+                #yield self.env.process(self.action())
 
-    def phone_call_assist(self, current_ad, day_cap):
+    def phone_call_assist(self, current_ad):
         """represents the phase of a phone call where the adviser decides how they will assist the hh"""
 
         if self.paper_allowed is False and self.resp_type == 'paper':  # if paper is allowed should we skip this and go for default values? Yes...
@@ -272,40 +266,38 @@ class Household(object):
                 self.resp_type = 'digital'
                 current_ad.length_of_call = 0.1
                 yield self.env.timeout(current_ad.length_of_call)
-                temp_result = day_cap - len(self.run.adviser_store.items)
-                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
-                yield self.env.process(self.phone_call_result(current_ad, day_cap))
+                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
+                yield self.env.process(self.phone_call_result(current_ad))
 
             elif self.input_data['dig_assist_eff'] <= call_ans_test < (self.input_data['dig_assist_eff'] + self.input_data['dig_assist_flex']):
                 """what proportion of people would we give a paper form too if they asked?"""
                 # allows hh to use paper to respond
                 current_ad.length_of_call = 0.1
                 yield self.env.timeout(current_ad.length_of_call)
+                self.run.ad_working.remove(current_ad)
                 yield self.run.adviser_store.put(current_ad)
-                temp_result = day_cap - len(self.run.adviser_store.items)
-                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
+                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
                 self.output_data.append(paper_requested(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type))
 
                 # pass values as always - but now allowed to use paper so can use default values
                 self.paper_allowed = True
                 self.resp_level = self.decision_level(self.input_data, "resp")
                 self.help_level = self.resp_level + self.decision_level(self.input_data, "help")
-                self.refuse_level = self.help_level + self.decision_level(self.input_data, "refuse")
                 self.env.process(self.action())
             else:
                 # suggests another form of digital assist - a visit in this case
                 """how long would suggesting different forms of digital assist take?"""
                 current_ad.length_of_call = 0.1
                 yield self.env.timeout(current_ad.length_of_call)
+                self.run.ad_working.remove(current_ad)
                 yield self.run.adviser_store.put(current_ad)
-                temp_result = day_cap - len(self.run.adviser_store.items)
-                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
+                self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
                 self.pri -= 5  # they have asked for help so raise the priority of the hh
         else:
             # dig so carry on and see what the result is
-            yield self.env.process(self.phone_call_result(current_ad, day_cap))
+            yield self.env.process(self.phone_call_result(current_ad))
 
-    def phone_call_result(self, current_ad, day_cap):
+    def phone_call_result(self, current_ad):
         """represents the phase where a response may be received"""
 
         """need to understand how successful taking calls is at gaining responses for each group of interest.
@@ -317,9 +309,9 @@ class Household(object):
             """how long would these calls last?"""
             current_ad.length_of_call = 0.1
             yield self.env.timeout(current_ad.length_of_call)
+            self.run.ad_working.remove(current_ad)
             yield self.run.adviser_store.put(current_ad)
-            temp_result = day_cap - len(self.run.adviser_store.items)
-            self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
+            self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
             self.resp_planned = True
             yield self.env.process(self.respond(True, self.delay))  # and create a successful response
             # some don't so back to action but with dig preferences
@@ -327,9 +319,9 @@ class Household(object):
             """how long would these calls last?"""
             current_ad.length_of_call = 0.1
             yield self.env.timeout(current_ad.length_of_call)
+            self.run.ad_working.remove(current_ad)
             yield self.run.adviser_store.put(current_ad)
-            temp_result = day_cap - len(self.run.adviser_store.items)
-            self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, temp_result, self.id_num))
+            self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now,len(self.run.ad_working), self.id_num))
             # back to the action progress with default values...and eventually with updated parameters
             # reflecting how this type of hh would now respond...
             """After a call where they don't respond there and then what do hh then do?"""
@@ -427,7 +419,6 @@ def response_profiles(run, dist_name):
 
     """what distributions should be used to represent the below?"""
     if dist_name == "HH_resp_time":
-        #return (run.rnd.betavariate(1, 2))*(run.sim_days*24
         return (run.rnd.betavariate(1, 2))*((run.sim_days*24) - run.env.now)
     elif dist_name == "Refuse":
         return run.rnd.uniform(9, (run.sim_days*24) - run.env.now)

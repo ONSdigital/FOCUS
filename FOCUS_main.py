@@ -12,9 +12,6 @@ replication = namedtuple('Replication', ['type', 'run', 'rep', 'time', 'seed'])
 
 letter_data_file = 'in_letter_data.csv'  # details the effects the various types of letters have
 letter_input = 'in_letter_phases.csv'  # details when each type of letter will be sent and to whom
-enu_shifts = 'in_enu_shifts.csv'  # when enumerators are available
-adviser_shifts = 'in_adviser_shifts.csv'
-adviser_chat_shifts = 'in_adviser_chat_shifts.csv'
 
 # allow user to select desired configuration file
 file_name = input('Enter file name: ')
@@ -30,7 +27,7 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 
 for run in list_of_runs:
 
-    try:
+    #try:
 
         output_data = []  # for output...
 
@@ -53,8 +50,8 @@ for run in list_of_runs:
 
             env = simpy.Environment()
             output_data.append(replication('start', int(run), reps + 1, now, seed))
-            current_run = initialize.Run(env, input_data[run], output_data, sim_start, sim_days, enu_shifts, letter_input,
-                                         letter_data_file, adviser_shifts, adviser_chat_shifts, rnd, run, reps + 1, seed)
+            current_run = initialize.Run(env, input_data[run], output_data, letter_input, letter_data_file, rnd,
+                                         run, reps + 1, seed)
 
             env.run(until=sim_days*24)
 
@@ -71,10 +68,10 @@ for run in list_of_runs:
                 csv_output.writerow(list(rows[0]._fields))
                 for row in rows:
                     csv_output.writerow(list(row))
-    except:
+    #except:
         # skip runs that cause errors
         # give more detail in an error log at some stage
-        pass
+        #pass
 
 
 

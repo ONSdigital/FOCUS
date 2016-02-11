@@ -121,8 +121,7 @@ def print_resp(run):
 
     yield run.env.timeout(0)
 
-
-# a helper process that creates an instance of a coordinator class
+# a helper process that creates an instance of a coordinator class and starts it working
 def fu_startup(run, env, district, data):
 
     Coordinator(run, env, district, 1)
@@ -139,7 +138,7 @@ def letter_startup(run, env, district, output_data, sim_days, targeted, letter_t
 
 def pop_advisers(run, input_dict, storage_list, store):
 
-    temp_date = str((run.sim_start + datetime.timedelta(hours=run.env.now)).date())
+    temp_date = str((run.start_date + datetime.timedelta(hours=run.env.now)).date())
     day_cap = int(input_dict[temp_date]['capacity'])
     temp_diff = day_cap - len(store.items)
 
@@ -213,7 +212,7 @@ class Enumerator(object):
         self.run = run
         self.id_num = id_num
         #self.district = run.district
-        self.sim_start = run.sim_start
+        self.sim_start = run.start_date
         self.time_start = time_start
         self.time_end = time_end
         self.from_date = from_date
@@ -492,37 +491,39 @@ class Adviser(object):
 
     def set_availability(self):
 
-        start_delay = self.start_time + 24*(self.start_date - self.run.sim_start.date()).days
-        end_delay = self.end_time + 24*(self.start_date - self.run.sim_start.date()).days
+        start_delay = self.start_time + 24*(self.start_date - self.run.start_date).days
+        end_delay = self.end_time + 24*(self.start_date - self.run.start_date).days
         repeat = (self.end_date - self.start_date).days + 1
 
         for i in range(repeat):
 
+            print(i)
+
             start_delayed(self.run.env, self.add_to_store(), start_delay)
             start_delayed(self.run.env, self.remove_from_store(), end_delay)
-            print(start_delay)
             start_delay += 24
             end_delay += 24
-
 
         yield self.run.env.timeout(0)
 
     def add_to_store(self):
 
-        print("add")
-
         self.run.ad_storage_list.remove(self)
         self.run.adviser_store.put(self)
-        print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
+        #print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
         yield self.run.env.timeout(0)
 
     def remove_from_store(self):
-        print("remove")
 
+
+        # note potential pitfall here - adviser object may be in use by a hh when it is due to become available.
+        # Does this even still happen in this case? If yes when?
+        # alternative may be to let a hh take a adviser and check at that point if it should still be available
+        # if not remove it and let the hh grab another adviser???
 
         current_ad = yield self.run.adviser_store.get(lambda item: item.id_num == self.id_num)
         self.run.ad_storage_list.append(current_ad)
-        print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
+        #print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
         yield self.run.env.timeout(0)
 
 
@@ -545,7 +546,7 @@ class Adviser(object):
             if self.env.now >= self.run.fu_start:
 
                 # get the working times for the day for the adviser
-                temp_date = str((self.run.sim_start + datetime.timedelta(hours=self.env.now)).date())
+                temp_date = str((self.run.start_date + datetime.timedelta(hours=self.env.now)).date())
                 self.time_start = int(self.run.adviser_dict[temp_date]['time'].split('-')[0])
                 self.time_end = int(self.run.adviser_dict[temp_date]['time'].split('-')[1])
 
@@ -625,12 +626,71 @@ class Adviser(object):
 class AdviserChat(object):
     """dedicated web chat adviser"""
 
-    def __init__(self, run, id_num):
+    def __init__(self, run, id_num, start_time, end_time, start_date, end_date, ad_type):
+
         self.env = run.env
         self.run = run
         self.id_num = id_num
+        self.start_time = start_time
+        self.end_time = end_time
+        self.start_date = datetime.datetime.strptime(start_date, '%Y, %m, %d').date()
+        self.end_date = datetime.datetime.strptime(end_date, '%Y, %m, %d').date()
+        self.ad_type = ad_type
+
         self.avail = False
 
+        temp_switch = 1
+        if temp_switch == 1:
+            # do the new stuff
+            self.run.env.process(self.set_availability())  # starts the process which runs the visits
+
+    def set_availability(self):
+
+        start_delay = self.start_time + 24*(self.start_date - self.run.start_date.date()).days
+        end_delay = self.end_time + 24*(self.start_date - self.run.start_date.date()).days
+        repeat = (self.end_date - self.start_date).days + 1
+
+        for i in range(repeat):
+
+            print(i)
+            start_delayed(self.run.env, self.add_to_store(), start_delay)
+            start_delayed(self.run.env, self.remove_from_store(), end_delay)
+            start_delay += 24
+            end_delay += 24
+
+
+        yield self.run.env.timeout(0)
+
+    def add_to_store(self):
+
+        print("add")
+
+        self.run.ad_chat_storage_list.remove(self)
+        self.run.adviser_chat_store.put(self)
+        #print(len(self.run.adviser_chat_store.items), len(self.run.ad_chat_storage_list))
+        yield self.run.env.timeout(0)
+
+    def remove_from_store(self):
+
+        print("remove")
+
+        # note potential pitfall here - adviser object may be in use by a hh when it is due to become available.
+        # Does this even still happen in this case? If yes when?
+        # alternative may be to let a hh take a adviser and check at that point if it should still be available
+        # if not remove it and let the hh grab another adviser???
+
+        current_ad = yield self.run.adviser_chat_store.get(lambda item: item.id_num == self.id_num)
+        self.run.ad_chat_storage_list.append(current_ad)
+        #print(len(self.run.adviser_chat_store.items), len(self.run.ad_chat_storage_list))
+        yield self.run.env.timeout(0)
+
+
+        # so you know the numbers of days to delay
+        #add the start time#
+        #  create the events that add and remove the adviser from the adviser store
+        #  loop through from start to end date and create event at start and end time
+        #  calc start delayed time
+        #  timedelta (date - startdate)
 
 class AdviserIncomplete(object):
     """dedicated adviser that FU incomplete responses"""
@@ -733,7 +793,6 @@ class alt_Enumerator(object):
                         current_hh.paper_allowed = True
                         current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                         current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
-                        current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
 
                         self.run.env.process(current_hh.action())
 
@@ -848,17 +907,16 @@ class alt_Enumerator(object):
                 return self.start_time + (24 - self.run.env.now % 24)
 
     def current_date(self):
-        return (self.run.sim_start + datetime.timedelta(hours=self.run.env.now)).date()
+        return self.run.start_date + datetime.timedelta(hours=self.run.env.now)
 
     def working_test(self):
         """returns true or false to depending on whether or not an enumerator is available"""
-
-        # return current data as date time object
 
         if (self.start_date <= self.current_date() <= self.end_date) \
                 and (self.start_time <= self.run.env.now % 24 < self.end_time):
             return True
         else:
+            print(self.run.env.now, "F")
             return False
 
 

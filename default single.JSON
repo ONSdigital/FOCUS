@@ -16,7 +16,7 @@
         "end_time": 17
       },
       "cycling": {
-        "number": 1,
+        "number": 0,
         "travel_speed": 20,
         "start_date": "2011, 3, 8",
         "end_date": "2011, 4, 5",
@@ -33,23 +33,22 @@
         "end_time": 17,
         "FU_on": 0
       },
-      "web chat": {
-        "number": 1,
+      "web": {
+        "number": 0,
         "start_date": "2011, 3, 8",
         "end_date": "2011, 3, 10",
         "start_time": 9,
-        "end_time": 17,
-        "FU_on": 0
+        "end_time": 17
       }
     },
     "households": {
       "htc1": {
-        "default_help": 5,
+        "default_help": 20,
         "dig_assist_eff": 20,
         "alt_refuse": 0,
         "paper_prop": 25,
         "allow_paper": 0,
-        "number": 10,
+        "number": 100,
         "FU_start_time": 72,
         "dig_assist_flex": 10,
         "alt_help": 55,
@@ -139,6 +138,6 @@
         "FU_on": "True"
       }
     },
-    "letters_on": "0"
+    "letters_on": 0
   }
 }
