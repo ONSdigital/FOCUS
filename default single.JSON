@@ -28,7 +28,7 @@
       "telephone": {
         "number": 1,
         "start_date": "2011, 3, 8",
-        "end_date": "2011, 3, 10",
+        "end_date": "2011, 4, 5",
         "start_time": 9,
         "end_time": 17,
         "FU_on": 0
@@ -48,7 +48,7 @@
         "alt_refuse": 0,
         "paper_prop": 25,
         "allow_paper": 0,
-        "number": 100,
+        "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 10,
         "alt_help": 55,
