@@ -38,7 +38,6 @@ class Household(object):
         self.input_data = input_data
         self.output_data = run.output_data
         self.run = run  # the run to which the hh belongs
-        self.letter_data_dict = run.letter_data_dict
 
         self.paper_allowed = str2bool(self.input_data['allow_paper'])
         self.FU_on = str2bool(self.input_data['FU_on'])
@@ -86,7 +85,7 @@ class Household(object):
                 # they respond
                 self.resp_planned = True
                 response_time = response_profiles(self.run, "HH_resp_time")
-                print(self.id_num, "respond", response_time)
+                #print(self.id_num, "respond", response_time)
                 self.status = "Responding"
                 yield self.env.timeout(response_time)  # wait until time
                 yield self.env.process(self.respond(True, self.delay))
@@ -94,7 +93,7 @@ class Household(object):
             elif self.resp_level < action_test <= self.help_level:
                 # ask for help
                 contact_time = response_profiles(self.run, "contact")
-                print(self.id_num, "contact", contact_time)
+                #print(self.id_num, "contact", contact_time)
                 self.status = "assist"
                 yield self.env.timeout(contact_time)
                 yield self.env.process(self.contact())
@@ -103,7 +102,7 @@ class Household(object):
                 # do nothing
                 self.output_data.append(do_nothing(self.run.run, self.run.reps, self.env.now, self.id_num))
                 self.status = "Do nothing"
-                print(self.id_num,"nothing")
+                #print(self.id_num, "nothing")
                 yield self.env.timeout((self.run.sim_days*24) - self.env.now)  # do nothing so pause until end of sim
 
     # HH requires assistance so pick an option to use - need data.JSON on this or can test impact of variation
@@ -209,18 +208,16 @@ class Household(object):
 
         if self.resp_sent is False:
 
-
-           # if start_time <= self.env.now % 24 < end_time:
+            if len(self.run.ad_working) > 0 or len(self.run.adviser_store.items) > 0:
                 # try and connect to an adviser
                 self.time_called = self.env.now
                 self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
                 self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, len(self.run.ad_working), self.id_num))
                 # to get util here divide by the store contents
                 current_ad = yield self.run.adviser_store.get()  # gets an adviser from the store...
-                self.run.ad_working.append(current_ad) # and puts it in a working list
+                self.run.ad_working.append(current_ad)  # and puts it in a working list
 
                 current_ad.current_hh = self.id_num
-
 
                 wait_time = self.env.now - self.time_called  # calc time a hh would have spent waiting if never hung up
 
@@ -248,13 +245,12 @@ class Household(object):
                     # connected what is the outcome
                     yield self.env.process(self.phone_call_assist(current_ad))
 
-            #else:
-                # called when the lines are closed. Will be dealt with by automated line
+            else:
+                # called when the lines are closed. Will be dealt with by automated line - how does this work?
                 """Need to understand how people respond when they do not get through?"""
-               # self.resp_level = 0
-               # self.help_level = self.resp_level + 80
-              #  self.refuse_level = self.help_level + 0
-                #yield self.env.process(self.action())
+                self.resp_level = 0
+                self.help_level = self.resp_level + 80
+                yield self.env.process(self.action())
 
     def phone_call_assist(self, current_ad):
         """represents the phase of a phone call where the adviser decides how they will assist the hh"""
@@ -360,7 +356,7 @@ class Household(object):
 
                 yield self.env.timeout((self.run.sim_days*24) - self.env.now)  # do nothing more until sim ends
 
-    def rec_letter(self, letter_type):
+    def rec_letter(self, letter_type, effect):
         """represents the hh receiving a letter"""
 
         self.letter_count += 1
@@ -374,11 +370,10 @@ class Household(object):
 
             """how effective are letters? Does effectiveness change the more you send? Do different letters
             have different effectiveness on different groups?"""
-            self.resp_level = int(lookup_letter(self.letter_data_dict, letter_type, 'resp_level'))
-            self.help_level = int(lookup_letter(self.letter_data_dict, letter_type, 'help_level'))
-            self.refuse_level = int(lookup_letter(self.letter_data_dict, letter_type, 'refuse_level'))
+            self.resp_level = effect
+            self.help_level = 0
 
-            # then back to action with updated values
+            # then back to action with the updated values
             yield self.env.process(self.action())
 
     def set_preference(self):

@@ -6,11 +6,11 @@
     "start_date": "2011, 3, 7, 0, 0, 0",
     "end_date": "2011, 4, 5, 0, 0, 0",
     "replications": 1,
-    "collectors": {
+    "collector": {
       "walking": {
-        "number": 1,
+        "number": 10,
         "travel_speed": 5,
-        "start_date": "2011, 3, 8",
+        "start_date": "2011, 3, 10",
         "end_date": "2011, 4, 5",
         "start_time": 9,
         "end_time": 17
@@ -59,7 +59,15 @@
         "contact_rate": 30,
         "default_refuse": 0,
         "conversion_rate": 35,
-        "FU_on": 1
+        "FU_on": 1,
+        "letter_phases": {
+          "reminder":{
+            "date": "2011, 3, 10, 9, 0, 0",
+            "delay": 48,
+            "effect": 10,
+            "targeted": 0
+          }
+        }
       },
       "htc2": {
         "default_help": 5,
@@ -78,7 +86,8 @@
         "contact_rate": 29,
         "default_refuse": 0,
         "conversion_rate": 33,
-        "FU_on": "True"
+        "FU_on": "True",
+        "letter_phases": {}
       },
       "htc3": {
         "default_help": 5,
@@ -97,7 +106,8 @@
         "contact_rate": 25,
         "default_refuse": 0,
         "conversion_rate": 31,
-        "FU_on": "True"
+        "FU_on": "True",
+        "letter_phases": {}
       },
       "htc4": {
         "default_help": 5,
@@ -116,7 +126,8 @@
         "contact_rate": 22,
         "default_refuse": 0,
         "conversion_rate": 27,
-        "FU_on": "True"
+        "FU_on": "True",
+        "letter_phases": {}
       },
       "htc5": {
         "default_help": 5,
@@ -135,9 +146,11 @@
         "contact_rate": 17,
         "default_refuse": 0,
         "conversion_rate": 29,
-        "FU_on": "True"
+        "FU_on": "True",
+        "letter_phases": {}
       }
     },
-    "letters_on": 0
+    "letters_on": 1
   }
+
 }
