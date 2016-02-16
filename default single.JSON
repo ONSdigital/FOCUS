@@ -68,6 +68,78 @@
             "targeted": 0
           }
         }
+      }
+    }
+  },
+  "2": {
+    "district": "UK average",
+    "district_area": 1750,
+    "description": "default",
+    "start_date": "2011, 3, 7, 0, 0, 0",
+    "end_date": "2011, 4, 5, 0, 0, 0",
+    "replications": 1,
+    "collector": {
+      "walking": {
+        "number": 10,
+        "travel_speed": 5,
+        "start_date": "2011, 3, 10",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17
+      },
+      "cycling": {
+        "number": 0,
+        "travel_speed": 20,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 1,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      },
+      "web": {
+        "number": 0,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 3, 10",
+        "start_time": 9,
+        "end_time": 17
+      }
+    },
+    "households": {
+      "htc1": {
+        "default_help": 20,
+        "dig_assist_eff": 20,
+        "alt_refuse": 0,
+        "paper_prop": 25,
+        "allow_paper": 0,
+        "number": 5000,
+        "FU_start_time": 72,
+        "dig_assist_flex": 10,
+        "alt_help": 55,
+        "priority": 5,
+        "max_visits": 2,
+        "alt_resp": 0,
+        "default_resp": 50,
+        "contact_rate": 30,
+        "default_refuse": 0,
+        "conversion_rate": 35,
+        "FU_on": 1,
+        "letter_phases": {
+          "reminder":{
+            "date": "2011, 3, 10, 9, 0, 0",
+            "delay": 48,
+            "effect": 20,
+            "targeted": 0
+          }
+        }
       },
       "htc2": {
         "default_help": 5,
@@ -149,8 +221,7 @@
         "FU_on": "True",
         "letter_phases": {}
       }
-    },
-    "letters_on": 1
+    }
   }
 
 }

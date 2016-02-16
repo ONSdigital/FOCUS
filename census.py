@@ -81,7 +81,6 @@ def print_resp(run):
             data = [run.run,
                     (run.input_data['households'][key]['allow_paper']),
                     (run.input_data['households'][key]['FU_on']),
-                    (run.input_data['letters_on']),
                     run.reps,
                     (run.input_data['households'][key]['default_resp']),
                     (run.input_data['households'][key]['paper_prop']),
@@ -238,10 +237,10 @@ class LetterPhase(object):
 
     def co_send_letter(self, household, letter_type, effect, delay):
         self.output_data.append(letter_sent(self.run.run, self.run.reps, self.env.now, household.id_num, letter_type, household.hh_type))
-        # send a letter which will take an amount of time to be received (which could vary)
-        yield self.env.timeout(delay)
-        # then the hh needs to do something...
-        self.env.process(household.rec_letter(letter_type, effect))
+        # send a letter which will take an amount of time to be received (which could vary if required?)
+        # then the hh needs to do something...at the right time
+        start_delayed(self.env, household.rec_letter(letter_type, effect), delay)
+        yield self.env.timeout(0)
 
 
 class Adviser(object):
@@ -440,27 +439,20 @@ class AdviserChat(object):
 
         for i in range(repeat):
 
-            #print(i)
             start_delayed(self.run.env, self.add_to_store(), start_delay)
             start_delayed(self.run.env, self.remove_from_store(), end_delay)
             start_delay += 24
             end_delay += 24
 
-
         yield self.run.env.timeout(0)
 
     def add_to_store(self):
 
-       # print("add")
-
         self.run.ad_chat_storage_list.remove(self)
         self.run.adviser_chat_store.put(self)
-        #print(len(self.run.adviser_chat_store.items), len(self.run.ad_chat_storage_list))
         yield self.run.env.timeout(0)
 
     def remove_from_store(self):
-
-        #print("remove")
 
         # note potential pitfall here - adviser object may be in use by a hh when it is due to become available.
         # Does this even still happen in this case? If yes when?
@@ -469,17 +461,7 @@ class AdviserChat(object):
 
         current_ad = yield self.run.adviser_chat_store.get(lambda item: item.id_num == self.id_num)
         self.run.ad_chat_storage_list.append(current_ad)
-        #print(len(self.run.adviser_chat_store.items), len(self.run.ad_chat_storage_list))
         yield self.run.env.timeout(0)
-
-
-        # so you know the numbers of days to delay
-        #add the start time#
-        #  create the events that add and remove the adviser from the adviser store
-        #  loop through from start to end date and create event at start and end time
-        #  calc start delayed time
-        #  timedelta (date - startdate)
-
 
 class AdviserIncomplete(object):
     """dedicated adviser that FU incomplete responses"""

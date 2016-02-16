@@ -31,6 +31,7 @@ class Run(object):
         self.total_ad_instances = 0
         self.total_ad_chat_instances = 0
 
+        # temp only
         self.letter_sent = 0
         self.letter_effect = 0
 
@@ -77,7 +78,6 @@ class Run(object):
 
         # some simple output
         self.resp_day(self.sim_days*24)
-
 
     """creates the households and calculates the initial hh separation"""
     def create_households(self, input_dict):
@@ -212,13 +212,12 @@ class Run(object):
                                                                   letter_phases[letter]["delay"]),
                                   event_delay)
 
-
     """Prints the percentage of responses received by group at past delay"""
     def resp_day(self, delay):
 
         start_delayed(self.env, census.print_resp(self), delay - 24)
 
-"""converts string or number inputs to a bool"""
+
 def str2bool(value):
     return str(value).lower() in ("True", "true", "1")
 
