@@ -10,9 +10,6 @@ import json
 
 replication = namedtuple('Replication', ['type', 'run', 'rep', 'time', 'seed'])
 
-#letter_data_file = 'in_letter_data.csv'  # details the effects the various types of letters have
-#letter_input = 'in_letter_phases.csv'  # details when each type of letter will be sent and to whom
-
 # allow user to select desired configuration file
 file_name = input('Enter file name: ')
 if len(file_name) < 1:
@@ -27,7 +24,7 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 
 for run in list_of_runs:
 
-    #try:
+    try:
 
         output_data = []  # for output...
 
@@ -38,10 +35,10 @@ for run in list_of_runs:
         replications = input_data[run]['replications']
 
         reps = 0
-       # print(input_data[run]['description'])
+
 
         for reps in range(replications):
-            #print('Run: ', run, ' replication: ', reps + 1)
+
             now = datetime.datetime.now()
             seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
             seed = abs(now - seed_date).total_seconds() + int(run)
@@ -67,10 +64,10 @@ for run in list_of_runs:
                 csv_output.writerow(list(rows[0]._fields))
                 for row in rows:
                     csv_output.writerow(list(row))
-    #except:
+    except:
         # skip runs that cause errors
         # give more detail in an error log at some stage
-        #pass
+        pass
 
 
 
