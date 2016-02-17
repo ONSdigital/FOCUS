@@ -17,7 +17,7 @@ class Run(object):
         self.output_data = output_data
         self.start_date = datetime.datetime.strptime(input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
         self.end_date = datetime.datetime.strptime(input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
-        self.sim_days = (self.end_date.date() - self.start_date.date()).days
+        self.sim_hours = (self.end_date.date() - self.start_date.date()).total_seconds()/3600
         self.rnd = rnd
         self.run = run
         self.reps = reps
@@ -77,7 +77,7 @@ class Run(object):
         self.start_letters(self.input_data["households"])
 
         # some simple output
-        self.resp_day(self.sim_days*24)
+        self.resp_day(self.sim_hours)
 
     """creates the households and calculates the initial hh separation"""
     def create_households(self, input_dict):
@@ -194,25 +194,36 @@ class Run(object):
 
                 for letter in list_of_letters:
                     letter_date = datetime.datetime.strptime(letter_phases[letter]["date"], '%Y, %m, %d, %H, %M, %S')
-                    event_delay = (letter_date - self.start_date).total_seconds()/3600
+                    self.letter_sent = (letter_date - self.start_date).total_seconds()/3600
 
                     # below only applicable if only 1 letter sent- for simple output only - delete in long term
-                    self.letter_sent = event_delay
+
                     self.letter_effect = letter_phases[letter]["effect"]
 
-                    start_delayed(self.env, census.letter_startup(self,
-                                                                  self.env,
-                                                                  self.district,
-                                                                  self.output_data,
-                                                                  self.sim_days,
-                                                                  str2bool(letter_phases[letter]["targeted"]),
-                                                                  letter,
-                                                                  letter_phases[letter]["effect"],
-                                                                  hh,
-                                                                  letter_phases[letter]["delay"]),
-                                  event_delay)
+                    if self.letter_sent != 0:
+                        start_delayed(self.env, census.letter_startup(self,
+                                                                      self.env,
+                                                                      self.district,
+                                                                      self.output_data,
+                                                                      self.sim_hours,
+                                                                      str2bool(letter_phases[letter]["targeted"]),
+                                                                      letter,
+                                                                      letter_phases[letter]["effect"],
+                                                                      hh,
+                                                                      letter_phases[letter]["delay"]),
+                                      self.letter_sent)
+                    else:
+                        self.env.process(census.letter_startup(self,
+                                                               self.env,
+                                                               self.district,
+                                                               self.output_data,
+                                                               self.sim_hours,
+                                                               str2bool(letter_phases[letter]["targeted"]),
+                                                               letter,
+                                                               letter_phases[letter]["effect"],
+                                                               hh,
+                                                               letter_phases[letter]["delay"]))
 
-    """Prints the percentage of responses received by group at past delay"""
     def resp_day(self, delay):
 
         start_delayed(self.env, census.print_resp(self), delay - 24)

@@ -21,21 +21,30 @@ with open(file_name) as data_file:
 
 list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file - iterate through this list to do all the runs
 
+names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
+         'dig assist flex', 'max visits', 'contact rates', 'call conversion rate', 'conversion rate', 'enumerators', 'advisers', 'letter sent',
+         'letter effect', 'responses', 'dig resp', 'paper resp', 'total visits', 'unn visits', 'wasted visits',
+         'visit out', 'visit success', 'visit contact', 'visit assist', 'visit paper', 'calls', 'phone responses', 'letter wasted',
+         'letter received', 'letter responses', 'seed']
+
+# add code to print to a file instead/as well
+with open('outputs/RAW_output_testing.csv', 'w', newline='') as csv_file:
+    output_file = csv.writer(csv_file, delimiter=',')
+    output_file.writerow(names)
 
 for run in list_of_runs:
 
-    try:
+    #try:
 
         output_data = []  # for output...
 
         sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
         sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
-        sim_days = (sim_end - sim_start).days
+        sim_hours = (sim_end - sim_start).total_seconds()/3600
 
         replications = input_data[run]['replications']
 
         reps = 0
-
 
         for reps in range(replications):
 
@@ -49,7 +58,7 @@ for run in list_of_runs:
             output_data.append(replication('start', int(run), reps + 1, now, seed))
             current_run = initialize.Run(env, input_data[run], output_data, rnd, run, reps + 1, seed)
 
-            env.run(until=sim_days*24)
+            env.run(until=sim_hours)
 
             now = datetime.datetime.now()
             output_data.append(replication('end', int(run), reps + 1, now, seed))
@@ -64,10 +73,12 @@ for run in list_of_runs:
                 csv_output.writerow(list(rows[0]._fields))
                 for row in rows:
                     csv_output.writerow(list(row))
-    except:
-        # skip runs that cause errors
-        # give more detail in an error log at some stage
-        pass
+    #except:
+        # skip runs that cause errors but...
+        # add code to give more detail in an error log at some stage as to why!
+        #print('Run:', run, 'failed with random seed', seed)
+
+        #pass
 
 
 

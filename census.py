@@ -42,6 +42,8 @@ def print_resp(run):
     letter_sent_counter = 0
     letter_wasted_counter = 0
     letter_received_counter = 0
+    letter_response_counter = 0
+    phone_response_counter = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
@@ -74,26 +76,38 @@ def print_resp(run):
             letter_wasted_counter += 1
         elif type(item).__name__ == 'letter_received' and item[0] == run.run and item[1] == run.reps:
             letter_received_counter += 1
+        elif type(item).__name__ == 'letter_response' and item[0] == run.run and item[1] == run.reps:
+            letter_response_counter += 1
+        elif type(item).__name__ == 'phone_response' and item[0] == run.run and item[1] == run.reps:
+            phone_response_counter += 1
+
+
 
     print(run.run, run.reps)
     for key, value in sorted(run.htc_resp.items()):  # sort the dictionary for output purposes
         try:
             data = [run.run,
-                    (run.input_data['households'][key]['allow_paper']),
-                    (run.input_data['households'][key]['FU_on']),
                     run.reps,
+                    (run.input_data['households'][key]['number']),
+                    (run.input_data['district_area']),
+                    (run.input_data['households'][key]['allow_paper']),
+                    (run.input_data['households'][key]['paper_after_max_visits']),
+                    (run.input_data['households'][key]['FU_on']),
                     (run.input_data['households'][key]['default_resp']),
                     (run.input_data['households'][key]['paper_prop']),
                     (run.input_data['households'][key]['FU_start_time']),
                     (run.input_data['households'][key]['dig_assist_eff']),
                     (run.input_data['households'][key]['dig_assist_flex']),
-                    (run.input_data['district_area']),
                     (run.input_data['households'][key]['max_visits']),
-                    run.total_enu_instances,  # all types
+                    (run.input_data['households'][key]['contact_rate']),
                     (run.input_data['households'][key]['conversion_rate']),
+                    (run.input_data['households'][key]['call_conversion_rate']),
+                    run.total_enu_instances,  # all types
+                    run.total_ad_instances,  # all types
                     run.letter_sent,  # time letters sent
                     run.letter_effect,  # change this to reflect letter effect???
-                    (value / run.hh_count[key]),
+                    # outputs from here
+                    value,
                     total_dig_resp,
                     total_pap_resp,
                     visit_counter,
@@ -105,21 +119,23 @@ def print_resp(run):
                     visit_assist_counter,
                     visit_paper_counter,
                     call_counter,
-                    letter_sent_counter,
+                    phone_response_counter,
                     letter_wasted_counter,
                     letter_received_counter,
+                    letter_response_counter,
                     run.seed]
 
             # add code to print to a file instead/as well
             with open('outputs/RAW_output_testing.csv', 'a', newline='') as csv_file:
                 output_file = csv.writer(csv_file, delimiter=',')
                 output_file.writerow(data)
-                output_file.close()
+
         except:
             # skip any that cause errors -at some point add in what caused them!
             pass
 
     yield run.env.timeout(0)
+
 
 # a helper process that creates an instance of a coordinator class and starts it working
 def fu_startup(run, env, district, data):
@@ -130,35 +146,10 @@ def fu_startup(run, env, district, data):
 
 
 # a helper process that creates an instance of a letter phase class
-def letter_startup(run, env, district, output_data, sim_days, targeted, letter_type, effect, targets, delay):
+def letter_startup(run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay):
 
-    LetterPhase(run, env, district, output_data, sim_days, targeted, letter_type, effect, targets, delay)
+    LetterPhase(run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay)
     yield env.timeout(0)
-
-
-def pop_advisers(run, input_dict, storage_list, store):
-
-    temp_date = str((run.start_date + datetime.timedelta(hours=run.env.now)).date())
-    day_cap = int(input_dict[temp_date]['capacity'])
-    temp_diff = day_cap - len(store.items)
-
-    if temp_diff < 0:
-        # remove
-        for i in range(abs(temp_diff)):
-            item = yield store.get()
-            # and place in a list to hold it
-            storage_list.append(item)
-            # and flag as not avail that day
-            item.avail = False
-    elif temp_diff > 0:
-        # add
-        for i in range(temp_diff):
-            # from list of existing advisers
-            temp_adviser = storage_list.pop(0)
-            temp_adviser.avail = True
-            store.put(temp_adviser)
-
-    yield run.env.timeout(0)
 
 
 def resp_rec(env, hh, run):
@@ -205,13 +196,13 @@ class Coordinator(object):
 
 
 class LetterPhase(object):
-    def __init__(self, run, env, district, output_data, sim_days, targeted, letter_type, effect, targets, delay):
+    def __init__(self, run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay):
         self.run = run
         self.env = env
         self.district = district
         self.letter_delay = 72
         self.output_data = output_data
-        self.sim_days = sim_days
+        self.sim_hours = sim_hours
         self.targets = targets.split(',')
         self.delay = delay
         self.letter_type = letter_type
@@ -233,7 +224,7 @@ class LetterPhase(object):
                 """what is the overhead of sending only to non responders?"""
 
         # then pause until the end
-        yield self.env.timeout((self.sim_days * 24) - self.env.now)
+        yield self.env.timeout((self.sim_hours) - self.env.now)
 
     def co_send_letter(self, household, letter_type, effect, delay):
         self.output_data.append(letter_sent(self.run.run, self.run.reps, self.env.now, household.id_num, letter_type, household.hh_type))
@@ -463,6 +454,7 @@ class AdviserChat(object):
         self.run.ad_chat_storage_list.append(current_ad)
         yield self.run.env.timeout(0)
 
+
 class AdviserIncomplete(object):
     """dedicated adviser that FU incomplete responses"""
 
@@ -557,8 +549,10 @@ class Enumerator(object):
                     # then put back in the list at the end if below max_visit number
                     if current_hh.visits < current_hh.max_visits:
                         self.run.visit_list.append(current_hh)
-                    else:
-                        '''add event to give paper if max visits received - but what will the HH then do?'''
+                    elif current_hh.paper_after_max_visits is True and current_hh.resp_type =='paper':
+                        '''add event to give paper if max visits received - but what will the HH then do?
+                        a dig preference, who decided to do nothing  could get a paper copy here and the respond
+                        is this sensisble?'''
                         self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
                         current_hh.paper_allowed = True
@@ -578,7 +572,7 @@ class Enumerator(object):
                 yield self.run.env.timeout(self.hold_until())
             else:
                 yield self.run.env.timeout(24)
-                # yield self.env.timeout((self.run.sim_days * 24) - self.env.now)
+
 
     def fu_visit_assist(self, current_hh):
         """once contact is made determine if digital assistance is required"""
@@ -595,18 +589,18 @@ class Enumerator(object):
 
             elif current_hh.input_data['dig_assist_eff'] <= dig_assist_test <\
                     (current_hh.input_data['dig_assist_eff'] + current_hh.input_data['dig_assist_flex'])\
-                    or current_hh.visits == current_hh.max_visits:
+                    or (current_hh.visits == current_hh.max_visits and current_hh.paper_after_max_visits is True):
                 # allows hh to use paper to respond
                 """how long to get to the point of letting them have paper?"""
                 yield self.run.env.timeout(0.2 + self.run.travel_time)
                 current_hh.paper_allowed = True
                 current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                 current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
-                current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
+
                 yield self.run.env.process(self.fu_visit_outcome(current_hh))
 
             else:
-                # suggests another form of digital assist - another visit in this case
+                # suggests another form of digital assist...
                 """how long would suggesting different forms of digital assist take?"""
                 yield self.run.env.timeout(0.2 + self.run.travel_time)
                 self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
@@ -641,7 +635,7 @@ class Enumerator(object):
                                                       current_hh.hh_type))
             current_hh.resp_planned = True
             yield self.run.env.timeout((12 / 60) + self.run.travel_time)
-            self.run.env.process(current_hh.respond(True, current_hh.delay))
+            self.run.env.process(current_hh.respond(current_hh.delay))
 
         # in but no immediate response
         if current_hh.resp_sent is False and hh_responds is False:
@@ -651,13 +645,19 @@ class Enumerator(object):
             """After a visit where they don't respond what do hh then do?"""
             current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
             current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
-            current_hh.refuse_level = current_hh.help_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "refuse")
+
             current_hh.pri += 2
             # then put back in the list to visit at the end with new pri but only if below max_visit number
             if current_hh.visits < current_hh.max_visits:
                 self.run.visit_list.append(current_hh)
+            elif current_hh.paper_after_max_visits is True and current_hh.paper_allowed is False and current_hh.resp_type == 'paper':
 
-            '''comment out the below? As the hh should really just do whatever they were going to?'''
+                self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
+                                                        current_hh.hh_type))
+                current_hh.paper_allowed = True
+                current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
+                current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
+
             self.run.env.process(current_hh.action())
 
         # transfer enumerator back to available list
