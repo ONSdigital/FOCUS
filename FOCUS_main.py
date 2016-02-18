@@ -28,13 +28,14 @@ names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits'
          'letter received', 'letter responses', 'seed']
 
 # add code to print to a file instead/as well
-with open('outputs/RAW_output_testing.csv', 'w', newline='') as csv_file:
+raw_output = 'RAW_testing.csv'
+with open('outputs/' + raw_output, 'w', newline='') as csv_file:
     output_file = csv.writer(csv_file, delimiter=',')
     output_file.writerow(names)
 
 for run in list_of_runs:
 
-    #try:
+    try:
 
         output_data = []  # for output...
 
@@ -56,7 +57,7 @@ for run in list_of_runs:
 
             env = simpy.Environment()
             output_data.append(replication('start', int(run), reps + 1, now, seed))
-            current_run = initialize.Run(env, input_data[run], output_data, rnd, run, reps + 1, seed)
+            current_run = initialize.Run(env, input_data[run], output_data, raw_output, rnd, run, reps + 1, seed)
 
             env.run(until=sim_hours)
 
@@ -64,21 +65,21 @@ for run in list_of_runs:
             output_data.append(replication('end', int(run), reps + 1, now, seed))
             reps += 1
 
-        output_data.sort(key=lambda x: type(x).__name__)
+        #output_data.sort(key=lambda x: type(x).__name__)
 
-        for k, g in groupby(output_data, lambda x: type(x).__name__):
-            with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
-                csv_output = csv.writer(f_output)
-                rows = list(g)
-                csv_output.writerow(list(rows[0]._fields))
-                for row in rows:
-                    csv_output.writerow(list(row))
-    #except:
+        #for k, g in groupby(output_data, lambda x: type(x).__name__):
+        #    with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
+        #        csv_output = csv.writer(f_output)
+        #        rows = list(g)
+        #        csv_output.writerow(list(rows[0]._fields))
+        #        for row in rows:
+        #            csv_output.writerow(list(row))
+    except:
         # skip runs that cause errors but...
         # add code to give more detail in an error log at some stage as to why!
-        #print('Run:', run, 'failed with random seed', seed)
+        print('Run:', run, 'failed with random seed', seed)
 
-        #pass
+
 
 
 

@@ -10,7 +10,7 @@ import math
 class Run(object):
     """contains the methods and data for an individual run"""
 
-    def __init__(self, env, input_data, output_data, rnd, run, reps, seed):
+    def __init__(self, env, input_data, output_data, raw_output, rnd, run, reps, seed):
 
         self.env = env
         self.input_data = input_data
@@ -22,6 +22,7 @@ class Run(object):
         self.run = run
         self.reps = reps
         self.seed = seed
+        self.raw_output = raw_output
 
         self.initial_hh_sep = 0  # initial average hh separation - does not change once set
         self.travel_time = 0  # changes based on number of households who have responded

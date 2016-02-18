@@ -8,7 +8,7 @@
     "replications": 1,
     "collector": {
       "walking": {
-        "number": 1,
+        "number": 10,
         "travel_speed": 5,
         "start_date": "2011, 3, 12",
         "end_date": "2011, 4, 5",
@@ -18,7 +18,7 @@
     },
     "advisers": {
       "telephone": {
-        "number": 1,
+        "number": 4,
         "start_date": "2011, 3, 8",
         "end_date": "2011, 4, 5",
         "start_time": 9,
@@ -29,25 +29,25 @@
     },
     "households": {
       "htc1": {
-        "default_help": 0,
+        "default_help": 5,
         "call_renege_lower": 0.05,
         "call_renege_upper": 0.25,
         "call_conversion_rate": 35,
-        "dig_assist_eff": 50,
-        "paper_prop": 25,
+        "dig_assist_eff": 20,
+        "paper_prop": 10,
         "allow_paper": 0,
-        "number": 500,
+        "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 0,
-        "alt_help": 95,
+        "alt_help": 35,
         "priority": 0,
         "max_visits": 1,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 60,
-        "contact_rate": 30,
-        "conversion_rate": 35,
-        "FU_on": 0,
+        "default_resp": 30,
+        "contact_rate": 20,
+        "conversion_rate": 20,
+        "FU_on": 1,
         "letter_phases": {
           "reminder":{
             "date": "2011, 3, 12, 9, 0, 0",

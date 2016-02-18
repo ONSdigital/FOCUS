@@ -126,7 +126,7 @@ def print_resp(run):
                     run.seed]
 
             # add code to print to a file instead/as well
-            with open('outputs/RAW_output_testing.csv', 'a', newline='') as csv_file:
+            with open('outputs/' + run.raw_output, 'a', newline='') as csv_file:
                 output_file = csv.writer(csv_file, delimiter=',')
                 output_file.writerow(data)
 
