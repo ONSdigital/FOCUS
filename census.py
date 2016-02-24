@@ -204,8 +204,8 @@ class Coordinator(object):
                 self.run.travel_time = 0
 
                 logging.exception('Got exception in run {0}, replication {1} at time {2}'.format(self.run.run,
-                                                                                              self.run.reps,
-                                                                                              self.env.now))
+                                                                                                 self.run.reps,
+                                                                                                 self.env.now))
 
 
                 raise
