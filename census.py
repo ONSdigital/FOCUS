@@ -6,6 +6,7 @@ import datetime
 import math
 import csv
 from simpy.util import start_delayed
+import logging
 
 
 FU_start = namedtuple('FU_start', ['Time'])
@@ -20,6 +21,10 @@ enu_util = namedtuple('Enu_util', ['run', 'reps', 'Time', 'Count'])  # enumerato
 enu_travel = namedtuple('Enu_travel', ['run', 'reps', 'Enu_id', 'Time', 'Distance', 'Travel_time'])
 visit_assist = namedtuple('Visit_assist', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_paper = namedtuple('Visit_paper', ['run', 'reps', 'Time', 'Household', 'Type'])
+
+
+LOG_FILENAME = '/home/bigdata/Desktop/nas/projects/FOCUS/outputs/error.txt'
+logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG,)
 
 
 def print_resp(run):
@@ -186,11 +191,24 @@ class Coordinator(object):
             # re-calculates travel time based on households left to visit in area
             # so based on what is left in district
             try:
+                # self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
+                #                                                               len(self.run.district))))
                 self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                                                                              len(self.run.district))))
-            except:
+                                                                              0)))
+            #except ZeroDivisionError:
+            except ZeroDivisionError:
+
+                #logger.error('error')
+                # print to error file run rep and time of error as well as type (and number of hh left to visit?)
                 self.current_hh_sep = 0
                 self.run.travel_time = 0
+
+                logging.exception('Got exception in run {0}, replication {1} at time {2}'.format(self.run.run,
+                                                                                              self.run.reps,
+                                                                                              self.env.now))
+
+
+                raise
 
             yield self.env.timeout(self.repeat_update*24)  # sorted at 00:00 each day. What time would this happen?
 
@@ -221,7 +239,7 @@ class LetterPhase(object):
             elif self.targeted is False and household.hh_type in self.targets:
                 self.env.process(self.co_send_letter(household, self.letter_type, self.effect, self.delay))
             # add an option to send to all ina group whether replied or not
-                """what is the overhead of sending only to non responders?"""
+                """what is the overhead, if any, of sending only to non responders?"""
 
         # then pause until the end
         yield self.env.timeout((self.sim_hours) - self.env.now)
@@ -275,8 +293,6 @@ class Adviser(object):
 
         for i in range(repeat):
 
-            #print(i)
-
             start_delayed(self.run.env, self.add_to_store(), start_delay)
             start_delayed(self.run.env, self.remove_from_store(), end_delay)
             start_delay += 24
@@ -288,33 +304,19 @@ class Adviser(object):
 
         self.run.ad_storage_list.remove(self)
         self.run.adviser_store.put(self)
-        #print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
         yield self.run.env.timeout(0)
 
     def remove_from_store(self):
 
 
-        # note potential pitfall here - adviser object may be in use by a hh when it is due to become available.
+        # note potential pitfall here - adviser object may be in use by a hh when it is due to become unavailable.
         # Does this even still happen in this case? If yes when?
         # alternative may be to let a hh take a adviser and check at that point if it should still be available
         # if not remove it and let the hh grab another adviser???
 
         current_ad = yield self.run.adviser_store.get(lambda item: item.id_num == self.id_num)
         self.run.ad_storage_list.append(current_ad)
-        #print(len(self.run.adviser_store.items), len(self.run.ad_storage_list))
         yield self.run.env.timeout(0)
-
-
-        # so you know the numbers of days to delay
-        #add the start time#
-        #  create the events that add and remove the adviser from the adviser store
-        #  loop through from start to end date and create event at start and end time
-        #  calc start delayed time
-        #  timedelta (date - startdate)
-
-
-
-
 
     def fu_call(self):
 

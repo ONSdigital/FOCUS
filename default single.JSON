@@ -39,26 +39,18 @@
         "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 0,
-        "alt_help": 35,
+        "alt_help": 25,
         "priority": 0,
         "max_visits": 1,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 30,
-        "contact_rate": 20,
-        "conversion_rate": 20,
+        "default_resp": 20,
+        "contact_rate": 40,
+        "conversion_rate": 35,
         "FU_on": 1,
         "letter_phases": {
-          "reminder":{
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 5,
-            "targeted": 1
-          }
         }
       }
     }
   }
-
-
 }

@@ -10,6 +10,9 @@ import json
 
 replication = namedtuple('Replication', ['type', 'run', 'rep', 'time', 'seed'])
 
+
+# add IO error catching
+
 # allow user to select desired configuration file
 file_name = input('Enter file name: ')
 if len(file_name) < 1:
@@ -28,13 +31,14 @@ names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits'
          'letter received', 'letter responses', 'seed']
 
 # add code to print to a file instead/as well
-raw_output = 'RAW_testing.csv'
+raw_output = 'RAW_testing9.csv'
 with open('outputs/' + raw_output, 'w', newline='') as csv_file:
     output_file = csv.writer(csv_file, delimiter=',')
     output_file.writerow(names)
 
 for run in list_of_runs:
 
+    # this will need to catch all other possible errors that occur...and record to error file
     try:
 
         output_data = []  # for output...
@@ -77,6 +81,7 @@ for run in list_of_runs:
     except:
         # skip runs that cause errors but...
         # add code to give more detail in an error log at some stage as to why!
+        # and print to a file...
         print('Run:', run, 'failed with random seed', seed)
 
 

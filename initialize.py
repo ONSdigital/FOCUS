@@ -195,11 +195,11 @@ class Run(object):
 
                 for letter in list_of_letters:
                     letter_date = datetime.datetime.strptime(letter_phases[letter]["date"], '%Y, %m, %d, %H, %M, %S')
-                    self.letter_sent = (letter_date - self.start_date).total_seconds()/3600
+                    self.letter_sent = (letter_date - self.start_date).total_seconds()/3600  # for waves for temp output make a list??
 
                     # below only applicable if only 1 letter sent- for simple output only - delete in long term
 
-                    self.letter_effect = letter_phases[letter]["effect"]
+                    self.letter_effect = letter_phases[letter]["effect"]  # for waves for temp output make a list??
 
                     if self.letter_sent != 0:
                         start_delayed(self.env, census.letter_startup(self,

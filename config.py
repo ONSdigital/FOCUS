@@ -47,23 +47,31 @@ def generate_output_file(run_data, run, id_num, change, changes, out_file):
                                                          run_data['households']['htc1']['default_resp']
             new_data[str(id_num)] = copy.deepcopy(run_data)
 
-
             id_num += 1
-
-    #sort the output by key?
-
 
     json.dump(new_data, out_file, sort_keys=True, indent=4)
 
     out_file.close()
     return id_num
 
-changes = {'paper_prop': {'lower': 10,
-                          'upper': 70,
-                          'step': 20},
-           'default_resp': {'lower': 30,
-                            'upper': 70,
-                            'step': 10}
+changes = {'paper_prop': {'lower': 20,
+                          'upper': 90,
+                          'step': 10},
+           'default_resp': {'lower': 20,
+                            'upper': 90,
+                            'step': 10},
+           'max_visits': {'lower': 1,
+                          'upper': 4,
+                          'step': 1},
+           'FU_start_time': {'lower': 72,
+                             'upper': 504,
+                             'step': 144},
+           'paper_after_max_visits': {'lower': 0,
+                                      'upper': 2,
+                                      'step': 1},
+           'allow_paper': {'lower': 0,
+                           'upper': 2,
+                           'step': 1},
            }
 
 src_file_name = input('Enter file name: ')
@@ -72,7 +80,7 @@ if len(src_file_name) < 1:
 
 dst_file_name = input('Enter file name: ')
 if len(dst_file_name) < 1:
-    dst_file_name = 'default.JSON'
+    dst_file_name = 'default8.JSON'
 
 copyfile(src_file_name, dst_file_name)
 
