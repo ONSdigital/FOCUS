@@ -54,24 +54,18 @@ def generate_output_file(run_data, run, id_num, change, changes, out_file):
     out_file.close()
     return id_num
 
-changes = {'paper_prop': {'lower': 20,
-                          'upper': 90,
-                          'step': 10},
-           'default_resp': {'lower': 20,
-                            'upper': 90,
-                            'step': 10},
-           'max_visits': {'lower': 1,
-                          'upper': 4,
-                          'step': 1},
+changes = {'max_visits': {'lower': 1,
+                          'upper': 11,
+                          'step': 2},
            'FU_start_time': {'lower': 72,
                              'upper': 504,
                              'step': 144},
-           'paper_after_max_visits': {'lower': 0,
-                                      'upper': 2,
-                                      'step': 1},
-           'allow_paper': {'lower': 0,
-                           'upper': 2,
-                           'step': 1},
+           'default_resp': {'lower': 10,
+                             'upper': 95,
+                             'step': 10},
+           'paper_prop': {'lower': 10,
+                             'upper': 95,
+                             'step': 10},
            }
 
 src_file_name = input('Enter file name: ')
@@ -80,7 +74,7 @@ if len(src_file_name) < 1:
 
 dst_file_name = input('Enter file name: ')
 if len(dst_file_name) < 1:
-    dst_file_name = 'default8.JSON'
+    dst_file_name = 'test_out_paper_from_start.JSON'
 
 copyfile(src_file_name, dst_file_name)
 

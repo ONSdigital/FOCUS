@@ -7,41 +7,65 @@ import simpy
 import datetime
 from collections import namedtuple
 import json
+import sys
+import os.path
+import logging
 
 replication = namedtuple('Replication', ['type', 'run', 'rep', 'time', 'seed'])
 
+LOG_FILENAME = '/home/bigdata/Desktop/nas/projects/FOCUS/outputs/error.txt'
+logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG,)
 
-# add IO error catching
-
-# allow user to select desired configuration file
-file_name = input('Enter file name: ')
+file_name = input('Enter input file name: ')
 if len(file_name) < 1:
     file_name = 'default single.JSON'
 
 # loads the selected config file
-with open(file_name) as data_file:
-    input_data = json.load(data_file)  # dict of the whole file
+try:
+    with open(file_name) as data_file:
+        input_data = json.load(data_file)  # dict of the whole file
 
-list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file - iterate through this list to do all the runs
+except IOError as e:
+    print(e)
+    sys.exit()
 
+list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
+
+###########################################
+# temp output only
 names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
          'dig assist flex', 'max visits', 'contact rates', 'call conversion rate', 'conversion rate', 'enumerators', 'advisers', 'letter sent',
          'letter effect', 'responses', 'dig resp', 'paper resp', 'total visits', 'unn visits', 'wasted visits',
          'visit out', 'visit success', 'visit contact', 'visit assist', 'visit paper', 'calls', 'phone responses', 'letter wasted',
          'letter received', 'letter responses', 'seed']
 
-# add code to print to a file instead/as well
-raw_output = 'RAW_testing9.csv'
-with open('outputs/' + raw_output, 'w', newline='') as csv_file:
-    output_file = csv.writer(csv_file, delimiter=',')
-    output_file.writerow(names)
+
+raw_output = input('Enter output file name: ')
+if len(raw_output) < 1:
+    raw_output = 'simple_no_letters.csv'
+
+try:
+    output_file_path = os.getcwd() + '/outputs/' + raw_output
+    if os.path.isfile(output_file_path) is True:
+        print("file", raw_output, 'was overwritten')
+    else:
+        print("file", raw_output, 'was created')
+
+    with open('outputs/' + raw_output, 'w', newline='') as csv_file:
+        output_file = csv.writer(csv_file, delimiter=',')
+        output_file.writerow(names)
+
+except IOError as e:
+    print(e)
+    sys.exit()
+
+#################################################
 
 for run in list_of_runs:
 
-    # this will need to catch all other possible errors that occur...and record to error file
     try:
 
-        output_data = []  # for output...
+        output_data = []
 
         sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
         sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
@@ -49,9 +73,7 @@ for run in list_of_runs:
 
         replications = input_data[run]['replications']
 
-        reps = 0
-
-        for reps in range(replications):
+        for rep in range(replications):
 
             now = datetime.datetime.now()
             seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
@@ -60,14 +82,16 @@ for run in list_of_runs:
             rnd.seed(seed)
 
             env = simpy.Environment()
-            output_data.append(replication('start', int(run), reps + 1, now, seed))
-            current_run = initialize.Run(env, input_data[run], output_data, raw_output, rnd, run, reps + 1, seed)
+            output_data.append(replication('start', int(run), rep + 1, now, seed))
+
+            current_run = initialize.Run(env, input_data[run], output_data, raw_output, rnd, run, rep + 1, seed,
+                                         LOG_FILENAME)
 
             env.run(until=sim_hours)
 
             now = datetime.datetime.now()
-            output_data.append(replication('end', int(run), reps + 1, now, seed))
-            reps += 1
+            output_data.append(replication('end', int(run), rep + 1, now, seed))
+            rep += 1
 
         #output_data.sort(key=lambda x: type(x).__name__)
 
@@ -78,13 +102,6 @@ for run in list_of_runs:
         #        csv_output.writerow(list(rows[0]._fields))
         #        for row in rows:
         #            csv_output.writerow(list(row))
-    except:
-        # skip runs that cause errors but...
-        # add code to give more detail in an error log at some stage as to why!
-        # and print to a file...
-        print('Run:', run, 'failed with random seed', seed)
 
-
-
-
-
+    except (StopIteration, KeyError, AttributeError):
+        logging.exception('Exception in run {0}, with seed {1}'.format(run, seed))

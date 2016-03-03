@@ -21,10 +21,7 @@ enu_util = namedtuple('Enu_util', ['run', 'reps', 'Time', 'Count'])  # enumerato
 enu_travel = namedtuple('Enu_travel', ['run', 'reps', 'Enu_id', 'Time', 'Distance', 'Travel_time'])
 visit_assist = namedtuple('Visit_assist', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_paper = namedtuple('Visit_paper', ['run', 'reps', 'Time', 'Household', 'Type'])
-
-
-LOG_FILENAME = '/home/bigdata/Desktop/nas/projects/FOCUS/outputs/error.txt'
-logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG,)
+partial_response_times = namedtuple('Partial_response', ['run', 'reps', 'Time', 'Household'])  # time partial response received
 
 
 def print_resp(run):
@@ -87,8 +84,8 @@ def print_resp(run):
             phone_response_counter += 1
 
 
-
     print(run.run, run.reps)
+
     for key, value in sorted(run.htc_resp.items()):  # sort the dictionary for output purposes
         try:
             data = [run.run,
@@ -143,10 +140,9 @@ def print_resp(run):
 
 
 # a helper process that creates an instance of a coordinator class and starts it working
-def fu_startup(run, env, district, data):
+def fu_startup(run, env, district, update_freq):
 
-    Coordinator(run, env, district, 1)
-    data.append(FU_start(env.now))
+    Coordinator(run, env, district, update_freq)
     yield env.timeout(0)
 
 
@@ -157,21 +153,34 @@ def letter_startup(run, env, district, output_data, sim_hours, targeted, letter_
     yield env.timeout(0)
 
 
+# a simple event representing the response being received
 def resp_rec(env, hh, run):
-    hh.resp_rec = True
-    run.total_responses += 1
+
+    call_response_test = run.rnd.uniform(0, 100)  # allow for a percentage of incomplete responses
+
+    """but what percent by each group sends in incomplete responses?"""
+    if call_response_test < hh.input_data['send_incomplete']:
+        hh.pri += 0  # allows for hh pri for FU to be changed if required - add to inputs
+        hh.output_data.append(partial_response_times(run.run, run.reps, hh.resp_time, hh.id_num))
+        """do these need to be followed up by a dedicated team or others? Add to a list for now"""
+        run.incomplete.append(hh)
+
+    else:
+
+        hh.resp_rec = True
+        run.total_responses += 1
 
     yield env.timeout(0)
 
 
 class Coordinator(object):
     """represents the coordinator for the assigned district"""
-    def __init__(self, run, env, district, repeat_update):
+    def __init__(self, run, env, district, update_freq):
         self.env = env
         self.run = run
         self.district = district
         self.check = env.process(self.arrange_visits())  # will start the action process
-        self.repeat_update = repeat_update
+        self.update_freq = update_freq
         self.update_count = 0
         self.current_hh_sep = 0
 
@@ -188,29 +197,18 @@ class Coordinator(object):
             """sort what is left by pri - lower numbers first"""
             self.run.visit_list.sort(key=lambda hh: hh.pri, reverse=False)
 
-            # re-calculates travel time based on households left to visit in area
-            # so based on what is left in district
+            # re-calculate travel time based on households left to visit in area
             try:
-                # self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                #                                                               len(self.run.district))))
                 self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                                                                              0)))
-            #except ZeroDivisionError:
+                                                                              len(self.run.district))))
+
             except ZeroDivisionError:
 
-                #logger.error('error')
-                # print to error file run rep and time of error as well as type (and number of hh left to visit?)
-                self.current_hh_sep = 0
-                self.run.travel_time = 0
-
-                logging.exception('Got exception in run {0}, replication {1} at time {2}'.format(self.run.run,
-                                                                                                 self.run.reps,
-                                                                                                 self.env.now))
-
-
+                logging.exception('Exception in run {0}, replication {1} at time {2} with seed {3}'
+                                  .format(self.run.run, self.run.reps, self.env.now, self.run.seed))
                 raise
 
-            yield self.env.timeout(self.repeat_update*24)  # sorted at 00:00 each day. What time would this happen?
+            yield self.env.timeout(self.update_freq*24)  # effectively sorted at 00:00. What time would this happen?
 
 
 class LetterPhase(object):
@@ -302,7 +300,7 @@ class Adviser(object):
 
     def add_to_store(self):
 
-        self.run.ad_storage_list.remove(self)
+        self.run.ad_avail.remove(self)
         self.run.adviser_store.put(self)
         yield self.run.env.timeout(0)
 
@@ -315,7 +313,7 @@ class Adviser(object):
         # if not remove it and let the hh grab another adviser???
 
         current_ad = yield self.run.adviser_store.get(lambda item: item.id_num == self.id_num)
-        self.run.ad_storage_list.append(current_ad)
+        self.run.ad_avail.append(current_ad)
         yield self.run.env.timeout(0)
 
     def fu_call(self):
@@ -482,7 +480,9 @@ class Enumerator(object):
         self.input_data = input_data
         self.visits_on = visits_on
 
+        self.total_distance_travelled = 0
         self.distance_travelled = 0
+        self.total_travel_time = 0
         self.travel_time = 0
         self.visits = 0
 
@@ -509,22 +509,28 @@ class Enumerator(object):
                 remove from list and move to next hh"""
 
                 current_hh.visits += 1  # increase visits to that hh by 1
+
                 self.visits += 1
 
                 try:
-                    self.distance_travelled += self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
-                                                                                       len(self.run.district))))
-                except:
-                    self.distance_travelled = 0
+                    self.distance_travelled = self.run.initial_hh_sep / (math.sqrt(1 - (self.run.total_responses /
+                                                                                        len(self.run.district))))
+                    self.total_distance_travelled += self.distance_travelled
 
-                self.travel_time += self.run.travel_time
+                    self.travel_time = self.distance_travelled / self.travel_speed
+                    self.total_travel_time += self.travel_time
+
+                except:
+                    self.total_distance_travelled = 0
+                    self.total_travel_time += 0
+
                 self.run.output_data.append(enu_travel(self.run.run, self.run.reps, self.id_num, self.run.env.now,
-                                                       self.distance_travelled, self.travel_time))
+                                                       self.total_distance_travelled, self.total_travel_time))
 
                 self.run.output_data.append(visit(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                   current_hh.hh_type))
 
-                # visited but will reply have done so if not visited
+                # visited but will reply have done so if not visiteda
                 if current_hh.resp_planned is True and current_hh.resp_sent is False:
                     # add record of a visit that was not required but otherwise carry on
                     self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.run.env.now,
@@ -545,7 +551,7 @@ class Enumerator(object):
                     # not in
                     self.run.output_data.append(visit_out(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
-                    yield self.run.env.timeout((3 / 60) + self.run.travel_time)  # travel time spent
+                    yield self.run.env.timeout((3 / 60) + self.travel_time)  # travel time spent
                     # will need to add back to the overall list with an update pri
                     current_hh.pri += 1
                     # then put back in the list at the end if below max_visit number
@@ -586,7 +592,7 @@ class Enumerator(object):
                 current_hh.resp_type = 'digital'
                 current_hh.delay = 0
                 """how long would it take to change their minds?"""
-                yield self.run.env.timeout(0.2 + self.run.travel_time)
+                yield self.run.env.timeout(0.2 + self.travel_time)
                 yield self.run.env.process(self.fu_visit_outcome(current_hh))
 
             elif current_hh.input_data['dig_assist_eff'] <= dig_assist_test <\
@@ -594,7 +600,7 @@ class Enumerator(object):
                     or (current_hh.visits == current_hh.max_visits and current_hh.paper_after_max_visits is True):
                 # allows hh to use paper to respond
                 """how long to get to the point of letting them have paper?"""
-                yield self.run.env.timeout(0.2 + self.run.travel_time)
+                yield self.run.env.timeout(0.2 + self.travel_time)
                 current_hh.paper_allowed = True
                 current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                 current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
@@ -604,7 +610,7 @@ class Enumerator(object):
             else:
                 # suggests another form of digital assist...
                 """how long would suggesting different forms of digital assist take?"""
-                yield self.run.env.timeout(0.2 + self.run.travel_time)
+                yield self.run.env.timeout(0.2 + self.travel_time)
                 self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
                 current_hh.pri -= 5  # they have asked for help so raise the priority of the hh
                 # so put hh back in the list to visit if max visits not reached
@@ -629,21 +635,21 @@ class Enumerator(object):
         # in but already replied
         if current_hh.resp_sent is True:
             self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
-            yield self.run.env.timeout((5 / 60) + self.run.travel_time)
+            yield self.run.env.timeout((5 / 60) + self.travel_time)
 
         # in and respond - there and then
         if current_hh.resp_sent is False and hh_responds is True:
             self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
             current_hh.resp_planned = True
-            yield self.run.env.timeout((12 / 60) + self.run.travel_time)
+            yield self.run.env.timeout((12 / 60) + self.travel_time)
             self.run.env.process(current_hh.respond(current_hh.delay))
 
         # in but no immediate response
         if current_hh.resp_sent is False and hh_responds is False:
             self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
-            yield self.run.env.timeout((5 / 60) + self.run.travel_time)
+            yield self.run.env.timeout((5 / 60) + self.travel_time)
             """After a visit where they don't respond what do hh then do?"""
             current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
             current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
