@@ -6,7 +6,7 @@
     "description": "default",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 4, 5, 0, 0, 0",
-    "replications": 1,
+    "replications": 100,
     "collector": {
       "walking": {
         "number": 10,
@@ -30,34 +30,27 @@
     },
     "households": {
       "htc1": {
-        "default_help": 5,
+        "default_help": 0,
         "call_renege_lower": 0.05,
         "call_renege_upper": 0.25,
         "call_conversion_rate": 35,
         "dig_assist_eff": 20,
-        "paper_prop": 10,
+        "paper_prop": 0,
         "allow_paper": 0,
         "number": 5000,
         "FU_start_time": 72,
         "dig_assist_flex": 0,
-        "alt_help": 15,
+        "alt_help": 55,
         "priority": 0,
         "max_visits": 1,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 10,
+        "default_resp": 50,
         "contact_rate": 40,
         "conversion_rate": 35,
         "FU_on": 1,
         "send_incomplete": 0,
         "letter_phases": {
-          "reminder":{
-            "date": "2011, 3, 10, 9, 0, 0",
-            "delay": 48,
-            "effect": 15,
-            "targeted": 1
-          }
-
         }
       }
     }

@@ -32,7 +32,7 @@ except IOError as e:
 list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
 
 ###########################################
-# temp output only
+# for simple and I hope temp output only
 names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
          'dig assist flex', 'max visits', 'contact rates', 'call conversion rate', 'conversion rate', 'enumerators', 'advisers', 'letter sent',
          'letter effect', 'responses', 'dig resp', 'paper resp', 'total visits', 'unn visits', 'wasted visits',
@@ -42,7 +42,7 @@ names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits'
 
 raw_output = input('Enter output file name: ')
 if len(raw_output) < 1:
-    raw_output = 'simple_no_letters.csv'
+    raw_output = 'simple_test.csv'
 
 try:
     output_file_path = os.getcwd() + '/outputs/' + raw_output
@@ -93,15 +93,16 @@ for run in list_of_runs:
             output_data.append(replication('end', int(run), rep + 1, now, seed))
             rep += 1
 
-        #output_data.sort(key=lambda x: type(x).__name__)
+        '''Event outputs'''
+        output_data.sort(key=lambda x: type(x).__name__)
 
-        #for k, g in groupby(output_data, lambda x: type(x).__name__):
-        #    with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
-        #        csv_output = csv.writer(f_output)
-        #        rows = list(g)
-        #        csv_output.writerow(list(rows[0]._fields))
-        #        for row in rows:
-        #            csv_output.writerow(list(row))
+        for k, g in groupby(output_data, lambda x: type(x).__name__):
+            with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
+                csv_output = csv.writer(f_output)
+                rows = list(g)
+                csv_output.writerow(list(rows[0]._fields))
+                for row in rows:
+                    csv_output.writerow(list(row))
 
     except (StopIteration, KeyError, AttributeError):
         logging.exception('Exception in run {0}, with seed {1}'.format(run, seed))

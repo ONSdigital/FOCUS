@@ -58,13 +58,20 @@ class Run(object):
         #self.hh_numbers_list = []
         self.visit_list = []
 
-        self.FU_on = True  # can be used to turn visits off regardless of contents of input file
+        # below can be used turn functionality off regardless of contents of configuration file
+        self.FU_on = True
         self.call_FU_on = False
+        self.advisers_on = False
+        self.letters_on = False
 
         self.create_households(self.input_data['households'])
-        self.start_coordinator(self.calc_fu_start(self.input_data['households']))  # places events in event list to enable coordinator to update visits list
-        self.create_enumerators(self.input_data["collector"], self.start_date)
-        self.create_advisers(self.input_data["advisers"], "")
+
+        if self.FU_on is True:
+            self.start_coordinator(self.calc_fu_start(self.input_data['households']))  # places events in event list to enable coordinator to update visits list
+            self.create_enumerators(self.input_data["collector"], self.start_date)
+
+        if self.advisers_on is True:
+            self.create_advisers(self.input_data["advisers"], "")
 
         # create required stores but only if there are resources to put inside them
         if self.total_ad_instances > 0:
@@ -72,8 +79,8 @@ class Run(object):
         if self.total_ad_chat_instances > 0:
             self.adviser_chat_store = simpy.FilterStore(self.env, capacity=self.total_ad_chat_instances)
 
-        # schedule the sending of letters
-        self.start_letters(self.input_data["households"])
+        if self.letters_on is True:
+            self.start_letters(self.input_data["households"])
 
         # and create some some simple (and temp) output
         self.resp_day(self.sim_hours)

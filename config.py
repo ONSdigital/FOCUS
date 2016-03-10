@@ -56,16 +56,16 @@ def generate_output_file(run_data, run, id_num, change, changes, out_file):
 
 changes = {'max_visits': {'lower': 1,
                           'upper': 11,
-                          'step': 2},
-           'FU_start_time': {'lower': 72,
-                             'upper': 504,
-                             'step': 144},
-           'default_resp': {'lower': 10,
-                             'upper': 95,
-                             'step': 10},
-           'paper_prop': {'lower': 10,
-                             'upper': 95,
-                             'step': 10},
+                          'step': 1}#,
+           #'FU_start_time': {'lower': 72,
+           #                  'upper': 504,
+           #                  'step': 144},
+           #'default_resp': {'lower': 10,
+           #                  'upper': 95,
+           #                  'step': 10},
+           #'paper_prop': {'lower': 10,
+           #                  'upper': 95,
+           #                  'step': 10},
            }
 
 src_file_name = input('Enter file name: ')
@@ -74,7 +74,7 @@ if len(src_file_name) < 1:
 
 dst_file_name = input('Enter file name: ')
 if len(dst_file_name) < 1:
-    dst_file_name = 'test_out_paper_from_start.JSON'
+    dst_file_name = 'simple_max_visits.JSON'
 
 copyfile(src_file_name, dst_file_name)
 

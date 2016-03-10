@@ -25,6 +25,7 @@ letter_wasted = namedtuple('letter_wasted', ['run', 'reps', 'Time', 'Household',
 letter_response = namedtuple('letter_response', ['run', 'reps', 'Time', 'Household', 'Type'])
 paper_requested = namedtuple('paper_requested', ['run', 'reps', 'Time', 'Household', 'Type'])
 phone_response = namedtuple('phone_response', ['run', 'reps', 'Time', 'Household', 'Type'])
+phone_automated = namedtuple('phone_automated', ['run', 'reps', 'Time', 'Household', 'Type'])
 
 
 class Household(object):
@@ -39,7 +40,11 @@ class Household(object):
 
         self.output_data = run.output_data
         self.paper_allowed = str2bool(self.input_data['allow_paper'])
-        self.FU_on = str2bool(self.input_data['FU_on'])
+        # if the master FU switch is off use the input file setting instead
+        if self.run.FU_on is True:
+            self.FU_on = str2bool(self.input_data['FU_on'])
+        else:
+            self.FU_on = False
 
         self.call_renege = self.run.rnd.uniform(self.input_data['call_renege_lower'],
                                                 self.input_data['call_renege_upper'])
@@ -83,6 +88,7 @@ class Household(object):
             """action based upon the current values for resp for individual households"""
 
             action_test = self.run.rnd.uniform(0, 100)  # represents the COA to be taken.
+            #action_test = random.uniform(0, 100)  # represents the COA to be taken.
 
             if action_test <= self.resp_level:
 
@@ -95,7 +101,7 @@ class Household(object):
                 elif self.status == 'Phone call':
                     self.output_data.append(phone_response(self.run.run, self.run.reps, self.env.now, self.id_num,
                                                            self.hh_type))
-                # or some other event has caused you to enter this...
+                # or some other event has caused the hh to respond
 
                 self.status = "Responding"
                 yield self.env.timeout(response_time)  # wait until defined response time
@@ -114,7 +120,7 @@ class Household(object):
                 self.status = "Do nothing"
                 yield self.env.timeout((self.run.sim_hours) - self.env.now)  # do nothing more
 
-    # HH requires assistance so pick an option to use - need data.JSON on this or can test impact of variation
+    # HH requires assistance so pick an option to use
     def contact(self):
         """what proportion of people will make contact via the different options and how will that differ if they
         prefer paper over digital?"""
@@ -122,7 +128,15 @@ class Household(object):
         if self.resp_sent is False:
 
             self.status = 'Phone call'
-            yield self.env.process(self.phone_call_connect())
+
+            if self.run.advisers_on is True:
+                yield self.env.process(self.phone_call_connect())
+            else:
+                self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
+                # then do nothing
+                yield self.env.timeout((self.run.sim_hours) - self.env.now)  # do nothing more
+
+
         # web chat
         # text assist
         # Post assistance
@@ -212,12 +226,13 @@ class Household(object):
     def phone_call_connect(self):
         """Represents whether or not a call by a hh leads to an adviser answering"""
 
+        self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
+
         if len(self.run.ad_working) > 0 or len(self.run.adviser_store.items) > 0:
-            # there is either an adviser busy or one available (so the lines are open!)
+            # call center func is on and there is either an adviser busy or one available (so the lines are open!)
 
             self.time_called = self.env.now
 
-            self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
             ad_util = len(self.run.ad_working)/(len(self.run.ad_working) + len(self.run.adviser_store.items))
             self.output_data.append(adviser_util(self.run.run, self.run.reps, self.env.now, ad_util, self.id_num))
 
@@ -256,8 +271,10 @@ class Household(object):
         else:
             # called when the lines are closed. Will be dealt with by automated line - how does this work?
             """Need to understand how people respond when they do not get through?"""
+            self.output_data.append(phone_automated(self.run.run, self.run.reps, self.time_called + self.call_renege,
+                                                    self.id_num))
             self.resp_level = 0  # automate help may be enough for some but how many?
-            self.help_level = 80  # means you lose 20% of callers who fail to get through each time
+            self.help_level = 80  # how many call again? 80 means you lose 20% of callers who fail to get through
             yield self.env.process(self.action())
 
     def phone_call_assist(self, current_ad):
@@ -431,6 +448,7 @@ def response_profiles(run, dist_name):
     """what distributions should be used to represent the below events?"""
     if dist_name == "HH_resp_time":
         return (run.rnd.betavariate(1, 2))*((run.sim_hours) - run.env.now)
+        #return 1
     elif dist_name == "Refuse":
         return run.rnd.uniform(9, (run.sim_hours) - run.env.now)
     else:

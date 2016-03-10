@@ -83,7 +83,6 @@ def print_resp(run):
         elif type(item).__name__ == 'phone_response' and item[0] == run.run and item[1] == run.reps:
             phone_response_counter += 1
 
-
     print(run.run, run.reps)
 
     for key, value in sorted(run.htc_resp.items()):  # sort the dictionary for output purposes
@@ -159,7 +158,7 @@ def resp_rec(env, hh, run):
     call_response_test = run.rnd.uniform(0, 100)  # allow for a percentage of incomplete responses
 
     """but what percent by each group sends in incomplete responses?"""
-    if call_response_test < hh.input_data['send_incomplete']:
+    if call_response_test <= hh.input_data['send_incomplete']:
         hh.pri += 0  # allows for hh pri for FU to be changed if required - add to inputs
         hh.output_data.append(partial_response_times(run.run, run.reps, hh.resp_time, hh.id_num))
         """do these need to be followed up by a dedicated team or others? Add to a list for now"""
@@ -279,9 +278,9 @@ class Adviser(object):
             # do the new stuff
             self.run.env.process(self.set_availability())  # starts the process which runs the visits
 
-        if self.do_fu_calls is True:
+        #if self.do_fu_calls is True:
             # add a switch to turn this on or off
-            run.env.process(self.fu_call())  # starts the process which runs the vi
+        run.env.process(self.fu_call())  # starts the process which runs the vi
 
     def set_availability(self):
 
@@ -486,8 +485,8 @@ class Enumerator(object):
         self.travel_time = 0
         self.visits = 0
 
-        if self.visits_on is True:
-            run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
+        #if self.visits_on is True:
+        run.env.process(self.fu_visit_contact())  # starts the process which runs the visits
 
     def fu_visit_contact(self):
         """does the enumerator make contact with the hh"""
@@ -530,7 +529,7 @@ class Enumerator(object):
                 self.run.output_data.append(visit(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                   current_hh.hh_type))
 
-                # visited but will reply have done so if not visiteda
+                # visited but would have replied if not visited
                 if current_hh.resp_planned is True and current_hh.resp_sent is False:
                     # add record of a visit that was not required but otherwise carry on
                     self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.run.env.now,
@@ -580,7 +579,6 @@ class Enumerator(object):
                 yield self.run.env.timeout(self.hold_until())
             else:
                 yield self.run.env.timeout(24)
-
 
     def fu_visit_assist(self, current_hh):
         """once contact is made determine if digital assistance is required"""
@@ -638,7 +636,7 @@ class Enumerator(object):
             yield self.run.env.timeout((5 / 60) + self.travel_time)
 
         # in and respond - there and then
-        if current_hh.resp_sent is False and hh_responds is True:
+        elif current_hh.resp_sent is False and hh_responds is True:
             self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
             current_hh.resp_planned = True
@@ -646,7 +644,7 @@ class Enumerator(object):
             self.run.env.process(current_hh.respond(current_hh.delay))
 
         # in but no immediate response
-        if current_hh.resp_sent is False and hh_responds is False:
+        elif current_hh.resp_sent is False and hh_responds is False:
             self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
             yield self.run.env.timeout((5 / 60) + self.travel_time)
@@ -654,7 +652,7 @@ class Enumerator(object):
             current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
             current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
 
-            current_hh.pri += 2
+            current_hh.pri += 0
             # then put back in the list to visit at the end with new pri but only if below max_visit number
             if current_hh.visits < current_hh.max_visits:
                 self.run.visit_list.append(current_hh)
@@ -663,8 +661,8 @@ class Enumerator(object):
                 self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                         current_hh.hh_type))
                 current_hh.paper_allowed = True
-                current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
-                current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
+
+            current_hh.status = "visited"
 
             self.run.env.process(current_hh.action())
 
