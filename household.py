@@ -87,8 +87,8 @@ class Household(object):
         while True and self.resp_sent is False and self.resp_planned is False:
             """action based upon the current values for resp for individual households"""
 
+            """add record of initial decision ready to compare later"""
             action_test = self.run.rnd.uniform(0, 100)  # represents the COA to be taken.
-            #action_test = random.uniform(0, 100)  # represents the COA to be taken.
 
             if action_test <= self.resp_level:
 

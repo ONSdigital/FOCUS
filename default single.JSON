@@ -6,7 +6,7 @@
     "description": "default",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 4, 5, 0, 0, 0",
-    "replications": 100,
+    "replications": 1,
     "collector": {
       "walking": {
         "number": 10,
