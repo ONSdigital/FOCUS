@@ -10,7 +10,7 @@ import logging
 
 
 FU_start = namedtuple('FU_start', ['Time'])
-letter_sent = namedtuple('letter_sent', ['run', 'reps', 'Time', 'Household', 'Type', 'hh_type'])
+letter_sent = namedtuple('letter_sent', ['run', 'reps', 'Time', 'Household',  'hh_type', 'Type'])
 visit = namedtuple('Visit', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_out = namedtuple('Visit_out', ['run', 'reps', 'Time', 'Household', 'Type'])
 visit_contact = namedtuple('Visit_contact', ['run', 'reps', 'Time', 'Household', 'Type'])
@@ -201,6 +201,8 @@ class Coordinator(object):
             """sort what is left by pri - lower numbers first"""
             self.run.visit_list.sort(key=lambda hh: hh.pri, reverse=False)
 
+            print(len(self.run.visit_list), self.env.now)
+
             # re-calculate travel time based on households left to visit in area
             try:
                 self.current_hh_sep = self.run.initial_hh_sep / (math.sqrt(1-(self.run.total_responses /
@@ -220,7 +222,7 @@ class LetterPhase(object):
         self.run = run
         self.env = env
         self.district = district
-        self.letter_delay = 72
+        #self.letter_delay = 72
         self.output_data = output_data
         self.sim_hours = sim_hours
         self.targets = targets.split(',')
@@ -247,7 +249,7 @@ class LetterPhase(object):
         yield self.env.timeout((self.sim_hours) - self.env.now)
 
     def co_send_letter(self, household, letter_type, effect, delay):
-        self.output_data.append(letter_sent(self.run.run, self.run.reps, self.env.now, household.id_num, letter_type, household.hh_type))
+        self.output_data.append(letter_sent(self.run.run, self.run.reps, self.env.now, household.id_num, household.hh_type, letter_type))
         # send a letter which will take an amount of time to be received (which could vary if required?)
         # then the hh needs to do something...at the right time
         start_delayed(self.env, household.rec_letter(letter_type, effect), delay)
@@ -545,6 +547,8 @@ class Enumerator(object):
 
                 if self.run.rnd.uniform(0, 100) <= self.input_data[current_hh.hh_type]['contact_rate']:
                     hh_in = True
+                    self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
+                                                              current_hh.hh_type))
 
                 if hh_in is True and (current_hh.resp_type == 'paper' and current_hh.paper_allowed is False):
                     yield self.run.env.process(self.fu_visit_assist(current_hh))
@@ -556,18 +560,19 @@ class Enumerator(object):
                     # not in
                     self.run.output_data.append(visit_out(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
+
                     yield self.run.env.timeout((3 / 60) + self.travel_time)  # travel time spent
                     # will need to add back to the overall list with an update pri
                     # current_hh.pri += 0
                     # then put back in the list at the end if below max_visit number
                     if current_hh.visits < current_hh.max_visits:
                         self.run.visit_list.append(current_hh)
-                    elif current_hh.paper_after_max_visits is True and current_hh.resp_type =='paper':
+                    elif current_hh.paper_after_max_visits is True and current_hh.resp_type == 'paper':
                         '''add event to give paper if max visits received - but what will the HH then do?
                         a dig preference, who decided to do nothing  could get a paper copy here and the respond
                         is this sensible?'''
                         self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
-                                                          current_hh.hh_type))
+                                                                current_hh.hh_type))
                         current_hh.paper_allowed = True
                         current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                         current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
@@ -651,12 +656,12 @@ class Enumerator(object):
 
         # in but no immediate response
         elif current_hh.resp_sent is False and hh_responds is False:
-            self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
-                                                      current_hh.hh_type))
+            #self.run.output_data.append(visit_contact(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
+             #                                         current_hh.hh_type))
             yield self.run.env.timeout((5 / 60) + self.travel_time)
             """After a visit where they don't respond what do hh then do?"""
-            current_hh.resp_level = 0 #current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
-            current_hh.help_level = 0 # current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
+            current_hh.resp_level = 0  # current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
+            current_hh.help_level = 0  # current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
 
             # current_hh.pri = 0
             # then put back in the list to visit at the end with new pri but only if below max_visit number

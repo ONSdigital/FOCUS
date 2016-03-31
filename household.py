@@ -20,9 +20,9 @@ call_out = namedtuple('Call_out', ['run', 'reps', 'Time', 'Household'])
 call_success = namedtuple('Call_success', ['run', 'reps', 'Time', 'Household'])
 wasted_call = namedtuple('Call_wasted', ['run', 'reps', 'Time', 'Household'])
 hung_up = namedtuple('Hung_up', ['run', 'reps', 'Time', 'Household'])
-letter_received = namedtuple('letter_received', ['run', 'reps', 'Time', 'Household', 'Type'])
-letter_wasted = namedtuple('letter_wasted', ['run', 'reps', 'Time', 'Household', 'Type'])
-letter_response = namedtuple('letter_response', ['run', 'reps', 'Time', 'Household', 'Type'])
+letter_received = namedtuple('letter_received', ['run', 'reps', 'Time', 'Household', 'hh_type', 'Type'])
+letter_wasted = namedtuple('letter_wasted', ['run', 'reps', 'Time', 'Household',  'hh_type', 'Type'])
+letter_response = namedtuple('letter_response', ['run', 'reps', 'Time', 'Household',  'hh_type'])
 paper_requested = namedtuple('paper_requested', ['run', 'reps', 'Time', 'Household', 'Type'])
 phone_response = namedtuple('phone_response', ['run', 'reps', 'Time', 'Household', 'Type'])
 phone_automated = namedtuple('phone_automated', ['run', 'reps', 'Time', 'Household', 'Type'])
@@ -51,7 +51,7 @@ class Household(object):
         self.time_called = 0  # time of phone call
         self.max_visits = self.input_data['max_visits']
         self.paper_after_max_visits = str2bool(self.input_data['paper_after_max_visits'])
-        self.pri = self.input_data['priority']  # set FU priority. Lower numbers have higher priority
+        self.pri = self.input_data['priority']  # set initial FU priority. Lower numbers have higher priority
         self.resp_type = self.set_preference()  # needs to be set based on inputs
         self.fu_start = self.input_data['FU_start_time']
         self.dig_assist_eff = self.input_data['dig_assist_eff']  # single value, could be different depending on method
@@ -87,13 +87,13 @@ class Household(object):
         while True and self.resp_sent is False and self.resp_planned is False:
             """action based upon the current values for resp for individual households"""
 
-            """add record of initial decision ready to compare later"""
+            """add record of initial decision ready to compare later?"""
             action_test = self.run.rnd.uniform(0, 100)  # represents the COA to be taken.
 
             if action_test <= self.resp_level:
 
                 self.resp_planned = True
-                response_time = response_profiles(self.run, "HH_resp_time")
+                response_time = beta_dist(self.run, self.input_data["beta_dist"][0], self.input_data["beta_dist"][1])
                 if self.status == "received letter":
                     self.letter_response = 'True'
                     self.output_data.append(letter_response(self.run.run, self.run.reps, self.env.now, self.id_num,
@@ -110,7 +110,7 @@ class Household(object):
             elif self.resp_level < action_test <= self.help_level:
                 # ask for help
                 '''what time of day do people call?'''
-                contact_time = response_profiles(self.run, "contact")
+                contact_time = uniform_dist(self.run)
                 self.status = "making contact"
                 yield self.env.timeout(contact_time)
                 yield self.env.process(self.contact())
@@ -388,10 +388,10 @@ class Household(object):
 
         if self.resp_sent is True:
             # record wasted letter but otherwise do nothing more
-            self.output_data.append(letter_wasted(self.run.run, self.run.reps, self.env.now, self.id_num, letter_type))
+            self.output_data.append(letter_wasted(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
             yield self.env.timeout(0)
         elif self.resp_sent is False and self.resp_type == 'digital':
-            self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, letter_type))
+            self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
 
             """how effective are letters? Does effectiveness change the more you send? Do different letters
             have different effectiveness on different groups?"""
@@ -405,9 +405,9 @@ class Household(object):
             # must be paper so do nothing more?
             """what do those hh who prefer paper who get a letter do?"""
             # then back to action with the updated values
-            self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, letter_type))
+            self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
             self.resp_level = 0
-            self.help_level = effect
+            self.help_level = 0 #effect
             self.status = "received letter"
 
             yield self.env.process(self.action())
@@ -442,18 +442,14 @@ class Household(object):
             return input_data[temp_key]
 
 
-# a method to select a number of predefined profiles
-def response_profiles(run, dist_name):
+def uniform_dist(run):
 
-    """what distributions should be used to represent the below events?"""
-    if dist_name == "HH_resp_time":
-        return (run.rnd.betavariate(0.25, 3))*((run.sim_hours) - run.env.now)
-        #return 1
-    elif dist_name == "Refuse":
-        return run.rnd.uniform(9, (run.sim_hours) - run.env.now)
-    else:
-        return run.rnd.uniform(9, (run.sim_hours) - run.env.now)
-    # add more as required
+    return run.rnd.uniform(9, (run.sim_hours) - run.env.now)
+
+
+def beta_dist(run, alpha, beta):
+
+    return (run.rnd.betavariate(alpha, beta))*(run.sim_hours - run.env.now)
 
 
 def next_day(env):

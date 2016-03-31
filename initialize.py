@@ -77,10 +77,10 @@ class Run(object):
         self.visit_list = []
 
         # below can be used turn functionality off regardless of contents of configuration file
-        self.FU_on = True
+        self.FU_on = False
         self.call_FU_on = False
         self.advisers_on = False
-        self.letters_on = False
+        self.letters_on = True
 
         self.create_households(self.input_data['households'])
 
