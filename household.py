@@ -69,7 +69,7 @@ class Household(object):
         self.letter_response = False
 
         """only for console output"""
-        self.run.hh_count[self.hh_type] += 1
+        #self.run.hh_count[self.hh_type] += 1
 
         # set start behaviours for HH
         self.resp_level = self.decision_level(self.input_data, 'resp')
@@ -101,7 +101,7 @@ class Household(object):
                 elif self.status == 'Phone call':
                     self.output_data.append(phone_response(self.run.run, self.run.reps, self.env.now, self.id_num,
                                                            self.hh_type))
-                # or some other event has caused the hh to respond
+                # or some other event has caused the hh to respond but not immediately - add in visits
 
                 self.status = "Responding"
                 yield self.env.timeout(response_time)  # wait until defined response time
@@ -447,7 +447,7 @@ def response_profiles(run, dist_name):
 
     """what distributions should be used to represent the below events?"""
     if dist_name == "HH_resp_time":
-        return (run.rnd.betavariate(1, 2))*((run.sim_hours) - run.env.now)
+        return (run.rnd.betavariate(0.25, 3))*((run.sim_hours) - run.env.now)
         #return 1
     elif dist_name == "Refuse":
         return run.rnd.uniform(9, (run.sim_hours) - run.env.now)

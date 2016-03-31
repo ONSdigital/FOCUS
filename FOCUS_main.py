@@ -18,7 +18,7 @@ logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG,)
 
 file_name = input('Enter input file name: ')
 if len(file_name) < 1:
-    file_name = 'default single.JSON'
+    file_name = 'default single census 2011.JSON'
 
 # loads the selected config file
 try:
@@ -33,12 +33,11 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 
 ###########################################
 # for simple and I hope temp output only
-names = ['run', 'rep', 'number', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
+names = ['run', 'rep', 'number', 'type', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
          'dig assist flex', 'max visits', 'contact rates', 'call conversion rate', 'conversion rate', 'enumerators', 'advisers', 'letter sent',
          'letter effect', 'responses', 'dig resp', 'paper resp', 'total visits', 'unn visits', 'wasted visits',
          'visit out', 'visit success', 'visit contact', 'visit assist', 'visit paper', 'calls', 'phone responses', 'letter wasted',
          'letter received', 'letter responses', 'seed']
-
 
 raw_output = input('Enter output file name: ')
 if len(raw_output) < 1:

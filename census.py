@@ -27,69 +27,74 @@ partial_response_times = namedtuple('Partial_response', ['run', 'reps', 'Time', 
 def print_resp(run):
     """returns the responses received to date for the current run and other counters"""
 
+    # populate the simple dicts for the totals
     for hh in run.list_of_hh:
-            run.htc_resp[hh] = 0
-
-    visit_counter = 0
-    call_counter = 0
-    total_dig_resp = 0
-    total_pap_resp = 0
-    visit_unnecessary_counter = 0
-    visit_wasted_counter = 0
-    visit_out_counter = 0
-    visit_success_counter = 0
-    visit_contact_counter = 0
-    visit_assist_counter = 0
-    visit_paper_counter = 0
-    letter_sent_counter = 0
-    letter_wasted_counter = 0
-    letter_received_counter = 0
-    letter_response_counter = 0
-    phone_response_counter = 0
+            run.hh_resp[hh] = 0
+            run.total_dig_resp[hh] = 0
+            run.total_pap_resp[hh] = 0
+            run.visit_counter[hh] = 0
+            run.call_counter[hh] = 0
+            run.visit_unnecessary_counter[hh] = 0
+            run.visit_wasted_counter[hh] = 0
+            run.visit_out_counter[hh] = 0
+            run.visit_success_counter[hh] = 0
+            run.visit_contact_counter[hh] = 0
+            run.visit_assist_counter[hh] = 0
+            run.visit_paper_counter[hh] = 0
+            run.letter_sent_counter[hh] = 0
+            run.letter_wasted_counter[hh] = 0
+            run.letter_received_counter[hh] = 0
+            run.letter_response_counter[hh] = 0
+            run.phone_response_counter[hh] = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
-            run.htc_resp[item[4]] += 1
+            run.hh_resp[item[4]] += 1
             if item[7] == 'digital':
-                total_dig_resp += 1
+                run.total_dig_resp[item[4]] += 1
             elif item[7] == 'paper':
-                total_pap_resp += 1
+                run.total_pap_resp[item[4]] += 1
         elif type(item).__name__ == 'Visit' and item[0] == run.run and item[1] == run.reps:
-            visit_counter += 1
+            run.visit_counter[item[4]] += 1
         elif type(item).__name__ == 'Phone_call' and item[0] == run.run and item[1] == run.reps:
-            call_counter += 1
+            run.call_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_unnecessary' and item[0] == run.run and item[1] == run.reps:
-            visit_unnecessary_counter += 1
+            run.visit_unnecessary_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_wasted' and item[0] == run.run and item[1] == run.reps:
-            visit_wasted_counter += 1
+            run.visit_wasted_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_out' and item[0] == run.run and item[1] == run.reps:
-            visit_out_counter += 1
+            run.visit_out_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_success' and item[0] == run.run and item[1] == run.reps:
-            visit_success_counter += 1
+            run.visit_success_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_contact' and item[0] == run.run and item[1] == run.reps:
-            visit_contact_counter += 1
+            run.visit_contact_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_assist' and item[0] == run.run and item[1] == run.reps:
-            visit_assist_counter += 1
+            run.visit_assist_counter[item[4]] += 1
         elif type(item).__name__ == 'Visit_paper' and item[0] == run.run and item[1] == run.reps:
-            visit_paper_counter += 1
+            run.visit_paper_counter[item[4]] += 1
         elif type(item).__name__ == 'letter_sent' and item[0] == run.run and item[1] == run.reps:
-            letter_sent_counter += 1
+            run.letter_sent_counter[item[4]] += 1
         elif type(item).__name__ == 'letter_wasted' and item[0] == run.run and item[1] == run.reps:
-            letter_wasted_counter += 1
+            run.letter_wasted_counter[item[4]] += 1
         elif type(item).__name__ == 'letter_received' and item[0] == run.run and item[1] == run.reps:
-            letter_received_counter += 1
+            run.letter_received_counter[item[4]] += 1
         elif type(item).__name__ == 'letter_response' and item[0] == run.run and item[1] == run.reps:
-            letter_response_counter += 1
+            run.letter_response_counter[item[4]] += 1
         elif type(item).__name__ == 'phone_response' and item[0] == run.run and item[1] == run.reps:
-            phone_response_counter += 1
+            run.phone_response_counter[item[4]] += 1
 
     print(run.run, run.reps)
 
-    for key, value in sorted(run.htc_resp.items()):  # sort the dictionary for output purposes
+
+    for key, value in sorted(run.hh_resp.items()):  # sort the dictionary for output purposes
+        print(key, value/run.hh_count[key])
+
+    for key, value in sorted(run.hh_resp.items()):
         try:
             data = [run.run,
                     run.reps,
                     (run.input_data['households'][key]['number']),
+                    key,
                     (run.input_data['district_area']),
                     (run.input_data['households'][key]['allow_paper']),
                     (run.input_data['households'][key]['paper_after_max_visits']),
@@ -109,21 +114,21 @@ def print_resp(run):
                     run.letter_effect,  # change this to reflect letter effect???
                     # outputs from here
                     value,
-                    total_dig_resp,
-                    total_pap_resp,
-                    visit_counter,
-                    visit_unnecessary_counter,
-                    visit_wasted_counter,
-                    visit_out_counter,
-                    visit_success_counter,
-                    visit_contact_counter,
-                    visit_assist_counter,
-                    visit_paper_counter,
-                    call_counter,
-                    phone_response_counter,
-                    letter_wasted_counter,
-                    letter_received_counter,
-                    letter_response_counter,
+                    run.total_dig_resp[key],
+                    run.total_pap_resp[key],
+                    run.visit_counter[key],
+                    run.visit_unnecessary_counter[key],
+                    run.visit_wasted_counter[key],
+                    run.visit_out_counter[key],
+                    run.visit_success_counter[key],
+                    run.visit_contact_counter[key],
+                    run.visit_assist_counter[key],
+                    run.visit_paper_counter[key],
+                    run.call_counter[key],
+                    run.phone_response_counter[key],
+                    run.letter_wasted_counter[key],
+                    run.letter_received_counter[key],
+                    run.letter_response_counter[key],
                     run.seed]
 
             # add code to print to a file instead/as well
@@ -362,7 +367,7 @@ class Adviser(object):
                             yield self.env.timeout(self.length_of_call)
                             yield self.run.adviser_store.put(current_ad)
                             self.district.append(current_hh)
-                            current_hh.pri += 2
+                            #current_hh.pri = 0
                             current_hh.resp_level = 10
                             current_hh.help_level = 5
                             current_hh.refuse_level = 1
@@ -377,7 +382,7 @@ class Adviser(object):
                             self.length_of_call = 0.05
                             yield self.env.timeout(self.length_of_call)
                             yield self.run.adviser_store.put(current_ad)
-                            current_hh.pri += 1
+                            #current_hh.pri = 0
                             self.district.append(current_hh)
                     else:
                         # is on a call so wait until that call is finished
@@ -508,6 +513,7 @@ class Enumerator(object):
                 remove from list and move to next hh"""
 
                 current_hh.visits += 1  # increase visits to that hh by 1
+                current_hh.pri = current_hh.visits  # is this the right logic to prioritise visits?
 
                 self.visits += 1
 
@@ -552,14 +558,14 @@ class Enumerator(object):
                                                           current_hh.hh_type))
                     yield self.run.env.timeout((3 / 60) + self.travel_time)  # travel time spent
                     # will need to add back to the overall list with an update pri
-                    current_hh.pri += 1
+                    # current_hh.pri += 0
                     # then put back in the list at the end if below max_visit number
                     if current_hh.visits < current_hh.max_visits:
                         self.run.visit_list.append(current_hh)
                     elif current_hh.paper_after_max_visits is True and current_hh.resp_type =='paper':
                         '''add event to give paper if max visits received - but what will the HH then do?
                         a dig preference, who decided to do nothing  could get a paper copy here and the respond
-                        is this sensisble?'''
+                        is this sensible?'''
                         self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                           current_hh.hh_type))
                         current_hh.paper_allowed = True
@@ -610,7 +616,7 @@ class Enumerator(object):
                 """how long would suggesting different forms of digital assist take?"""
                 yield self.run.env.timeout(0.2 + self.travel_time)
                 self.run.output_data.append(visit_assist(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num, current_hh.hh_type))
-                current_hh.pri -= 5  # they have asked for help so raise the priority of the hh
+                # current_hh.pri = 0  # they have asked for help so raise the priority of the hh
                 # so put hh back in the list to visit if max visits not reached
                 if current_hh.visits < current_hh.max_visits:
                     self.run.visit_list.append(current_hh)
@@ -640,7 +646,7 @@ class Enumerator(object):
             self.run.output_data.append(visit_success(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                       current_hh.hh_type))
             current_hh.resp_planned = True
-            yield self.run.env.timeout((12 / 60) + self.travel_time)
+            yield self.run.env.timeout((30 / 60) + self.travel_time)
             self.run.env.process(current_hh.respond(current_hh.delay))
 
         # in but no immediate response
@@ -649,10 +655,10 @@ class Enumerator(object):
                                                       current_hh.hh_type))
             yield self.run.env.timeout((5 / 60) + self.travel_time)
             """After a visit where they don't respond what do hh then do?"""
-            current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
-            current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
+            current_hh.resp_level = 0 #current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
+            current_hh.help_level = 0 # current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
 
-            current_hh.pri += 0
+            # current_hh.pri = 0
             # then put back in the list to visit at the end with new pri but only if below max_visit number
             if current_hh.visits < current_hh.max_visits:
                 self.run.visit_list.append(current_hh)

@@ -5,6 +5,7 @@ import census
 import household
 import datetime
 import math
+import random
 
 
 class Run(object):
@@ -38,12 +39,33 @@ class Run(object):
         self.letter_effect = 0
 
         self.district = []  # a list of households in the district
-        #self.copy_district = []
-        self.hh_count = {}
-        self.htc_resp = {}
+        self.hh_count = {}  # simple dict containing a count of the hh types in the sim
+        self.hh_resp = {}  # a simple dict to keep a tally of the hh who have responded
         self.list_of_hh = sorted(list(self.input_data['households']))  # top level keys only, hh in this case
         for hh in self.list_of_hh:
-            self.hh_count[hh] = 0
+            self.hh_count[hh] = self.input_data['households'][hh]['number']
+
+        '''below is for temp output only'''
+        ################################################################################
+
+        self.total_dig_resp = {}
+        self.total_pap_resp = {}
+        self.visit_counter = {}
+        self.call_counter = {}
+        self.visit_unnecessary_counter = {}
+        self.visit_wasted_counter = {}
+        self.visit_out_counter = {}
+        self.visit_success_counter = {}
+        self.visit_contact_counter = {}
+        self.visit_assist_counter = {}
+        self.visit_paper_counter = {}
+        self.letter_sent_counter = {}
+        self.letter_wasted_counter = {}
+        self.letter_received_counter = {}
+        self.letter_response_counter = {}
+        self.phone_response_counter = {}
+
+        #################################################################################
 
         self.enu_avail = []  # list use to hold enumerators instances when available for work
         self.enu_working = []  # list to store instances of working enumerators
@@ -51,11 +73,7 @@ class Run(object):
         self.ad_working = []
         self.ad_chat_avail = []
         self.ad_chat_working = []
-
-        #self.letters = []  # contains details of the letter phases, when, who etc
         self.incomplete = []  # a list containing the households who submitted incomplete responses
-
-        #self.hh_numbers_list = []
         self.visit_list = []
 
         # below can be used turn functionality off regardless of contents of configuration file
@@ -90,12 +108,18 @@ class Run(object):
 
         id_num = 0
 
+        # dicts are unsorted so hh will not always be created in the same order as defined
+        # this could impact on visit order so the list is shuffled after creation
+
         for hh_type, value in input_dict.items():
 
             for i in range(input_dict[hh_type]['number']):
 
                 self.district.append(household.Household(self, self.env, hh_type, id_num, input_dict[hh_type]))
                 id_num += 1
+
+        # shuffle the list - so if pri equal the order of visits is random
+        random.shuffle(self.district)
 
         # then define for the run the initial distance between houses
         hh_area = self.input_data['district_area'] / len(self.district)
