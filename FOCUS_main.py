@@ -33,6 +33,7 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 
 ###########################################
 # for simple and I hope temp output only
+
 names = ['run', 'rep', 'number', 'type', 'area', 'allow paper', 'paper_after_max_visits', 'FU on', 'default resp', 'paper prop', 'FU start time', 'dig assist eff',
          'dig assist flex', 'max visits', 'contact rates', 'call conversion rate', 'conversion rate', 'enumerators', 'advisers', 'letter sent',
          'letter effect', 'responses', 'dig resp', 'paper resp', 'total visits', 'unn visits', 'wasted visits',

@@ -13,7 +13,7 @@ wait_times = namedtuple('Wait_time', ['run', 'reps', 'Time', 'Wait', 'Household'
 fu_call_time = namedtuple('FU_call', ['run', 'reps', 'Time', 'Household'])  # times of FU calls and to whom
 hh_assist = namedtuple('HH_refuse', ['run', 'reps', 'Time', 'Household'])  # time of assist
 hh_refuse = namedtuple('HH_refuse', ['run', 'reps', 'Time', 'Household'])  # time of refusal
-phone_call_time = namedtuple('Phone_call', ['run', 'reps', 'Time', 'Household'])  # time of phone call from hh
+phone_call_time = namedtuple('Phone_call', ['run', 'reps', 'Time', 'Household', 'Type'])  # time of phone call from hh
 do_nothing = namedtuple('Do_nothing', ['run', 'reps', 'Time', 'Household'])
 call_in = namedtuple('Call_in', ['run', 'reps', 'Time', 'Household'])
 call_out = namedtuple('Call_out', ['run', 'reps', 'Time', 'Household'])
@@ -132,7 +132,8 @@ class Household(object):
             if self.run.advisers_on is True:
                 yield self.env.process(self.phone_call_connect())
             else:
-                self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
+                self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num,
+                                                        self.hh_type))
                 # then do nothing
                 yield self.env.timeout((self.run.sim_hours) - self.env.now)  # do nothing more
 
