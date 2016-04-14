@@ -132,8 +132,8 @@ class Household(object):
             if self.run.advisers_on is True:
                 yield self.env.process(self.phone_call_connect())
             else:
-                self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num,
-                                                        self.hh_type))
+                #self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num,
+                #                                        self.hh_type))
                 # then do nothing
                 yield self.env.timeout((self.run.sim_hours) - self.env.now)  # do nothing more
 
@@ -227,7 +227,7 @@ class Household(object):
     def phone_call_connect(self):
         """Represents whether or not a call by a hh leads to an adviser answering"""
 
-        self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num))
+        self.output_data.append(phone_call_time(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type))
 
         if len(self.run.ad_working) > 0 or len(self.run.adviser_store.items) > 0:
             # call center func is on and there is either an adviser busy or one available (so the lines are open!)
@@ -273,7 +273,7 @@ class Household(object):
             # called when the lines are closed. Will be dealt with by automated line - how does this work?
             """Need to understand how people respond when they do not get through?"""
             self.output_data.append(phone_automated(self.run.run, self.run.reps, self.time_called + self.call_renege,
-                                                    self.id_num))
+                                                    self.id_num, self.hh_type))
             self.resp_level = 0  # automate help may be enough for some but how many?
             self.help_level = 80  # how many call again? 80 means you lose 20% of callers who fail to get through
             yield self.env.process(self.action())

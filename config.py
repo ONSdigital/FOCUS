@@ -3,7 +3,7 @@ import copy
 from shutil import copyfile
 
 '''creates a new json file with new run id's. Bit of a hack here as need to adjust code to go to different trees
- will need something more swish for the final version with GUI.'''
+ will need something more swish for the final version with GUI but this if fine for now.'''
 def generate_config_file(input_data, attribute, new_value): # att/val could be a dict of things to change fed by a nested list
 
     for key, value in input_data.items():
@@ -30,21 +30,24 @@ def generate_output_file(run_data, run, id_num, change, changes, out_file):
     upper = changes['upper']
     step = changes['step']
 
+    for key in run_data["households"]:
+        household_type = key
+
     out_file = open(out_file, "w")
 
     for i in range(lower, upper, step):
         # makes the changes to the files but only for the simple case of 1 type of household!
         # to work for all will need to move this test into generate_config_file perhaps
         # return a false and if detected skip it....
-        if i != run_data['households']['htc1'][change]:
+        if i != run_data['households'][household_type][change]:
             sub_data[str(id_num)] = copy.deepcopy(run_data)
             new_data[str(id_num)] = generate_config_file(sub_data[str(id_num)], change, i)
             print(id_num)
             id_num += 1
         # copies the initial entry but otherwise prevents duplicates
-        elif i == run_data['households']['htc1'][change] and id_num == 1:
-            run_data['households']['htc1']['alt_help'] = run_data['households']['htc1']['default_help'] +\
-                                                         run_data['households']['htc1']['default_resp']
+        elif i == run_data['households'][household_type][change] and id_num == 1:
+            run_data['households'][household_type]['alt_help'] = run_data['households'][household_type]['default_help'] +\
+                                                         run_data['households'][household_type]['default_resp']
             new_data[str(id_num)] = copy.deepcopy(run_data)
 
             id_num += 1
@@ -54,27 +57,26 @@ def generate_output_file(run_data, run, id_num, change, changes, out_file):
     out_file.close()
     return id_num
 
-changes = {'max_visits': {'lower': 1,
-                          'upper': 11,
-                          'step': 1}#,
-           #'FU_start_time': {'lower': 72,
-           #                  'upper': 504,
-           #                  'step': 144},
-           #'default_resp': {'lower': 10,
-           #                  'upper': 95,
-           #                  'step': 10},
-           #'paper_prop': {'lower': 10,
-           #                  'upper': 95,
-           #                  'step': 10},
+# household only
+changes = {'default_resp': {'lower': 20,
+                            'upper': 65,
+                            'step': 5},
+           'paper_prop': {'lower': 20,
+                          'upper': 85,
+                          'step': 5},
+           'dig_assist_flex': {'lower': 20,
+                               'upper': 65,
+                               'step': 5}
+
            }
 
-src_file_name = input('Enter file name: ')
+src_file_name = input('Enter src file name: ')
 if len(src_file_name) < 1:
-    src_file_name = 'default single.JSON'
+    src_file_name = 'single cntl 2017 htc1.JSON'
 
-dst_file_name = input('Enter file name: ')
+dst_file_name = input('Enter dst file name: ')
 if len(dst_file_name) < 1:
-    dst_file_name = 'simple_max_visits.JSON'
+    dst_file_name = 'htc1_2017_CO_5.JSON'
 
 copyfile(src_file_name, dst_file_name)
 

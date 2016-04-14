@@ -129,6 +129,8 @@ def print_resp(run):
                     run.letter_wasted_counter[key],
                     run.letter_received_counter[key],
                     run.letter_response_counter[key],
+                    run.total_travel_dist,
+                    run.total_travel_time,
                     run.seed]
 
             # add code to print to a file instead/as well
@@ -201,7 +203,7 @@ class Coordinator(object):
             """sort what is left by pri - lower numbers first"""
             self.run.visit_list.sort(key=lambda hh: hh.pri, reverse=False)
 
-            print(len(self.run.visit_list), self.env.now)
+            #print(len(self.run.visit_list), self.env.now)
 
             # re-calculate travel time based on households left to visit in area
             try:
@@ -271,6 +273,7 @@ class Adviser(object):
         self.end_date = datetime.datetime.strptime(end_date, '%Y, %m, %d')
         self.ad_type = ad_type
 
+
         self.avail = False
         self.time_answered = 0
         self.length_of_call = 0
@@ -285,9 +288,9 @@ class Adviser(object):
             # do the new stuff
             self.run.env.process(self.set_availability())  # starts the process which runs the visits
 
-        #if self.do_fu_calls is True:
+        if str2bool(self.do_fu_calls) is True:
             # add a switch to turn this on or off
-        run.env.process(self.fu_call())  # starts the process which runs the vi
+            run.env.process(self.fu_call())  # starts the process which runs the vi
 
     def set_availability(self):
 
@@ -331,8 +334,9 @@ class Adviser(object):
 
                 # get the working times for the day for the adviser
                 temp_date = str((self.run.start_date + datetime.timedelta(hours=self.env.now)).date())
-                self.time_start = int(self.run.adviser_dict[temp_date]['time'].split('-')[0])
-                self.time_end = int(self.run.adviser_dict[temp_date]['time'].split('-')[1])
+                #self.time_start = int(self.run.adviser_dict[temp_date]['time'].split('-')[0])
+
+                #self.time_end = int(self.run.adviser_dict[temp_date]['time'].split('-')[1])
 
                 if self.time_start <= self.env.now % 24 < self.time_end and self.avail is True and len(self.district) != 0:
                     # working but check if taking a phone call
@@ -534,6 +538,13 @@ class Enumerator(object):
                 self.run.output_data.append(enu_travel(self.run.run, self.run.reps, self.id_num, self.run.env.now,
                                                        self.total_distance_travelled, self.total_travel_time))
 
+                ####### more temp output to calc total travel time and dist?
+
+                self.run.total_travel_dist += self.distance_travelled
+                self.run.total_travel_time += self.travel_time
+
+                #######
+
                 self.run.output_data.append(visit(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
                                                   current_hh.hh_type))
 
@@ -542,6 +553,10 @@ class Enumerator(object):
                     # add record of a visit that was not required but otherwise carry on
                     self.run.output_data.append(visit_unnecessary(self.run.run, self.run.reps, self.run.env.now,
                                                                   current_hh.id_num, current_hh.hh_type))
+                if current_hh.resp_sent is True:
+                    # add record of a visit that was not required but otherwise carry on
+                    self.run.output_data.append(visit_wasted(self.run.run, self.run.reps, self.run.env.now,
+                                                             current_hh.id_num, current_hh.hh_type))
 
                 hh_in = False  # contact rate
 
@@ -610,6 +625,8 @@ class Enumerator(object):
                 # allows hh to use paper to respond
                 """how long to get to the point of letting them have paper?"""
                 yield self.run.env.timeout(0.2 + self.travel_time)
+                self.run.output_data.append(visit_paper(self.run.run, self.run.reps, self.run.env.now, current_hh.id_num,
+                                                        current_hh.hh_type))
                 current_hh.paper_allowed = True
                 current_hh.resp_level = current_hh.decision_level(self.input_data[current_hh.hh_type], "resp")
                 current_hh.help_level = current_hh.resp_level + current_hh.decision_level(self.input_data[current_hh.hh_type], "help")
@@ -708,6 +725,8 @@ class Enumerator(object):
             return False
 
 
+def str2bool(value):
+    return str(value).lower() in ("True", "true", "1")
 
 
 

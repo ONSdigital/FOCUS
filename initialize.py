@@ -67,6 +67,8 @@ class Run(object):
 
         #################################################################################
 
+        self.total_travel_dist = 0
+        self.total_travel_time = 0
         self.enu_avail = []  # list use to hold enumerators instances when available for work
         self.enu_working = []  # list to store instances of working enumerators
         self.ad_avail = []
@@ -77,10 +79,10 @@ class Run(object):
         self.visit_list = []
 
         # below can be used turn functionality off regardless of contents of configuration file
-        self.FU_on = False
-        self.call_FU_on = False
+        self.FU_on = True
+        #self.call_FU_on = False
         self.advisers_on = False
-        self.letters_on = False
+        self.letters_on = True
 
         self.create_households(self.input_data['households'])
 
@@ -101,6 +103,7 @@ class Run(object):
             self.start_letters(self.input_data["households"])
 
         # and create some some simple (and temp) output
+       # self.resp_day(744)
         self.resp_day(self.sim_hours)
 
     """creates the households and calculates the initial hh separation"""
@@ -148,7 +151,7 @@ class Run(object):
     """create instances of an enumerators"""
     def create_enumerators(self, input_data, input_key):
 
-        id_num = 0
+        id_num = self.total_enu_instances
         for key, value in input_data.items():
             if isinstance(value, dict):
 
@@ -168,15 +171,15 @@ class Run(object):
                                                             self.input_data['households'],  # households to visit
                                                             self.FU_on))
                     id_num += 1
-                    self.total_enu_instances = id_num
+                    self.total_enu_instances += 1
 
         return input_key
 
     def create_advisers(self, input_data, input_key):
 
         # create the advisers - different types
-        id_ad_num = 0
-        id_ad_chat_num = 0
+        id_ad_num = self.total_ad_instances
+        id_ad_chat_num = self.total_ad_instances
         for key, value in input_data.items():
             if isinstance(value, dict):
 
@@ -193,7 +196,7 @@ class Run(object):
                                                         input_key,
                                                         input_data["FU_on"]))
                     id_ad_num += 1
-                    self.total_ad_instances = id_ad_num
+                    self.total_ad_instances += 1
 
             elif key == "number" and ("web" in input_key) == True:
                 for i in range(int(input_data["number"])):
@@ -206,7 +209,7 @@ class Run(object):
                                                                  input_data["end_date"],
                                                                  input_key))
                     id_ad_chat_num += 1
-                    self.total_ad_chat_instances = id_ad_chat_num
+                    self.total_ad_chat_instances += 1
 
 
         return input_key

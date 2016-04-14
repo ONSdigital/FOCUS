@@ -1,4 +1,270 @@
 {
+  "1": {
+    "district": "UK average",
+    "district_area": 654,
+    "coordinator_update": 11,
+    "description": "High level simplified representation of htc 1 areas in Census 2011",
+    "start_date": "2011, 3, 7, 9, 0, 0",
+    "end_date": "2011, 5, 6, 0, 0, 0",
+    "replications": 1,
+    "collector": {
+      "early": {
+        "number": 12,
+        "travel_speed": 5,
+        "start_date": "2011, 3, 21",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      },
+       "late": {
+        "number": 69,
+        "travel_speed": 5,
+        "start_date": "2011, 4, 6",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 4,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      }
+
+    },
+    "households": {
+      "htc1": {
+        "default_help": 0,
+        "call_renege_lower": 0.05,
+        "call_renege_upper": 0.25,
+        "call_conversion_rate": 35,
+        "dig_assist_eff": 0,
+        "paper_prop": 86,
+        "allow_paper": 1,
+        "number": 101682,
+        "FU_start_time": 336,
+        "dig_assist_flex": 0,
+        "alt_help": 55,
+        "priority": 0,
+        "max_visits": 15,
+        "paper_after_max_visits": 0,
+        "alt_resp": 0,
+        "default_resp": 89.5,
+        "contact_rate": 30,
+        "conversion_rate": 35,
+        "FU_on": 1,
+        "send_incomplete": 0,
+        "beta_dist": [0.1,2],
+        "letter_phases": {
+          "reminder": {
+            "date":  "2011, 3, 12, 9, 0, 0",
+            "delay": 48,
+            "effect": 5,
+            "targeted": 1
+          }
+        }
+      }
+    }
+  },
+  "2": {
+    "district": "UK average",
+    "district_area": 654,
+    "coordinator_update": 11,
+    "description": "High level simplified representation of htc 2 areas in Census 2011",
+    "start_date": "2011, 3, 7, 9, 0, 0",
+    "end_date": "2011, 5, 6, 0, 0, 0",
+    "replications": 1,
+    "collector": {
+      "early": {
+        "number": 15,
+        "travel_speed": 5,
+        "start_date": "2011, 3, 21",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      },
+       "late": {
+        "number": 84,
+        "travel_speed": 5,
+        "start_date": "2011, 4, 6",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 4,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      }
+
+    },
+    "households": {
+      "htc2": {
+        "default_help": 0,
+        "call_renege_lower": 0.05,
+        "call_renege_upper": 0.25,
+        "call_conversion_rate": 33,
+        "dig_assist_eff": 0,
+        "paper_prop": 85,
+        "allow_paper": 1,
+        "number": 101682,
+        "FU_start_time": 336,
+        "dig_assist_flex": 0,
+        "alt_help": 55,
+        "priority": 0,
+        "max_visits": 15,
+        "paper_after_max_visits": 0,
+        "alt_resp": 0,
+        "default_resp": 85,
+        "contact_rate": 29,
+        "conversion_rate": 33,
+        "FU_on": 1,
+        "send_incomplete": 0,
+        "beta_dist": [0.14,2],
+        "letter_phases": {
+        }
+      }
+    }
+  },
+  "3": {
+    "district": "UK average",
+    "district_area": 163,
+    "coordinator_update": 11,
+    "description": "High level simplified representation of htc 3 areas in Census 2011",
+    "start_date": "2011, 3, 7, 9, 0, 0",
+    "end_date": "2011, 5, 6, 0, 0, 0",
+    "replications": 1,
+    "collector": {
+      "early": {
+        "number": 7,
+        "travel_speed": 5,
+        "start_date": "2011, 3, 21",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      },
+       "late": {
+        "number": 38,
+        "travel_speed": 5,
+        "start_date": "2011, 4, 6",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 4,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      }
+
+    },
+    "households": {
+      "htc3": {
+        "default_help": 0,
+        "call_renege_lower": 0.05,
+        "call_renege_upper": 0.25,
+        "call_conversion_rate": 31,
+        "dig_assist_eff": 0,
+        "paper_prop": 82,
+        "allow_paper": 1,
+        "number": 25421,
+        "FU_start_time": 336,
+        "dig_assist_flex": 0,
+        "alt_help": 55,
+        "priority": 0,
+        "max_visits": 15,
+        "paper_after_max_visits": 0,
+        "alt_resp": 0,
+        "default_resp": 78.5,
+        "contact_rate": 25,
+        "conversion_rate": 31,
+        "FU_on": 1,
+        "send_incomplete": 0,
+        "beta_dist": [0.2,2],
+        "letter_phases": {
+        }
+      }
+    }
+  },
+  "4": {
+    "district": "UK average",
+    "district_area": 130,
+    "coordinator_update": 11,
+    "description": "High level simplified representation of htc 4 areas in Census 2011",
+    "start_date": "2011, 3, 7, 9, 0, 0",
+    "end_date": "2011, 5, 6, 0, 0, 0",
+    "replications": 1,
+    "collector": {
+      "early": {
+        "number": 8,
+        "travel_speed": 5,
+        "start_date": "2011, 3, 21",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      },
+       "late": {
+        "number": 45,
+        "travel_speed": 5,
+        "start_date": "2011, 4, 6",
+        "end_date": "2011, 5, 6",
+        "start_time": 12.5,
+        "end_time": 16
+      }
+    },
+    "advisers": {
+      "telephone": {
+        "number": 4,
+        "start_date": "2011, 3, 8",
+        "end_date": "2011, 4, 5",
+        "start_time": 9,
+        "end_time": 17,
+        "FU_on": 0
+      }
+
+    },
+    "households": {
+      "htc4": {
+        "default_help": 0,
+        "call_renege_lower": 0.05,
+        "call_renege_upper": 0.25,
+        "call_conversion_rate": 27,
+        "dig_assist_eff": 0,
+        "paper_prop": 78,
+        "allow_paper": 1,
+        "number": 20337,
+        "FU_start_time": 336,
+        "dig_assist_flex": 0,
+        "alt_help": 55,
+        "priority": 0,
+        "max_visits": 15,
+        "paper_after_max_visits": 0,
+        "alt_resp": 0,
+        "default_resp": 73,
+        "contact_rate": 22,
+        "conversion_rate": 27,
+        "FU_on": 1,
+        "send_incomplete": 0,
+        "beta_dist": [0.245,2],
+        "letter_phases": {
+        }
+      }
+    }
+  },
   "5": {
     "district": "UK average",
     "district_area": 32.7,
@@ -42,8 +308,8 @@
         "call_renege_upper": 0.25,
         "call_conversion_rate": 29,
         "dig_assist_eff": 0,
-        "paper_prop": 24,
-        "allow_paper": 0,
+        "paper_prop": 76,
+        "allow_paper": 1,
         "number": 5085,
         "FU_start_time": 336,
         "dig_assist_flex": 0,
@@ -57,14 +323,8 @@
         "conversion_rate": 29,
         "FU_on": 1,
         "send_incomplete": 0,
-        "beta_dist": [0.255,3],
+        "beta_dist": [0.255,2],
         "letter_phases": {
-          "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 5,
-            "targeted": 1
-          }
         }
       }
     }
