@@ -8,10 +8,10 @@
     "end_date": "2017, 5, 17, 0, 0, 0",
     "replications": 10,
     "collector": {
-       "walking": {
-        "number": 10,
+      "walking": {
+        "number": 15,
         "travel_speed": 5,
-        "start_date": "2017, 4, 24",
+        "start_date": "2017, 4, 19",
         "end_date": "2017, 5, 17",
         "start_time": 12.5,
         "end_time": 16
@@ -26,7 +26,6 @@
         "end_time": 17,
         "FU_on": 0
       }
-
     },
     "households": {
       "htc4": {
@@ -38,32 +37,41 @@
         "paper_prop": 20,
         "allow_paper": 0,
         "number": 5000,
-        "FU_start_time": 864,
+        "FU_start_time": 744,
         "dig_assist_flex": 20,
         "alt_help": 55,
         "priority": 0,
         "max_visits": 5,
-        "paper_after_max_visits": 0,
+        "paper_after_max_visits": 1,
         "alt_resp": 0,
         "default_resp": 20,
         "contact_rate": 22,
         "conversion_rate": 27,
         "FU_on": 1,
         "send_incomplete": 0,
-        "beta_dist": [0.99, 2.2],
+        "beta_dist": [
+          0.99,
+          2.2
+        ],
         "letter_phases": {
           "1st reminder": {
-            "date":  "2017, 4, 11, 9, 0, 0",
+            "date": "2017, 4, 6, 9, 0, 0",
+            "delay": 48,
+            "effect": 1,
+            "targeted": 1
+          },
+          "2nd reminder": {
+            "date": "2017, 4, 15, 9, 0, 0",
+            "delay": 48,
+            "effect": 1,
+            "targeted": 1
+          },
+          "3rd reminder": {
+            "date": "2017, 4, 25, 9, 0, 0",
             "delay": 48,
             "effect": 1,
             "targeted": 1
           }
-        },
-           "2nd reminder": {
-            "date":  "2017, 4, 25, 9, 0, 0",
-            "delay": 48,
-            "effect": 1,
-            "targeted": 1
         }
       }
     }

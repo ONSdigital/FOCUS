@@ -26,6 +26,7 @@ letter_response = namedtuple('letter_response', ['run', 'reps', 'Time', 'Househo
 paper_requested = namedtuple('paper_requested', ['run', 'reps', 'Time', 'Household', 'Type'])
 phone_response = namedtuple('phone_response', ['run', 'reps', 'Time', 'Household', 'Type'])
 phone_automated = namedtuple('phone_automated', ['run', 'reps', 'Time', 'Household', 'Type'])
+pq_received = namedtuple('pq_received', ['run', 'reps', 'Time', 'Household', 'hh_type', 'Type'])
 
 
 class Household(object):
@@ -382,15 +383,21 @@ class Household(object):
 
             yield self.env.timeout((self.run.sim_hours) - self.env.now)  # hh does no more (without intervention)
 
-    def rec_letter(self, letter_type, effect):
+    def rec_letter(self, letter_type, effect, pq):
         """represents the hh receiving a letter"""
 
         self.letter_count += 1
+
+        # counter if pq sent
+        if pq is True:
+            self.output_data.append(pq_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
+            self.run.pq_sent = 1
 
         if self.resp_sent is True:
             # record wasted letter but otherwise do nothing more
             self.output_data.append(letter_wasted(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
             yield self.env.timeout(0)
+
         elif self.resp_sent is False and self.resp_type == 'digital':
             self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
 
@@ -399,6 +406,16 @@ class Household(object):
             self.resp_level = effect
             self.help_level = 0
             self.status = "received letter"
+
+            yield self.env.process(self.action())
+
+        elif self.resp_sent is False and self.resp_type == 'paper' and pq is True:
+            self.status = "received letter"
+            self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
+            self.paper_allowed = True
+
+            self.resp_level = self.decision_level(self.input_data, 'resp')
+            self.help_level = self.resp_level + self.decision_level(self.input_data, 'help')
 
             yield self.env.process(self.action())
 

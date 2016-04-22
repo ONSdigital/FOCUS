@@ -46,6 +46,7 @@ def print_resp(run):
             run.letter_received_counter[hh] = 0
             run.letter_response_counter[hh] = 0
             run.phone_response_counter[hh] = 0
+            run.pq_sent_counter[hh] = 0
 
     for item in run.output_data:
         if type(item).__name__ == 'Responded' and item[0] == run.run and item[1] == run.reps:
@@ -82,6 +83,8 @@ def print_resp(run):
             run.letter_response_counter[item[4]] += 1
         elif type(item).__name__ == 'phone_response' and item[0] == run.run and item[1] == run.reps:
             run.phone_response_counter[item[4]] += 1
+        elif type(item).__name__ == 'pq_received' and item[0] == run.run and item[1] == run.reps:
+            run.pq_sent_counter[item[4]] += 1
 
     print(run.run, run.reps)
 
@@ -98,6 +101,7 @@ def print_resp(run):
                     (run.input_data['district_area']),
                     (run.input_data['households'][key]['allow_paper']),
                     (run.input_data['households'][key]['paper_after_max_visits']),
+                    run.pq_sent,  # simple flag to mark if pq sent as letter
                     (run.input_data['households'][key]['FU_on']),
                     (run.input_data['households'][key]['default_resp']),
                     (run.input_data['households'][key]['paper_prop']),
@@ -129,6 +133,7 @@ def print_resp(run):
                     run.letter_wasted_counter[key],
                     run.letter_received_counter[key],
                     run.letter_response_counter[key],
+                    run.pq_sent_counter[key],
                     run.total_travel_dist,
                     run.total_travel_time,
                     run.seed]
@@ -153,9 +158,9 @@ def fu_startup(run, env, district, update_freq):
 
 
 # a helper process that creates an instance of a letter phase class
-def letter_startup(run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay):
+def letter_startup(run, env, district, output_data, sim_hours, input_data, letter_name, targets):
 
-    LetterPhase(run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay)
+    LetterPhase(run, env, district, output_data, sim_hours, input_data, letter_name, targets)
     yield env.timeout(0)
 
 
@@ -220,18 +225,18 @@ class Coordinator(object):
 
 
 class LetterPhase(object):
-    def __init__(self, run, env, district, output_data, sim_hours, targeted, letter_type, effect, targets, delay):
+    def __init__(self, run, env, district, output_data, sim_hours, input_data, letter_name, targets):
         self.run = run
         self.env = env
         self.district = district
-        #self.letter_delay = 72
         self.output_data = output_data
         self.sim_hours = sim_hours
-        self.targets = targets.split(',')
-        self.delay = delay
-        self.letter_type = letter_type
-        self.effect = effect
-        self.targeted = targeted
+        self.targets = targets
+        self.delay = input_data['delay']
+        self.letter_type = letter_name
+        self.effect = input_data['effect']
+        self.targeted = str2bool(input_data["targeted"])
+        self.pq = str2bool(input_data['pq'])
 
         env.process(self.fu_letter())
 
@@ -241,20 +246,20 @@ class LetterPhase(object):
         for household in self.district:
             if self.targeted is True and household.resp_rec is False and household.hh_type in self.targets:
                 # send a letter
-                self.env.process(self.co_send_letter(household, self.letter_type, self.effect, self.delay))
+                self.env.process(self.co_send_letter(household, self.letter_type, self.effect, self.delay, self.pq))
             elif self.targeted is False and household.hh_type in self.targets:
-                self.env.process(self.co_send_letter(household, self.letter_type, self.effect, self.delay))
+                self.env.process(self.co_send_letter(household, self.letter_type, self.effect, self.delay, self.pq))
             # add an option to send to all ina group whether replied or not
                 """what is the overhead, if any, of sending only to non responders?"""
 
         # then pause until the end
         yield self.env.timeout((self.sim_hours) - self.env.now)
 
-    def co_send_letter(self, household, letter_type, effect, delay):
+    def co_send_letter(self, household, letter_type, effect, delay, pq):
         self.output_data.append(letter_sent(self.run.run, self.run.reps, self.env.now, household.id_num, household.hh_type, letter_type))
         # send a letter which will take an amount of time to be received (which could vary if required?)
         # then the hh needs to do something...at the right time
-        start_delayed(self.env, household.rec_letter(letter_type, effect), delay)
+        start_delayed(self.env, household.rec_letter(letter_type, effect, pq), delay)
         yield self.env.timeout(0)
 
 

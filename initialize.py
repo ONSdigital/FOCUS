@@ -33,6 +33,7 @@ class Run(object):
         self.total_enu_instances = 0
         self.total_ad_instances = 0
         self.total_ad_chat_instances = 0
+        self.pq_sent = 0  # a flag to record if a pq was sent as a letter
 
         # temp only for simple output spreadsheet
         self.letter_sent = 0
@@ -64,6 +65,7 @@ class Run(object):
         self.letter_received_counter = {}
         self.letter_response_counter = {}
         self.phone_response_counter = {}
+        self.pq_sent_counter = {}
 
         #################################################################################
 
@@ -241,11 +243,9 @@ class Run(object):
                                                                       self.district,
                                                                       self.output_data,
                                                                       self.sim_hours,
-                                                                      str2bool(letter_phases[letter]["targeted"]),
+                                                                      letter_phases[letter],
                                                                       letter,
-                                                                      letter_phases[letter]["effect"],
-                                                                      hh,
-                                                                      letter_phases[letter]["delay"]),
+                                                                      hh),
                                       self.letter_sent)
                     else:
                         self.env.process(census.letter_startup(self,
@@ -253,11 +253,9 @@ class Run(object):
                                                                self.district,
                                                                self.output_data,
                                                                self.sim_hours,
-                                                               str2bool(letter_phases[letter]["targeted"]),
+                                                               letter_phases[letter],
                                                                letter,
-                                                               letter_phases[letter]["effect"],
-                                                               hh,
-                                                               letter_phases[letter]["delay"]))
+                                                               hh))
 
     def resp_day(self, delay):
 
