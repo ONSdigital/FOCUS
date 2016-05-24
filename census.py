@@ -88,7 +88,6 @@ def print_resp(run):
 
     print(run.run, run.reps)
 
-
     for key, value in sorted(run.hh_resp.items()):  # sort the dictionary for output purposes
         print(key, value/run.hh_count[key])
 

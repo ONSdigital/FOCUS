@@ -64,7 +64,8 @@
             "date":  "2011, 3, 12, 9, 0, 0",
             "delay": 48,
             "effect": 5,
-            "targeted": 1
+            "targeted": 1,
+            "pq": 0
           }
         }
       }
@@ -131,6 +132,13 @@
         "send_incomplete": 0,
         "beta_dist": [0.14,2],
         "letter_phases": {
+          "reminder": {
+            "date":  "2011, 3, 12, 9, 0, 0",
+            "delay": 48,
+            "effect": 4,
+            "targeted": 1,
+            "pq": 0
+          }
         }
       }
     }
@@ -196,6 +204,13 @@
         "send_incomplete": 0,
         "beta_dist": [0.2,2],
         "letter_phases": {
+          "reminder": {
+            "date":  "2011, 3, 12, 9, 0, 0",
+            "delay": 48,
+            "effect": 3,
+            "targeted": 1,
+            "pq": 0
+          }
         }
       }
     }
@@ -261,6 +276,13 @@
         "send_incomplete": 0,
         "beta_dist": [0.245,2],
         "letter_phases": {
+          "reminder": {
+            "date":  "2011, 3, 12, 9, 0, 0",
+            "delay": 48,
+            "effect": 2,
+            "targeted": 1,
+            "pq": 0
+          }
         }
       }
     }
@@ -325,6 +347,13 @@
         "send_incomplete": 0,
         "beta_dist": [0.255,2],
         "letter_phases": {
+          "reminder": {
+            "date":  "2011, 3, 12, 9, 0, 0",
+            "delay": 48,
+            "effect": 1,
+            "targeted": 1,
+            "pq": 0
+          }
         }
       }
     }

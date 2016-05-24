@@ -1,7 +1,7 @@
 {
   "1": {
     "district": "UK average",
-    "district_area": 32.2,
+    "district_area": 79.4,
     "coordinator_update": 1,
     "description": "High level simplified representation of htc 2 areas in 2017 test",
     "start_date": "2017, 3, 19, 9, 0, 0",
@@ -9,7 +9,7 @@
     "replications": 10,
     "collector": {
        "walking": {
-        "number": 15,
+        "number": 12,
         "travel_speed": 5,
         "start_date": "2017, 4, 19",
         "end_date": "2017, 5, 17",
@@ -66,12 +66,12 @@
             "targeted": 1,
             "pq": 0
           },
-          "paper questionnaire": {
+          "3rd reminder": {
             "date":  "2017, 4, 25, 9, 0, 0",
             "delay": 48,
             "effect": 1,
             "targeted": 1,
-            "pq": 1
+            "pq": 0
           }
         }
       }

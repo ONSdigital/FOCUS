@@ -19,7 +19,7 @@ logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG,)
 file_name = input('Enter input file name: ')
 if len(file_name) < 1:
     #file_name = 'default single census 2011.JSON'
-    file_name = 'single cntl 2017 htc1.JSON'
+    file_name = 'default single census 2011.JSON'
 
 # loads the selected config file
 try:
@@ -44,7 +44,7 @@ names = ['run', 'rep', 'number', 'type', 'area', 'allow paper', 'paper_after_max
 raw_output = input('Enter output file name: ')
 if len(raw_output) < 1:
     #raw_output = 'simple_test.csv'
-    raw_output = 'cntl 2017 htc1.csv'
+    raw_output = 'default.csv'
 
 try:
     output_file_path = os.getcwd() + '/outputs/' + raw_output
@@ -96,15 +96,15 @@ for run in list_of_runs:
             rep += 1
 
         '''Event outputs'''
-        output_data.sort(key=lambda x: type(x).__name__)
+        #output_data.sort(key=lambda x: type(x).__name__)
 
-        for k, g in groupby(output_data, lambda x: type(x).__name__):
-            with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
-                csv_output = csv.writer(f_output)
-                rows = list(g)
-                csv_output.writerow(list(rows[0]._fields))
-                for row in rows:
-                    csv_output.writerow(list(row))
+        #for k, g in groupby(output_data, lambda x: type(x).__name__):
+            #with open('outputs/{}.csv'.format(k), 'w', newline='') as f_output:  # use a for append
+            #    csv_output = csv.writer(f_output)
+            #    rows = list(g)
+           #     csv_output.writerow(list(rows[0]._fields))
+           #     for row in rows:
+           #         csv_output.writerow(list(row))
 
     except (StopIteration, KeyError, AttributeError):
         logging.exception('Exception in run {0}, with seed {1}'.format(run, seed))

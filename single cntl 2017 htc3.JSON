@@ -1,7 +1,7 @@
 {
   "1": {
     "district": "UK average",
-    "district_area": 32.2,
+    "district_area": 79.4,
     "coordinator_update": 1,
     "description": "High level simplified representation of htc 3 areas in 2017 test",
     "start_date": "2017, 3, 19, 9, 0, 0",
@@ -9,7 +9,7 @@
     "replications": 10,
     "collector": {
        "walking": {
-        "number": 15,
+        "number": 12,
         "travel_speed": 5,
         "start_date": "2017, 4, 19",
         "end_date": "2017, 5, 17",
@@ -43,7 +43,7 @@
         "alt_help": 55,
         "priority": 0,
         "max_visits": 5,
-        "paper_after_max_visits": 1,
+        "paper_after_max_visits": 0,
         "alt_resp": 0,
         "default_resp": 20,
         "contact_rate": 25,
@@ -56,19 +56,22 @@
             "date":  "2017, 4, 6, 9, 0, 0",
             "delay": 48,
             "effect": 1,
-            "targeted": 1
+            "targeted": 1,
+            "pq": 0
           },
           "2nd reminder": {
             "date":  "2017, 4, 15, 9, 0, 0",
             "delay": 48,
             "effect": 1,
-            "targeted": 1
+            "targeted": 1,
+            "pq": 0
           },
           "3rd reminder": {
             "date":  "2017, 4, 25, 9, 0, 0",
             "delay": 48,
             "effect": 1,
-            "targeted": 1
+            "targeted": 1,
+            "pq": 0
           }
         }
       }

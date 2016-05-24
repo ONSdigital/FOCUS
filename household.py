@@ -420,12 +420,12 @@ class Household(object):
             yield self.env.process(self.action())
 
         else:
-            # must be paper so do nothing more?
+            # must be paper pref so do nothing more?
             """what do those hh who prefer paper who get a letter do?"""
             # then back to action with the updated values
             self.output_data.append(letter_received(self.run.run, self.run.reps, self.env.now, self.id_num, self.hh_type, letter_type))
             self.resp_level = 0
-            self.help_level = 0 #effect
+            self.help_level = 0
             self.status = "received letter"
 
             yield self.env.process(self.action())
