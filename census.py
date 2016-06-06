@@ -206,6 +206,7 @@ class Coordinator(object):
 
             """sort what is left by pri - lower numbers first"""
             self.run.visit_list.sort(key=lambda hh: hh.pri, reverse=False)
+            print(len(self.run.visit_list))
 
             #print(len(self.run.visit_list), self.env.now)
 

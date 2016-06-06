@@ -2,7 +2,7 @@
   "1": {
     "district": "UK average",
     "district_area": 654,
-    "coordinator_update": 11,
+    "coordinator_update": 7,
     "description": "High level simplified representation of htc 1 areas in Census 2011",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 5, 6, 0, 0, 0",
@@ -61,9 +61,9 @@
         "beta_dist": [0.1,2],
         "letter_phases": {
           "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
+            "date":  "2011, 4, 26, 9, 0, 0",
             "delay": 48,
-            "effect": 5,
+            "effect": 1,
             "targeted": 1,
             "pq": 0
           }
@@ -74,7 +74,7 @@
   "2": {
     "district": "UK average",
     "district_area": 654,
-    "coordinator_update": 11,
+    "coordinator_update": 7,
     "description": "High level simplified representation of htc 2 areas in Census 2011",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 5, 6, 0, 0, 0",
@@ -133,9 +133,9 @@
         "beta_dist": [0.14,2],
         "letter_phases": {
           "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
+            "date":  "2011, 4, 26, 9, 0, 0",
             "delay": 48,
-            "effect": 4,
+            "effect": 1,
             "targeted": 1,
             "pq": 0
           }
@@ -146,7 +146,7 @@
   "3": {
     "district": "UK average",
     "district_area": 163,
-    "coordinator_update": 11,
+    "coordinator_update": 7,
     "description": "High level simplified representation of htc 3 areas in Census 2011",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 5, 6, 0, 0, 0",
@@ -197,7 +197,7 @@
         "max_visits": 15,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 78.5,
+        "default_resp": 78,
         "contact_rate": 25,
         "conversion_rate": 31,
         "FU_on": 1,
@@ -205,9 +205,9 @@
         "beta_dist": [0.2,2],
         "letter_phases": {
           "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
+            "date":  "2011, 4, 26, 9, 0, 0",
             "delay": 48,
-            "effect": 3,
+            "effect": 2,
             "targeted": 1,
             "pq": 0
           }
@@ -218,7 +218,7 @@
   "4": {
     "district": "UK average",
     "district_area": 130,
-    "coordinator_update": 11,
+    "coordinator_update": 7,
     "description": "High level simplified representation of htc 4 areas in Census 2011",
     "start_date": "2011, 3, 7, 9, 0, 0",
     "end_date": "2011, 5, 6, 0, 0, 0",
@@ -269,7 +269,7 @@
         "max_visits": 15,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 73,
+        "default_resp": 71,
         "contact_rate": 22,
         "conversion_rate": 27,
         "FU_on": 1,
@@ -277,7 +277,7 @@
         "beta_dist": [0.245,2],
         "letter_phases": {
           "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
+            "date":  "2011, 4, 26, 9, 0, 0",
             "delay": 48,
             "effect": 2,
             "targeted": 1,
@@ -340,7 +340,7 @@
         "max_visits": 15,
         "paper_after_max_visits": 0,
         "alt_resp": 0,
-        "default_resp": 69,
+        "default_resp": 66,
         "contact_rate": 17,
         "conversion_rate": 29,
         "FU_on": 1,
@@ -348,7 +348,7 @@
         "beta_dist": [0.255,2],
         "letter_phases": {
           "reminder": {
-            "date":  "2011, 3, 12, 9, 0, 0",
+            "date":  "2011, 4, 26, 9, 0, 0",
             "delay": 48,
             "effect": 1,
             "targeted": 1,

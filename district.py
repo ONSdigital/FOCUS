@@ -1,12 +1,28 @@
 """a stub for the district class"""
+import householdv2
 
 
 class District(object):
 
-    def __init__(self, run, env, input_data):
-        self.run = run
+    def __init__(self, rnd, env, name, input_data):
+        self.rnd = rnd
         self.env = env
+        self.name = name
         self.input_data = input_data
+
+        self.households = []
+
+        self.create_households()
+
+    def create_households(self):
+
+        for hh in self.input_data['households']:
+
+            for i in range(self.input_data['households'][hh]['number']):
+
+                print(hh)
+                # create instance of HH class
+                self.households.append(householdv2.Household(self.rnd, self.env, hh, self.input_data['households'][hh]))
 
 
         '''each instance of a District contains 1 coordinator,
