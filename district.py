@@ -4,7 +4,8 @@ import householdv2
 
 class District(object):
 
-    def __init__(self, rnd, env, name, input_data):
+    def __init__(self, run, rnd, env, name, input_data):
+        self.run = run
         self.rnd = rnd
         self.env = env
         self.name = name
