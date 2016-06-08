@@ -1,11 +1,13 @@
-"""run class is the instance that contains all that is required for current run of simulation"""
+"""rep class is the instance that contains all that is required for current rep of simulation"""
 import district
+import simpy
+import censusv2
 
 
-class Run(object):
-    """contains the methods and data for an individual run"""
+class Rep(object):
+    """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, rnd, run, reps, seed):
+    def __init__(self, env, input_data, rnd, reps, seed):
 
         # values fed into class
         self.env = env
@@ -18,58 +20,34 @@ class Run(object):
         self.total_ad_instances = 0
         self.total_web_chat_instances = 0
         self.districts = []  # list containing each instance of the district class
-        self.ad_avail = []
+        self.ad_avail = []  # list of all teh available advisers
 
         # methods to run on start
-        self.create_advisers(self.input_data, "")
+        self.total_ad_instances = self.input_data['advisers']['number']
+        if self.total_ad_instances > 0:
+            self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
+
+        # create common resources
+        self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
+
+        # create districts
         self.create_districts()
 
     def create_advisers(self, input_data, input_key):
 
         # create the advisers - both web and phone
-        id_ad_num = self.total_ad_instances
-        id_web_chat_num = self.total_ad_instances
-        for key, value in input_data.items():
-            if isinstance(value, dict):
+        id_ad_num = 0
+        for i in range(int(input_data["number"])):
 
-                self.create_advisers(value, key)
+            print('adviser created')
+            self.ad_avail.append(censusv2.Adviser(self))
 
-            elif key == "number" and ("telephone" in input_key) == True:
-                for i in range(int(input_data["number"])):
-
-                    print('ad created')
-
-                    #self.ad_avail.append(census.Adviser(self,
-                    #                                    id_ad_num,
-                    #                                    input_data["start_time"],
-                    #                                    input_data["end_time"],
-                    #                                    input_data["start_date"],
-                    #                                    input_data["end_date"],
-                    #                                    input_key,
-                    #                                    input_data["FU_on"]))
-                    id_ad_num += 1
-                    self.total_ad_instances += 1
-
-            elif key == "number" and ("web" in input_key) == True:
-                for i in range(int(input_data["number"])):
-                    print('web chat created')
-
-                    #self.ad_chat_avail.append(census.AdviserChat(self,
-                    #                                             id_ad_chat_num,
-                    #                                             input_data["start_time"],
-                    #                                             input_data["end_time"],
-                    #                                             input_data["start_date"],
-                    #                                             input_data["end_date"],
-                    #                                             input_key))
-                    id_web_chat_num += 1
-                    self.total_web_chat_instances += 1
-
-        return input_key
+            id_ad_num += 1
 
     def create_districts(self):
 
-        for dist in self.input_data['districts']:
+        for distr in self.input_data['districts']:
 
-            print(dist)
+            print(distr)
 
-            self.districts.append(district.District(self, self.rnd, self.env, dist, self.input_data['districts'][dist]))
+            self.districts.append(district.District(self, self.rnd, self.env, distr, self.input_data['districts'][distr]))

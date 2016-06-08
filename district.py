@@ -1,19 +1,30 @@
 """a stub for the district class"""
 import householdv2
+import sys
+import censusv2
 
 
 class District(object):
 
-    def __init__(self, run, rnd, env, name, input_data):
-        self.run = run
+    def __init__(self, rep, rnd, env, name, input_data):
+        # values fed into class
+        self.rep = rep
         self.rnd = rnd
         self.env = env
         self.name = name
         self.input_data = input_data
 
+        # list of households in the district
         self.households = []
 
+        # create the households that will exist in the district
         self.create_households()
+
+        # create action plans for the district
+        self.action_plan = self.create_action_plans()
+
+        # create Census Officers that will work in the district
+        self.create_co(self.input_data["census officer"], "")
 
     def create_households(self):
 
@@ -23,28 +34,37 @@ class District(object):
 
                 print(hh)
                 # create instance of HH class
-                self.households.append(householdv2.Household(self.rnd, self.env, hh, self.input_data['households'][hh]))
+                self.households.append(householdv2.Household(self.rep,
+                                                             self.rnd,
+                                                             self.env,
+                                                             hh,
+                                                             self.input_data['households'][hh]))
 
+    def create_action_plans(self):
 
-        '''each instance of a District contains 1 coordinator,
-        a number of households
-        and a set of enumerators - though schedules and numbers would be set via a default at a higher level
+        return censusv2.ActionPlan(self.env, self.name, self.households)
 
-        call center staff are shared across  districts so those instances are generated elsewhere
+    def create_co(self, input_data, input_key):
 
-        default letters at higher level and ue at district level unless overridden
+        id_num = 0
+        for key, value in input_data.items():
+            if isinstance(value, dict):
 
+                self.create_co(value, key)
 
-        so:
+            else:
+                try:
+                    if 'number' in input_data:
+                        for i in range(int(input_data["number"])):
+                            id_num += 1
+                            print('CO created in ' + str(self.name))
+                            # create CO
+                            censusv2.CensusOfficer(self.env, self, self.action_plan)
 
-        1) Create a run instance (effectively the areas to be represented)
-        2) Create resources to be shared across the UK - Advisers, paper?
-        3) Create each district object
-        4) which creates its HH
-        5) and ts own coordinator who in turn creates the enumerators
+                except IOError as e:
+                    print(e)
+                    sys.exit()
+                break
 
-
-        '''
-
-
+        return input_key
 
