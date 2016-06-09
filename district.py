@@ -34,14 +34,18 @@ class District(object):
 
             for i in range(self.input_data['households'][hh]['number']):
 
-                print(hh)
+
                 # create instance of HH class
                 self.households.append(householdv2.Household(self.rep,
                                                              self.rnd,
                                                              self.env,
+                                                             self,
+                                                             self.rep.total_hh,
                                                              hh,
                                                              self.input_data['households'][hh],
                                                              self.output_data))
+
+                self.rep.total_hh += 1
 
     def create_action_plans(self):
 

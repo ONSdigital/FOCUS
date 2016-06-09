@@ -23,8 +23,8 @@ class Rep(object):
         self.total_ad_instances = 0
         self.total_web_chat_instances = 0
         self.districts = []  # list containing each instance of the district class
-        self.ad_avail = []  # list of all teh available advisers
-
+        self.ad_avail = []  # list of all the available advisers
+        self.total_hh = 0  # used to store total number of hh created across all districts
         # methods to run on start
         self.total_ad_instances = self.input_data['advisers']['number']
         if self.total_ad_instances > 0:

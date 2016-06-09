@@ -142,8 +142,14 @@ Responded_list = []
 
 for df in dataLists[default_key]:
 
-    int_df = pd.DataFrame({'count': df.groupby([0, 2]).size()}).reset_index()
-    Responded_list.append(pd.DataFrame(int_df.groupby(2).mean()['count']))
+    df.columns = ['rep', 'district', 'hh_id', 'time', 'hh_type']
+    print(df.sort(['rep', 'district'], ascending=[1, 0]))
+
+    int_df = pd.DataFrame({'count': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
+    print(int_df)
+    Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
+
+print(Responded_list[0])
 
     # so responded list is an indexable summary of overall responses by area for each run
 

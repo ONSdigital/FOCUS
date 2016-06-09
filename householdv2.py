@@ -2,17 +2,19 @@
 
 from collections import namedtuple
 
-response_times = namedtuple('Responded', ['reps', 'Time', 'Household'])  # time full response received
+response_times = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
 
 
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, rnd, env, hh_type, input_data, output_data):
+    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, output_data):
 
         self.rep = rep
         self.rnd = rnd
         self.env = env
+        self.district = district
+        self.hh_id = hh_id
         self.hh_type = hh_type
         self.input_data = input_data
         self.output_data = output_data
@@ -35,6 +37,8 @@ class Household(object):
             response_time = beta_dist(self.rep, self.input_data["beta_dist"][0], self.input_data["beta_dist"][1])
             yield self.env.timeout(response_time)
             self.output_data.append(response_times(self.rep.reps,
+                                                   self.district.name,
+                                                   self.hh_id,
                                                    self.env.now,
                                                    self.hh_type))
 
