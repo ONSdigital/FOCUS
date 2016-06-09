@@ -39,8 +39,8 @@ class Household(object):
             self.output_data.append(response_times(self.rep.reps,
                                                    self.district.name,
                                                    self.hh_id,
-                                                   self.env.now,
-                                                   self.hh_type))
+                                                   self.hh_type,
+                                                   self.env.now))
 
         elif self.resp_level < action_test <= self.help_level:
 
