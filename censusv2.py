@@ -27,7 +27,6 @@ class ActionPlan(object):
         self.env.process(self.arrange_visits())
 
     def arrange_visits(self):
-        while True:
 
             self.visit_list = []
 
@@ -35,7 +34,8 @@ class ActionPlan(object):
                 self.visit_list.append(household)
                 print(str(household.hh_type) + ' added to ' + str(self.district) + ' FU list')
 
-            yield self.env.timeout(1000)
+            yield self.env.timeout(24)
+            self.env.process(self.arrange_visits())
 
 
 class CensusOfficer(object):
@@ -55,6 +55,13 @@ class CensusOfficer(object):
             current_hh = self.action_plan.visit_list.pop(0)
             print(str(self) + 'Visiting ' + str(current_hh.hh_type) + ' at time ' + str(self.env.now))
             yield self.env.timeout(1)
+        else:
+            yield self.env.timeout(24)
+
+        self.env.process(self.contact())
+
+
+
 
 
 

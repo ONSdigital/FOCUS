@@ -1,4 +1,5 @@
-"""a stub for the district class"""
+"""A district represents any user defined region (such as an LSOA/LA) that contains a set number of HH
+and shares a number of census officers"""
 import householdv2
 import sys
 import censusv2
@@ -6,13 +7,14 @@ import censusv2
 
 class District(object):
 
-    def __init__(self, rep, rnd, env, name, input_data):
+    def __init__(self, rep, rnd, env, name, input_data, output_data):
         # values fed into class
         self.rep = rep
         self.rnd = rnd
         self.env = env
         self.name = name
         self.input_data = input_data
+        self.output_data = output_data
 
         # list of households in the district
         self.households = []
@@ -38,7 +40,8 @@ class District(object):
                                                              self.rnd,
                                                              self.env,
                                                              hh,
-                                                             self.input_data['households'][hh]))
+                                                             self.input_data['households'][hh],
+                                                             self.output_data))
 
     def create_action_plans(self):
 

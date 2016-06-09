@@ -7,12 +7,15 @@ import censusv2
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, rnd, reps, seed):
+    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, seed):
 
         # values fed into class
         self.env = env
         self.input_data = input_data
+        self.output_data = output_data
         self.rnd = rnd
+        self.run = run
+        self.sim_hours = sim_hours
         self.reps = reps
         self.seed = seed
 
@@ -50,4 +53,9 @@ class Rep(object):
 
             print(distr)
 
-            self.districts.append(district.District(self, self.rnd, self.env, distr, self.input_data['districts'][distr]))
+            self.districts.append(district.District(self,
+                                                    self.rnd,
+                                                    self.env,
+                                                    distr,
+                                                    self.input_data['districts'][distr],
+                                                    self.output_data))
