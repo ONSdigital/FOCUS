@@ -115,7 +115,8 @@ for run in list_of_runs:
 
 # then, if required, dump JSON config file with seeds to the output folder
 if create_new_config is True:
-    output_JSON_name = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + '.JSON'
+
+    output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile)
 
@@ -123,20 +124,21 @@ if create_new_config is True:
 dirList = glob.glob("outputs/*/")
 dataLists = {}
 
-# for each directory
+# for each directory do some basis processing
 for raw_directory_path in dirList:
-    # get the files
-    folder = raw_directory_path.split("/")[1]
+    # get the files to process from current results folder
+    folder = raw_directory_path.split(os.path.sep)[1]
     dataLists[folder] = []
-    fileList = glob.glob('outputs/' + folder + '/*.csv')
+
+    fileList = glob.glob('outputs\\' + folder + '\\*.csv')
     # for each file add to a list in the top level dictionary
     for raw_file_path in fileList:
         print(raw_file_path)
-        # add the raw file to dataLists ready for further processing
-        dataLists[raw_file_path.split("/")[1]].append(pd.read_csv(raw_file_path, header=-1))
+        # add the raw file to dataLists ready for
+        dataLists[raw_file_path.split(os.path.sep)[1]].append(pd.read_csv(raw_file_path, header=-1))
 
 # create some default output
-default_key = 'Responded'
+default_key = 'Responded'  # this should be able to be changed via a menu option
 
 Responded_list = []
 
@@ -151,7 +153,15 @@ for df in dataLists[default_key]:
     print(int_df)
     Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
 
+    # Responded list is a list of dataframes containing the averages of the number of responses for each run
+    # so to print a specific runs results just call the list and give the run number as the index
     print(Responded_list[len(Responded_list)-1])
+
+    # add call to new module that passes default dataset and creates visualisation
+
+
+
+
 
 
 
