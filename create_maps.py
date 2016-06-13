@@ -29,7 +29,7 @@ for feature in map_data['features']:
 
 
 for item in LA_names:
-    rnd_values.append((random.randint(0, 6)))
+    rnd_values.append((random.randint(0, 15)))
 
 
 LA_colors = [colors[int(rate/3)] for rate in rnd_values]
