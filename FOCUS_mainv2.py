@@ -38,7 +38,7 @@ except IOError as e:
     print(e)
     sys.exit()
 
-# ask for output destination
+# ask for output destination but still need to check if can create new folders
 output_path = input('Enter output path or press enter to use default: ')
 if len(output_path) < 1:
     outputs = 'outputs'
@@ -103,9 +103,9 @@ for run in list_of_runs:
         output_data.sort(key=lambda x: type(x).__name__)
 
         for k, g in groupby(output_data, lambda x: type(x).__name__):
-            if os.path.isdir('outputs/{}'.format(k) + '/') is False:
-                os.mkdir('outputs/{}'.format(k) + '/')
-            with open('outputs/{}'.format(k) + '/' + str(run) + '.csv', 'a', newline='') as f_output:  # use a for append
+            if os.path.isdir(output_path + '/{}'.format(k) + '/') is False:
+                os.mkdir(output_path + '/{}'.format(k) + '/')
+            with open(output_path + '/{}'.format(k) + '/' + str(run) + '.csv', 'a', newline='') as f_output:  # use a for append
                 csv_output = csv.writer(f_output)
                 rows = list(g)
                 # uncomment below to add headers based on named tuples
@@ -139,22 +139,31 @@ for directory in dirList:
         dataLists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
 
 # create some default output
-default_key = 'Responded'  # this should be able to be changed via a menu option
-print(dataLists)
-
 Responded_list = []
 
-for df in dataLists[default_key]:
+for df in dataLists['Responded']:
 
     # add column names
     df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
     # create new key value pair, convert to dataframe and add to list
-    int_df = pd.DataFrame({'count': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-    Responded_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['count']))
-    #Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
+    int_df = pd.DataFrame({'Returns': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
+    # print(int_df)
+    Responded_list.append(pd.DataFrame(int_df.groupby(['district']).sum()['Returns']))
+    # Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
     # so to print a specific run call the list and give the run number-1 as the index
-    print(Responded_list[len(Responded_list)-1])
+    # print(Responded_list[len(Responded_list)-1])
 
+district_size_list = []
+
+# collate total hh outputs
+for df in dataLists['Total_hh']:
+    df.columns = ['rep', 'district', 'hh_count']
+    district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
+    # print(district_size_list[0])
+
+perc_ret = pd.DataFrame((Responded_list[0].join(district_size_list[0])))
+perc_ret = perc_ret[['Returns']].div(perc_ret.hh_count, axis=0)
+print(perc_ret)
 
 
 

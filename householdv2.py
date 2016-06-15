@@ -20,7 +20,9 @@ class Household(object):
         self.output_data = output_data
 
         self.resp_level = self.input_data['default_resp']
-        self.help_level = self.input_data['default_help']
+        #self.help_level = self.input_data['default_help']
+        self.help_level = 0
+
         self.status = ''
 
         self.rep.env.process(self.action())
@@ -31,7 +33,7 @@ class Household(object):
 
         if action_test <= self.resp_level:
 
-            print('respond')
+            #print('respond')
 
             '''generate some responses, over time for each region, and create a map!!!'''
             response_time = beta_dist(self.rep, self.input_data["beta_dist"][0], self.input_data["beta_dist"][1])
@@ -52,14 +54,15 @@ class Household(object):
 
         else:
 
-            print('nothing')
+            pass
+            #print('nothing')
 
     def contact(self):
 
-        print(str(self.hh_type) + "  called at " + str(self.env.now))
+        #print(str(self.hh_type) + "  called at " + str(self.env.now))
 
         current_ad = yield self.rep.adviser_store.get()
-        print(str(current_ad) + " is with " + str(self.hh_type) + " at time " + str(self.env.now))
+        #print(str(current_ad) + " is with " + str(self.hh_type) + " at time " + str(self.env.now))
         yield self.env.timeout(0.5)
         self.rep.adviser_store.put(current_ad)
 

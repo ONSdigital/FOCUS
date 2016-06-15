@@ -3,7 +3,9 @@ and shares a number of census officers"""
 import householdv2
 import sys
 import censusv2
+from collections import namedtuple
 
+total_hh = namedtuple('Total_hh', ['reps', 'district', 'count'])
 
 class District(object):
 
@@ -21,6 +23,8 @@ class District(object):
 
         # create the households that will exist in the district
         self.create_households()
+        # record total households created for region?
+        self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))
 
         # create action plans for the district
         self.action_plan = self.create_action_plans()
@@ -64,7 +68,7 @@ class District(object):
                     if 'number' in input_data:
                         for i in range(int(input_data["number"])):
                             id_num += 1
-                            print('CO created in ' + str(self.name))
+                            # print('CO created in ' + str(self.name))
                             # create CO
                             censusv2.CensusOfficer(self.env, self, self.action_plan)
 

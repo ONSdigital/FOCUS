@@ -32,7 +32,7 @@ class ActionPlan(object):
 
             for household in self.households:
                 self.visit_list.append(household)
-                print(str(household.hh_type) + ' added to ' + str(self.district) + ' FU list')
+                #print(str(household.hh_type) + ' added to ' + str(self.district) + ' FU list')
 
             yield self.env.timeout(24)
             self.env.process(self.arrange_visits())
@@ -53,7 +53,7 @@ class CensusOfficer(object):
 
         if len(self.action_plan.visit_list) > 0:
             current_hh = self.action_plan.visit_list.pop(0)
-            print(str(self) + 'Visiting ' + str(current_hh.hh_type) + ' at time ' + str(self.env.now))
+            #print(str(self) + 'Visiting ' + str(current_hh.hh_type) + ' at time ' + str(self.env.now))
             yield self.env.timeout(1)
         else:
             yield self.env.timeout(24)

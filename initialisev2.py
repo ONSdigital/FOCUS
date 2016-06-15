@@ -42,7 +42,7 @@ class Rep(object):
         id_ad_num = 0
         for i in range(int(input_data["number"])):
 
-            print('adviser created')
+            #print('adviser created')
             self.ad_avail.append(censusv2.Adviser(self))
 
             id_ad_num += 1
@@ -51,7 +51,7 @@ class Rep(object):
 
         for distr in self.input_data['districts']:
 
-            print(distr)
+            #print(distr)
 
             self.districts.append(district.District(self,
                                                     self.rnd,

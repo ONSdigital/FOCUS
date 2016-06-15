@@ -59,5 +59,3 @@ hover.tooltips = [
 output_file("test.html", title="test LA example")
 
 show(p)
-
-
