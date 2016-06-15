@@ -55,7 +55,7 @@ except IOError as e:
     sys.exit()
 
 
-# create list of runs in config file
+# create list of runs from config file
 list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
 
 # cycle through the runs
@@ -120,44 +120,44 @@ if create_new_config is True:
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile)
 
-# get list of all directories
 dirList = glob.glob("outputs/*/")
 dataLists = {}
 
 # for each directory do some basis processing
-for raw_directory_path in dirList:
+for directory in dirList:
     # get the files to process from current results folder
-    folder = raw_directory_path.split(os.path.sep)[1]
+    folder = directory.split(os.path.sep)[1]
+    # create new key value pair in dict
     dataLists[folder] = []
 
-    fileList = glob.glob('outputs\\' + folder + '\\*.csv')
+    glob_folder = os.path.join('outputs', folder, '*.csv')
+    fileList = glob.glob(glob_folder)
     # for each file add to a list in the top level dictionary
-    for raw_file_path in fileList:
-        print(raw_file_path)
+    for file in fileList:
+        # print(raw_file_path)
         # add the raw file to dataLists ready for
-        dataLists[raw_file_path.split(os.path.sep)[1]].append(pd.read_csv(raw_file_path, header=-1))
+        dataLists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
 
 # create some default output
 default_key = 'Responded'  # this should be able to be changed via a menu option
+print(dataLists)
 
 Responded_list = []
 
 for df in dataLists[default_key]:
 
+    # add column names
     df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-    # print(df.sort(['rep', 'district'], ascending=[1, 0]))
-    print(df)
-
+    # create new key value pair, convert to dataframe and add to list
     int_df = pd.DataFrame({'count': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-
-    print(int_df)
-    Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
-
-    # Responded list is a list of dataframes containing the averages of the number of responses for each run
-    # so to print a specific runs results just call the list and give the run number as the index
+    Responded_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['count']))
+    #Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
+    # so to print a specific run call the list and give the run number-1 as the index
     print(Responded_list[len(Responded_list)-1])
 
-    # add call to new module that passes default dataset and creates visualisation
+
+
+
 
 
 

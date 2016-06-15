@@ -13,9 +13,8 @@ LA_ys = []
 colors = ["#F1EEF6", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043"]
 
 for feature in map_data['features']:
-    print(feature['properties']['name'])
-    LA_names.append(str(feature['properties']['name']))
 
+    LA_names.append(str(feature['properties']['name']))
     sub_LA_xs = []
     sub_LA_ys = []
 
@@ -31,7 +30,6 @@ for feature in map_data['features']:
 for item in LA_names:
     rnd_values.append((random.randint(0, 15)))
 
-
 LA_colors = [colors[int(rate/3)] for rate in rnd_values]
 
 source = ColumnDataSource(data=dict(
@@ -44,7 +42,7 @@ source = ColumnDataSource(data=dict(
 
 TOOLS = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-p = figure(title="example", tools=TOOLS)
+p = figure(title="Response rates by LA", tools=TOOLS)
 
 p.patches('x', 'y', source=source,
           fill_color='color', fill_alpha=0.7,
@@ -54,7 +52,7 @@ hover = p.select_one(HoverTool)
 hover.point_policy = "follow_mouse"
 hover.tooltips = [
     ("Name", "@name"),
-    ("Unemployment rate)", "@rnd_values%"),
+    ("Return rate)", "@rate%"),
     ("(Long, Lat)", "($x, $y)"),
 ]
 
