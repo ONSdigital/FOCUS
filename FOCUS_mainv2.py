@@ -8,12 +8,13 @@ import initialisev2
 import os
 import csv
 import shutil
-import pandas as pd
-import glob
+import post_process
 from itertools import groupby
 
 # set required flags
+display_default = True
 create_new_config = False
+data_lists = {}
 
 # delete all old output files from default location - but not generated JSON files
 if os.path.isdir('outputs/') is True:
@@ -21,11 +22,12 @@ if os.path.isdir('outputs/') is True:
     for d in dirs:
         if d != 'outputs/':
             shutil.rmtree(str(d))
+        # if outputs dir remove certain filetypes
 
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'single multi district.JSON'
+    file_name = 'inputs/single multi district.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -105,11 +107,9 @@ for run in list_of_runs:
         for k, g in groupby(output_data, lambda x: type(x).__name__):
             if os.path.isdir(output_path + '/{}'.format(k) + '/') is False:
                 os.mkdir(output_path + '/{}'.format(k) + '/')
-            with open(output_path + '/{}'.format(k) + '/' + str(run) + '.csv', 'a', newline='') as f_output:  # use a for append
+            with open(output_path + '/{}'.format(k) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
                 csv_output = csv.writer(f_output)
                 rows = list(g)
-                # uncomment below to add headers based on named tuples
-                # csv_output.writerow(list(rows[0]._fields))
                 for row in rows:
                     csv_output.writerow(list(row))
 
@@ -120,50 +120,10 @@ if create_new_config is True:
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile)
 
-dirList = glob.glob("outputs/*/")
-dataLists = {}
-
-# for each directory do some basis processing
-for directory in dirList:
-    # get the files to process from current results folder
-    folder = directory.split(os.path.sep)[1]
-    # create new key value pair in dict
-    dataLists[folder] = []
-
-    glob_folder = os.path.join('outputs', folder, '*.csv')
-    fileList = glob.glob(glob_folder)
-    # for each file add to a list in the top level dictionary
-    for file in fileList:
-        # print(raw_file_path)
-        # add the raw file to dataLists ready for
-        dataLists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
-
-# create some default output
-Responded_list = []
-
-for df in dataLists['Responded']:
-
-    # add column names
-    df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-    # create new key value pair, convert to dataframe and add to list
-    int_df = pd.DataFrame({'Returns': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-    # print(int_df)
-    Responded_list.append(pd.DataFrame(int_df.groupby(['district']).sum()['Returns']))
-    # Responded_list.append(pd.DataFrame(int_df.groupby(['district', 'hh_type']).mean()['count']))
-    # so to print a specific run call the list and give the run number-1 as the index
-    # print(Responded_list[len(Responded_list)-1])
-
-district_size_list = []
-
-# collate total hh outputs
-for df in dataLists['Total_hh']:
-    df.columns = ['rep', 'district', 'hh_count']
-    district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
-    # print(district_size_list[0])
-
-perc_ret = pd.DataFrame((Responded_list[0].join(district_size_list[0])))
-perc_ret = perc_ret[['Returns']].div(perc_ret.hh_count, axis=0)
-print(perc_ret)
+# progress to processing data created
+post_process.aggregate(output_path, data_lists)
+if display_default is True:
+    post_process.create_response_map(output_path, data_lists, 'inputs/geog_LAs.geojson')
 
 
 

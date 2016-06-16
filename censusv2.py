@@ -24,7 +24,7 @@ class ActionPlan(object):
 
         self.visit_list = []
 
-        self.env.process(self.arrange_visits())
+        # self.env.process(self.arrange_visits())
 
     def arrange_visits(self):
 
@@ -47,7 +47,7 @@ class CensusOfficer(object):
         self.district = district
         self.action_plan = action_plan
 
-        self.env.process(self.contact())
+        # self.env.process(self.contact())
 
     def contact(self):
 

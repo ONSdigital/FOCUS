@@ -27,10 +27,10 @@ class District(object):
         self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))
 
         # create action plans for the district
-        self.action_plan = self.create_action_plans()
+        # self.action_plan = self.create_action_plans()
 
         # create Census Officers that will work in the district
-        self.create_co(self.input_data["census officer"], "")
+        # self.create_co(self.input_data["census officer"], "")
 
     def create_households(self):
 

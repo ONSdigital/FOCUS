@@ -36,6 +36,8 @@ class Household(object):
             #print('respond')
 
             '''generate some responses, over time for each region, and create a map!!!'''
+            # first select the day on which they will respond then the time within that day (depends on day!))
+
             response_time = beta_dist(self.rep, self.input_data["beta_dist"][0], self.input_data["beta_dist"][1])
             yield self.env.timeout(response_time)
             self.output_data.append(response_times(self.rep.reps,
