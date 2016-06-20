@@ -5,9 +5,9 @@ import os
 import csv
 
 
-def generate_multiple_districts(input_path, new_district_list, output_JSON_name):
+def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name):
     # read in JSON file
-    with open(input_path) as data_file:
+    with open(input_JSON) as data_file:
         input_data = json.load(data_file)
 
     # get list of keys in district area
@@ -53,8 +53,11 @@ def generate_multiple_districts(input_path, new_district_list, output_JSON_name)
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
     file_name = 'single multi district.JSON'
-    input_path = os.path.join(os.getcwd(), file_name)
-generate_multiple_districts(input_path, 'LSOA_simple_test_inputs2.csv', 'LSOA_simple_test_inputs2.JSON')
+    input_path = os.path.join(os.getcwd(), 'inputs', file_name)
+    new_districts = os.path.join(os.getcwd(), 'inputs', 'LSOA_simple_test_inputs.csv')
+    output_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_simple_test_inputs.JSON')
+
+generate_multiple_districts(input_path, new_districts, output_path)
 
 
 

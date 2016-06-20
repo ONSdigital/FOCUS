@@ -12,7 +12,7 @@ import post_process
 from itertools import groupby
 
 # set required flags
-display_default = True
+display_default = False
 create_new_config = False
 data_lists = {}
 

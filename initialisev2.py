@@ -2,6 +2,7 @@
 import district
 import simpy
 import censusv2
+import datetime
 
 
 class Rep(object):
@@ -16,6 +17,8 @@ class Rep(object):
         self.rnd = rnd
         self.run = run
         self.sim_hours = sim_hours
+        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
+        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
         self.reps = reps
         self.seed = seed
 

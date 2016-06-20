@@ -2,7 +2,7 @@
   "1": {
     "replications": 1,
     "replication seeds": {},
-    "start_date": "2017, 3, 19, 9, 0, 0",
+    "start_date": "2017, 3, 19, 0, 0, 0",
     "end_date": "2017, 5, 17, 0, 0, 0",
     "coordinator_update": 1,
     "advisers": {
@@ -36,180 +36,480 @@
         },
         "households": {
           "htc1": {
-        "default_help": 0,
-        "call_renege_lower": 0.05,
-        "call_renege_upper": 0.25,
-        "call_conversion_rate": 35,
-        "dig_assist_eff": 0,
-        "paper_prop": 86,
-        "allow_paper": 1,
-        "number": 101682,
-        "FU_start_time": 336,
-        "dig_assist_flex": 0,
-        "alt_help": 55,
-        "priority": 0,
-        "max_visits": 15,
-        "paper_after_max_visits": 0,
-        "alt_resp": 0,
-        "default_resp": 89.5,
-        "contact_rate": 30,
-        "conversion_rate": 35,
-        "FU_on": 1,
-        "send_incomplete": 0,
-        "beta_dist": [
-          0.1,
-          2
-        ],
-        "letter_phases": {
-          "reminder": {
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 5,
-            "targeted": 1,
-            "pq": 0
-          }
-        }
-      },
+            "default_help": 0,
+            "call_renege_lower": 0.05,
+            "call_renege_upper": 0.25,
+            "call_conversion_rate": 35,
+            "dig_assist_eff": 0,
+            "paper_prop": 86,
+            "allow_paper": 1,
+            "number": 1,
+            "FU_start_time": 336,
+            "dig_assist_flex": 0,
+            "alt_help": 55,
+            "priority": 0,
+            "max_visits": 15,
+            "paper_after_max_visits": 0,
+            "alt_resp": 0,
+            "default_resp": 89.5,
+            "contact_rate": 30,
+            "conversion_rate": 35,
+            "FU_on": 1,
+            "send_incomplete": 0,
+            "beta_dist": [
+              0.1,
+              2
+            ],
+            "letter_phases": {
+              "reminder": {
+                "date": "2011, 3, 12, 9, 0, 0",
+                "delay": 48,
+                "effect": 5,
+                "targeted": 1,
+                "pq": 0
+              }
+            },
+            "response_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            },
+            "at_home_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            }
+          },
           "htc2": {
-        "default_help": 0,
-        "call_renege_lower": 0.05,
-        "call_renege_upper": 0.25,
-        "call_conversion_rate": 33,
-        "dig_assist_eff": 0,
-        "paper_prop": 85,
-        "allow_paper": 1,
-        "number": 101682,
-        "FU_start_time": 336,
-        "dig_assist_flex": 0,
-        "alt_help": 55,
-        "priority": 0,
-        "max_visits": 15,
-        "paper_after_max_visits": 0,
-        "alt_resp": 0,
-        "default_resp": 85,
-        "contact_rate": 29,
-        "conversion_rate": 33,
-        "FU_on": 1,
-        "send_incomplete": 0,
-        "beta_dist": [
-          0.14,
-          2
-        ],
-        "letter_phases": {
-          "reminder": {
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 4,
-            "targeted": 1,
-            "pq": 0
-          }
-        }
-      },
+            "default_help": 0,
+            "call_renege_lower": 0.05,
+            "call_renege_upper": 0.25,
+            "call_conversion_rate": 33,
+            "dig_assist_eff": 0,
+            "paper_prop": 85,
+            "allow_paper": 1,
+            "number": 1,
+            "FU_start_time": 336,
+            "dig_assist_flex": 0,
+            "alt_help": 55,
+            "priority": 0,
+            "max_visits": 15,
+            "paper_after_max_visits": 0,
+            "alt_resp": 0,
+            "default_resp": 85,
+            "contact_rate": 29,
+            "conversion_rate": 33,
+            "FU_on": 1,
+            "send_incomplete": 0,
+            "beta_dist": [
+              0.14,
+              2
+            ],
+            "letter_phases": {
+              "reminder": {
+                "date": "2011, 3, 12, 9, 0, 0",
+                "delay": 48,
+                "effect": 4,
+                "targeted": 1,
+                "pq": 0
+              }
+            },
+            "response_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            },
+            "at_home_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            }
+          },
           "htc3": {
-        "default_help": 0,
-        "call_renege_lower": 0.05,
-        "call_renege_upper": 0.25,
-        "call_conversion_rate": 31,
-        "dig_assist_eff": 0,
-        "paper_prop": 82,
-        "allow_paper": 1,
-        "number": 25421,
-        "FU_start_time": 336,
-        "dig_assist_flex": 0,
-        "alt_help": 55,
-        "priority": 0,
-        "max_visits": 15,
-        "paper_after_max_visits": 0,
-        "alt_resp": 0,
-        "default_resp": 78.5,
-        "contact_rate": 25,
-        "conversion_rate": 31,
-        "FU_on": 1,
-        "send_incomplete": 0,
-        "beta_dist": [
-          0.2,
-          2
-        ],
-        "letter_phases": {
-          "reminder": {
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 3,
-            "targeted": 1,
-            "pq": 0
-          }
-        }
-      },
+            "default_help": 0,
+            "call_renege_lower": 0.05,
+            "call_renege_upper": 0.25,
+            "call_conversion_rate": 31,
+            "dig_assist_eff": 0,
+            "paper_prop": 82,
+            "allow_paper": 1,
+            "number": 1,
+            "FU_start_time": 336,
+            "dig_assist_flex": 0,
+            "alt_help": 55,
+            "priority": 0,
+            "max_visits": 15,
+            "paper_after_max_visits": 0,
+            "alt_resp": 0,
+            "default_resp": 78.5,
+            "contact_rate": 25,
+            "conversion_rate": 31,
+            "FU_on": 1,
+            "send_incomplete": 0,
+            "beta_dist": [
+              0.2,
+              2
+            ],
+            "letter_phases": {
+              "reminder": {
+                "date": "2011, 3, 12, 9, 0, 0",
+                "delay": 48,
+                "effect": 3,
+                "targeted": 1,
+                "pq": 0
+              }
+            },
+            "response_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            },
+            "at_home_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            }
+          },
           "htc4": {
-        "default_help": 0,
-        "call_renege_lower": 0.05,
-        "call_renege_upper": 0.25,
-        "call_conversion_rate": 27,
-        "dig_assist_eff": 0,
-        "paper_prop": 78,
-        "allow_paper": 1,
-        "number": 20337,
-        "FU_start_time": 336,
-        "dig_assist_flex": 0,
-        "alt_help": 55,
-        "priority": 0,
-        "max_visits": 15,
-        "paper_after_max_visits": 0,
-        "alt_resp": 0,
-        "default_resp": 73,
-        "contact_rate": 22,
-        "conversion_rate": 27,
-        "FU_on": 1,
-        "send_incomplete": 0,
-        "beta_dist": [
-          0.245,
-          2
-        ],
-        "letter_phases": {
-          "reminder": {
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 2,
-            "targeted": 1,
-            "pq": 0
-          }
-        }
-      },
+            "default_help": 0,
+            "call_renege_lower": 0.05,
+            "call_renege_upper": 0.25,
+            "call_conversion_rate": 27,
+            "dig_assist_eff": 0,
+            "paper_prop": 78,
+            "allow_paper": 1,
+            "number": 1,
+            "FU_start_time": 336,
+            "dig_assist_flex": 0,
+            "alt_help": 55,
+            "priority": 0,
+            "max_visits": 15,
+            "paper_after_max_visits": 0,
+            "alt_resp": 0,
+            "default_resp": 73,
+            "contact_rate": 22,
+            "conversion_rate": 27,
+            "FU_on": 1,
+            "send_incomplete": 0,
+            "beta_dist": [
+              0.245,
+              2
+            ],
+            "letter_phases": {
+              "reminder": {
+                "date": "2011, 3, 12, 9, 0, 0",
+                "delay": 48,
+                "effect": 2,
+                "targeted": 1,
+                "pq": 0
+              }
+            },
+            "response_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            },
+            "at_home_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            }
+          },
           "htc5": {
-        "default_help": 0,
-        "call_renege_lower": 0.05,
-        "call_renege_upper": 0.25,
-        "call_conversion_rate": 29,
-        "dig_assist_eff": 0,
-        "paper_prop": 76,
-        "allow_paper": 1,
-        "number": 5085,
-        "FU_start_time": 336,
-        "dig_assist_flex": 0,
-        "alt_help": 55,
-        "priority": 0,
-        "max_visits": 15,
-        "paper_after_max_visits": 0,
-        "alt_resp": 0,
-        "default_resp": 69,
-        "contact_rate": 17,
-        "conversion_rate": 29,
-        "FU_on": 1,
-        "send_incomplete": 0,
-        "beta_dist": [
-          0.255,
-          2
-        ],
-        "letter_phases": {
-          "reminder": {
-            "date": "2011, 3, 12, 9, 0, 0",
-            "delay": 48,
-            "effect": 1,
-            "targeted": 1,
-            "pq": 0
+            "default_help": 0,
+            "call_renege_lower": 0.05,
+            "call_renege_upper": 0.25,
+            "call_conversion_rate": 29,
+            "dig_assist_eff": 0,
+            "paper_prop": 76,
+            "allow_paper": 1,
+            "number": 1,
+            "FU_start_time": 336,
+            "dig_assist_flex": 0,
+            "alt_help": 55,
+            "priority": 0,
+            "max_visits": 15,
+            "paper_after_max_visits": 0,
+            "alt_resp": 0,
+            "default_resp": 69,
+            "contact_rate": 17,
+            "conversion_rate": 29,
+            "FU_on": 1,
+            "send_incomplete": 0,
+            "beta_dist": [
+              0.255,
+              2
+            ],
+            "letter_phases": {
+              "reminder": {
+                "date": "2011, 3, 12, 9, 0, 0",
+                "delay": 48,
+                "effect": 1,
+                "targeted": 1,
+                "pq": 0
+              }
+            },
+            "response_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            },
+            "at_home_time": {
+              "0": [
+                12,
+                1
+              ],
+              "1": [
+                12,
+                1
+              ],
+              "2": [
+                12,
+                1
+              ],
+              "3": [
+                12,
+                1
+              ],
+              "4": [
+                12,
+                1
+              ],
+              "5": [
+                12,
+                1
+              ],
+              "6": [
+                12,
+                1
+              ]
+            }
           }
-        }
-      }
         }
       }
     }

@@ -1,5 +1,6 @@
 """file used to store the classes and definitions related to the households represented in the simulation """
 
+import datetime
 from collections import namedtuple
 
 response_times = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
@@ -19,6 +20,7 @@ class Household(object):
         self.input_data = input_data
         self.output_data = output_data
 
+
         self.resp_level = self.input_data['default_resp']
         #self.help_level = self.input_data['default_help']
         self.help_level = 0
@@ -33,15 +35,27 @@ class Household(object):
 
         if action_test <= self.resp_level:
 
-            #print('respond')
+            current_date_time = self.rep.start_date + datetime.timedelta(hours=self.rep.env.now)
+            sim_days_left = (self.rep.end_date.date() - current_date_time.date()).days
 
-            '''generate some responses, over time for each region, and create a map!!!'''
-            # first select the day on which they will respond then the time within that day (depends on day!))
-            # and create actual response event
-            # and return received event
+            days_until_response = beta_dist(self.rep,
+                                            self.input_data['beta_dist'][0],
+                                            self.input_data['beta_dist'][1],
+                                            sim_days_left)
 
-            response_time = beta_dist(self.rep, self.input_data["beta_dist"][0], self.input_data["beta_dist"][1])
-            yield self.env.timeout(response_time)
+            response_date = current_date_time.date() + datetime.timedelta(days=days_until_response)
+
+            response_day = response_date.weekday()
+            response_time = gauss_dist(self.rnd,
+                                       self.input_data['response_time'][str(response_day)][0],
+                                       self.input_data['response_time'][str(response_day)][1])
+
+            response_date_time = datetime.datetime.combine(response_date, datetime.datetime.min.time())\
+                                + datetime.timedelta(hours=response_time)
+
+            response_date_time = (response_date_time - current_date_time).total_seconds()/3600
+
+            yield self.env.timeout(response_date_time)
             self.output_data.append(response_times(self.rep.reps,
                                                    self.district.name,
                                                    self.hh_id,
@@ -72,6 +86,25 @@ class Household(object):
 
 
 # beta dist used to generate some numbers for responses over time
-def beta_dist(run, alpha, beta):
+def beta_dist(rep, alpha, beta, sim_days_left):
+    # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
+    return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
 
-    return (run.rnd.betavariate(alpha, beta))*(run.sim_hours - run.env.now)
+
+def gauss_dist(rnd, alpha, beta):
+
+    response_time = rnd.gauss(alpha, beta)
+
+    if response_time < 0:
+        response_time = 0
+
+
+
+    return response_time
+
+
+
+
+
+
+
