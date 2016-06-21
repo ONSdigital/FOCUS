@@ -45,16 +45,20 @@ class Rep(object):
         id_ad_num = 0
         for i in range(int(input_data["number"])):
 
-            #print('adviser created')
             self.ad_avail.append(censusv2.Adviser(self))
 
             id_ad_num += 1
 
     def create_districts(self):
 
-        for distr in self.input_data['districts']:
+        # create list of districts for the rep from config file to iterate through.
+        # It is possible to just iterate though the part of the config file direct but as python dicts
+        # are unsorted the districts will be created randomly. to get the same result each time the same seed is used
+        # need to iterate through a sorted list of the dict keys.
+        list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
-            #print(distr)
+        #for distr in self.input_data['districts']:
+        for distr in list_of_districts:
 
             self.districts.append(district.District(self,
                                                     self.rnd,

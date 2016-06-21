@@ -73,6 +73,7 @@ class Household(object):
         else:
 
             pass
+            # yield until end of sim
             #print('nothing')
 
     def contact(self):

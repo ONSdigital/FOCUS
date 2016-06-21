@@ -45,10 +45,10 @@ def create_choropleth(json_file, data_file):
     district_names = []
     district_xs = []
     district_ys = []
-    # colors = ["#CCCCCC", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043"]
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0",  "#C994C7", "#D4B9DA"]
 
-    name_key = 'LAD11NM'
+    name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
+    ID_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
 
     for feature in map_data['features']:
 
@@ -58,8 +58,8 @@ def create_choropleth(json_file, data_file):
             sub_xs = []
             sub_ys = []
 
-            if str(feature['properties'][name_key]) in my_results_dict:
-                results.append(float(my_results_dict[str(feature['properties'][name_key])])*100)
+            if str(feature['properties'][ID_key]) in my_results_dict:
+                results.append(float(my_results_dict[str(feature['properties'][ID_key])])*100)
             else:
                 results.append(float('nan'))
 
@@ -73,7 +73,7 @@ def create_choropleth(json_file, data_file):
             district_xs.append(sub_xs)
             district_ys.append(sub_ys)
 
-        else:  # likely to be a multipolygon
+        else:  # likely to be a multipolygon so need to draw each sub list separately
 
             for sub_list in feature['geometry']['coordinates']:
 
@@ -81,8 +81,8 @@ def create_choropleth(json_file, data_file):
                 sub_xs = []
                 sub_ys = []
 
-                if str(feature['properties'][name_key]) in my_results_dict:
-                    results.append(float(my_results_dict[str(feature['properties'][name_key])])*100)
+                if str(feature['properties'][ID_key]) in my_results_dict:
+                    results.append(float(my_results_dict[str(feature['properties'][ID_key])])*100)
                 else:
                     results.append(float('nan'))
 
@@ -95,6 +95,7 @@ def create_choropleth(json_file, data_file):
                 district_ys.append(sub_ys)
 
     district_colors = [colors[set_colour_level(np.nanmax(results), np.nanmin(results), rate)] for rate in results]
+    #district_colors = [colors[1] for rate in results]
 
     source = ColumnDataSource(data=dict(
         x=district_xs,
@@ -110,7 +111,7 @@ def create_choropleth(json_file, data_file):
 
     p.patches('x', 'y', source=source,
               fill_color='color', fill_alpha=0.7,
-              line_color="white", line_width=0.3)
+              line_color="grey", line_width=0.3)
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"

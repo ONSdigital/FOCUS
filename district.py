@@ -34,10 +34,11 @@ class District(object):
 
     def create_households(self):
 
-        for hh in self.input_data['households']:
+        list_of_hh = sorted(list(self.input_data['households'].keys()))
+        # for hh in self.input_data['households']:
+        for hh in list_of_hh:
 
             for i in range(self.input_data['households'][hh]['number']):
-
 
                 # create instance of HH class
                 self.households.append(householdv2.Household(self.rep,

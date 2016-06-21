@@ -16,7 +16,7 @@ display_default = True
 create_new_config = False
 data_lists = {}
 
-# delete all old output files from default location - but not generated JSON files
+# delete all old output files from default location except generated JSON files
 if os.path.isdir('outputs/') is True:
     dirs = [x[0] for x in os.walk('outputs/')]
     for d in dirs:
@@ -27,7 +27,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/LSOA_simple_test_inputs.JSON'
+    file_name = 'inputs/LA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -56,7 +56,6 @@ except IOError as e:
     print(e)
     sys.exit()
 
-
 # create list of runs from config file
 list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
 
@@ -81,16 +80,19 @@ for run in list_of_runs:
             now = datetime.datetime.now()
             seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
             seed = abs(now - seed_date).total_seconds() + int(run)
+            input_data[run]['replication seeds'][rep] = seed  # added...
+            create_new_config = True
 
         else:
             seed = input_data[run]['replication seeds'][str(rep)]
 
         rnd = random.Random()
-        rnd.seed(seed)
+        rnd.seed(str(seed))
+
         # and write to dict as record of each reps seed
-        if str(rep) not in input_data[run]['replication seeds']:
-            input_data[run]['replication seeds'][rep] = seed
-            create_new_config = True
+        #if str(rep) not in input_data[run]['replication seeds']:
+        #    input_data[run]['replication seeds'][rep] = seed
+        #    create_new_config = True
 
         # define simpy env for current rep
         env = simpy.Environment()

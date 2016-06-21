@@ -38,24 +38,26 @@ def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name)
         # then populate each sub dictionary appropriately
         # number of households
         for HH in list_of_current_hh:
-            hh_number = row[int(HH[-1])]  # number as in new district list input
-            input_data["1"]["districts"][district]["households"][HH]["number"] = int(hh_number)
-            co_number += int(hh_number)/hh_per_co[int(HH[-1])-1]
+            hh_number = int(row[int(HH[-1])+1])  # number as in new district list input
+
+            if hh_number == 0:
+                # delete entry
+                del input_data["1"]["districts"][district]["households"][HH]
+            else:
+                input_data["1"]["districts"][district]["households"][HH]["number"] = int(hh_number)
+                co_number += hh_number/hh_per_co[int(HH[-1])-1]
 
         input_data["1"]["districts"][district]["census officer"]["walking"]["number"] = int(co_number)
-        input_data["1"]["districts"][district]["district_area"] = float(row[6])
+        input_data["1"]["districts"][district]["district_area"] = float(row[7])
 
     # dump as new json file
     with open(os.path.join(output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
 
 
-input_path = input('Enter input file path or press enter to use defaults: ')
-if len(input_path) < 1:
-    file_name = 'single multi district.JSON'
-    input_path = os.path.join(os.getcwd(), 'inputs', file_name)
-    new_districts = os.path.join(os.getcwd(), 'inputs', 'LSOA_simple_test_inputs.csv')
-    output_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_simple_test_inputs.JSON')
+input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'LSOA_hh.csv')
+output_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hh.JSON')
 
 generate_multiple_districts(input_path, new_districts, output_path)
 
