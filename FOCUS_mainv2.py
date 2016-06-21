@@ -12,7 +12,7 @@ import post_process
 from itertools import groupby
 
 # set required flags
-display_default = False
+display_default = True
 create_new_config = False
 data_lists = {}
 
@@ -27,7 +27,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/single multi district.JSON'
+    file_name = 'inputs/LSOA_simple_test_inputs.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -123,7 +123,7 @@ if create_new_config is True:
 # progress to processing data created
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
-    post_process.create_response_map(output_path, data_lists, 'inputs/geog_LAs.geojson')
+    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
 
 
 

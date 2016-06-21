@@ -520,7 +520,9 @@
                         "alt_help": 55,
                         "alt_resp": 0,
                         "at_home_time": {
-                            "0": [12,                               1
+                            "0": [
+                                12,
+                                1
                             ],
                             "1": [
                                 12,
@@ -24512,7 +24514,7 @@
         "end_date": "2017, 5, 17, 0, 0, 0",
         "replication seeds": {},
         "replications": 1,
-        "start_date": "2017, 3, 19, 9, 0, 0",
+        "start_date": "2017, 3, 19, 0, 0, 0",
         "webchat": {
             "FU_on": 0,
             "end_date": "2011, 4, 5",

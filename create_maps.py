@@ -9,7 +9,7 @@ import math
 import numpy as np
 
 
-# need a better way of setting color levels
+# need a better way of setting color levels??
 def set_colour_level(max_val, min_val, rate):
 
     steps = int((max_val - min_val)/4)
@@ -20,6 +20,9 @@ def set_colour_level(max_val, min_val, rate):
             break
         elif math.isnan(rate):
             i = 0
+            break
+        elif steps == 0:
+            i = 1
             break
         i += 1
     return i
@@ -42,39 +45,54 @@ def create_choropleth(json_file, data_file):
     district_names = []
     district_xs = []
     district_ys = []
-    colors = ["#CCCCCC", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043"]
+    # colors = ["#CCCCCC", "#D4B9DA", "#C994C7", "#DF65B0", "#DD1C77", "#980043"]
+    colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0",  "#C994C7", "#D4B9DA"]
+
     name_key = 'LAD11NM'
 
     for feature in map_data['features']:
 
-        district_names.append(str(feature['properties'][name_key]))
-        sub_xs = []
-        sub_ys = []
-
-
-        if str(feature['properties'][name_key]) in my_results_dict:
-            results.append(float(my_results_dict[str(feature['properties'][name_key])])*100)
-        else:
-            results.append(float('nan'))
-
         if feature['geometry']['type'] == 'Polygon':
+
+            district_names.append(str(feature['properties'][name_key]))
+            sub_xs = []
+            sub_ys = []
+
+            if str(feature['properties'][name_key]) in my_results_dict:
+                results.append(float(my_results_dict[str(feature['properties'][name_key])])*100)
+            else:
+                results.append(float('nan'))
+
             temp_list = feature['geometry']['coordinates'][0]
-        else:
-            temp_list = feature['geometry']['coordinates'][0][0]
-            #temp_list2 = feature['geometry']['coordinates'][1][0]
 
-            #for row in temp_list2:
-                #temp_list.append(row)
+            for coord in temp_list:
 
-        for coord in temp_list:
-            try:
                 sub_xs.append((coord[0]))
                 sub_ys.append((coord[1]))
-            except IOError as e:
-                print(e)
 
-        district_xs.append(sub_xs)
-        district_ys.append(sub_ys)
+            district_xs.append(sub_xs)
+            district_ys.append(sub_ys)
+
+        else:  # likely to be a multipolygon
+
+            for sub_list in feature['geometry']['coordinates']:
+
+                district_names.append(str(feature['properties'][name_key]))
+                sub_xs = []
+                sub_ys = []
+
+                if str(feature['properties'][name_key]) in my_results_dict:
+                    results.append(float(my_results_dict[str(feature['properties'][name_key])])*100)
+                else:
+                    results.append(float('nan'))
+
+                for row in sub_list[0]:
+
+                    sub_xs.append((row[0]))
+                    sub_ys.append((row[1]))
+
+                district_xs.append(sub_xs)
+                district_ys.append(sub_ys)
 
     district_colors = [colors[set_colour_level(np.nanmax(results), np.nanmin(results), rate)] for rate in results]
 
@@ -88,11 +106,11 @@ def create_choropleth(json_file, data_file):
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    p = figure(title="Response rates by LA", tools=tools)
+    p = figure(width=900, height=900, title="Response rates by LA", tools=tools)
 
     p.patches('x', 'y', source=source,
               fill_color='color', fill_alpha=0.7,
-              line_color="grey", line_width=0.3)
+              line_color="white", line_width=0.3)
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"
