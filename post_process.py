@@ -40,11 +40,11 @@ def create_response_map(output_path, data_lists, geojson):
     for df in data_lists['Total_hh']:
         df.columns = ['rep', 'district', 'hh_count']
         district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
-        # print(district_size_list[0])
+
 
     perc_ret = pd.DataFrame((responded_list[0].join(district_size_list[0])))
     perc_ret = perc_ret[['Returns']].div(perc_ret.hh_count, axis=0)
-    perc_ret.to_csv(os.path.join(output_path, "perc_ret"))
+    perc_ret.to_csv(os.path.join(output_path, "perc_ret.csv"))
 
-    create_maps.create_choropleth(geojson, "perc_ret")
+    create_maps.create_choropleth(geojson, "outputs/perc_ret.csv", "inputs/LA_hh.csv")
 

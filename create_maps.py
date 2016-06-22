@@ -3,7 +3,7 @@
 import json
 import csv
 import os
-from bokeh.models import HoverTool
+from bokeh.models import HoverTool, GeoJSONDataSource
 from bokeh.plotting import figure, show, output_file, ColumnDataSource
 import math
 import numpy as np
@@ -28,20 +28,36 @@ def set_colour_level(max_val, min_val, rate):
     return i
 
 
-# JSON file is the map data, data_file is the data to be attached to the map. A common key is needed to link them.
-def create_choropleth(json_file, data_file):
+def create_choropleth(json_file, shade_data_file, sup_data_file):
 
+
+    # read in geojson map file
     with open(json_file) as base_map:
         map_data = json.load(base_map)
 
-    with open(os.path.join(os.getcwd(), "outputs", data_file), 'r') as f:
+    # read in data that will define shading
+    with open(os.path.join(os.getcwd(), shade_data_file), 'r') as shade_data:
 
-        reader = csv.reader(f)
+        reader = csv.reader(shade_data)
         next(reader)
         my_results = list(reader)
-        my_results_dict = {rows[0]: rows[1] for rows in my_results}
+        my_shade_dict = {rows[0]: rows[1] for rows in my_results}
+
+    # read in some supplementary info
+    with open(os.path.join(os.getcwd(), sup_data_file), 'r') as supp_data:
+
+        reader = csv.reader(supp_data)
+        next(reader)
+        my_results = list(reader)
+        my_supp_dict = {rows[0]: rows[1:] for rows in my_results}
 
     results = []
+    households1 = []
+    households2 = []
+    households3 = []
+    households4 = []
+    households5 = []
+    areas = []
     district_names = []
     district_xs = []
     district_ys = []
@@ -55,13 +71,27 @@ def create_choropleth(json_file, data_file):
         if feature['geometry']['type'] == 'Polygon':
 
             district_names.append(str(feature['properties'][name_key]))
+
             sub_xs = []
             sub_ys = []
 
-            if str(feature['properties'][ID_key]) in my_results_dict:
-                results.append(float(my_results_dict[str(feature['properties'][ID_key])])*100)
+            if str(feature['properties'][ID_key]) in my_shade_dict:
+                results.append(float(my_shade_dict[str(feature['properties'][ID_key])])*100)
+                households1.append(int(my_supp_dict[str(feature['properties'][ID_key])][1])*100)
+                households2.append(int(my_supp_dict[str(feature['properties'][ID_key])][2])*100)
+                households3.append(int(my_supp_dict[str(feature['properties'][ID_key])][3])*100)
+                households4.append(int(my_supp_dict[str(feature['properties'][ID_key])][4])*100)
+                households5.append(int(my_supp_dict[str(feature['properties'][ID_key])][5])*100)
+                areas.append(my_supp_dict[str(feature['properties'][ID_key])][6])
+
             else:
                 results.append(float('nan'))
+                households1.append(float('nan'))
+                households2.append(float('nan'))
+                households3.append(float('nan'))
+                households4.append(float('nan'))
+                households5.append(float('nan'))
+                areas.append(float('nan'))
 
             temp_list = feature['geometry']['coordinates'][0]
 
@@ -78,13 +108,26 @@ def create_choropleth(json_file, data_file):
             for sub_list in feature['geometry']['coordinates']:
 
                 district_names.append(str(feature['properties'][name_key]))
+
                 sub_xs = []
                 sub_ys = []
 
-                if str(feature['properties'][ID_key]) in my_results_dict:
-                    results.append(float(my_results_dict[str(feature['properties'][ID_key])])*100)
+                if str(feature['properties'][ID_key]) in my_shade_dict:
+                    results.append(float(my_shade_dict[str(feature['properties'][ID_key])])*100)
+                    households1.append(int(my_supp_dict[str(feature['properties'][ID_key])][1])*100)
+                    households2.append(int(my_supp_dict[str(feature['properties'][ID_key])][2])*100)
+                    households3.append(int(my_supp_dict[str(feature['properties'][ID_key])][3])*100)
+                    households4.append(int(my_supp_dict[str(feature['properties'][ID_key])][4])*100)
+                    households5.append(int(my_supp_dict[str(feature['properties'][ID_key])][5])*100)
+                    areas.append(my_supp_dict[str(feature['properties'][ID_key])][6])
                 else:
                     results.append(float('nan'))
+                    households1.append(float('nan'))
+                    households2.append(float('nan'))
+                    households3.append(float('nan'))
+                    households4.append(float('nan'))
+                    households5.append(float('nan'))
+                    areas.append(float('nan'))
 
                 for row in sub_list[0]:
 
@@ -103,6 +146,12 @@ def create_choropleth(json_file, data_file):
         color=district_colors,
         name=district_names,
         rate=results,
+        households1=households1,
+        households2=households2,
+        households3=households3,
+        households4=households4,
+        households5=households5,
+        area=areas,
     ))
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
@@ -117,11 +166,18 @@ def create_choropleth(json_file, data_file):
     hover.point_policy = "follow_mouse"
     hover.tooltips = [
         ("Name", "@name"),
-        ("Return rate)", "@rate%"),
+        ("Return rate", "@rate%"),
+        ("htc 1", "@households1"),
+        ("htc 2", "@households2"),
+        ("htc 3", "@households3"),
+        ("htc 4", "@households4"),
+        ("htc 5", "@households5"),
+        ("Area", "@area"),
     ]
 
     output_file("Return rate by LA.html", title="Return rate by LA")
 
     show(p)
+
 
 
