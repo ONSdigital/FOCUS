@@ -1,3 +1,13 @@
+"""Module used to store the classes related to census..."""
+
+
+# a helper process that creates an instance of a coordinator class and starts it working
+def start_fu(env, district):
+
+    StartFU(env, district)
+    yield env.timeout(0)
+
+
 class Adviser(object):
     """Call centre adviser - multitasking"""
 
@@ -14,17 +24,17 @@ class Adviser(object):
         yield self.rep.env.timeout(0)
 
 
-class ActionPlan(object):
-    """represents the coordinator for the assigned district"""
-    def __init__(self, env, district, households):
+class StartFU(object):
+    """represents the RMT creating the visit lists for the assigned districts"""
+    def __init__(self, env, district):
 
         self.env = env
         self.district = district
-        self.households = households
+        self.households = self.district.households
 
         self.visit_list = []
 
-        # self.env.process(self.arrange_visits())
+        self.env.process(self.arrange_visits())
 
     def arrange_visits(self):
 

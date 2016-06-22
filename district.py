@@ -3,9 +3,11 @@ and shares a number of census officers"""
 import householdv2
 import sys
 import censusv2
+from simpy.util import start_delayed
 from collections import namedtuple
 
 total_hh = namedtuple('Total_hh', ['reps', 'district', 'count'])
+
 
 class District(object):
 
@@ -18,18 +20,13 @@ class District(object):
         self.input_data = input_data
         self.output_data = output_data
 
-        # list of households in the district
-        self.households = []
+        self.households = []  # list of households in the district
+        self.district_co = []  # list of CO assigned to the district
 
-        # create the households that will exist in the district
         self.create_households()
-        # record total households created for region?
-        self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))
+        self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))  # total hh for region
 
-        # create action plans for the district
-        # self.action_plan = self.create_action_plans()
-
-        # create Census Officers that will work in the district
+        self.start_fu()  # process used to commence FU activities for the district
         # self.create_co(self.input_data["census officer"], "")
 
     def create_households(self):
@@ -52,9 +49,11 @@ class District(object):
 
                 self.rep.total_hh += 1
 
-    def create_action_plans(self):
+    def start_fu(self):
 
-        return censusv2.ActionPlan(self.env, self.name, self.households)
+        hh_list = sorted(list(self.input_data['households'].keys()))
+        delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
+        start_delayed(self.env, censusv2.start_fu(self.env, self), delay)
 
     def create_co(self, input_data, input_key):
 
@@ -71,7 +70,7 @@ class District(object):
                             id_num += 1
                             # print('CO created in ' + str(self.name))
                             # create CO
-                            censusv2.CensusOfficer(self.env, self, self.action_plan)
+                            self.district_co.append(censusv2.CensusOfficer(self.env, self, self.action_plan))
 
                 except IOError as e:
                     print(e)

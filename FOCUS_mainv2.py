@@ -27,7 +27,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/LA_hh.JSON'
+    file_name = 'inputs/test_LA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
