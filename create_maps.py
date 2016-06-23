@@ -31,7 +31,6 @@ def set_colour_level(rate):
 
 def create_choropleth(json_file, shade_data_file, sup_data_file):
 
-
     # read in geojson map file
     with open(json_file) as base_map:
         map_data = json.load(base_map)
@@ -139,7 +138,6 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
                 district_ys.append(sub_ys)
 
     district_colors = [colors[set_colour_level(rate)] for rate in results]
-    #district_colors = [colors[1] for rate in results]
 
     source = ColumnDataSource(data=dict(
         x=district_xs,

@@ -5,6 +5,7 @@ from collections import namedtuple
 
 return_times = namedtuple('Returned', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
 enu_util = namedtuple('Enu_util', ['reps', 'Time', 'Count'])  # enumerator usage over time
+visit = namedtuple('Visit', ['reps', 'District', 'Household', 'Type', 'Time'])
 
 
 # a helper process that creates an instance of a coordinator class and starts it working
@@ -108,8 +109,16 @@ class CensusOfficer(object):
 
             if len(self.action_plan) > 0:
 
+                # as part of the utilisation records check if last entry was different before adding new?
                 self.co_util_add()
                 current_hh = self.action_plan.pop(0)
+
+                self.rep.output_data.append(visit(self.rep.reps,
+                                                  self.district.name,
+                                                  current_hh.hh_id,
+                                                  current_hh.hh_type,
+                                                  self.rep.env.now))
+
                 yield self.env.timeout(0.5)
                 self.co_util_remove()
 
@@ -163,7 +172,6 @@ class CensusOfficer(object):
         self.rep.output_data.append(enu_util(self.rep.reps,
                                              self.env.now,
                                              len(self.district.co_working)/len(self.district.district_co)))
-
 
 
 def make_time(hours, mins, secs):
