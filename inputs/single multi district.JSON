@@ -4,7 +4,6 @@
     "replication seeds": {},
     "start_date": "2017, 3, 19, 0, 0, 0",
     "end_date": "2017, 5, 17, 0, 0, 0",
-    "coordinator_update": 1,
     "advisers": {
       "number": 1,
       "start_date": "2011, 3, 8",
@@ -23,6 +22,7 @@
     },
     "districts": {
       "Cornwall": {
+        "RMT_update": 24,
         "district_area": 79.4,
         "census officer": {
           "walking": {
@@ -30,8 +30,18 @@
             "travel_speed": 5,
             "start_date": "2017, 4, 19",
             "end_date": "2017, 5, 17",
-            "start_time": 12.5,
-            "end_time": 16
+            "availability_dict": {
+              "0": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "1": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "2": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "3": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "4": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "5": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+              "6": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]]
+            },
+            "availability": [[[10, 30, 0], [12, 0, 0]],[[12, 30, 0], [15, 0, 0]]],
+            "start_time": [10, 13],
+            "end_time": [12, 15]
           }
         },
         "households": {
@@ -128,6 +138,10 @@
                 12,
                 1
               ]
+            },
+            "delay": {
+              "paper": 72,
+              "digital": 0
             }
           },
           "htc2": {
@@ -142,6 +156,10 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "alt_help": 55,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
             "priority": 0,
             "max_visits": 15,
             "paper_after_max_visits": 0,
@@ -229,6 +247,10 @@
             "default_help": 0,
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
             "call_conversion_rate": 31,
             "dig_assist_eff": 0,
             "paper_prop": 82,
@@ -334,6 +356,10 @@
             "alt_help": 55,
             "priority": 0,
             "max_visits": 15,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
             "paper_after_max_visits": 0,
             "alt_resp": 0,
             "default_resp": 73,
@@ -422,6 +448,10 @@
             "call_conversion_rate": 29,
             "dig_assist_eff": 0,
             "paper_prop": 76,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
             "allow_paper": 1,
             "number": 1,
             "FU_start_time": 336,

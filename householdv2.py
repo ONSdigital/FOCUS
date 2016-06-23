@@ -1,6 +1,8 @@
 """file used to store the classes and definitions related to the households represented in the simulation """
 
 import datetime
+import censusv2
+from simpy.util import start_delayed
 from collections import namedtuple
 
 response_times = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
@@ -20,11 +22,18 @@ class Household(object):
         self.input_data = input_data
         self.output_data = output_data
 
-
+        # below define how the hh behaves
         self.resp_level = self.input_data['default_resp']
         #self.help_level = self.input_data['default_help']
         self.help_level = 0
+        self.resp_type = set_preference(self)
+        self.delay = self.input_data['delay'][self.resp_type]
 
+        # flags to keep track of what the hh is doing/has done
+        self.resp_planned = False
+        self.resp_sent = False
+        self.resp_rec = False
+        self.resp_time = 0
         self.status = ''
 
         self.rep.env.process(self.action())
@@ -35,6 +44,9 @@ class Household(object):
 
         if action_test <= self.resp_level:
 
+            self.resp_planned = True
+
+            # determine date and time of response
             current_date_time = self.rep.start_date + datetime.timedelta(hours=self.rep.env.now)
             sim_days_left = (self.rep.end_date.date() - current_date_time.date()).days
 
@@ -53,14 +65,13 @@ class Household(object):
             response_date_time = datetime.datetime.combine(response_date, datetime.datetime.min.time())\
                                 + datetime.timedelta(hours=response_time)
 
-            response_date_time = (response_date_time - current_date_time).total_seconds()/3600
+            response_date_time_hours = (response_date_time - current_date_time).total_seconds()/3600
 
-            yield self.env.timeout(response_date_time)
-            self.output_data.append(response_times(self.rep.reps,
-                                                   self.district.name,
-                                                   self.hh_id,
-                                                   self.hh_type,
-                                                   self.env.now))
+            # wait until that time
+            self.status = "Responding"
+            yield self.env.timeout(response_date_time_hours)
+            # then respond
+            yield self.env.process(self.respond(self.delay))
 
         elif self.resp_level < action_test <= self.help_level:
 
@@ -78,12 +89,31 @@ class Household(object):
 
     def contact(self):
 
-        #print(str(self.hh_type) + "  called at " + str(self.env.now))
-
         current_ad = yield self.rep.adviser_store.get()
-        #print(str(current_ad) + " is with " + str(self.hh_type) + " at time " + str(self.env.now))
         yield self.env.timeout(0.5)
         self.rep.adviser_store.put(current_ad)
+
+    def respond(self, delay=0):
+        """represents the hh responding - not the response being received by census"""
+        """will need to add incomplete responses"""
+
+        if self.resp_sent is False:
+
+            self.resp_sent = True
+            self.resp_time = self.env.now
+            # add to hh response event log
+            self.output_data.append(response_times(self.rep.reps,
+                                                   self.district.name,
+                                                   self.hh_id,
+                                                   self.hh_type,
+                                                   self.resp_time))
+
+            if self.delay == 0:  # digital
+                self.env.process(censusv2.ret_rec(self, self.rep))
+            else:  # paper
+                start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
+
+            yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
 
 
 # beta dist used to generate some numbers for responses over time
@@ -102,6 +132,17 @@ def gauss_dist(rnd, alpha, beta):
 
 
     return response_time
+
+
+def set_preference(hh):
+    """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
+    paper_test = hh.rep.rnd.uniform(0, 100)
+
+    if paper_test <= int(hh.input_data['paper_prop']):
+
+        return "paper"
+
+    return "digital"
 
 
 

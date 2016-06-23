@@ -9,22 +9,23 @@ import math
 import numpy as np
 
 
-# need a better way of setting color levels??
-def set_colour_level(max_val, min_val, rate):
+def set_colour_level(rate):
 
-    steps = int((max_val - min_val)/4)
-    i = 1
+    i = 0
 
-    while True:
-        if rate < min_val + (i*steps):
-            break
-        elif math.isnan(rate):
-            i = 0
-            break
-        elif steps == 0:
-            i = 1
-            break
-        i += 1
+    if math.isnan(rate) is True:
+        i = 0
+    elif rate < 80:
+        i = 1
+    elif rate < 85:
+        i = 2
+    elif rate < 90:
+        i = 3
+    elif rate < 95:
+        i = 4
+    elif rate <= 100:
+        i = 5
+
     return i
 
 
@@ -137,7 +138,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
                 district_xs.append(sub_xs)
                 district_ys.append(sub_ys)
 
-    district_colors = [colors[set_colour_level(np.nanmax(results), np.nanmin(results), rate)] for rate in results]
+    district_colors = [colors[set_colour_level(rate)] for rate in results]
     #district_colors = [colors[1] for rate in results]
 
     source = ColumnDataSource(data=dict(

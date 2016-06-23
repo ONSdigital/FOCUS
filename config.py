@@ -59,8 +59,8 @@ def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name)
 
 
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
-new_districts = os.path.join(os.getcwd(), 'inputs', 'test_LA_hh.csv')
-output_path = os.path.join(os.getcwd(), 'inputs', 'test_LA_hh.JSON')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'LA_hh.csv')
+output_path = os.path.join(os.getcwd(), 'inputs', 'LA_hh.JSON')
 
 generate_multiple_districts(input_path, new_districts, output_path)
 

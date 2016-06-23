@@ -23,11 +23,14 @@ class District(object):
         self.households = []  # list of households in the district
         self.district_co = []  # list of CO assigned to the district
 
+        self.co_working = []
+        self.co_not_working = []
+
         self.create_households()
         self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))  # total hh for region
 
         self.start_fu()  # process used to commence FU activities for the district
-        # self.create_co(self.input_data["census officer"], "")
+        self.create_co(self.input_data["census officer"], "")
 
     def create_households(self):
 
@@ -70,7 +73,10 @@ class District(object):
                             id_num += 1
                             # print('CO created in ' + str(self.name))
                             # create CO
-                            self.district_co.append(censusv2.CensusOfficer(self.env, self, self.action_plan))
+                            self.district_co.append(censusv2.CensusOfficer(self.rep,
+                                                                           self.env,
+                                                                           self,
+                                                                           input_data))
 
                 except IOError as e:
                     print(e)
