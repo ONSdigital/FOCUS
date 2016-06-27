@@ -10,9 +10,10 @@ import csv
 import shutil
 import post_process
 from itertools import groupby
+from collections import defaultdict
 
 # set required flags
-display_default = True
+display_default = False
 create_new_config = False
 data_lists = {}
 
@@ -73,7 +74,8 @@ for run in list_of_runs:
     # run each replication
     for rep in range(replications):
 
-        output_data = []  # a list to store namedtuples that record each event in the simulation
+        #output_data = []  # a list to store namedtuples that record each event in the simulation
+        output_data = defaultdict(list)
 
         # set a random seed based on current date and current rep unless seed exists
         if str(rep) not in input_data[run]['replication seeds']:
@@ -89,11 +91,6 @@ for run in list_of_runs:
         rnd = random.Random()
         rnd.seed(str(seed))
 
-        # and write to dict as record of each reps seed
-        #if str(rep) not in input_data[run]['replication seeds']:
-        #    input_data[run]['replication seeds'][rep] = seed
-        #    create_new_config = True
-
         # define simpy env for current rep
         env = simpy.Environment()
 
@@ -103,17 +100,18 @@ for run in list_of_runs:
         # and run it
         env.run(until=sim_hours)
 
-        # then create the csv output files for the current replication
-        output_data.sort(key=lambda x: type(x).__name__)
+        # write the output to csv files
+        list_of_output = sorted(list(output_data.keys()))
 
-        for k, g in groupby(output_data, lambda x: type(x).__name__):
-            if os.path.isdir(output_path + '/{}'.format(k) + '/') is False:
-                os.mkdir(output_path + '/{}'.format(k) + '/')
-            with open(output_path + '/{}'.format(k) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
-                csv_output = csv.writer(f_output)
-                rows = list(g)
-                for row in rows:
-                    csv_output.writerow(list(row))
+        for row in list_of_output:
+            if os.path.isdir(output_path + '/{}'.format(row) + '/') is False:
+                os.mkdir(output_path + '/{}'.format(row) + '/')
+                with open(output_path + '/{}'.format(row) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
+                    csv_output = csv.writer(f_output)
+
+                    for data_row in output_data[row]:
+                        rows = list(data_row)
+                        csv_output.writerow(list(rows))
 
 # then, if required, dump JSON config file with seeds to the output folder
 if create_new_config is True:
@@ -126,7 +124,7 @@ if create_new_config is True:
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
     post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
-    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
+    #post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
 
 
 

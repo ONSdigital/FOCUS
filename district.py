@@ -27,8 +27,7 @@ class District(object):
         self.co_not_working = []
 
         self.create_households()
-        self.output_data.append(total_hh(self.rep.reps, self.name, int(len(self.households))))  # total hh for region
-
+        self.output_data['Total_hh'].append(total_hh(self.rep.reps, self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
         self.create_co(self.input_data["census officer"], "")
 

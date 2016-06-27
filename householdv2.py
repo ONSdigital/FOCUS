@@ -5,7 +5,7 @@ import censusv2
 from simpy.util import start_delayed
 from collections import namedtuple
 
-response_times = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
+response = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
 
 
 class Household(object):
@@ -102,11 +102,17 @@ class Household(object):
             self.resp_sent = True
             self.resp_time = self.env.now
             # add to hh response event log
-            self.output_data.append(response_times(self.rep.reps,
-                                                   self.district.name,
-                                                   self.hh_id,
-                                                   self.hh_type,
-                                                   self.resp_time))
+            #self.output_data.append(response_times(self.rep.reps,
+            #                                       self.district.name,
+            #                                       self.hh_id,
+           #                                        self.hh_type,
+            #                                       self.resp_time))
+
+            self.output_data['Respond'].append(response(self.rep.reps,
+                                                        self.district.name,
+                                                        self.hh_id,
+                                                        self.hh_type,
+                                                        self.resp_time))
 
             if self.delay == 0:  # digital
                 self.env.process(censusv2.ret_rec(self, self.rep))

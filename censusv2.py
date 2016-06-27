@@ -21,11 +21,11 @@ def ret_rec(hh, rep):
     hh.resp_rec = True
     rep.total_returns += 1
 
-    rep.output_data.append(return_times(rep.reps,
-                                        hh.district.name,
-                                        hh.hh_id,
-                                        hh.hh_type,
-                                        rep.env.now))
+    rep.output_data['Return'].append(return_times(rep.reps,
+                                                  hh.district.name,
+                                                  hh.hh_id,
+                                                  hh.hh_type,
+                                                  rep.env.now))
 
     yield rep.env.timeout(0)
 
@@ -113,11 +113,11 @@ class CensusOfficer(object):
                 self.co_util_add()
                 current_hh = self.action_plan.pop(0)
 
-                self.rep.output_data.append(visit(self.rep.reps,
-                                                  self.district.name,
-                                                  current_hh.hh_id,
-                                                  current_hh.hh_type,
-                                                  self.rep.env.now))
+                self.rep.output_data['Visit'].append(visit(self.rep.reps,
+                                                           self.district.name,
+                                                           current_hh.hh_id,
+                                                           current_hh.hh_type,
+                                                           self.rep.env.now))
 
                 yield self.env.timeout(0.5)
                 self.co_util_remove()
@@ -155,23 +155,37 @@ class CensusOfficer(object):
 
     def co_util_add(self):
 
-        self.rep.output_data.append(enu_util(self.rep.reps,
-                                             self.env.now,
-                                             len(self.district.co_working)/len(self.district.district_co)))
-        self.district.co_working.append(self)
-        self.rep.output_data.append(enu_util(self.rep.reps,
-                                             self.env.now,
-                                             len(self.district.co_working)/len(self.district.district_co)))
+        # check first if should add..
+        # so look to see if current time is same as last entry
+        # if old util is same as new delete all entries with same time stamp
+
+        if len(self.rep.output_data['enu_util']) > 0:
+
+            time = self.rep.output_data['enu_util'][len(self.rep.output_data['enu_util'])-1]
+
+        # if old util is diff just delete last entry and only add after util
+
+        else:
+            # just add
+            self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
+                                                             self.env.now,
+                                                             len(self.district.co_working)/
+                                                             len(self.district.district_co)))
+            self.district.co_working.append(self)
+            self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
+                                                             self.env.now,
+                                                             len(self.district.co_working)/
+                                                             len(self.district.district_co)))
 
     def co_util_remove(self):
 
-        self.rep.output_data.append(enu_util(self.rep.reps,
-                                             self.env.now,
-                                             len(self.district.co_working)/len(self.district.district_co)))
+        self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
+                                                         self.env.now,
+                                                         len(self.district.co_working)/len(self.district.district_co)))
         self.district.co_working.remove(self)
-        self.rep.output_data.append(enu_util(self.rep.reps,
-                                             self.env.now,
-                                             len(self.district.co_working)/len(self.district.district_co)))
+        self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
+                                                         self.env.now,
+                                                         len(self.district.co_working)/len(self.district.district_co)))
 
 
 def make_time(hours, mins, secs):
