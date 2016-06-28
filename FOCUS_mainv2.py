@@ -13,7 +13,7 @@ from itertools import groupby
 from collections import defaultdict
 
 # set required flags
-display_default = False
+display_default = True
 create_new_config = False
 data_lists = {}
 
@@ -74,7 +74,6 @@ for run in list_of_runs:
     # run each replication
     for rep in range(replications):
 
-        #output_data = []  # a list to store namedtuples that record each event in the simulation
         output_data = defaultdict(list)
 
         # set a random seed based on current date and current rep unless seed exists

@@ -58,12 +58,34 @@ def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name)
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
 
 
+def generate_test_file(input_JSON, output_JSON_name, number):
+
+    with open(input_JSON) as data_file:
+        input_data = json.load(data_file)
+
+    list_of_districts = sorted(list(input_data['1']['districts']))
+    count = 1
+
+    for distr in list_of_districts:
+        if count > number:
+            input_data['1']['districts'].pop(distr, None)
+
+        count += 1
+
+    with open(os.path.join(output_JSON_name), 'w') as outfile:
+        json.dump(input_data, outfile,  indent=4, sort_keys=True)
+
+
+
+
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
 new_districts = os.path.join(os.getcwd(), 'inputs', 'LA_hh.csv')
 output_path = os.path.join(os.getcwd(), 'inputs', 'LA_hh.JSON')
 
 generate_multiple_districts(input_path, new_districts, output_path)
 
+
+generate_test_file('inputs/LA_hh.JSON', 'inputs/test_LA_hh.JSON', 3)
 
 
 

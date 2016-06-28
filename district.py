@@ -20,12 +20,12 @@ class District(object):
         self.input_data = input_data
         self.output_data = output_data
 
+        # belong to the class
         self.households = []  # list of households in the district
         self.district_co = []  # list of CO assigned to the district
+        self.return_rate = 0
 
-        self.co_working = []
-        self.co_not_working = []
-
+        # processes to run
         self.create_households()
         self.output_data['Total_hh'].append(total_hh(self.rep.reps, self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
@@ -34,7 +34,6 @@ class District(object):
     def create_households(self):
 
         list_of_hh = sorted(list(self.input_data['households'].keys()))
-        # for hh in self.input_data['households']:
         for hh in list_of_hh:
 
             for i in range(self.input_data['households'][hh]['number']):
@@ -70,8 +69,6 @@ class District(object):
                     if 'number' in input_data:
                         for i in range(int(input_data["number"])):
                             id_num += 1
-                            # print('CO created in ' + str(self.name))
-                            # create CO
                             self.district_co.append(censusv2.CensusOfficer(self.rep,
                                                                            self.env,
                                                                            self,

@@ -35,6 +35,7 @@ class Household(object):
         self.resp_rec = False
         self.resp_time = 0
         self.status = ''
+        self.visits = 0
 
         self.rep.env.process(self.action())
 
@@ -94,19 +95,13 @@ class Household(object):
         self.rep.adviser_store.put(current_ad)
 
     def respond(self, delay=0):
-        """represents the hh responding - not the response being received by census"""
-        """will need to add incomplete responses"""
+        """represents the hh responding - not the return being received by census"""
 
         if self.resp_sent is False:
 
             self.resp_sent = True
             self.resp_time = self.env.now
             # add to hh response event log
-            #self.output_data.append(response_times(self.rep.reps,
-            #                                       self.district.name,
-            #                                       self.hh_id,
-           #                                        self.hh_type,
-            #                                       self.resp_time))
 
             self.output_data['Respond'].append(response(self.rep.reps,
                                                         self.district.name,
@@ -130,14 +125,12 @@ def beta_dist(rep, alpha, beta, sim_days_left):
 
 def gauss_dist(rnd, alpha, beta):
 
-    response_time = rnd.gauss(alpha, beta)
+    output = rnd.gauss(alpha, beta)
 
-    if response_time < 0:
-        response_time = 0
+    if output < 0:
+        output = 0
 
-
-
-    return response_time
+    return output
 
 
 def set_preference(hh):

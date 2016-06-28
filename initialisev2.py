@@ -10,7 +10,7 @@ class Rep(object):
 
     def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, seed):
 
-        # values fed into class
+        # values passed to the class
         self.env = env
         self.input_data = input_data
         self.output_data = output_data
@@ -22,13 +22,14 @@ class Rep(object):
         self.reps = reps
         self.seed = seed
 
-        # variables created within the class
+        # variables created within the class - belonging to it
         self.total_ad_instances = 0
         self.total_web_chat_instances = 0
         self.total_returns = 0
         self.districts = []  # list containing each instance of the district class
         self.ad_avail = []  # list of all the available advisers
         self.total_hh = 0  # used to store total number of hh created across all districts
+
         # methods to run on start
         self.total_ad_instances = self.input_data['advisers']['number']
         if self.total_ad_instances > 0:
@@ -52,13 +53,8 @@ class Rep(object):
 
     def create_districts(self):
 
-        # create list of districts for the rep from config file to iterate through.
-        # It is possible to just iterate though the part of the config file direct but as python dicts
-        # are unsorted the districts will be created randomly. to get the same result each time the same seed is used
-        # need to iterate through a sorted list of the dict keys.
         list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
-        #for distr in self.input_data['districts']:
         for distr in list_of_districts:
 
             self.districts.append(district.District(self,

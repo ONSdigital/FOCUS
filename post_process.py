@@ -28,7 +28,7 @@ def create_response_map(output_path, data_lists, geojson):
     # create some default output
     responded_list = []
 
-    for df in data_lists['Responded']:
+    for df in data_lists['Respond']:
 
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
         int_df = pd.DataFrame({'Returns': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()

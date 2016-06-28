@@ -4,8 +4,11 @@ import datetime as dt
 from collections import namedtuple
 
 return_times = namedtuple('Returned', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
-enu_util = namedtuple('Enu_util', ['reps', 'Time', 'Count'])  # enumerator usage over time
 visit = namedtuple('Visit', ['reps', 'District', 'Household', 'Type', 'Time'])
+visit_contact = namedtuple('Visit_contact', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit_out = namedtuple('Visit_out', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit_wasted = namedtuple('Visit_wasted', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit_success = namedtuple('Visit_success', ['run', 'reps', 'Time', 'Household', 'Type'])
 
 
 # a helper process that creates an instance of a coordinator class and starts it working
@@ -72,7 +75,6 @@ class StartFU(object):
         split = math.ceil(len(self.visit_list)/slices)
 
         for co in self.district.district_co:
-            action_plan = []
             if split > len(self.visit_list):
                 action_plan = self.visit_list[:]
                 self.visit_list = []
@@ -100,40 +102,86 @@ class CensusOfficer(object):
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
 
         self.env.process(self.contact())
-        self.district.co_not_working.append(self)
 
     def contact(self):
 
-        # first test if CO available for work...and if the trigger for the district has been reached?
-        if self.working_test() is True:
+        if (self.working() and returns_to_date(self.district) < self.district.input_data["trigger"] and
+                len(self.action_plan) > 0):
 
-            if len(self.action_plan) > 0:
+            current_hh = self.action_plan.pop(0)
+            self.rep.output_data['Visit'].append(visit(self.rep.reps,
+                                                       self.district.name,
+                                                       current_hh.hh_id,
+                                                       current_hh.hh_type,
+                                                       self.rep.env.now))
 
-                # as part of the utilisation records check if last entry was different before adding new?
-                self.co_util_add()
-                current_hh = self.action_plan.pop(0)
+            current_hh.visits += 1
+            contact_test = self.rep.rnd.uniform(0, 100)
 
-                self.rep.output_data['Visit'].append(visit(self.rep.reps,
-                                                           self.district.name,
-                                                           current_hh.hh_id,
-                                                           current_hh.hh_type,
-                                                           self.rep.env.now))
+            contact_dict = current_hh.input_data['at_home'][str(current_day(self))]
 
-                yield self.env.timeout(0.5)
-                self.co_util_remove()
+            if contact_test <= contact_dict[return_time_key(contact_dict, self.env.now)]:
 
+                self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.run,
+                                                                           self.rep.reps,
+                                                                           self.env.now,
+                                                                           current_hh.hh_id,
+                                                                           current_hh.hh_type))
+
+                yield self.rep.env.process(self.fu_visit_outcome(current_hh))
 
             else:
-                # no one to visit...stop working and wait until the start of the next day...whenever that is
-                yield self.env.timeout(24 - (self.env.now/24 - int(self.env.now/24))*24)
+                # out
+                self.rep.output_data['Visit_out'].append(visit_out(self.rep.run,
+                                                                   self.rep.reps,
+                                                                   self.env.now,
+                                                                   current_hh.hh_id,
+                                                                   current_hh.hh_type))
+
+                yield self.rep.env.timeout((3 / 60))  # need to add travel time calcs
+
         else:
-            # the yield time here needs to be until the next time they are due to be available
+            # either not at work, no one to visit or trigger reached - check when co next becomes available.
             yield self.env.timeout(next_available(self))
 
         self.env.process(self.contact())
 
-    def working_test(self):
-        """returns true or false to depending on whether or not a CO is available"""
+    def fu_visit_outcome(self, current_hh):
+
+        outcome_test = self.rep.rnd.uniform(0, 100)
+        conversion_dict = current_hh.input_data['conversion_rate'][str(current_day(self))]
+
+        if current_hh.resp_sent is True:
+            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.run,
+                                                                     self.rep.reps,
+                                                                     self.rep.env.now,
+                                                                     current_hh.hh_id,
+                                                                     current_hh.hh_type))
+
+            yield self.rep.env.timeout((5 / 60))  # need to add travel time
+
+        # hh have not responded yet and respond there and then either by paper or digital.
+        elif (current_hh.resp_sent is False and
+                outcome_test <= conversion_dict[return_time_key(conversion_dict, self.env.now)]):
+
+            self.rep.output_data['Visit_success'].append(visit_success(self.rep.run,
+                                                                       self.rep.reps,
+                                                                       self.rep.env.now,
+                                                                       current_hh.hh_id,
+                                                                       current_hh.hh_type))
+            current_hh.resp_planned = True
+            yield self.rep.env.timeout((30 / 60))  # add travel time
+            self.rep.env.process(current_hh.respond(current_hh.delay))
+
+        # hh have not responded but do not respond as a result of the visit.
+        elif (current_hh.resp_sent is False and
+                outcome_test > conversion_dict[return_time_key(conversion_dict, self.env.now)]):
+
+            yield self.rep.env.timeout((5 / 60))  # add travel time
+            # add a link back to hh action with updated behaviours
+
+    def working(self):
+        """returns true or false to depending on whether or not a CO is available at current time"""
 
         current_date_time = self.rep.start_date + dt.timedelta(hours=self.rep.env.now)
         current_date = current_date_time.date()
@@ -142,51 +190,38 @@ class CensusOfficer(object):
         if self.start_date <= current_date < self.end_date:
 
             current_time = current_date_time.time()
-            current_day = current_date.weekday()
+            week_day = current_day(self)
 
-            avail_data = self.input_data['availability_dict'][str(current_day)]
+            avail_data = self.input_data['availability'][str(week_day)]
 
             for row in avail_data:
                 # compare
-                if make_time(row[0][0], row[0][1], row[0][2]) <= current_time < make_time(row[1][0], row[1][1], row[1][2]):
+                if make_time(row[0][0], row[0][1], row[0][2]) <= \
+                        current_time < make_time(row[1][0], row[1][1], row[1][2]):
                     return True
 
         return False
 
-    def co_util_add(self):
 
-        # check first if should add..
-        # so look to see if current time is same as last entry
-        # if old util is same as new delete all entries with same time stamp
+def current_day(obj):
 
-        if len(self.rep.output_data['enu_util']) > 0:
+    current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
+    current_date = current_date_time.date()
+    day = current_date.weekday()
 
-            time = self.rep.output_data['enu_util'][len(self.rep.output_data['enu_util'])-1]
+    return day
 
-        # if old util is diff just delete last entry and only add after util
 
-        else:
-            # just add
-            self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
-                                                             self.env.now,
-                                                             len(self.district.co_working)/
-                                                             len(self.district.district_co)))
-            self.district.co_working.append(self)
-            self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
-                                                             self.env.now,
-                                                             len(self.district.co_working)/
-                                                             len(self.district.district_co)))
+def simpy_to_time(simpy_time):
 
-    def co_util_remove(self):
+    days = int(simpy_time/24)
+    hours = int(simpy_time - days*24)
+    mins = ((simpy_time - days*24) - hours)*60
+    secs = int((mins - int(mins))*60)
 
-        self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
-                                                         self.env.now,
-                                                         len(self.district.co_working)/len(self.district.district_co)))
-        self.district.co_working.remove(self)
-        self.rep.output_data['enu_util'].append(enu_util(self.rep.reps,
-                                                         self.env.now,
-                                                         len(self.district.co_working)/len(self.district.district_co)))
+    time = str(hours) + "," + str(int(mins)) + "," + str(secs)
 
+    return dt.datetime.strptime(time, '%H,%M,%S').time()
 
 def make_time(hours, mins, secs):
 
@@ -206,44 +241,51 @@ def make_time_decimal(time_object):
 
 def next_available(co):
 
-        current_date_time = co.rep.start_date + dt.timedelta(hours=co.rep.env.now)
-        current_date = current_date_time.date()
-        current_time = current_date_time.time()
+    current_date_time = co.rep.start_date + dt.timedelta(hours=co.rep.env.now)
+    current_date = current_date_time.date()
+    current_time = current_date_time.time()
 
-        start_hours = co.input_data['availability_dict'][str(co.start_date.weekday())][0][0][0]
-        start_mins = co.input_data['availability_dict'][str(co.start_date.weekday())][0][0][1]
-        start_secs = co.input_data['availability_dict'][str(co.start_date.weekday())][0][0][2]
-        start_time = make_time_decimal(make_time(start_hours, start_mins, start_secs))
+    # check if correct day.
+    if current_date < co.start_date:
 
-        if current_date < co.start_date:
-            # then wait until the next day they are working plus time they start that day
-            return (co.start_date - current_date).total_seconds()/3600 + start_time
+        return (co.start_date - current_date).total_seconds()/3600
 
-        elif co.start_date <= current_date <= co.end_date:
-            # working day...
-            # if working day...get time and see if less than any start times for that day
-            start_times = co.input_data['availability_dict'][str(co.start_date.weekday())]
-            for times in start_times:
-                next_start = make_time(times[0][0], times[0][1], times[0][2])
-                if current_time <= next_start:
-                    # then yield till then
-                    return make_time_decimal(next_start) - make_time_decimal(current_time)
+    # check if there is anyone to visit or if trigger has been reached
+    elif len(co.action_plan) == 0 or returns_to_date(co.district) >= co.district.input_data["trigger"]:
+        return 24 - make_time_decimal(current_time)
 
-            # if get to here must be passed last start time so wait until next day
-            return 24 - make_time_decimal(current_time)
+    # if the right day check if the right time.
+    elif co.start_date <= current_date <= co.end_date:
+        start_times = co.input_data['availability'][str(co.start_date.weekday())]
+        for times in start_times:
+            next_start = make_time(times[0][0], times[0][1], times[0][2])
+            if current_time <= next_start:
+                return make_time_decimal(next_start) - make_time_decimal(current_time)
 
+        # if get to here must be past last start time so wait until next day.
+        return 24 - make_time_decimal(current_time)
 
-
-
+    elif current_date > co.end_date:
+        # past last day of work so yield until the end of the simulation.
+        return co.rep.sim_hours - co.rep.env.now
 
 
+def returns_to_date(district):
 
-        elif current_date > co.end_date:
-            # yield till end of sim
-            return co.rep.sim_hours - co.rep.env.now
+    count = len([hh.hh_id for hh in district.households if hh.resp_rec is True])
+
+    return (count/len(district.households))*100
 
 
+def return_time_key(input_dict, time):
 
+    time = make_time_decimal(simpy_to_time(time))
+
+    key_list = sorted(list(input_dict.keys()), key=int)
+
+    for key in key_list:
+        if int(key) >= time:
+            return key
 
 
 
