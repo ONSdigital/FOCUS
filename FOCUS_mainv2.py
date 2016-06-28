@@ -9,7 +9,6 @@ import os
 import csv
 import shutil
 import post_process
-from itertools import groupby
 from collections import defaultdict
 
 # set required flags
@@ -107,7 +106,6 @@ for run in list_of_runs:
                 os.mkdir(output_path + '/{}'.format(row) + '/')
                 with open(output_path + '/{}'.format(row) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
                     csv_output = csv.writer(f_output)
-
                     for data_row in output_data[row]:
                         rows = list(data_row)
                         csv_output.writerow(list(rows))

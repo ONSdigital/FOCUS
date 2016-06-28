@@ -5,19 +5,19 @@ import censusv2
 from simpy.util import start_delayed
 from collections import namedtuple
 
-response = namedtuple('Responded', ['reps', 'District', 'hh_id', 'Type', 'Time'])  # time full response received
+response = namedtuple('Responded', ['reps', 'District', 'id', 'Type', 'Time'])  # time full response received
 
 
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, output_data):
+    def __init__(self, rep, rnd, env, district, id, hh_type, input_data, output_data):
 
         self.rep = rep
         self.rnd = rnd
         self.env = env
         self.district = district
-        self.hh_id = hh_id
+        self.id = id
         self.hh_type = hh_type
         self.input_data = input_data
         self.output_data = output_data
@@ -28,6 +28,7 @@ class Household(object):
         self.help_level = 0
         self.resp_type = set_preference(self)
         self.delay = self.input_data['delay'][self.resp_type]
+        self.priority = self.input_data['priority']
 
         # flags to keep track of what the hh is doing/has done
         self.resp_planned = False
@@ -105,7 +106,7 @@ class Household(object):
 
             self.output_data['Respond'].append(response(self.rep.reps,
                                                         self.district.name,
-                                                        self.hh_id,
+                                                        self.id,
                                                         self.hh_type,
                                                         self.resp_time))
 

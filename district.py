@@ -3,6 +3,8 @@ and shares a number of census officers"""
 import householdv2
 import sys
 import censusv2
+import math
+from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
 
@@ -24,12 +26,30 @@ class District(object):
         self.households = []  # list of households in the district
         self.district_co = []  # list of CO assigned to the district
         self.return_rate = 0
+        self.travel_dist = 0
 
         # processes to run
         self.create_households()
         self.output_data['Total_hh'].append(total_hh(self.rep.reps, self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
         self.create_co(self.input_data["census officer"], "")
+
+        self.hh_area = self.input_data['district_area'] / len(self.households)
+        self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
+
+        self.env.process(self.hh_separation())
+
+    # takes current response rate and calculates hh separation based on current response rate.
+    def hh_separation(self):
+
+        while True:
+
+            try:
+                self.travel_dist = self.initial_hh_sep / (math.sqrt(1 - (returns_to_date(self, "%"))))
+            except ZeroDivisionError:
+                self.travel_dist = 0
+
+            yield self.env.timeout(24)
 
     def create_households(self):
 
