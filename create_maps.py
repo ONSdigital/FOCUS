@@ -1,35 +1,61 @@
-"""module for creating colour coded maps"""
+"""module for creating colour coded maps. The JSO?N file is the map. The shade file defines the
+colors that will be seen. Sup data is extra information that will be displayed in the hover tool"""
 
 import json
 import csv
 import os
-from bokeh.models import HoverTool, GeoJSONDataSource
+from bokeh.models import HoverTool
 from bokeh.plotting import figure, show, output_file, ColumnDataSource
 import math
 import numpy as np
 
 
-def set_colour_level(rate):
+def set_colour_level(rate, min_shade, max_shade, dynamic_shading):
 
-    i = 0
+    if dynamic_shading:
 
-    if math.isnan(rate) is True:
+        shade_range = max_shade - min_shade
+        step = math.ceil(shade_range/5)
+        min_value = int(min_shade)
+
         i = 0
-    elif rate < 80:
-        i = 1
-    elif rate < 85:
-        i = 2
-    elif rate < 90:
-        i = 3
-    elif rate < 95:
-        i = 4
-    elif rate <= 100:
-        i = 5
 
-    return i
+        if math.isnan(rate) is True:
+            i = 0
+        elif rate < min_value + step:
+            i = 1
+        elif rate < min_value + step*2:
+            i = 2
+        elif rate < min_value + step*3:
+            i = 3
+        elif rate < min_value + step*4:
+            i = 4
+        elif rate <= min_value + step*5:
+            i = 5
+
+        return i
+
+    else:
+
+        i = 0
+
+        if math.isnan(rate) is True:
+            i = 0
+        elif rate < 80:
+            i = 1
+        elif rate < 85:
+            i = 2
+        elif rate < 90:
+            i = 3
+        elif rate < 95:
+            i = 4
+        elif rate <= 100:
+            i = 5
+
+        return i
 
 
-def create_choropleth(json_file, shade_data_file, sup_data_file):
+def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dynamic_shading):
 
     # read in geojson map file
     with open(json_file) as base_map:
@@ -43,7 +69,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
         my_results = list(reader)
         my_shade_dict = {rows[0]: rows[1] for rows in my_results}
 
-    # read in some supplementary info
+    # read in some supplementary info - must have district as row[0]?
     with open(os.path.join(os.getcwd(), sup_data_file), 'r') as supp_data:
 
         reader = csv.reader(supp_data)
@@ -51,20 +77,18 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
         my_results = list(reader)
         my_supp_dict = {rows[0]: rows[1:] for rows in my_results}
 
-    results = []
-    households1 = []
-    households2 = []
-    households3 = []
-    households4 = []
-    households5 = []
-    areas = []
+    output_filename = os.path.join(output_type, ".html")
+
+    shade = []
+    supplementary = []
     district_names = []
     district_xs = []
     district_ys = []
+
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0",  "#C994C7", "#D4B9DA"]
 
     name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
-    ID_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
+    id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
 
     for feature in map_data['features']:
 
@@ -75,23 +99,13 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
             sub_xs = []
             sub_ys = []
 
-            if str(feature['properties'][ID_key]) in my_shade_dict:
-                results.append(float(my_shade_dict[str(feature['properties'][ID_key])])*100)
-                households1.append(int(my_supp_dict[str(feature['properties'][ID_key])][1])*100)
-                households2.append(int(my_supp_dict[str(feature['properties'][ID_key])][2])*100)
-                households3.append(int(my_supp_dict[str(feature['properties'][ID_key])][3])*100)
-                households4.append(int(my_supp_dict[str(feature['properties'][ID_key])][4])*100)
-                households5.append(int(my_supp_dict[str(feature['properties'][ID_key])][5])*100)
-                areas.append(my_supp_dict[str(feature['properties'][ID_key])][6])
+            if str(feature['properties'][id_key]) in my_shade_dict:
+                shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
+                supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
 
             else:
-                results.append(float('nan'))
-                households1.append(float('nan'))
-                households2.append(float('nan'))
-                households3.append(float('nan'))
-                households4.append(float('nan'))
-                households5.append(float('nan'))
-                areas.append(float('nan'))
+                shade.append(float('nan'))
+                supplementary.append(float('nan'))
 
             temp_list = feature['geometry']['coordinates'][0]
 
@@ -112,22 +126,12 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
                 sub_xs = []
                 sub_ys = []
 
-                if str(feature['properties'][ID_key]) in my_shade_dict:
-                    results.append(float(my_shade_dict[str(feature['properties'][ID_key])])*100)
-                    households1.append(int(my_supp_dict[str(feature['properties'][ID_key])][1])*100)
-                    households2.append(int(my_supp_dict[str(feature['properties'][ID_key])][2])*100)
-                    households3.append(int(my_supp_dict[str(feature['properties'][ID_key])][3])*100)
-                    households4.append(int(my_supp_dict[str(feature['properties'][ID_key])][4])*100)
-                    households5.append(int(my_supp_dict[str(feature['properties'][ID_key])][5])*100)
-                    areas.append(my_supp_dict[str(feature['properties'][ID_key])][6])
+                if str(feature['properties'][id_key]) in my_shade_dict:
+                    shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
+                    supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
                 else:
-                    results.append(float('nan'))
-                    households1.append(float('nan'))
-                    households2.append(float('nan'))
-                    households3.append(float('nan'))
-                    households4.append(float('nan'))
-                    households5.append(float('nan'))
-                    areas.append(float('nan'))
+                    shade.append(float('nan'))
+                    supplementary.append(float('nan'))
 
                 for row in sub_list[0]:
 
@@ -137,20 +141,19 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
                 district_xs.append(sub_xs)
                 district_ys.append(sub_ys)
 
-    district_colors = [colors[set_colour_level(rate)] for rate in results]
+    min_shade = np.nanmin(shade)
+    max_shade = np.nanmax(shade)
+
+    #district_colors = [colors[set_colour_level(rate)] for rate in shade]
+    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading)] for rate in shade]
 
     source = ColumnDataSource(data=dict(
         x=district_xs,
         y=district_ys,
         color=district_colors,
         name=district_names,
-        rate=results,
-        households1=households1,
-        households2=households2,
-        households3=households3,
-        households4=households4,
-        households5=households5,
-        area=areas,
+        rate=shade,
+        supp=supplementary,
     ))
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
@@ -165,16 +168,11 @@ def create_choropleth(json_file, shade_data_file, sup_data_file):
     hover.point_policy = "follow_mouse"
     hover.tooltips = [
         ("Name", "@name"),
-        ("Return rate", "@rate%"),
-        ("htc 1", "@households1"),
-        ("htc 2", "@households2"),
-        ("htc 3", "@households3"),
-        ("htc 4", "@households4"),
-        ("htc 5", "@households5"),
-        ("Area", "@area"),
+        (output_type, "@rate%"),
+        ("Supp", "@supp"),
     ]
 
-    output_file("Return rate by LA.html", title="Return rate by LA")
+    output_file(output_filename, title="Return rate by LA")
 
     show(p)
 

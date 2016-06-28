@@ -5,12 +5,14 @@ from collections import namedtuple
 import helper as h
 
 return_times = namedtuple('Returned', ['reps', 'District', 'id', 'Type', 'Time'])  # time full response received
-visit = namedtuple('Visit', ['reps', 'District', 'Household', 'Type', 'Time'])
-visit_contact = namedtuple('Visit_contact', ['run', 'reps', 'Time', 'Household', 'Type'])
-visit_out = namedtuple('Visit_out', ['run', 'reps', 'Time', 'Household', 'Type'])
-visit_wasted = namedtuple('Visit_wasted', ['run', 'reps', 'Time', 'Household', 'Type'])
-visit_success = namedtuple('Visit_success', ['run', 'reps', 'Time', 'Household', 'Type'])
-visit_failed = namedtuple('Visit_failed', ['run', 'reps', 'Time', 'Household', 'Type'])
+visit = namedtuple('Visit', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_out = namedtuple('Visit_out', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_wasted = namedtuple('Visit_wasted',['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_success = namedtuple('Visit_success', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+
+
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -127,21 +129,21 @@ class CensusOfficer(object):
 
             if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
 
-                self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.run,
-                                                                           self.rep.reps,
-                                                                           self.env.now,
+                self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.reps,
+                                                                           self.district.name,
                                                                            current_hh.id,
-                                                                           current_hh.hh_type))
+                                                                           current_hh.hh_type,
+                                                                           self.env.now))
 
                 yield self.rep.env.process(self.fu_visit_outcome(current_hh))
 
             else:
                 # out
-                self.rep.output_data['Visit_out'].append(visit_out(self.rep.run,
-                                                                   self.rep.reps,
-                                                                   self.env.now,
+                self.rep.output_data['Visit_out'].append(visit_out(self.rep.reps,
+                                                                   self.district.name,
                                                                    current_hh.id,
-                                                                   current_hh.hh_type))
+                                                                   current_hh.hh_type,
+                                                                   self.env.now))
 
                 visit_time = current_hh.input_data["visit_times"]["out"]
                 yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -158,11 +160,11 @@ class CensusOfficer(object):
         conversion_dict = current_hh.input_data['conversion_rate'][str(h.current_day(self))]
 
         if current_hh.resp_sent is True:
-            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.run,
-                                                                     self.rep.reps,
-                                                                     self.rep.env.now,
+            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
+                                                                     self.district.name,
                                                                      current_hh.id,
-                                                                     current_hh.hh_type))
+                                                                     current_hh.hh_type,
+                                                                     self.env.now))
 
             visit_time = current_hh.input_data["visit_times"]["wasted"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -171,11 +173,11 @@ class CensusOfficer(object):
         elif (current_hh.resp_sent is False and
                 outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]):
 
-            self.rep.output_data['Visit_success'].append(visit_success(self.rep.run,
-                                                                       self.rep.reps,
-                                                                       self.rep.env.now,
+            self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
+                                                                       self.district.name,
                                                                        current_hh.id,
-                                                                       current_hh.hh_type))
+                                                                       current_hh.hh_type,
+                                                                       self.env.now))
             current_hh.resp_planned = True
             visit_time = current_hh.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -185,11 +187,11 @@ class CensusOfficer(object):
         elif (current_hh.resp_sent is False and
                 outcome_test > conversion_dict[h.return_time_key(conversion_dict, self.env.now)]):
 
-            self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.run,
-                                                                     self.rep.reps,
-                                                                     self.rep.env.now,
+            self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
+                                                                     self.district.name,
                                                                      current_hh.id,
-                                                                     current_hh.hh_type))
+                                                                     current_hh.hh_type,
+                                                                     self.env.now))
 
             visit_time = current_hh.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])

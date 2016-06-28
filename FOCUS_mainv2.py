@@ -120,8 +120,8 @@ if create_new_config is True:
 # progress to processing data created
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
-    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
-    #post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
+    post_process.create_response_map('inputs/geog_E+W_LAs.geojson', output_path, data_lists)
+    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
 
 
 
