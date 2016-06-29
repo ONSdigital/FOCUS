@@ -71,7 +71,7 @@ class StartFU(object):
         self.visit_list = []
 
         for household in self.households:
-            if household.resp_rec is False:
+            if household.resp_rec is False and household.input_data['FU_start_time'] <= self.env.now:
                 self.visit_list.append(household)
 
         self.district.rep.rnd.shuffle(self.visit_list)

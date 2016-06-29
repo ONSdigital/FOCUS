@@ -10,7 +10,7 @@ import math
 import numpy as np
 
 
-def set_colour_level(rate, min_shade, max_shade, dynamic_shading):
+def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
     if dynamic_shading:
 
@@ -33,7 +33,10 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading):
         elif rate <= min_value + step*5:
             i = 5
 
-        return i
+        if reversed and i != 0:
+            return 6-i
+        else:
+            return i
 
     else:
 
@@ -52,10 +55,13 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading):
         elif rate <= 100:
             i = 5
 
-        return i
+        if reversed and i != 0:
+            return 6-i
+        else:
+            return i
 
 
-def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dynamic_shading):
+def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reversed):
 
     # read in geojson map file
     with open(json_file) as base_map:
@@ -77,7 +83,8 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
         my_results = list(reader)
         my_supp_dict = {rows[0]: rows[1:] for rows in my_results}
 
-    output_filename = os.path.join(output_type, ".html")
+    suffix = '.html'
+    output_filename = os.path.join(output_type + suffix)
 
     shade = []
     supplementary = []
@@ -87,8 +94,8 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
 
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0",  "#C994C7", "#D4B9DA"]
 
-    name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
-    id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
+    name_key = 'LSOA11NM'  # 'LSOA11NM' # 'LAD11NM'
+    id_key = 'LSOA11CD'  # 'LSOA11CD' # 'LAD11CD'
 
     for feature in map_data['features']:
 
@@ -144,8 +151,8 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
     min_shade = np.nanmin(shade)
     max_shade = np.nanmax(shade)
 
-    #district_colors = [colors[set_colour_level(rate)] for rate in shade]
-    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading)] for rate in shade]
+    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed)]
+                       for rate in shade]
 
     source = ColumnDataSource(data=dict(
         x=district_xs,
@@ -158,7 +165,9 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    p = figure(width=900, height=900, title="Response rates by LA", tools=tools)
+    title = output_type + " by LA"
+
+    p = figure(width=900, height=900, title=title, tools=tools)
 
     p.patches('x', 'y', source=source,
               fill_color='color', fill_alpha=0.7,
@@ -172,7 +181,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
         ("Supp", "@supp"),
     ]
 
-    output_file(output_filename, title="Return rate by LA")
+    output_file(output_filename, title=title)
 
     show(p)
 

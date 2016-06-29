@@ -23,16 +23,19 @@ def aggregate(output_path, data_lists):
             data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
 
 
-def create_response_map(geojson, output_path, data_lists ):
+def create_response_map(output_path, data_lists, geojson):
 
-    # create some default output
+    # create some default output in ths case overall response rate by district
     return_list = []
 
     for df in data_lists['Return']:
 
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        int_df = pd.DataFrame({'Returns': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-        return_list.append(pd.DataFrame(int_df.groupby(['district']).sum()['Returns']))
+        #print(df)
+        int_df = pd.DataFrame({'Returns': df.groupby(['district', 'rep']).size()}).reset_index()
+        #print(int_df)
+        return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Returns']))
+        #print(return_list)
 
     district_size_list = []
 
@@ -45,7 +48,7 @@ def create_response_map(geojson, output_path, data_lists ):
     returns = returns[['Returns']].div(returns.hh_count, axis=0)
     returns.to_csv(os.path.join(output_path, "returns.csv"))
 
-    create_maps.create_choropleth(geojson, "outputs/returns.csv", "inputs/LA_hh.csv", "Return rates", False)
+    create_maps.create_choropleth(geojson, "outputs/returns.csv", "inputs/LSOA_hh.csv", "Return rates", False, False)
 
 
 def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success"):
@@ -64,10 +67,13 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
 
     # count the number of visits that had the input outcome
     for df in data_lists[visit_type]:
+        #print(df)
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
         # check below works correct with multiple reps - may need average of sum by below groupings
-        int_df = pd.DataFrame({'outcome': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-        visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).sum()['outcome']))
+        int_df = pd.DataFrame({'outcome': df.groupby(['rep', 'district']).size()}).reset_index()
+        #print(int_df)
+        visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['outcome']))
+        #print(visit_outcome_list)
 
     visits_done = pd.DataFrame((visit_list[0].join(visit_outcome_list[0])))
     visits_done = visits_done[['outcome']].div(visits_done.Visits, axis=0)
@@ -77,7 +83,7 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
     # get headers of created scv file
     # and supp file?
 
-    create_maps.create_choropleth(geojson, "outputs/visits.csv", "inputs/LA_hh.csv", visit_type, True)
+    create_maps.create_choropleth(geojson, "outputs/visits.csv", "inputs/LSOA_hh.csv", visit_type, True, False)
 
 
 

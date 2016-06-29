@@ -27,7 +27,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/test_LA_hh.JSON'
+    file_name = 'inputs/test_LSOA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -104,11 +104,11 @@ for run in list_of_runs:
         for row in list_of_output:
             if os.path.isdir(output_path + '/{}'.format(row) + '/') is False:
                 os.mkdir(output_path + '/{}'.format(row) + '/')
-                with open(output_path + '/{}'.format(row) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
-                    csv_output = csv.writer(f_output)
-                    for data_row in output_data[row]:
-                        rows = list(data_row)
-                        csv_output.writerow(list(rows))
+            with open(output_path + '/{}'.format(row) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
+                csv_output = csv.writer(f_output)
+                for data_row in output_data[row]:
+                    rows = list(data_row)
+                    csv_output.writerow(list(rows))
 
 # then, if required, dump JSON config file with seeds to the output folder
 if create_new_config is True:
@@ -120,8 +120,8 @@ if create_new_config is True:
 # progress to processing data created
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
-    post_process.create_response_map('inputs/geog_E+W_LAs.geojson', output_path, data_lists)
-    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
+    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LSOAs.geojson')
+    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LSOAs.geojson', "Visit_contact")
 
 
 
