@@ -31,11 +31,8 @@ def create_response_map(output_path, data_lists, geojson):
     for df in data_lists['Return']:
 
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        #print(df)
         int_df = pd.DataFrame({'Returns': df.groupby(['district', 'rep']).size()}).reset_index()
-        #print(int_df)
         return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Returns']))
-        #print(return_list)
 
     district_size_list = []
 
@@ -49,9 +46,13 @@ def create_response_map(output_path, data_lists, geojson):
     for item in return_list:
         returns = pd.DataFrame((item.join(district_size_list[index-1])))
         returns = returns[['Returns']].div(returns.hh_count, axis=0)
-        file_name = os.path.join(output_path, "run_" + str(index) + "_returns.csv")
+        output_dir = os.path.join("outputs", "csv")
+        if os.path.isdir(output_dir) is False:
+            os.mkdir(output_dir)
+        file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
         returns.to_csv(file_name)
-        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv", "run_" + str(index) + "_return rates", False, False)
+        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) + " return rates",
+                                      True, False)
         index += 1
 
 
@@ -71,23 +72,24 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
 
     # count the number of visits that had the input outcome
     for df in data_lists[visit_type]:
-        #print(df)
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        # check below works correct with multiple reps - may need average of sum by below groupings
         int_df = pd.DataFrame({'outcome': df.groupby(['rep', 'district']).size()}).reset_index()
-        #print(int_df)
         visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['outcome']))
-        #print(visit_outcome_list)
 
-    visits_done = pd.DataFrame((visit_list[0].join(visit_outcome_list[0])))
-    visits_done = visits_done[['outcome']].div(visits_done.Visits, axis=0)
-    # output the percentage of visits that have the outcome as per the input.
-    visits_done.to_csv(os.path.join(output_path, "visits.csv"))
-
-    # get headers of created scv file
-    # and supp file?
-
-    create_maps.create_choropleth(geojson, "outputs/visits.csv", "inputs/LA_hh.csv", visit_type, True, False)
+    index = 1
+    for item in visit_outcome_list:
+        visits_done = pd.DataFrame((visit_list[index-1].join(item)))
+        visits_done = visits_done[['outcome']].div(visits_done.Visits, axis=0)
+        # output the percentage of visits that have the outcome as per the input.
+        output_dir = os.path.join("outputs", "csv")
+        if os.path.isdir(output_dir) is False:
+            os.mkdir(output_dir)
+        file_name = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
+        visits_done.to_csv(file_name)
+        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv",
+                                      "run " + str(index) + " " + visit_type,
+                                      True, False)
+        index += 1
 
 
 

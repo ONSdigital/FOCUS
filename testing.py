@@ -9,14 +9,10 @@ import os
 import csv
 import shutil
 from collections import defaultdict
-import post_process
-import glob
-
-from multiprocessing import Process, Manager,  cpu_count, Queue, Pool
+from multiprocessing import cpu_count, Pool
 
 # set required flags
-display_default = True
-create_new_config = False
+create_new_config = []
 data_lists = {}
 
 
@@ -52,7 +48,7 @@ def start_run(run_input):
         env = simpy.Environment()
 
         # initialise replication
-        current_rep = initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, rep + 1, seed)
+        initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, rep + 1, seed)
 
         # and run it
         env.run(until=sim_hours)
@@ -69,18 +65,19 @@ def start_run(run_input):
                     rows = list(data_row)
                     csv_output.writerow(list(rows))
 
+
 # delete all old output files from default location except generated JSON files
 if os.path.isdir('outputs/') is True:
     dirs = [x[0] for x in os.walk('outputs/')]
     for d in dirs:
         if d != 'outputs/':
             shutil.rmtree(str(d))
-        # if outputs dir remove certain filetypes
+
 
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/test_LA_hh.JSON'
+    file_name = 'inputs/small_test_LA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -114,13 +111,17 @@ list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of 
 the_list = []
 
 counter = 1
-print(cpu_count())
+
 for item in list_of_runs:
     input_data[item]['id'] = counter
     the_list.append(input_data[item])
     counter += 1
 
 Pool().map(start_run, the_list)
+
+output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
+    json.dump(input_data, outfile)
 
 
 

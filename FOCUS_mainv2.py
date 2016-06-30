@@ -22,7 +22,7 @@ if os.path.isdir('outputs/') is True:
     for d in dirs:
         if d != 'outputs/':
             shutil.rmtree(str(d))
-        # if outputs dir remove certain filetypes
+
 
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
@@ -121,4 +121,4 @@ if create_new_config is True:
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
     post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
-    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_contact")
+    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")

@@ -99,8 +99,8 @@ output_path = os.path.join(os.getcwd(), 'inputs', 'LA_hh.JSON')
 
 generate_multiple_districts(input_path, new_districts, output_path)
 
-
 generate_test_file('inputs/LA_hh.JSON', 'inputs/small_test_LA_hh.JSON', 3)
+generate_test_file('inputs/LA_hh.JSON', 'inputs/test_LA_hh.JSON', 50)
 
 #changes = [[['districts', 'all', 'trigger'], 80], [['districts', 'all', 'RMT_update'], 48]]
 

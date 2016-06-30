@@ -110,6 +110,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
             sub_ys = []
 
             if str(feature['properties'][id_key]) in my_shade_dict:
+                print(my_shade_dict[str(feature['properties'][id_key])])
                 shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                 supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
 
@@ -137,6 +138,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
                 sub_ys = []
 
                 if str(feature['properties'][id_key]) in my_shade_dict:
+                    print(my_shade_dict[str(feature['properties'][id_key])])
                     shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                     supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
                 else:
@@ -157,7 +159,6 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
     district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed)]
                        for rate in shade]
 
-
     source = ColumnDataSource(data=dict(
         x=district_xs,
         y=district_ys,
@@ -166,8 +167,6 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
         rate=shade,
         supp=supplementary,
     ))
-
-
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
@@ -187,7 +186,12 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
         ("Supp", "@supp"),
     ]
 
-    output_file(os.path.join("outputs", output_filename), title=title)
+    output_dir = os.path.join("outputs", "charts")
+
+    if os.path.isdir(output_dir) is False:
+        os.mkdir(output_dir)
+
+    output_file(os.path.join("outputs", "charts", output_filename), title=title)
     save(p)
     #show(p)
 

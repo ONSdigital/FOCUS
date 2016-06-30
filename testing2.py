@@ -18,6 +18,4 @@ for folder in folder_list:
 
     post_process.aggregate(output_path, data_lists)
 
-
-
 post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
