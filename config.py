@@ -93,19 +93,16 @@ def generate_multiple_runs(input_JSON, changes):
                 pass
 
 
+input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'LA_hh.csv')
+output_path = os.path.join(os.getcwd(), 'inputs', 'LA_hh.JSON')
+
+generate_multiple_districts(input_path, new_districts, output_path)
 
 
+generate_test_file('inputs/LA_hh.JSON', 'inputs/small_test_LA_hh.JSON', 3)
 
-#input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
-#new_districts = os.path.join(os.getcwd(), 'inputs', 'LSOA_hh.csv')
-#output_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hh.JSON')
-
-#generate_multiple_districts(input_path, new_districts, output_path)
-
-
-generate_test_file('inputs/LSOA_hh.JSON', 'inputs/test_LSOA_hh.JSON', 10000)
-
-changes = [[['districts', 'all', 'trigger'], 80], [['districts', 'all', 'RMT_update'], 48]]
+#changes = [[['districts', 'all', 'trigger'], 80], [['districts', 'all', 'RMT_update'], 48]]
 
 #generate_multiple_runs('inputs/test_LSOA_hh.JSON', changes)
 

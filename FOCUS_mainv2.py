@@ -27,7 +27,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/test_LSOA_hh.JSON'
+    file_name = 'inputs/test_LA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -70,7 +70,7 @@ for run in list_of_runs:
     # number of replications to run
     replications = input_data[run]['replications']
 
-    # run each replication
+   # run each replication
     for rep in range(replications):
 
         output_data = defaultdict(list)
@@ -120,41 +120,5 @@ if create_new_config is True:
 # progress to processing data created
 post_process.aggregate(output_path, data_lists)
 if display_default is True:
-    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LSOAs.geojson')
-    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LSOAs.geojson', "Visit_contact")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
+    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_contact")

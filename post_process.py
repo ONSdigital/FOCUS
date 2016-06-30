@@ -44,11 +44,15 @@ def create_response_map(output_path, data_lists, geojson):
         df.columns = ['rep', 'district', 'hh_count']
         district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
 
-    returns = pd.DataFrame((return_list[0].join(district_size_list[0])))
-    returns = returns[['Returns']].div(returns.hh_count, axis=0)
-    returns.to_csv(os.path.join(output_path, "returns.csv"))
-
-    create_maps.create_choropleth(geojson, "outputs/returns.csv", "inputs/LSOA_hh.csv", "Return rates", False, False)
+    # selects only the first data frame
+    index = 1
+    for item in return_list:
+        returns = pd.DataFrame((item.join(district_size_list[index-1])))
+        returns = returns[['Returns']].div(returns.hh_count, axis=0)
+        file_name = os.path.join(output_path, "run_" + str(index) + "_returns.csv")
+        returns.to_csv(file_name)
+        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv", "run_" + str(index) + "_return rates", False, False)
+        index += 1
 
 
 def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success"):
@@ -83,7 +87,7 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
     # get headers of created scv file
     # and supp file?
 
-    create_maps.create_choropleth(geojson, "outputs/visits.csv", "inputs/LSOA_hh.csv", visit_type, True, False)
+    create_maps.create_choropleth(geojson, "outputs/visits.csv", "inputs/LA_hh.csv", visit_type, True, False)
 
 
 
