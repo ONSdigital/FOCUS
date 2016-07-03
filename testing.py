@@ -10,6 +10,13 @@ import csv
 import shutil
 from collections import defaultdict
 from multiprocessing import cpu_count, Pool
+import time
+
+
+ts = time.time()
+
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+print(st)
 
 # set required flags
 create_new_config = []
@@ -17,6 +24,8 @@ data_lists = {}
 
 
 def start_run(run_input):
+
+    output_path = os.path.join(os.getcwd(), 'outputs')
 
     # pull out length of sim for current run
     sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
@@ -65,67 +74,68 @@ def start_run(run_input):
                     rows = list(data_row)
                     csv_output.writerow(list(rows))
 
+if __name__ == '__main__':
 
-# delete all old output files from default location except generated JSON files
-if os.path.isdir('outputs/') is True:
-    dirs = [x[0] for x in os.walk('outputs/')]
-    for d in dirs:
-        if d != 'outputs/':
-            shutil.rmtree(str(d))
+    # delete all old output files from default location except generated JSON files
+    if os.path.isdir('outputs/') is True:
+        dirs = [x[0] for x in os.walk('outputs/')]
+        for d in dirs:
+            if d != 'outputs/':
+                shutil.rmtree(str(d))
 
+    # read in input configuration file - use a default if nothing is selected
+    input_path = input('Enter input file path or press enter to use defaults: ')
+    if len(input_path) < 1:
+        file_name = 'inputs/small_test_LA_hh.JSON'
+        input_path = os.path.join(os.getcwd(), file_name)
 
-# read in input configuration file - use a default if nothing is selected
-input_path = input('Enter input file path or press enter to use defaults: ')
-if len(input_path) < 1:
-    file_name = 'inputs/small_test_LA_hh.JSON'
-    input_path = os.path.join(os.getcwd(), file_name)
+    # loads the selected config file
+    try:
+        with open(input_path) as data_file:
+            input_data = json.load(data_file)  # dict of the whole file
 
-# loads the selected config file
-try:
-    with open(input_path) as data_file:
-        input_data = json.load(data_file)  # dict of the whole file
+    # if something goes wrong exit with error
+    except IOError as e:
+        print(e)
+        sys.exit()
 
-# if something goes wrong exit with error
-except IOError as e:
-    print(e)
-    sys.exit()
+    # ask for output destination but still need to check if can create new folders
+    output_path = input('Enter output path or press enter to use default: ')
+    if len(output_path) < 1:
+        outputs = 'outputs'
+        output_path = os.path.join(os.getcwd(), outputs)
 
-# ask for output destination but still need to check if can create new folders
-output_path = input('Enter output path or press enter to use default: ')
-if len(output_path) < 1:
-    outputs = 'outputs'
-    output_path = os.path.join(os.getcwd(), outputs)
+    try:
+        # create if does not exist
+        if os.path.isdir(output_path) is False:
+            os.makedirs(output_path)
 
-try:
-    # create if does not exist
-    if os.path.isdir(output_path) is False:
-        os.makedirs(output_path)
+    # if something goes wrong exit with error
+    except IOError as e:
+        print(e)
+        sys.exit()
 
-# if something goes wrong exit with error
-except IOError as e:
-    print(e)
-    sys.exit()
+    # create list of runs from config file
+    list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
+    the_list = []
 
-# create list of runs from config file
-list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
-the_list = []
+    counter = 1
 
-counter = 1
+    for item in list_of_runs:
+        input_data[item]['id'] = counter
+        the_list.append(input_data[item])
+        counter += 1
 
-for item in list_of_runs:
-    input_data[item]['id'] = counter
-    the_list.append(input_data[item])
-    counter += 1
+    Pool().map(start_run, the_list)
 
-Pool().map(start_run, the_list)
+    output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+    with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
+        json.dump(input_data, outfile)
 
-output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
-with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
-    json.dump(input_data, outfile)
+    ts = time.time()
 
-
-
-
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(st)
 
 
 

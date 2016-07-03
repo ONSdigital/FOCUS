@@ -192,8 +192,8 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
         os.mkdir(output_dir)
 
     output_file(os.path.join("outputs", "charts", output_filename), title=title)
-    save(p)
-    #show(p)
+    #save(p)
+    show(p)
 
 
 
