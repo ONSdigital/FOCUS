@@ -12,14 +12,8 @@ import post_process
 import time
 from collections import defaultdict
 
-
-ts = time.time()
-
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-print(st)
-
 # set required flags
-display_default = False
+display_default = True
 create_new_config = False
 data_lists = {}
 
@@ -34,7 +28,7 @@ if os.path.isdir('outputs/') is True:
 # read in input configuration file - use a default if nothing is selected
 input_path = input('Enter input file path or press enter to use defaults: ')
 if len(input_path) < 1:
-    file_name = 'inputs/small_test_LA_hh.JSON'
+    file_name = 'inputs/test_LA_hh.JSON'
     input_path = os.path.join(os.getcwd(), file_name)
 
 # loads the selected config file
@@ -65,6 +59,10 @@ except IOError as e:
 
 # create list of runs from config file
 list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
+
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+print(st)
 
 # cycle through the runs
 for run in list_of_runs:
@@ -124,13 +122,13 @@ if create_new_config is True:
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile)
 
-ts = time.time()
-
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-print(st)
 
 # progress to processing data created
 if display_default is True:
     post_process.aggregate(output_path, data_lists)
     post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
     post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
+
+ts = time.time()
+st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+print(st)

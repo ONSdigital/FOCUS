@@ -20,7 +20,8 @@ def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name)
     list_of_current_hh = sorted(list(my_hh_dict.keys()), key=str)
 
     # numbers of HH per htc hh
-    hh_per_co = [1290, 1050, 580, 390, 290]
+    #hh_per_co = [1290, 1050, 580, 390, 290]
+    hh_per_co = [1290, 1050, 580, 200, 150]
 
     with open(new_district_list, 'r') as f:
 
@@ -95,12 +96,12 @@ def generate_multiple_runs(input_JSON, changes):
 
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
 new_districts = os.path.join(os.getcwd(), 'inputs', 'LA_hh.csv')
-output_path = os.path.join(os.getcwd(), 'inputs', 'LA_hh.JSON')
+output_path = os.path.join(os.getcwd(), 'inputs', 'alt_LA_hh.JSON')
 
 generate_multiple_districts(input_path, new_districts, output_path)
 
-generate_test_file('inputs/LA_hh.JSON', 'inputs/small_test_LA_hh.JSON', 3)
-generate_test_file('inputs/LA_hh.JSON', 'inputs/test_LA_hh.JSON', 50)
+generate_test_file('inputs/LA_hh.JSON', 'inputs/alt_small_test_LA_hh.JSON', 3)
+generate_test_file('inputs/LA_hh.JSON', 'inputs/alt_test_LA_hh.JSON', 50)
 
 #changes = [[['districts', 'all', 'trigger'], 80], [['districts', 'all', 'RMT_update'], 48]]
 

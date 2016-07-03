@@ -8,24 +8,16 @@ import initialisev2
 import os
 import csv
 import shutil
+from itertools import repeat
 from collections import defaultdict
-from multiprocessing import cpu_count, Pool
+from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import time
 
 
-ts = time.time()
-
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-print(st)
-
-# set required flags
-create_new_config = []
-data_lists = {}
+l = Lock()  # global declaration...can I avoid this?
 
 
-def start_run(run_input):
-
-    output_path = os.path.join(os.getcwd(), 'outputs')
+def start_run(run_input, filepath):
 
     # pull out length of sim for current run
     sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
@@ -35,7 +27,7 @@ def start_run(run_input):
     # number of replications to run
     replications = run_input['replications']
 
-   # run each replication
+    # run each replication
     for rep in range(replications):
 
         output_data = defaultdict(list)
@@ -65,16 +57,20 @@ def start_run(run_input):
         # write the output to csv files
         list_of_output = sorted(list(output_data.keys()))
 
+        l.acquire()
         for row in list_of_output:
-            if os.path.isdir(output_path + '/{}'.format(row) + '/') is False:
-                os.mkdir(output_path + '/{}'.format(row) + '/')
-            with open(output_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
+            if os.path.isdir(filepath + '/{}'.format(row) + '/') is False:
+                os.mkdir(filepath + '/{}'.format(row) + '/')
+            with open(filepath + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
                 csv_output = csv.writer(f_output)
                 for data_row in output_data[row]:
                     rows = list(data_row)
                     csv_output.writerow(list(rows))
+        l.release()
 
 if __name__ == '__main__':
+
+    freeze_support()
 
     # delete all old output files from default location except generated JSON files
     if os.path.isdir('outputs/') is True:
@@ -126,7 +122,12 @@ if __name__ == '__main__':
         the_list.append(input_data[item])
         counter += 1
 
-    Pool().map(start_run, the_list)
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(st)
+
+    pool = Pool(cpu_count())
+    Pool().starmap(start_run, zip(the_list, repeat(output_path)))
 
     output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:

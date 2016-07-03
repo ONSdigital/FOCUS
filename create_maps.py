@@ -21,7 +21,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
         i = 0
 
-        if math.isnan(rate) is True:
+        if math.isnan(rate):
             i = 0
         elif rate < min_value + step:
             i = 1
@@ -43,7 +43,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
         i = 0
 
-        if math.isnan(rate) is True:
+        if math.isnan(rate):
             i = 0
         elif rate < 80:
             i = 1
@@ -110,7 +110,6 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
             sub_ys = []
 
             if str(feature['properties'][id_key]) in my_shade_dict:
-                print(my_shade_dict[str(feature['properties'][id_key])])
                 shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                 supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
 
@@ -138,7 +137,6 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
                 sub_ys = []
 
                 if str(feature['properties'][id_key]) in my_shade_dict:
-                    print(my_shade_dict[str(feature['properties'][id_key])])
                     shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                     supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
                 else:

@@ -52,7 +52,7 @@ def create_response_map(output_path, data_lists, geojson):
         file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
         returns.to_csv(file_name)
         create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) + " return rates",
-                                      True, False)
+                                      False, False)
         index += 1
 
 
