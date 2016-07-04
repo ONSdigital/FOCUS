@@ -11,69 +11,21 @@ import shutil
 import post_process
 import time
 from collections import defaultdict
+from itertools import repeat
+from multiprocessing import cpu_count, Pool, freeze_support, Lock
 
-# set required flags
-display_default = True
-create_new_config = False
-data_lists = {}
-
-# delete all old output files from default location except generated JSON files
-if os.path.isdir('outputs/') is True:
-    dirs = [x[0] for x in os.walk('outputs/')]
-    for d in dirs:
-        if d != 'outputs/':
-            shutil.rmtree(str(d))
+l = Lock()  # global declaration...can I avoid this?
 
 
-# read in input configuration file - use a default if nothing is selected
-input_path = input('Enter input file path or press enter to use defaults: ')
-if len(input_path) < 1:
-    file_name = 'inputs/test_LA_hh.JSON'
-    input_path = os.path.join(os.getcwd(), file_name)
-
-# loads the selected config file
-try:
-    with open(input_path) as data_file:
-        input_data = json.load(data_file)  # dict of the whole file
-
-# if something goes wrong exit with error
-except IOError as e:
-    print(e)
-    sys.exit()
-
-# ask for output destination but still need to check if can create new folders
-output_path = input('Enter output path or press enter to use default: ')
-if len(output_path) < 1:
-    outputs = 'outputs'
-    output_path = os.path.join(os.getcwd(), outputs)
-
-try:
-    # create if does not exist
-    if os.path.isdir(output_path) is False:
-        os.makedirs(output_path)
-
-# if something goes wrong exit with error
-except IOError as e:
-    print(e)
-    sys.exit()
-
-# create list of runs from config file
-list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
-
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-print(st)
-
-# cycle through the runs
-for run in list_of_runs:
+def start_run(run_input, filepath):
 
     # pull out length of sim for current run
-    sim_start = datetime.datetime.strptime(input_data[run]['start_date'], '%Y, %m, %d, %H, %M, %S')
-    sim_end = datetime.datetime.strptime(input_data[run]['end_date'], '%Y, %m, %d, %H, %M, %S')
+    sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
+    sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_hours = (sim_end - sim_start).total_seconds()/3600
 
     # number of replications to run
-    replications = input_data[run]['replications']
+    replications = run_input['replications']
 
    # run each replication
     for rep in range(replications):
@@ -81,15 +33,15 @@ for run in list_of_runs:
         output_data = defaultdict(list)
 
         # set a random seed based on current date and current rep unless seed exists
-        if str(rep) not in input_data[run]['replication seeds']:
+        if str(rep) not in run_input['replication seeds']:
             now = datetime.datetime.now()
             seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
-            seed = abs(now - seed_date).total_seconds() + int(run)
-            input_data[run]['replication seeds'][rep] = seed  # added...
+            seed = abs(now - seed_date).total_seconds() + int(run_input['id'])
+            run_input['replication seeds'][rep] = seed  # added...
             create_new_config = True
 
         else:
-            seed = input_data[run]['replication seeds'][str(rep)]
+            seed = run_input['replication seeds'][str(rep)]
 
         rnd = random.Random()
         rnd.seed(str(seed))
@@ -98,7 +50,7 @@ for run in list_of_runs:
         env = simpy.Environment()
 
         # initialise replication
-        current_rep = initialisev2.Rep(env, input_data[run], output_data, rnd, run, sim_hours, rep + 1, seed)
+        current_rep = initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, rep + 1, seed)
 
         # and run it
         env.run(until=sim_hours)
@@ -106,29 +58,93 @@ for run in list_of_runs:
         # write the output to csv files
         list_of_output = sorted(list(output_data.keys()))
 
+        l.acquire()
+
         for row in list_of_output:
-            if os.path.isdir(output_path + '/{}'.format(row) + '/') is False:
-                os.mkdir(output_path + '/{}'.format(row) + '/')
-            with open(output_path + '/{}'.format(row) + '/' + str(run) + '.csv', 'a', newline='') as f_output:
+            if os.path.isdir(filepath + '/{}'.format(row) + '/') is False:
+                os.mkdir(filepath + '/{}'.format(row) + '/')
+            with open(filepath + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
                 csv_output = csv.writer(f_output)
                 for data_row in output_data[row]:
                     rows = list(data_row)
                     csv_output.writerow(list(rows))
 
-# then, if required, dump JSON config file with seeds to the output folder
-if create_new_config is True:
+        l.release()
+
+
+def produce_default_output():
+
+        agg_data = post_process.aggregate(output_path)
+        post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson')
+        #post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
+
+if __name__ == '__main__':
+
+    freeze_support()
+
+    # delete all old output files from default location except generated JSON files
+    if os.path.isdir('outputs/') is True:
+        dirs = [x[0] for x in os.walk('outputs/')]
+        for d in dirs:
+            if d != 'outputs/':
+                shutil.rmtree(str(d))
+
+    # read in input configuration file - use a default if nothing is selected
+    input_path = input('Enter input file path or press enter to use defaults: ')
+    if len(input_path) < 1:
+        file_name = 'inputs/small_test_LA_hh.JSON'
+        input_path = os.path.join(os.getcwd(), file_name)
+
+    # loads the selected config file
+    try:
+        with open(input_path) as data_file:
+            input_data = json.load(data_file)  # dict of the whole file
+
+    # if something goes wrong exit with error
+    except IOError as e:
+        print(e)
+        sys.exit()
+
+    # ask for output destination but still need to check if can create new folders
+    output_path = input('Enter output path or press enter to use default: ')
+    if len(output_path) < 1:
+        outputs = 'outputs'
+        output_path = os.path.join(os.getcwd(), outputs)
+
+    try:
+        # create if does not exist
+        if os.path.isdir(output_path) is False:
+            os.makedirs(output_path)
+
+    # if something goes wrong exit with error
+    except IOError as e:
+        print(e)
+        sys.exit()
+
+    # create list of runs from config file
+    list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
+    the_list = []
+
+    counter = 1
+
+    for item in list_of_runs:
+        input_data[item]['id'] = counter
+        the_list.append(input_data[item])
+        counter += 1
+
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(st)
+
+    pool = Pool(cpu_count())
+    Pool().starmap(start_run, zip(the_list, repeat(output_path)))
 
     output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile)
 
+    produce_default_output()
 
-# progress to processing data created
-if display_default is True:
-    post_process.aggregate(output_path, data_lists)
-    post_process.create_response_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson')
-    post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
-
-ts = time.time()
-st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-print(st)
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(st)

@@ -5,13 +5,14 @@ import glob
 import create_maps
 
 
-def aggregate(output_path, data_lists):
+def aggregate(output_path):
 
-    folder_list = glob.glob("outputs/*/")
+    folder_list = glob.glob(output_path + '/*/')
+    data_lists = {}
 
     for folder in folder_list:
 
-        folder_name = folder.split(os.path.sep)[1]
+        folder_name = folder.split(os.path.sep)[-2]
         data_lists[folder_name] = []
 
         glob_folder = os.path.join('outputs', folder_name, '*.csv')
@@ -21,6 +22,8 @@ def aggregate(output_path, data_lists):
         for file in file_list:
             # add the raw file to dataLists ready for
             data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
+
+    return data_lists
 
 
 def create_response_map(output_path, data_lists, geojson):
