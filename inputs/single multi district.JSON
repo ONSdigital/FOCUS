@@ -21,7 +21,7 @@
       "FU_on": 0
     },
     "districts": {
-      "Cornwall": {
+      "E06000001": {
         "trigger": 90,
         "RMT_update": 24,
         "district_area": 79.4,
@@ -214,6 +214,55 @@
                   ]
                 ]
               ]
+            },
+            "visit_times": {
+              "htc1": {
+                "out": 3,
+                "convert": 5,
+                "success": 30,
+                "wasted": 5,
+                "failed": 5,
+                "query": 1
+              },
+              "htc2": {
+                "out": 3,
+                "convert": 5,
+                "success": 30,
+                "wasted": 5,
+                "failed": 5,
+                "query": 1
+              },
+              "htc3": {
+                "out": 3,
+                "convert": 5,
+                "success": 30,
+                "wasted": 5,
+                "failed": 5,
+                "query": 1
+              },
+              "htc4": {
+                "out": 3,
+                "convert": 5,
+                "success": 30,
+                "wasted": 5,
+                "failed": 5,
+                "query": 1
+              },
+              "htc5": {
+                "out": 3,
+                "convert": 5,
+                "success": 30,
+                "wasted": 5,
+                "failed": 5,
+                "query": 1
+              }
+            },
+            "da_effectiveness": {
+              "htc1": 50,
+              "htc2": 40,
+              "htc3": 35,
+              "htc4": 30,
+              "htc5": 20
             }
           }
         },
@@ -223,9 +272,8 @@
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
-            "dig_assist_eff": 0,
             "paper_prop": 86,
-            "allow_paper": 1,
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -234,12 +282,6 @@
             "max_visits": 15,
             "paper_after_max_visits": 0,
             "alt_resp": 0,
-            "visit_times": {
-              "out": 3,
-              "success": 30,
-              "wasted": 5,
-              "failed": 5
-            },
             "default_resp": 89.5,
             "conversion_rate": {
               "0": {
@@ -370,15 +412,8 @@
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 33,
-            "dig_assist_eff": 0,
             "paper_prop": 85,
-            "visit_times": {
-              "out": 3,
-              "success": 30,
-              "wasted": 5,
-              "failed": 5
-            },
-            "allow_paper": 1,
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -521,20 +556,13 @@
               "digital": 0
             },
             "call_conversion_rate": 31,
-            "dig_assist_eff": 0,
             "paper_prop": 82,
-            "allow_paper": 1,
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "alt_help": 55,
             "priority": -2,
-            "visit_times": {
-              "out": 3,
-              "success": 30,
-              "wasted": 5,
-              "failed": 5
-            },
             "max_visits": 15,
             "paper_after_max_visits": 0,
             "alt_resp": 0,
@@ -665,15 +693,8 @@
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 27,
-            "dig_assist_eff": 0,
-            "visit_times": {
-              "out": 3,
-              "success": 30,
-              "wasted": 5,
-              "failed": 5
-            },
             "paper_prop": 78,
-            "allow_paper": 1,
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -813,25 +834,18 @@
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 29,
-            "dig_assist_eff": 0,
             "paper_prop": 76,
             "delay": {
               "paper": 72,
               "digital": 0
             },
-            "allow_paper": 1,
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "alt_help": 55,
             "priority": -4,
             "max_visits": 15,
-            "visit_times": {
-              "out": 3,
-              "success": 30,
-              "wasted": 5,
-              "failed": 5
-            },
             "paper_after_max_visits": 0,
             "alt_resp": 0,
             "default_resp": 69,

@@ -26,9 +26,15 @@ class Household(object):
         self.resp_level = self.input_data['default_resp']
         #self.help_level = self.input_data['default_help']
         self.help_level = 0
-        self.resp_type = set_preference(self)
-        self.delay = self.input_data['delay'][self.resp_type]
+        self.digital = set_preference(self)
+
+        if self.digital:
+            self.delay = self.input_data['delay']['digital']
+        else:
+            self.delay = self.input_data['delay']['paper']
+
         self.priority = self.input_data['priority']
+        self.paper_allowed = bool(self.input_data['paper_allowed'])
 
         # flags to keep track of what the hh is doing/has done
         self.resp_planned = False
@@ -140,9 +146,9 @@ def set_preference(hh):
 
     if paper_test <= int(hh.input_data['paper_prop']):
 
-        return "paper"
+        return False
 
-    return "digital"
+    return True
 
 
 
