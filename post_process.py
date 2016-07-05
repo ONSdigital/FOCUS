@@ -54,8 +54,8 @@ def create_response_map(output_path, data_lists, geojson):
             os.mkdir(output_dir)
         file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
         returns.to_csv(file_name)
-        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) + " return rates",
-                                      False, False)
+        create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
+                                      " return rates", False, False)
         index += 1
 
 
@@ -68,8 +68,8 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
     for df in data_lists["Visit"]:
 
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        int_df = pd.DataFrame({'Visits': df.groupby(['rep', 'district', 'hh_type']).size()}).reset_index()
-        visit_list.append(pd.DataFrame(int_df.groupby(['district']).sum()['Visits']))
+        int_df = pd.DataFrame({'Visits': df.groupby(['rep', 'district']).size()}).reset_index()
+        visit_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Visits']))
 
     visit_outcome_list = []
 
@@ -89,9 +89,8 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
             os.mkdir(output_dir)
         file_name = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
         visits_done.to_csv(file_name)
-        create_maps.create_choropleth(geojson, file_name, "inputs/LA_hh.csv",
-                                      "run " + str(index) + " " + visit_type,
-                                      True, False)
+        create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
+                                      " " + visit_type, True, False)
         index += 1
 
 

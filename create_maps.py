@@ -62,7 +62,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
             return i
 
 
-def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reversed):
+def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reverse):
 
     reset_output()
 
@@ -154,7 +154,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
     min_shade = np.nanmin(shade)
     max_shade = np.nanmax(shade)
 
-    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed)]
+    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading, reverse)]
                        for rate in shade]
 
     source = ColumnDataSource(data=dict(
@@ -189,7 +189,7 @@ def create_choropleth(json_file, shade_data_file, sup_data_file, output_type, dy
     if os.path.isdir(output_dir) is False:
         os.mkdir(output_dir)
 
-    output_file(os.path.join("outputs", "charts", output_filename), title=title)
+    output_file(os.path.join(output_path, "charts", output_filename), title=title)
     #save(p)
     show(p)
 

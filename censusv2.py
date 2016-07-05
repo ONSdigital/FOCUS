@@ -13,8 +13,6 @@ visit_success = namedtuple('Visit_success', ['rep', 'district', 'hh_id', 'hh_typ
 visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 
 
-
-
 # a helper process that creates an instance of a StartFU class and starts it working
 def start_fu(env, district):
 

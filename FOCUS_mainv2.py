@@ -10,6 +10,7 @@ import csv
 import shutil
 import post_process
 import time
+import copy
 from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
@@ -17,103 +18,86 @@ from multiprocessing import cpu_count, Pool, freeze_support, Lock
 l = Lock()  # global declaration...can I avoid this?
 
 
-def start_run(run_input, filepath):
+def start_run(run_input, seeds, out_path):
 
     # pull out length of sim for current run
     sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
     sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_hours = (sim_end - sim_start).total_seconds()/3600
 
-    # number of replications to run
-    replications = run_input['replications']
+    output_data = defaultdict(list)
+    rnd = random.Random()
+    rnd.seed(str(seeds))
 
-   # run each replication
-    for rep in range(replications):
+    # define simpy env for current rep
+    env = simpy.Environment()
 
-        output_data = defaultdict(list)
+    # initialise replication
+    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'], seed)
 
-        # set a random seed based on current date and current rep unless seed exists
-        if str(rep) not in run_input['replication seeds']:
-            now = datetime.datetime.now()
-            seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
-            seed = abs(now - seed_date).total_seconds() + int(run_input['id'])
-            run_input['replication seeds'][rep] = seed  # added...
-            create_new_config = True
+    # and run it
+    env.run(until=sim_hours)
 
-        else:
-            seed = run_input['replication seeds'][str(rep)]
+    # write the output to csv files
+    list_of_output = sorted(list(output_data.keys()))
 
-        rnd = random.Random()
-        rnd.seed(str(seed))
+    l.acquire()
 
-        # define simpy env for current rep
-        env = simpy.Environment()
+    for row in list_of_output:
+        if os.path.isdir(out_path + '/{}'.format(row) + '/') is False:
+            os.mkdir(out_path + '/{}'.format(row) + '/')
+        with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
+            csv_output = csv.writer(f_output)
+            for data_row in output_data[row]:
+                rows = list(data_row)
+                csv_output.writerow(list(rows))
 
-        # initialise replication
-        current_rep = initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, rep + 1, seed)
-
-        # and run it
-        env.run(until=sim_hours)
-
-        # write the output to csv files
-        list_of_output = sorted(list(output_data.keys()))
-
-        l.acquire()
-
-        for row in list_of_output:
-            if os.path.isdir(filepath + '/{}'.format(row) + '/') is False:
-                os.mkdir(filepath + '/{}'.format(row) + '/')
-            with open(filepath + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
-                csv_output = csv.writer(f_output)
-                for data_row in output_data[row]:
-                    rows = list(data_row)
-                    csv_output.writerow(list(rows))
-
-        l.release()
+    l.release()
 
 
 def produce_default_output():
 
         agg_data = post_process.aggregate(output_path)
         post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson')
-        #post_process.create_visit_map(output_path, data_lists, 'inputs/geog_E+W_LAs.geojson', "Visit_success")
+        post_process.create_visit_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', "Visit_contact")
 
 if __name__ == '__main__':
 
+    create_new_config = False
+    produce_default = True
+
     freeze_support()
 
-    # delete all old output files from default location except generated JSON files
-    if os.path.isdir('outputs/') is True:
+    # delete all old output files from default location except generated JSON files.
+    if os.path.isdir('outputs/'):
         dirs = [x[0] for x in os.walk('outputs/')]
         for d in dirs:
             if d != 'outputs/':
                 shutil.rmtree(str(d))
 
-    # read in input configuration file - use a default if nothing is selected
+    # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/small_test_LA_hh.JSON'
+        file_name = 'inputs/test_LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
-    # loads the selected config file
     try:
         with open(input_path) as data_file:
-            input_data = json.load(data_file)  # dict of the whole file
+            input_data = json.load(data_file)
 
     # if something goes wrong exit with error
     except IOError as e:
         print(e)
         sys.exit()
 
-    # ask for output destination but still need to check if can create new folders
+    # ask for output destination or use a default if none specified
     output_path = input('Enter output path or press enter to use default: ')
     if len(output_path) < 1:
         outputs = 'outputs'
         output_path = os.path.join(os.getcwd(), outputs)
 
     try:
-        # create if does not exist
-        if os.path.isdir(output_path) is False:
+        if not os.path.isdir(output_path):
             os.makedirs(output_path)
 
     # if something goes wrong exit with error
@@ -121,29 +105,57 @@ if __name__ == '__main__':
         print(e)
         sys.exit()
 
-    # create list of runs from config file
-    list_of_runs = sorted(list(input_data.keys()), key=int)  # returns top level of config file
-    the_list = []
+    # create a list of runs from configuration file
+    list_of_runs = sorted(list(input_data.keys()), key=int)
+    # define a list to be used to map all run/replication combinations to availalble processors
+    run_list = []
+    seed_dict = {}
+    seed_list = []
 
-    counter = 1
+    # place, with random seeds, a copy of the run/rep into the run list
+    for run in list_of_runs:
+        input_data[run]['id'] = run
+        seed_dict[str(run)] = {}
+        for rep in range(1, input_data[run]['replications'] + 1):
 
-    for item in list_of_runs:
-        input_data[item]['id'] = counter
-        the_list.append(input_data[item])
-        counter += 1
+            if str(rep) not in input_data[run]['replication seeds']:
+                now = datetime.datetime.now()
+                seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
+                seed = abs(now - seed_date).total_seconds() + int(run) + rep
+                seed_dict[str(input_data[run]['id'])][str(rep)] = seed
+                create_new_config = True
+
+            else:
+                seed = input_data[run]['replication seeds'][str(rep)]
+
+            seed_list.append(seed)
+
+            input_data[run]['rep id'] = rep
+            run_list.append(copy.deepcopy(input_data[run]))
 
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
     pool = Pool(cpu_count())
-    Pool().starmap(start_run, zip(the_list, repeat(output_path)))
+    Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
 
-    output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
-    with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
-        json.dump(input_data, outfile)
+    # at the end add the seed list and print out the JSON?
+    if create_new_config:
 
-    produce_default_output()
+        list_of_seed_runs = sorted(list(seed_dict.keys()), key=int)
+        # first assign the seeds...
+        for run in list_of_seed_runs:
+            input_data[run]['replication seeds'] = seed_dict[run]
+            # delete ids
+            del input_data[run]['id']
+            del input_data[run]['rep id']
+
+        output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+        with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
+            json.dump(input_data, outfile)
+    if produce_default:
+        produce_default_output()
 
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
