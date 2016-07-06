@@ -1,14 +1,16 @@
-"""module for creating colour coded maps. The JSO?N file is the map. The shade file defines the
+"""module for creating colour coded maps. The JSON file is the map. The shade file defines the
 colors that will be seen. Sup data is extra information that will be displayed in the hover tool"""
 
 import json
 import csv
 import os
 from bokeh.models import HoverTool
-from bokeh.plotting import figure, show, output_file, ColumnDataSource, save
+from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, vplot
 from bokeh.plotting import reset_output
 import math
 import numpy as np
+import pandas as pd
+from bokeh.io import curstate
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
@@ -64,6 +66,8 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
 def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reverse):
 
+    curstate().autoadd = False
+
     reset_output()
 
     # read in geojson map file
@@ -71,14 +75,9 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
         map_data = json.load(base_map)
 
     # read in data that will define shading
-    with open(os.path.join(os.getcwd(), shade_data_file), 'r') as shade_data:
+    my_results = pd.read_csv(shade_data_file)
+    my_shade_dict = dict(zip(my_results.district, my_results.result))
 
-        reader = csv.reader(shade_data)
-        next(reader)
-        my_results = list(reader)
-        my_shade_dict = {rows[0]: rows[1] for rows in my_results}
-
-    # read in some supplementary info - must have district as row[0]?
     with open(os.path.join(os.getcwd(), sup_data_file), 'r') as supp_data:
 
         reader = csv.reader(supp_data)
@@ -109,7 +108,9 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
             sub_xs = []
             sub_ys = []
 
-            if str(feature['properties'][id_key]) in my_shade_dict:
+            if (str(feature['properties'][id_key]) in my_shade_dict and
+                    my_shade_dict[str(feature['properties'][id_key])] != math.nan):
+
                 shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                 supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
 
@@ -136,7 +137,9 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
                 sub_xs = []
                 sub_ys = []
 
-                if str(feature['properties'][id_key]) in my_shade_dict:
+                if (str(feature['properties'][id_key]) in my_shade_dict and
+                        my_shade_dict[str(feature['properties'][id_key])] != math.nan):
+
                     shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
                     supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
                 else:
@@ -174,7 +177,7 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
 
     p.patches('x', 'y', source=source,
               fill_color='color', fill_alpha=0.7,
-              line_color="grey", line_width=0.3)
+              line_color="white", line_width=0.15)
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"

@@ -32,7 +32,7 @@ class District(object):
         self.create_households()
         self.output_data['Total_hh'].append(total_hh(self.rep.reps, self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
-        self.create_co(self.input_data["census officer"], "")
+        self.create_co(self.input_data["census officer"])
 
         self.hh_area = self.input_data['district_area'] / len(self.households)
         self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
@@ -76,7 +76,7 @@ class District(object):
         delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
         start_delayed(self.env, censusv2.start_fu(self.env, self), delay)
 
-    def create_co(self, input_data, input_key):
+    def create_co(self, input_data, input_key=""):
 
         id_num = 0
         for key, value in input_data.items():

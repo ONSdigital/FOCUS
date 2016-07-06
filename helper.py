@@ -64,3 +64,18 @@ def return_time_key(input_dict, time):
 
 def str2bool(value):
     return str(value).lower() in ("True", "true", "1")
+
+
+def beta_dist(rep, alpha, beta, sim_days_left):
+    # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
+    return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
+
+
+def gauss_dist(rnd, alpha, beta):
+
+    output = rnd.gauss(alpha, beta)
+
+    if output < 0:
+        output = 0
+
+    return output

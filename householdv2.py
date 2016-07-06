@@ -59,17 +59,17 @@ class Household(object):
             current_date_time = self.rep.start_date + datetime.timedelta(hours=self.rep.env.now)
             sim_days_left = (self.rep.end_date.date() - current_date_time.date()).days
 
-            days_until_response = beta_dist(self.rep,
-                                            self.input_data['beta_dist'][0],
-                                            self.input_data['beta_dist'][1],
-                                            sim_days_left)
+            days_until_response = h.beta_dist(self.rep,
+                                              self.input_data['beta_dist'][0],
+                                              self.input_data['beta_dist'][1],
+                                              sim_days_left)
 
             response_date = current_date_time.date() + datetime.timedelta(days=days_until_response)
 
             response_day = response_date.weekday()
-            response_time = gauss_dist(self.rnd,
-                                       self.input_data['response_time'][str(response_day)][0],
-                                       self.input_data['response_time'][str(response_day)][1])
+            response_time = h.gauss_dist(self.rnd,
+                                         self.input_data['response_time'][str(response_day)][0],
+                                         self.input_data['response_time'][str(response_day)][1])
 
             response_date_time = datetime.datetime.combine(response_date, datetime.datetime.min.time())\
                                 + datetime.timedelta(hours=response_time)
@@ -131,22 +131,6 @@ class Household(object):
             return self.input_data['behaviours']['default'][behaviour]
         else:
             return self.input_data['behaviours']['alt'][behaviour]
-
-
-# beta dist used to generate some numbers for responses over time
-def beta_dist(rep, alpha, beta, sim_days_left):
-    # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
-    return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
-
-
-def gauss_dist(rnd, alpha, beta):
-
-    output = rnd.gauss(alpha, beta)
-
-    if output < 0:
-        output = 0
-
-    return output
 
 
 def set_preference(hh):

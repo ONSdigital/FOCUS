@@ -41,8 +41,8 @@ def create_response_map(output_path, data_lists, geojson, response_type="all", d
 
         df.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
         int_df = df.loc[df['digital'].isin(type_filter)]
-        int_df = pd.DataFrame({'Returns': int_df.groupby(['district', 'rep']).size()}).reset_index()
-        return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Returns']))
+        int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep']).size()}).reset_index()
+        return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['result']))
 
     district_size_list = []
 
@@ -51,11 +51,10 @@ def create_response_map(output_path, data_lists, geojson, response_type="all", d
         df.columns = ['rep', 'district', 'hh_count']
         district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
 
-    # selects only the first data frame
     index = 1
     for item in return_list:
         returns = pd.DataFrame((item.join(district_size_list[index-1])))
-        returns = returns[['Returns']].div(returns.hh_count, axis=0)
+        returns = returns[['result']].div(returns.hh_count, axis=0)
         output_dir = os.path.join("outputs", "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
@@ -83,13 +82,13 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
     # count the number of visits that had the input outcome
     for df in data_lists[visit_type]:
         df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        int_df = pd.DataFrame({'outcome': df.groupby(['rep', 'district']).size()}).reset_index()
-        visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['outcome']))
+        int_df = pd.DataFrame({'result': df.groupby(['rep', 'district']).size()}).reset_index()
+        visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['result']))
 
     index = 1
     for item in visit_outcome_list:
         visits_done = pd.DataFrame((visit_list[index-1].join(item)))
-        visits_done = visits_done[['outcome']].div(visits_done.Visits, axis=0)
+        visits_done = visits_done[['result']].div(visits_done.Visits, axis=0)
         # output the percentage of visits that have the outcome as per the input.
         output_dir = os.path.join("outputs", "csv")
         if os.path.isdir(output_dir) is False:

@@ -107,9 +107,9 @@ class CensusOfficer(object):
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
 
-        self.env.process(self.contact())
+        self.env.process(self.fu_visit_contact())
 
-    def contact(self):
+    def fu_visit_contact(self):
 
         if (self.working() and h.returns_to_date(self.district) < self.district.input_data["trigger"] and
                 len(self.action_plan) > 0):
@@ -151,7 +151,7 @@ class CensusOfficer(object):
             # either not at work, no one to visit or trigger reached - check when co becomes available next.
             yield self.env.timeout(next_available(self))
 
-        self.env.process(self.contact())
+        self.env.process(self.fu_visit_contact())
 
     def fu_visit_assist(self, current_hh):
 
