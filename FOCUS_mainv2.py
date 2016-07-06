@@ -60,9 +60,9 @@ def produce_default_output():
     agg_data = post_process.aggregate(output_path)
 
     post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson')
-    post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'paper', True, True)
-    post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'digital', True, False)
-    post_process.create_visit_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', "Visit_paper", True, True)
+    #post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'paper', True, True)
+    #post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'digital', True, False)
+    #post_process.create_visit_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', "Visit_paper", True, True)
 
 
 if __name__ == '__main__':

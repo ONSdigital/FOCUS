@@ -63,13 +63,28 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
             return i
 
 
-def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reverse):
-
-    # options are
-    # add drawn legend
-    # plot separately
+def create_choropleth(output_path, json_file, shade_data_file, output_type, dynamic_shading, reverse):
 
     reset_output()
+
+    colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA"]
+
+    # separate shade data file
+    my_results = pd.read_csv(shade_data_file)
+    base_plot_name = 'shade'
+
+    y = 0
+    plot_dict = {}
+    for x in range(80, 105, 5):
+        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)].head()
+        plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
+        y = x
+
+    # now separate the geojson file by the districts that have an entry?
+    # so cycle through create a dict of geoJSON files 1 for each of the lists above - same keys
+
+    # then go through the below adding to same plot different source each time...
+
 
     # read in geojson map file
     with open(json_file) as base_map:
@@ -79,13 +94,6 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
     my_results = pd.read_csv(shade_data_file)
     my_shade_dict = dict(zip(my_results.district, my_results.result))
 
-    with open(os.path.join(os.getcwd(), sup_data_file), 'r') as supp_data:
-
-        reader = csv.reader(supp_data)
-        next(reader)
-        my_results = list(reader)
-        my_supp_dict = {rows[0]: rows[1:] for rows in my_results}
-
     suffix = '.html'
     output_filename = os.path.join(output_type + suffix)
 
@@ -94,8 +102,6 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
     district_names = []
     district_xs = []
     district_ys = []
-
-    colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0",  "#C994C7", "#D4B9DA"]
 
     name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
     id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
@@ -113,7 +119,6 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
                     my_shade_dict[str(feature['properties'][id_key])] != math.nan):
 
                 shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
-                supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
 
             else:
                 shade.append(float('nan'))
@@ -142,7 +147,7 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
                         my_shade_dict[str(feature['properties'][id_key])] != math.nan):
 
                     shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
-                    supplementary.append(my_supp_dict[str(feature['properties'][id_key])][:])
+
                 else:
                     shade.append(float('nan'))
                     supplementary.append(float('nan'))
@@ -167,7 +172,6 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
         color=district_colors,
         name=district_names,
         rate=shade,
-        supp=supplementary,
     ))
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
@@ -178,7 +182,7 @@ def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, ou
 
     p.patches('x', 'y', source=source,
               fill_color='color', fill_alpha=0.7,
-              line_color="white", line_width=0.15)
+              line_color="white", line_width=0.15, legend='95')
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"
