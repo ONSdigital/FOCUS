@@ -8,7 +8,7 @@ import datetime
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, seed):
+    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps):
 
         # values passed to the class
         self.env = env
@@ -20,7 +20,6 @@ class Rep(object):
         self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
         self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
         self.reps = reps
-        self.seed = seed
 
         # variables created within the class - belonging to it
         self.total_ad_instances = 0

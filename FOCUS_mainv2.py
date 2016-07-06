@@ -33,7 +33,7 @@ def start_run(run_input, seeds, out_path):
     env = simpy.Environment()
 
     # initialise replication
-    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'], seed)
+    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'])
 
     # and run it
     env.run(until=sim_hours)

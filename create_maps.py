@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
+def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
 
     if dynamic_shading:
 
@@ -63,39 +63,9 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
             return i
 
 
-def create_choropleth(output_path, json_file, shade_data_file, output_type, dynamic_shading, reverse):
-
-    reset_output()
+def draw_features(map_features, shade_data):
 
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA"]
-
-    # separate shade data file
-    my_results = pd.read_csv(shade_data_file)
-    base_plot_name = 'shade'
-
-    y = 0
-    plot_dict = {}
-    for x in range(80, 105, 5):
-        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)].head()
-        plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
-        y = x
-
-    # now separate the geojson file by the districts that have an entry?
-    # so cycle through create a dict of geoJSON files 1 for each of the lists above - same keys
-
-    # then go through the below adding to same plot different source each time...
-
-
-    # read in geojson map file
-    with open(json_file) as base_map:
-        map_data = json.load(base_map)
-
-    # read in data that will define shading
-    my_results = pd.read_csv(shade_data_file)
-    my_shade_dict = dict(zip(my_results.district, my_results.result))
-
-    suffix = '.html'
-    output_filename = os.path.join(output_type + suffix)
 
     shade = []
     supplementary = []
@@ -106,7 +76,7 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
     name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
     id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
 
-    for feature in map_data['features']:
+    for feature in map_features:
 
         if feature['geometry']['type'] == 'Polygon':
 
@@ -115,10 +85,10 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
             sub_xs = []
             sub_ys = []
 
-            if (str(feature['properties'][id_key]) in my_shade_dict and
-                    my_shade_dict[str(feature['properties'][id_key])] != math.nan):
+            if (str(feature['properties'][id_key]) in shade_data and
+                        shade_data[str(feature['properties'][id_key])] != math.nan):
 
-                shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
+                shade.append(float(shade_data[str(feature['properties'][id_key])]) * 100)
 
             else:
                 shade.append(float('nan'))
@@ -127,7 +97,6 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
             temp_list = feature['geometry']['coordinates'][0]
 
             for coord in temp_list:
-
                 sub_xs.append((coord[0]))
                 sub_ys.append((coord[1]))
 
@@ -143,17 +112,16 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
                 sub_xs = []
                 sub_ys = []
 
-                if (str(feature['properties'][id_key]) in my_shade_dict and
-                        my_shade_dict[str(feature['properties'][id_key])] != math.nan):
+                if (str(feature['properties'][id_key]) in shade_data and
+                            shade_data[str(feature['properties'][id_key])] != math.nan):
 
-                    shade.append(float(my_shade_dict[str(feature['properties'][id_key])])*100)
+                    shade.append(float(shade_data[str(feature['properties'][id_key])]) * 100)
 
                 else:
                     shade.append(float('nan'))
                     supplementary.append(float('nan'))
 
                 for row in sub_list[0]:
-
                     sub_xs.append((row[0]))
                     sub_ys.append((row[1]))
 
@@ -163,7 +131,7 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
     min_shade = np.nanmin(shade)
     max_shade = np.nanmax(shade)
 
-    district_colors = [colors[set_colour_level(rate, min_shade, max_shade, dynamic_shading, reverse)]
+    district_colors = [colors[set_colour_level(rate, min_shade, max_shade)]
                        for rate in shade]
 
     source = ColumnDataSource(data=dict(
@@ -174,9 +142,11 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
         rate=shade,
     ))
 
+    # so by this point a source file has been generated...
+
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    title = output_type + " by LA"
+    title = " by LA"
 
     p = figure(width=900, height=900, title=title, tools=tools)
 
@@ -188,7 +158,7 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
     hover.point_policy = "follow_mouse"
     hover.tooltips = [
         ("Name", "@name"),
-        (output_type, "@rate%"),
+        ('output', "@rate%"),
         ("Supp", "@supp"),
     ]
 
@@ -197,9 +167,69 @@ def create_choropleth(output_path, json_file, shade_data_file, output_type, dyna
     if os.path.isdir(output_dir) is False:
         os.mkdir(output_dir)
 
-    output_file(os.path.join(output_path, "charts", output_filename), title=title)
-    #save(p)
+    output_file(os.path.join(os.getcwd(), "charts", "test_file"), title=title)
+    # save(p)
     show(p)
+
+
+def create_choropleth(json_file, shade_data_file):
+
+    reset_output()
+    # separate shade data file
+    my_results = pd.read_csv(shade_data_file)
+
+    y = 0
+    plot_dict = {}
+    for x in range(80, 105, 5):
+        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)].head()
+        if len(temp_df.index) > 0:
+            plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
+        y = x
+
+    # now separate the geojson file by the districts that have an entry?
+    # so cycle through create a dict of geoJSON files 1 for each of the lists above - same keys
+    geojson_dict = {}
+
+    # read in geojson map file
+    with open(json_file) as base_map:
+        map_data = json.load(base_map)
+
+    # don't need the below to ensure same results...this is just plotting!!
+    list_of_plot_dict_keys = sorted(list(plot_dict.keys()), key=int)
+
+    name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
+    id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
+
+    for plot in list_of_plot_dict_keys:
+
+        geojson_list = []
+
+        if bool(plot_dict[plot]):
+
+            for feature in map_data['features']:
+
+                if str(feature['properties'][id_key]) in plot_dict[plot]:
+
+                    geojson_list.append(feature)
+
+            geojson_dict[plot] = geojson_list
+
+    # will need to add any regions not found - ie, that there are no results for
+    # For each feature dict look for corresponding values in corresponding shade dict and create plot
+    for key, value in geojson_dict.items():
+
+        # may need to run the below in this loop direct
+        draw_features(value, plot_dict[key])
+
+
+
+
+
+
+
+
+
+
 
 
 
