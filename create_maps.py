@@ -65,6 +65,10 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
 def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reverse):
 
+    # options are
+    # add drawn legend
+    # plot separately
+
     reset_output()
 
     # read in geojson map file
