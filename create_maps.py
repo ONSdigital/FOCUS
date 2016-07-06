@@ -142,7 +142,10 @@ def draw_features(map_features, shade_data):
         rate=shade,
     ))
 
-    # so by this point a source file has been generated...
+    # so by this point a source file has been generated...as have the other files to be plotted.
+    # place in dicts/keys and create the next set
+
+    # then plot all at once...
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
