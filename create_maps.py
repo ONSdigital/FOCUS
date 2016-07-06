@@ -10,7 +10,6 @@ from bokeh.plotting import reset_output
 import math
 import numpy as np
 import pandas as pd
-from bokeh.io import curstate
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
@@ -65,8 +64,6 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading, reversed):
 
 
 def create_choropleth(output_path, json_file, shade_data_file, sup_data_file, output_type, dynamic_shading, reverse):
-
-    curstate().autoadd = False
 
     reset_output()
 
