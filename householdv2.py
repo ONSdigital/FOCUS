@@ -4,8 +4,9 @@ import datetime
 import censusv2
 from simpy.util import start_delayed
 from collections import namedtuple
+import helper as h
 
-response = namedtuple('Responded', ['reps', 'District', 'id', 'Type', 'Time'])  # time full response received
+response = namedtuple('Responded', ['reps', 'District', 'digital', 'hh_type', 'Time'])  # time response sent
 
 
 class Household(object):
@@ -22,10 +23,6 @@ class Household(object):
         self.input_data = input_data
         self.output_data = output_data
 
-        # below define how the hh behaves
-        self.resp_level = self.input_data['default_resp']
-        #self.help_level = self.input_data['default_help']
-        self.help_level = 0
         self.digital = set_preference(self)
 
         if self.digital:
@@ -34,7 +31,7 @@ class Household(object):
             self.delay = self.input_data['delay']['paper']
 
         self.priority = self.input_data['priority']
-        self.paper_allowed = bool(self.input_data['paper_allowed'])
+        self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])
 
         # flags to keep track of what the hh is doing/has done
         self.resp_planned = False
@@ -43,6 +40,10 @@ class Household(object):
         self.resp_time = 0
         self.status = ''
         self.visits = 0
+
+        # below define how the hh behaves depending on preference
+        self.resp_level = self.set_behaviour('response')
+        self.help_level = 0
 
         self.rep.env.process(self.action())
 
@@ -112,7 +113,7 @@ class Household(object):
 
             self.output_data['Respond'].append(response(self.rep.reps,
                                                         self.district.name,
-                                                        self.id,
+                                                        self.digital,
                                                         self.hh_type,
                                                         self.resp_time))
 
@@ -122,6 +123,14 @@ class Household(object):
                 start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
 
             yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
+
+    def set_behaviour(self, behaviour):
+
+        if self.digital or self.paper_allowed is True:
+            # use default
+            return self.input_data['behaviours']['default'][behaviour]
+        else:
+            return self.input_data['behaviours']['alt'][behaviour]
 
 
 # beta dist used to generate some numbers for responses over time

@@ -58,8 +58,12 @@ def start_run(run_input, seeds, out_path):
 def produce_default_output():
 
         agg_data = post_process.aggregate(output_path)
+
         post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson')
-        post_process.create_visit_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', "Visit_contact")
+        post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'paper', True, True)
+        post_process.create_response_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', 'digital', True, False)
+        post_process.create_visit_map(output_path, agg_data, 'inputs/geog_E+W_LAs.geojson', "Visit_paper", True, True)
+
 
 if __name__ == '__main__':
 
@@ -78,7 +82,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/small_test_LA_hh.JSON'
+        file_name = 'inputs/LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

@@ -4,7 +4,7 @@ import datetime as dt
 from collections import namedtuple
 import helper as h
 
-return_times = namedtuple('Returned', ['reps', 'District', 'id', 'Type', 'Time'])  # time full response received
+return_times = namedtuple('Returned', ['reps', 'District', 'digital', 'hh_type', 'Time'])  # time return received
 visit = namedtuple('Visit', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 visit_out = namedtuple('Visit_out', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
@@ -12,6 +12,7 @@ visit_wasted = namedtuple('Visit_wasted',['rep', 'district', 'hh_id', 'hh_type',
 visit_success = namedtuple('Visit_success', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
+visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'hh_id', 'hh_type', 'time'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -29,7 +30,7 @@ def ret_rec(hh, rep):
 
     rep.output_data['Return'].append(return_times(rep.reps,
                                                   hh.district.name,
-                                                  hh.id,
+                                                  hh.digital,
                                                   hh.hh_type,
                                                   rep.env.now))
 
@@ -123,7 +124,6 @@ class CensusOfficer(object):
             current_hh.visits += 1
             current_hh.priority += 1
             contact_test = self.rep.rnd.uniform(0, 100)
-
             contact_dict = current_hh.input_data['at_home'][str(h.current_day(self))]
 
             if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
@@ -144,7 +144,7 @@ class CensusOfficer(object):
                                                                    current_hh.hh_type,
                                                                    self.env.now))
 
-                visit_time = self.input_data["visit_times"][current_hh.hh_type]["out"]
+                visit_time = self.input_data["visit_times"]["out"]
                 yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         else:
@@ -157,14 +157,16 @@ class CensusOfficer(object):
 
         da_test = self.rep.rnd.uniform(0, 100)
         da_effectiveness = self.input_data['da_effectiveness'][current_hh.hh_type]
-        yield self.env.timeout(self.input_data['visit_times'][current_hh.hh_type]['query'])
 
+        yield self.env.timeout(self.input_data['visit_times']['query'])
+
+        # if digital or have already responded skip straight to the outcome of the visit
         if current_hh.digital or current_hh.resp_sent:
             yield self.rep.env.process(self.fu_visit_outcome(current_hh))
 
-        # not so start trying to change minds
-        elif not current_hh.digital and da_test <= da_effectiveness:  # don't really need the first half of this condition?
-            yield self.env.timeout(self.input_data['visit_times'][current_hh.hh_type]['convert'])
+        # if not digital try to persuade them to complete online.
+        elif not current_hh.digital and da_test <= da_effectiveness:
+            yield self.env.timeout(self.input_data['visit_times']['convert'])
 
             self.rep.output_data['Visit_convert'].append(visit_convert(self.rep.reps,
                                                                        self.district.name,
@@ -174,11 +176,26 @@ class CensusOfficer(object):
             current_hh.digital = True
             yield self.rep.env.process(self.fu_visit_outcome(current_hh))
 
-        elif not current_hh.digital and da_test > da_effectiveness:
+        # if not digital, do not convince to complete online, nd trigger not reached give/send paper.
+        elif (not current_hh.digital and da_test > da_effectiveness and
+              h.returns_to_date(self.district) < self.district.input_data['paper_trigger']):
 
-            # give/allow paper
-            # or suggest other forms of assistance
-            print(current_hh.id, 'prefers paper')
+            yield self.env.timeout(self.input_data['visit_times']['paper'])
+
+            self.rep.output_data['Visit_paper'].append(visit_paper(self.rep.reps,
+                                                                   self.district.name,
+                                                                   current_hh.id,
+                                                                   current_hh.hh_type,
+                                                                   self.rep.env.now))
+
+            current_hh.paper_allowed = True
+            current_hh.set_behaviour('response')
+            current_hh.set_behaviour('help')
+            # add check here to set if CO have paper of if they arrange for paper to be sent...
+            yield self.rep.env.process(self.fu_visit_outcome(current_hh))
+
+        # or could you send paper?
+        # or suggest other forms of assistance to be decided...
 
     def fu_visit_outcome(self, current_hh):
 
@@ -192,7 +209,7 @@ class CensusOfficer(object):
                                                                      current_hh.hh_type,
                                                                      self.env.now))
 
-            visit_time = self.input_data["visit_times"][current_hh.hh_type]["wasted"]
+            visit_time = self.input_data["visit_times"]["wasted"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         # hh have not responded yet and respond there and then either by paper or digital.
@@ -205,7 +222,7 @@ class CensusOfficer(object):
                                                                        current_hh.hh_type,
                                                                        self.env.now))
             current_hh.resp_planned = True
-            visit_time = self.input_data["visit_times"][current_hh.hh_type]["success"]
+            visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
             self.rep.env.process(current_hh.respond(current_hh.delay))
 
@@ -219,9 +236,8 @@ class CensusOfficer(object):
                                                                      current_hh.hh_type,
                                                                      self.env.now))
 
-            visit_time = self.input_data["visit_times"][current_hh.hh_type]["failed"]
+            visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
-            # add a link back to hh action with updated behaviours
 
     def working(self):
         """returns true or false to depending on whether or not a CO is available at current time"""

@@ -26,15 +26,22 @@ def aggregate(output_path):
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson):
+def create_response_map(output_path, data_lists, geojson, response_type="all", dynamic=False, reverse=False):
 
     # create some default output in ths case overall response rate by district
     return_list = []
+    if response_type == 'all':
+        type_filter = [0, 1]
+    elif response_type == 'paper':
+        type_filter = [0]
+    else:
+        type_filter = [1]
 
     for df in data_lists['Return']:
 
-        df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
-        int_df = pd.DataFrame({'Returns': df.groupby(['district', 'rep']).size()}).reset_index()
+        df.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
+        int_df = df.loc[df['digital'].isin(type_filter)]
+        int_df = pd.DataFrame({'Returns': int_df.groupby(['district', 'rep']).size()}).reset_index()
         return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Returns']))
 
     district_size_list = []
@@ -55,11 +62,11 @@ def create_response_map(output_path, data_lists, geojson):
         file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
         returns.to_csv(file_name)
         create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
-                                      " return rates", False, False)
+                                      " " + response_type + " return rates", dynamic, reverse)
         index += 1
 
 
-def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success"):
+def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success", dynamic=False, reverse=False):
 
     # create some output
     visit_list = []
@@ -90,7 +97,7 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
         file_name = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
         visits_done.to_csv(file_name)
         create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
-                                      " " + visit_type, True, False)
+                                      " " + visit_type, dynamic, reverse)
         index += 1
 
 

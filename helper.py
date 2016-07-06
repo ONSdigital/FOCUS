@@ -60,3 +60,7 @@ def return_time_key(input_dict, time):
     for key in key_list:
         if int(key) >= time:
             return key
+
+
+def str2bool(value):
+    return str(value).lower() in ("True", "true", "1")
