@@ -63,7 +63,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
             return i
 
 
-def draw_features(map_features, shade_data):
+def draw_features(map_features, shade_data, key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict):
 
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA"]
 
@@ -134,7 +134,13 @@ def draw_features(map_features, shade_data):
     district_colors = [colors[set_colour_level(rate, min_shade, max_shade)]
                        for rate in shade]
 
-    source = ColumnDataSource(data=dict(
+    x_dict[key] = district_xs
+    y_dict[key] = district_ys
+    color_dict[key] = district_colors
+    name_dict[key] = district_names
+    rate_dict[key] = shade
+
+    source_dict[key] = ColumnDataSource(data=dict(
         x=district_xs,
         y=district_ys,
         color=district_colors,
@@ -142,37 +148,47 @@ def draw_features(map_features, shade_data):
         rate=shade,
     ))
 
+    #source = ColumnDataSource(data=dict(
+    #    x=district_xs,
+    #    y=district_ys,
+    #    color=district_colors,
+    #    name=district_names,
+    #    rate=shade,
+    #))
+
     # so by this point a source file has been generated...as have the other files to be plotted.
     # place in dicts/keys and create the next set
 
     # then plot all at once....
 
-    tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
+    #tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    title = " by LA"
+    #title = " by LA"
 
-    p = figure(width=900, height=900, title=title, tools=tools)
+    #p = figure(width=900, height=900, title=title, tools=tools)
 
-    p.patches('x', 'y', source=source,
-              fill_color='color', fill_alpha=0.7,
-              line_color="white", line_width=0.15, legend='95')
 
-    hover = p.select_one(HoverTool)
-    hover.point_policy = "follow_mouse"
-    hover.tooltips = [
-        ("Name", "@name"),
-        ('output', "@rate%"),
-        ("Supp", "@supp"),
-    ]
 
-    output_dir = os.path.join("outputs", "charts")
+    #p.patches('x', 'y', source=source,
+    #          fill_color='color', fill_alpha=0.7,
+    #          line_color="white", line_width=0.15, legend='95')
 
-    if os.path.isdir(output_dir) is False:
-        os.mkdir(output_dir)
+    #hover = p.select_one(HoverTool)
+    #hover.point_policy = "follow_mouse"
+    #hover.tooltips = [
+    #    ("Name", "@name"),
+    #    ('output', "@rate%"),
+    #    ("Supp", "@supp"),
+    #]
 
-    output_file(os.path.join(os.getcwd(), "charts", "test_file"), title=title)
+    #output_dir = os.path.join("outputs", "charts")
+
+    #if os.path.isdir(output_dir) is False:
+    #    os.mkdir(output_dir)
+
+    #output_file(os.path.join(os.getcwd(), "charts", "test_file"), title=title)
     # save(p)
-    show(p)
+    #show(p)
 
 
 def create_choropleth(json_file, shade_data_file):
@@ -214,15 +230,58 @@ def create_choropleth(json_file, shade_data_file):
                 if str(feature['properties'][id_key]) in plot_dict[plot]:
 
                     geojson_list.append(feature)
+                    # but also remove the feature from the map_data[features] file
 
             geojson_dict[plot] = geojson_list
 
     # will need to add any regions not found - ie, that there are no results for
     # For each feature dict look for corresponding values in corresponding shade dict and create plot
+    source_dict = {}
+
+    x_dict = {}
+    y_dict = {}
+    color_dict = {}
+    name_dict = {}
+    rate_dict = {}
+
     for key, value in geojson_dict.items():
 
         # may need to run the below in this loop direct
-        draw_features(value, plot_dict[key])
+        draw_features(value, plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
+
+
+
+    tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
+
+    title = " by LA"
+
+    p = figure(width=900, height=900, title=title, tools=tools)
+
+    p.patches('x', 'y', source=source_dict['80'],
+              fill_color='color', fill_alpha=0.7,
+              line_color="white", line_width=0.15, legend='95')
+
+    hover = p.select_one(HoverTool)
+    hover.point_policy = "follow_mouse"
+    hover.tooltips = [
+        ("Name", "@name"),
+        ('output', "@rate%"),
+        ("Supp", "@supp"),
+    ]
+
+    output_dir = os.path.join("outputs", "charts")
+
+    if os.path.isdir(output_dir) is False:
+        os.mkdir(output_dir)
+
+
+    output_file(os.path.join(os.getcwd(), "charts", "test_file.html"), title=title)
+    #save(p)
+    show(p)
+
+
+
+
 
 
 
