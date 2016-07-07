@@ -250,7 +250,7 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
             "paper_prop": 86,
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,

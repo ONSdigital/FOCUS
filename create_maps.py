@@ -2,7 +2,6 @@
 colors that will be seen. Sup data is extra information that will be displayed in the hover tool"""
 
 import json
-import csv
 import os
 from bokeh.models import HoverTool
 from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, vplot
@@ -148,48 +147,6 @@ def draw_features(map_features, shade_data, key, x_dict, y_dict, color_dict, nam
         rate=shade,
     ))
 
-    #source = ColumnDataSource(data=dict(
-    #    x=district_xs,
-    #    y=district_ys,
-    #    color=district_colors,
-    #    name=district_names,
-    #    rate=shade,
-    #))
-
-    # so by this point a source file has been generated...as have the other files to be plotted.
-    # place in dicts/keys and create the next set
-
-    # then plot all at once....
-
-    #tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
-
-    #title = " by LA"
-
-    #p = figure(width=900, height=900, title=title, tools=tools)
-
-
-
-    #p.patches('x', 'y', source=source,
-    #          fill_color='color', fill_alpha=0.7,
-    #          line_color="white", line_width=0.15, legend='95')
-
-    #hover = p.select_one(HoverTool)
-    #hover.point_policy = "follow_mouse"
-    #hover.tooltips = [
-    #    ("Name", "@name"),
-    #    ('output', "@rate%"),
-    #    ("Supp", "@supp"),
-    #]
-
-    #output_dir = os.path.join("outputs", "charts")
-
-    #if os.path.isdir(output_dir) is False:
-    #    os.mkdir(output_dir)
-
-    #output_file(os.path.join(os.getcwd(), "charts", "test_file"), title=title)
-    # save(p)
-    #show(p)
-
 
 def create_choropleth(json_file, shade_data_file):
 
@@ -197,10 +154,13 @@ def create_choropleth(json_file, shade_data_file):
     # separate shade data file
     my_results = pd.read_csv(shade_data_file)
 
+    suffix = '.html'
+    output_filename = os.path.join('test' + suffix)
+
     y = 0
     plot_dict = {}
     for x in range(80, 105, 5):
-        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)].head()
+        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)]
         if len(temp_df.index) > 0:
             plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
         y = x
@@ -244,12 +204,19 @@ def create_choropleth(json_file, shade_data_file):
     name_dict = {}
     rate_dict = {}
 
-    for key, value in geojson_dict.items():
+# this does need to happen inorder so the colour scale looks neat!
+    #list_of_geojson_dict = sorted(list(geojson_dict.keys()), key=int)
+
+    #for key in list_of_geojson_dict:
+
+        #draw_features(geojson_dict[key], plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
+
+
+
+    for key in sorted(geojson_dict.keys(), key=int):
 
         # may need to run the below in this loop direct
-        draw_features(value, plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
-
-
+        draw_features(geojson_dict[key], plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
@@ -257,9 +224,15 @@ def create_choropleth(json_file, shade_data_file):
 
     p = figure(width=900, height=900, title=title, tools=tools)
 
-    p.patches('x', 'y', source=source_dict['80'],
-              fill_color='color', fill_alpha=0.7,
-              line_color="white", line_width=0.15, legend='95')
+    # draw each patch
+
+    for key, value in source_dict.items():
+
+        p.patches('x', 'y', source=value,
+                  fill_color='color', fill_alpha=0.7,
+                  line_color="white", line_width=0.15, legend=str(key))
+
+
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"
@@ -274,8 +247,9 @@ def create_choropleth(json_file, shade_data_file):
     if os.path.isdir(output_dir) is False:
         os.mkdir(output_dir)
 
+    output_file_path = os.path.join(output_dir, output_filename)
 
-    output_file(os.path.join(os.getcwd(), "charts", "test_file.html"), title=title)
+    output_file(output_file_path, title=title)
     #save(p)
     show(p)
 
