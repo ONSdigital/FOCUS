@@ -1,5 +1,6 @@
 """module containing functions used across modules"""
 import datetime as dt
+import ntpath
 
 
 def returns_to_date(district, output_format=""):
@@ -79,3 +80,8 @@ def gauss_dist(rnd, alpha, beta):
         output = 0
 
     return output
+
+
+def path_leaf(path):
+    head, tail = ntpath.split(path)
+    return tail or ntpath.basename(head)

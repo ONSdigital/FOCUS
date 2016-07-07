@@ -9,6 +9,7 @@ from bokeh.plotting import reset_output
 import math
 import numpy as np
 import pandas as pd
+import helper as h
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
@@ -43,7 +44,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
 
         i = 0
 
-        if math.isnan(rate):
+        if math.isnan(rate) or rate == 0:
             i = 0
         elif rate < 80:
             i = 1
@@ -62,7 +63,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
             return i
 
 
-def draw_features(map_features, shade_data, key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict):
+def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict):
 
     colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA"]
 
@@ -151,88 +152,77 @@ def draw_features(map_features, shade_data, key, x_dict, y_dict, color_dict, nam
 def create_choropleth(json_file, shade_data_file):
 
     reset_output()
-    # separate shade data file
-    my_results = pd.read_csv(shade_data_file)
 
-    suffix = '.html'
-    output_filename = os.path.join('test' + suffix)
+    # separate data file used to define shade
+    results_data = pd.read_csv(shade_data_file)
+    results_filename = h.path_leaf(shade_data_file).split(".")[0]
 
     y = 0
-    plot_dict = {}
+    plot_dict = {}  # dict used to store each plots shade data.
     for x in range(80, 105, 5):
-        temp_df = my_results[(my_results['result'] > y/100) & (my_results['result'] <= x/100)]
+        temp_df = results_data[(results_data['result'] > y/100) & (results_data['result'] <= x/100)]
         if len(temp_df.index) > 0:
             plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
         y = x
 
-    # now separate the geojson file by the districts that have an entry?
-    # so cycle through create a dict of geoJSON files 1 for each of the lists above - same keys
-    geojson_dict = {}
+    # separate JSON file to match the shade separation
 
-    # read in geojson map file
+    geojson_dict = {}  # dict used to store each plots geo data
+    delete_list = []
     with open(json_file) as base_map:
         map_data = json.load(base_map)
 
-    # don't need the below to ensure same results...this is just plotting!!
-    list_of_plot_dict_keys = sorted(list(plot_dict.keys()), key=int)
+    id_key = 'LAD11CD'  # 'LSOA11CD', 'LAD11CD'
 
-    name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
-    id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
-
-    for plot in list_of_plot_dict_keys:
+    for key, value in plot_dict.items():
 
         geojson_list = []
 
-        if bool(plot_dict[plot]):
+        for feature in map_data['features']:
 
-            for feature in map_data['features']:
+            if str(feature['properties'][id_key]) in value:
 
-                if str(feature['properties'][id_key]) in plot_dict[plot]:
+                geojson_list.append(feature)
+                # but also remove the feature from the map_data[features] file
+                delete_list.append(str(feature['properties'][id_key]))
 
-                    geojson_list.append(feature)
-                    # but also remove the feature from the map_data[features] file
+        geojson_dict[key] = geojson_list
 
-            geojson_dict[plot] = geojson_list
+    # if any features have no defined output add them but assign them a zero value.
 
-    # will need to add any regions not found - ie, that there are no results for
-    # For each feature dict look for corresponding values in corresponding shade dict and create plot
+    map_data['features'] = [feature for feature in map_data['features']
+                            if feature['properties'][id_key] not in delete_list]
+
+    if bool(map_data['features']):
+
+        plot_dict['0'] = dict((feature['properties'][id_key], 0) for feature in map_data['features'])
+        geojson_dict['0'] = [feature for feature in map_data['features']]
+
+    # define the dictionaries that will store the generated plot data
     source_dict = {}
-
     x_dict = {}
     y_dict = {}
     color_dict = {}
     name_dict = {}
     rate_dict = {}
 
-# this does need to happen inorder so the colour scale looks neat!
-    #list_of_geojson_dict = sorted(list(geojson_dict.keys()), key=int)
+    for key, value in geojson_dict.items():
 
-    #for key in list_of_geojson_dict:
-
-        #draw_features(geojson_dict[key], plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
-
-
-
-    for key in sorted(geojson_dict.keys(), key=int):
-
-        # may need to run the below in this loop direct
-        draw_features(geojson_dict[key], plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
+        define_features(value, plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    title = " by LA"
+    title = results_filename + " by LA"
 
     p = figure(width=900, height=900, title=title, tools=tools)
 
     # draw each patch
 
-    for key, value in source_dict.items():
+    for key in sorted(source_dict.keys(), key=int, reverse=True):
 
-        p.patches('x', 'y', source=value,
+        p.patches('x', 'y', source=source_dict[key],
                   fill_color='color', fill_alpha=0.7,
                   line_color="white", line_width=0.15, legend=str(key))
-
-
 
     hover = p.select_one(HoverTool)
     hover.point_policy = "follow_mouse"
@@ -247,10 +237,13 @@ def create_choropleth(json_file, shade_data_file):
     if os.path.isdir(output_dir) is False:
         os.mkdir(output_dir)
 
+    suffix = '.html'
+    output_filename = os.path.join('test' + suffix)
+
     output_file_path = os.path.join(output_dir, output_filename)
 
     output_file(output_file_path, title=title)
-    #save(p)
+    # save(p)
     show(p)
 
 

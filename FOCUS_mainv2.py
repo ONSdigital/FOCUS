@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     # create a list of runs from configuration file
     list_of_runs = sorted(list(input_data.keys()), key=int)
-    # define a list to be used to map all run/replication combinations to availalble processors
+    # define a list to be used to map all run/replication combinations to available processors
     run_list = []
     seed_dict = {}
     seed_list = []
