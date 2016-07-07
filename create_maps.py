@@ -77,7 +77,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
             return i
 
 
-def define_features(map_features, shade_data, key, source_dict, min_range, max_range, shade_no, colours):
+def define_features(map_features, shade_data, key, source_dict, min_range, max_range, step, colours):
 
     shade = []
     district_names = []
@@ -107,7 +107,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
             temp_list = feature['geometry']['coordinates'][0]
 
             for coord in temp_list:
-                sub_xs.append((coord[0])) # try list comprehension instead...quicker?
+                sub_xs.append((coord[0]))  # try list comprehension instead...quicker?
                 sub_ys.append((coord[1]))
 
             district_xs.append(sub_xs)
@@ -143,7 +143,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
     #district_colors = [colours[set_colour_level(rate, min_shade, max_shade)]
     #                   for rate in shade]
 
-    district_colors = [colours[set_colour_level_alt(rate, min_range, max_range, shade_no)]
+    district_colors = [colours[set_colour_level_alt(rate, min_range, max_range, step)]
                        for rate in shade]
 
     source_dict[key] = ColumnDataSource(data=dict(
@@ -155,7 +155,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
     ))
 
 
-def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range=80, max_range=100):
+def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range=60, max_range=100):
 
     reset_output()
 
@@ -163,19 +163,21 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
     results_data = pd.read_csv(shade_data_file)
     results_filename = h.path_leaf(shade_data_file).split(".")[0]
 
+    # calculate the maximum number of shades to show in final output
     shade_no = int(((max_range+step)-min_range)/step)
-    y = 0
-    plot_dict = {}  # dict used to store each plots shade data.
-    for x in range(min_range, max_range+step, step):
-        temp_df = results_data[(results_data['result'] > y/100) & (results_data['result'] <= x/100)]
+    plot_dict = {}  # dict used to store each plots data - max of one for each shade to display.
+
+    lower_limit = 0
+    for upper_limit in range(min_range, max_range+step, step):
+        temp_df = results_data[(results_data['result'] > lower_limit/100) & (results_data['result'] <= upper_limit/100)]
         if len(temp_df.index) > 0:
-            plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
-        y = x
+            plot_dict[str(upper_limit)] = dict(zip(temp_df.district, temp_df.result))
+        lower_limit = upper_limit
 
-    # separate JSON file to match the shade separation
-
+    # separate geojson file to match the plots above
     geojson_dict = {}  # dict used to store each plots geo data
-    delete_list = []
+    delete_list = []  # districts to delete once all with a colour are assigned
+
     with open(json_file) as base_map:
         map_data = json.load(base_map)
 
@@ -196,19 +198,17 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
         geojson_dict[key] = geojson_list
 
     # if any features have no defined output add them but assign them a zero value.
-
     map_data['features'] = [feature for feature in map_data['features']
                             if feature['properties'][id_key] not in delete_list]
 
+    # add a corresponding plot for the shade for those 0 values
     if bool(map_data['features']):
 
         plot_dict['0'] = dict((feature['properties'][id_key], 0) for feature in map_data['features'])
         geojson_dict['0'] = [feature for feature in map_data['features']]
 
-    # define the dictionaries that will store the generated plot data
-    source_dict = {}
-    colours = [[211, 211, 211]]
-
+    # create the colour palette to use
+    colours = [(211, 211, 211)]
     seaborn_pal = list(sns.cubehelix_palette(shade_no, reverse=True))
     seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in seaborn_pal]
     colours = colours + seaborn_pal
@@ -216,9 +216,10 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
     colours = ["#{0:02x}{1:02x}{2:02x}".format(h.clamp(colour[0]), h.clamp(colour[1]), h.clamp(colour[2]))
                for colour in colours]
 
+    source_dict = {}  # a dict that will store all the columndatasources
     for key, value in geojson_dict.items():
 
-        define_features(value, plot_dict[key], key, source_dict, min_range, max_range, shade_no, colours)
+        define_features(value, plot_dict[key], key, source_dict, min_range, max_range, step, colours)
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 

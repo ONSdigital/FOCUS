@@ -26,9 +26,9 @@ def aggregate(output_path):
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson, response_type="all", dynamic=False, reverse=False):
+def create_response_map(output_path, data_lists, geojson, response_type="all"):
 
-    # create some default output in ths case overall response rate by district
+    # create overall response rate by district or just for paper/digital
     return_list = []
     if response_type == 'all':
         type_filter = [0, 1]
@@ -55,12 +55,12 @@ def create_response_map(output_path, data_lists, geojson, response_type="all", d
     for item in return_list:
         returns = pd.DataFrame((item.join(district_size_list[index-1])))
         returns = returns[['result']].div(returns.hh_count, axis=0)
-        output_dir = os.path.join("outputs", "csv")
+        output_dir = os.path.join(output_path, "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
-        file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
-        returns.to_csv(file_name)
-        create_maps.create_choropleth(output_path, geojson, file_name)
+        plot_data = os.path.join(output_dir, "run " + str(index) + " returns.csv")
+        returns.to_csv(plot_data)
+        create_maps.create_choropleth(output_path, geojson, plot_data)
         index += 1
 
 
