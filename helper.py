@@ -85,3 +85,9 @@ def gauss_dist(rnd, alpha, beta):
 def path_leaf(path):
     head, tail = ntpath.split(path)
     return tail or ntpath.basename(head)
+
+
+def clamp(x):
+    return max(0, min(x, 255))
+
+

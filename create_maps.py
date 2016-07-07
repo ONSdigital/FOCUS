@@ -3,13 +3,27 @@ colors that will be seen. Sup data is extra information that will be displayed i
 
 import json
 import os
-from bokeh.models import HoverTool
-from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, vplot
-from bokeh.plotting import reset_output
 import math
 import numpy as np
 import pandas as pd
 import helper as h
+from bokeh.models import HoverTool
+from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, vplot
+from bokeh.plotting import reset_output
+import seaborn as sns
+
+
+def set_colour_level_alt(rate, min_shade, max_shade, step):
+
+    i = 1
+    if math.isnan(rate) or rate == 0:
+        return 0
+    else:
+        for x in range(min_shade, max_shade+step, step):
+            if rate <= x:
+                return i
+            else:
+                i += 1
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
@@ -63,12 +77,9 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
             return i
 
 
-def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict):
-
-    colors = ["#CCCCCC", "#980043", "#DD1C77", "#DF65B0", "#C994C7", "#D4B9DA"]
+def define_features(map_features, shade_data, key, source_dict, min_range, max_range, shade_no, colours):
 
     shade = []
-    supplementary = []
     district_names = []
     district_xs = []
     district_ys = []
@@ -86,18 +97,17 @@ def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, n
             sub_ys = []
 
             if (str(feature['properties'][id_key]) in shade_data and
-                        shade_data[str(feature['properties'][id_key])] != math.nan):
+                    shade_data[str(feature['properties'][id_key])] != math.nan):
 
                 shade.append(float(shade_data[str(feature['properties'][id_key])]) * 100)
 
             else:
                 shade.append(float('nan'))
-                supplementary.append(float('nan'))
 
             temp_list = feature['geometry']['coordinates'][0]
 
             for coord in temp_list:
-                sub_xs.append((coord[0]))
+                sub_xs.append((coord[0])) # try list comprehension instead...quicker?
                 sub_ys.append((coord[1]))
 
             district_xs.append(sub_xs)
@@ -113,13 +123,12 @@ def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, n
                 sub_ys = []
 
                 if (str(feature['properties'][id_key]) in shade_data and
-                            shade_data[str(feature['properties'][id_key])] != math.nan):
+                        shade_data[str(feature['properties'][id_key])] != math.nan):
 
                     shade.append(float(shade_data[str(feature['properties'][id_key])]) * 100)
 
                 else:
                     shade.append(float('nan'))
-                    supplementary.append(float('nan'))
 
                 for row in sub_list[0]:
                     sub_xs.append((row[0]))
@@ -128,17 +137,14 @@ def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, n
                 district_xs.append(sub_xs)
                 district_ys.append(sub_ys)
 
-    min_shade = np.nanmin(shade)
-    max_shade = np.nanmax(shade)
+    #min_shade = np.nanmin(shade)
+    #max_shade = np.nanmax(shade)
 
-    district_colors = [colors[set_colour_level(rate, min_shade, max_shade)]
+    #district_colors = [colours[set_colour_level(rate, min_shade, max_shade)]
+    #                   for rate in shade]
+
+    district_colors = [colours[set_colour_level_alt(rate, min_range, max_range, shade_no)]
                        for rate in shade]
-
-    x_dict[key] = district_xs
-    y_dict[key] = district_ys
-    color_dict[key] = district_colors
-    name_dict[key] = district_names
-    rate_dict[key] = shade
 
     source_dict[key] = ColumnDataSource(data=dict(
         x=district_xs,
@@ -149,7 +155,7 @@ def define_features(map_features, shade_data, key, x_dict, y_dict, color_dict, n
     ))
 
 
-def create_choropleth(json_file, shade_data_file):
+def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range=80, max_range=100):
 
     reset_output()
 
@@ -157,9 +163,10 @@ def create_choropleth(json_file, shade_data_file):
     results_data = pd.read_csv(shade_data_file)
     results_filename = h.path_leaf(shade_data_file).split(".")[0]
 
+    shade_no = int(((max_range+step)-min_range)/step)
     y = 0
     plot_dict = {}  # dict used to store each plots shade data.
-    for x in range(80, 105, 5):
+    for x in range(min_range, max_range+step, step):
         temp_df = results_data[(results_data['result'] > y/100) & (results_data['result'] <= x/100)]
         if len(temp_df.index) > 0:
             plot_dict[str(x)] = dict(zip(temp_df.district, temp_df.result))
@@ -200,15 +207,18 @@ def create_choropleth(json_file, shade_data_file):
 
     # define the dictionaries that will store the generated plot data
     source_dict = {}
-    x_dict = {}
-    y_dict = {}
-    color_dict = {}
-    name_dict = {}
-    rate_dict = {}
+    colours = [[211, 211, 211]]
+
+    seaborn_pal = list(sns.cubehelix_palette(shade_no, reverse=True))
+    seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in seaborn_pal]
+    colours = colours + seaborn_pal
+    print(colours)
+    colours = ["#{0:02x}{1:02x}{2:02x}".format(h.clamp(colour[0]), h.clamp(colour[1]), h.clamp(colour[2]))
+               for colour in colours]
 
     for key, value in geojson_dict.items():
 
-        define_features(value, plot_dict[key], key, x_dict, y_dict, color_dict, name_dict, rate_dict, source_dict)
+        define_features(value, plot_dict[key], key, source_dict, min_range, max_range, shade_no, colours)
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
@@ -232,7 +242,7 @@ def create_choropleth(json_file, shade_data_file):
         ("Supp", "@supp"),
     ]
 
-    output_dir = os.path.join("outputs", "charts")
+    output_dir = os.path.join(output_path, "charts")
 
     if os.path.isdir(output_dir) is False:
         os.mkdir(output_dir)

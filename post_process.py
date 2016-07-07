@@ -60,7 +60,7 @@ def create_response_map(output_path, data_lists, geojson, response_type="all", d
             os.mkdir(output_dir)
         file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
         returns.to_csv(file_name)
-        create_maps.create_choropleth(geojson, file_name)
+        create_maps.create_choropleth(output_path, geojson, file_name)
         index += 1
 
 
