@@ -59,7 +59,16 @@ def produce_default_output():
 
     agrregated_data = post_process.aggregate(output_path)
 
-    post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson')
+    post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
+                                     palette_colour="muted purple")  # http://xkcd.com/color/rgb/
+    post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
+                                     palette_colour="muted purple", response_type='paper',
+                                     step=5, min_range=60, max_range=90)  # http://xkcd.com/color/rgb/
+    post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
+                                     palette_colour="muted purple", response_type='digital',
+                                     step=5, min_range=0, max_range=25)  # http://xkcd.com/color/rgb/
+    post_process.create_visit_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
+                                  palette_colour="gold", )
     #post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson', 'paper', True, True)
     #post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson', 'digital', True, False)
     #post_process.create_visit_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson', "Visit_paper", True, True)
@@ -81,7 +90,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/LA_hh.JSON'
+        file_name = 'inputs/test_LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

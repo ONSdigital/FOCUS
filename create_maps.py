@@ -13,6 +13,11 @@ from bokeh.plotting import reset_output
 import seaborn as sns
 
 
+def select_palette(shade_no, palette_colour, reverse=False):
+
+    return list(sns.dark_palette(palette_colour, shade_no, reverse=reverse, input='xkcd'))
+
+
 def set_colour_level_alt(rate, min_shade, max_shade, step):
 
     i = 1
@@ -155,13 +160,12 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
     ))
 
 
-def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range=60, max_range=100):
+def create_choropleth(output_path, json_file, shade_data_file, palette_colour, output_type, step, min_range, max_range):
 
     reset_output()
 
     # separate data file used to define shade
     results_data = pd.read_csv(shade_data_file)
-    results_filename = h.path_leaf(shade_data_file).split(".")[0]
 
     # calculate the maximum number of shades to show in final output
     shade_no = int(((max_range+step)-min_range)/step)
@@ -209,7 +213,7 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
 
     # create the colour palette to use
     colours = [(211, 211, 211)]
-    seaborn_pal = list(sns.cubehelix_palette(shade_no, reverse=True))
+    seaborn_pal = select_palette(shade_no, palette_colour)
     seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in seaborn_pal]
     colours = colours + seaborn_pal
     print(colours)
@@ -223,7 +227,7 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
-    title = results_filename + " by LA"
+    title = output_type + " by LA"
 
     p = figure(width=900, height=900, title=title, tools=tools)
 
@@ -249,7 +253,7 @@ def create_choropleth(output_path, json_file, shade_data_file, step=5, min_range
         os.mkdir(output_dir)
 
     suffix = '.html'
-    output_filename = os.path.join('test' + suffix)
+    output_filename = os.path.join(output_type + suffix)
 
     output_file_path = os.path.join(output_dir, output_filename)
 
