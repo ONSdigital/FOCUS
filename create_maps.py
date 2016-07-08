@@ -18,17 +18,29 @@ def select_palette(shade_no, palette_colour, reverse=False):
     return list(sns.dark_palette(palette_colour, shade_no, reverse=reverse, input='xkcd'))
 
 
-def set_colour_level_alt(rate, min_shade, max_shade, step):
+def set_colour_level_alt(rate, min_shade, max_shade, step, reversed=False):
 
-    i = 1
-    if math.isnan(rate) or rate == 0:
-        return 0
+    if reversed:
+        pass
+        # round up upper
+        # round down lower
+        # get range
+        # decide on suitable step based on range
+        # do as below on passed values...
+
+
+
     else:
-        for x in range(min_shade, max_shade+step, step):
-            if rate <= x:
-                return i
-            else:
-                i += 1
+
+        i = 1
+        if math.isnan(rate) or rate == 0:
+            return 0
+        else:
+            for x in range(min_shade, max_shade+step, step):
+                if rate <= x:
+                    return i
+                else:
+                    i += 1
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
@@ -160,7 +172,8 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
     ))
 
 
-def create_choropleth(output_path, json_file, shade_data_file, palette_colour, output_type, step, min_range, max_range):
+def create_choropleth(output_path, json_file, shade_data_file, palette_colour, output_type, step, min_range, max_range,
+                      reverse):
 
     reset_output()
 
@@ -213,10 +226,9 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     # create the colour palette to use
     colours = [(211, 211, 211)]
-    seaborn_pal = select_palette(shade_no, palette_colour)
-    seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in seaborn_pal]
+    seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in select_palette(shade_no, palette_colour,
+                                                                                         reverse)]
     colours = colours + seaborn_pal
-    print(colours)
     colours = ["#{0:02x}{1:02x}{2:02x}".format(h.clamp(colour[0]), h.clamp(colour[1]), h.clamp(colour[2]))
                for colour in colours]
 
@@ -243,8 +255,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     hover.point_policy = "follow_mouse"
     hover.tooltips = [
         ("Name", "@name"),
-        ('output', "@rate%"),
-        ("Supp", "@supp"),
+        (output_type, "@rate%"),
     ]
 
     output_dir = os.path.join(output_path, "charts")

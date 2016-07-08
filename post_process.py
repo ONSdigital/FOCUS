@@ -27,7 +27,7 @@ def aggregate(output_path):
 
 
 def create_response_map(output_path, data_lists, geojson, palette_colour, response_type="all",
-                        step=5, min_range=80, max_range=100):
+                        step=5, min_range=80, max_range=100, reverse=False):
 
     # create overall response rate by district or just for paper/digital
     return_list = []
@@ -63,12 +63,12 @@ def create_response_map(output_path, data_lists, geojson, palette_colour, respon
         returns.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
                                       "run " + str(index) + " " + response_type + " " + "returns",
-                                      step, min_range, max_range)
+                                      step, min_range, max_range, reverse)
         index += 1
 
 
 def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_type="Visit_contact",
-                     step=10, min_range=20, max_range=100):
+                     step=10, min_range=20, max_range=100, reverse=False):
 
     # create some output
     visit_list = []
@@ -99,7 +99,7 @@ def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_typ
         plot_data = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
         visits_done.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
-                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range)
+                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range, reverse)
         index += 1
 
 
