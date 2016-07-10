@@ -1,6 +1,15 @@
 """module containing functions used across modules"""
 import datetime as dt
 import ntpath
+import math
+
+
+def roundup_nearest_ten(x):
+    return int(math.ceil(x / 10.0)) * 10
+
+
+def rounddown_nearest_ten(x):
+    return int(math.floor(x / 10.0)) * 10
 
 
 def returns_to_date(district, output_format=""):

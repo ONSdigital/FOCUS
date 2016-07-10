@@ -27,7 +27,7 @@ def aggregate(output_path):
 
 
 def create_response_map(output_path, data_lists, geojson, palette_colour, response_type="all",
-                        step=5, min_range=80, max_range=100, reverse=False):
+                        step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
 
     # create overall response rate by district or just for paper/digital
     return_list = []
@@ -63,7 +63,7 @@ def create_response_map(output_path, data_lists, geojson, palette_colour, respon
         returns.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
                                       "run " + str(index) + " " + response_type + " " + "returns",
-                                      step, min_range, max_range, reverse)
+                                      step, min_range, max_range, reverse, dynamic)
         index += 1
 
 

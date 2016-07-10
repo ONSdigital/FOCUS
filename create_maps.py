@@ -18,29 +18,28 @@ def select_palette(shade_no, palette_colour, reverse=False):
     return list(sns.dark_palette(palette_colour, shade_no, reverse=reverse, input='xkcd'))
 
 
-def set_colour_level_alt(rate, min_shade, max_shade, step, reversed=False):
+def set_dynamic_step(min_shade, max_shade):
 
-    if reversed:
-        pass
-        # round up upper
-        # round down lower
-        # get range
-        # decide on suitable step based on range
-        # do as below on passed values...
+    steps = [1, 2, 5, 10]
+
+    shade_range = h.roundup_nearest_ten(max_shade) - h.rounddown_nearest_ten(min_shade)
+    # default to step that is a whole number in multiple of 1,2 5 or 10, max of 10 shades?
+    for step in steps:
+        if shade_range / step <= 10:
+            return step
 
 
+def set_colour_level_alt(rate, min_shade, max_shade, step):
 
+    i = 1
+    if math.isnan(rate) or rate == 0:
+        return 0
     else:
-
-        i = 1
-        if math.isnan(rate) or rate == 0:
-            return 0
-        else:
-            for x in range(min_shade, max_shade+step, step):
-                if rate <= x:
-                    return i
-                else:
-                    i += 1
+        for x in range(min_shade, max_shade+step, step):
+            if rate <= x:
+                return i
+            else:
+                i += 1
 
 
 def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
@@ -94,7 +93,7 @@ def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed
             return i
 
 
-def define_features(map_features, shade_data, key, source_dict, min_range, max_range, step, colours):
+def define_features(map_features, shade_data, key, source_dict, min_range, max_range, step, colours, dynamic):
 
     shade = []
     district_names = []
@@ -154,12 +153,6 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
                 district_xs.append(sub_xs)
                 district_ys.append(sub_ys)
 
-    #min_shade = np.nanmin(shade)
-    #max_shade = np.nanmax(shade)
-
-    #district_colors = [colours[set_colour_level(rate, min_shade, max_shade)]
-    #                   for rate in shade]
-
     district_colors = [colours[set_colour_level_alt(rate, min_range, max_range, step)]
                        for rate in shade]
 
@@ -173,15 +166,23 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
 
 
 def create_choropleth(output_path, json_file, shade_data_file, palette_colour, output_type, step, min_range, max_range,
-                      reverse):
+                      reverse, dynamic=True):
 
     reset_output()
 
     # separate data file used to define shade
     results_data = pd.read_csv(shade_data_file)
+    print(results_data)
 
     # calculate the maximum number of shades to show in final output
+    if dynamic:
+        min_range = h.rounddown_nearest_ten(np.nanmin(list(results_data.result*100)))
+        max_range = h.roundup_nearest_ten(np.nanmax(list(results_data.result*100)))
+        step = set_dynamic_step(min_range, max_range)
+
+    # check for a whole number in user defined values - return an error if not
     shade_no = int(((max_range+step)-min_range)/step)
+
     plot_dict = {}  # dict used to store each plots data - max of one for each shade to display.
 
     lower_limit = 0
@@ -235,7 +236,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     source_dict = {}  # a dict that will store all the columndatasources
     for key, value in geojson_dict.items():
 
-        define_features(value, plot_dict[key], key, source_dict, min_range, max_range, step, colours)
+        define_features(value, plot_dict[key], key, source_dict, min_range, max_range, step, colours, dynamic)
 
     tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
 
