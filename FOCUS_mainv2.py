@@ -62,13 +62,13 @@ def produce_default_output():
     post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="muted purple", dynamic=True)  # http://xkcd.com/color/rgb/
     post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
-                                     palette_colour="blue", response_type='paper',
-                                     step=5, min_range=60, max_range=90, reverse=True)  # http://xkcd.com/color/rgb/
+                                     palette_colour="blue", response_type='paper', dynamic=True,
+                                     reverse=True)  # http://xkcd.com/color/rgb/
     post_process.create_response_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="green", response_type='digital',
-                                     step=5, min_range=0, max_range=25)  # http://xkcd.com/color/rgb/
+                                     dynamic=True)  # http://xkcd.com/color/rgb/
     post_process.create_visit_map(output_path, agrregated_data, 'inputs/geog_E+W_LAs.geojson',
-                                  palette_colour="gold", )
+                                  palette_colour="gold")
 
 if __name__ == '__main__':
 

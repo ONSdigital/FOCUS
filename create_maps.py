@@ -181,7 +181,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
         step = set_dynamic_step(min_range, max_range)
 
     # check for a whole number in user defined values - return an error if not
-    shade_no = int(((max_range+step)-min_range)/step)
+    shade_no = int((max_range-min_range)/step)
 
     plot_dict = {}  # dict used to store each plots data - max of one for each shade to display.
 
