@@ -26,9 +26,10 @@ def aggregate(output_path):
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson, response_type="all", dynamic=False, reverse=False):
+def create_response_map(output_path, data_lists, geojson, palette_colour, response_type="all",
+                        step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
 
-    # create some default output in ths case overall response rate by district
+    # create overall response rate by district or just for paper/digital
     return_list = []
     if response_type == 'all':
         type_filter = [0, 1]
@@ -55,17 +56,19 @@ def create_response_map(output_path, data_lists, geojson, response_type="all", d
     for item in return_list:
         returns = pd.DataFrame((item.join(district_size_list[index-1])))
         returns = returns[['result']].div(returns.hh_count, axis=0)
-        output_dir = os.path.join("outputs", "csv")
+        output_dir = os.path.join(output_path, "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
-        file_name = os.path.join(output_dir, "run " + str(index) + " returns.csv")
-        returns.to_csv(file_name)
-        create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
-                                      " " + response_type + " return rates", dynamic, reverse)
+        plot_data = os.path.join(output_dir, "run " + str(index) + " returns.csv")
+        returns.to_csv(plot_data)
+        create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
+                                      "run " + str(index) + " " + response_type + " " + "returns",
+                                      step, min_range, max_range, reverse, dynamic)
         index += 1
 
 
-def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success", dynamic=False, reverse=False):
+def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_type="Visit_contact",
+                     step=10, min_range=20, max_range=100, reverse=False):
 
     # create some output
     visit_list = []
@@ -93,10 +96,10 @@ def create_visit_map(output_path, data_lists, geojson, visit_type="Visit_success
         output_dir = os.path.join("outputs", "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
-        file_name = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
-        visits_done.to_csv(file_name)
-        create_maps.create_choropleth(output_path, geojson, file_name, "inputs/LA_hh.csv", "run " + str(index) +
-                                      " " + visit_type, dynamic, reverse)
+        plot_data = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
+        visits_done.to_csv(plot_data)
+        create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
+                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range, reverse)
         index += 1
 
 
