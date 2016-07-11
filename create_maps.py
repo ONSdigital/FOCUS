@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 import helper as h
 from bokeh.models import HoverTool
-from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, vplot
-from bokeh.plotting import reset_output
+from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, reset_output
 import seaborn as sns
 
 
 def select_palette(shade_no, palette_colour, reverse=False):
-
-    return list(sns.dark_palette(palette_colour, shade_no, reverse=reverse, input='xkcd'))
+    missing = ["#d8dcd6"]
+    pal = sns.dark_palette(palette_colour, shade_no, reverse=reverse, input='xkcd')
+    return missing + list(pal.as_hex())
 
 
 def set_dynamic_step(min_shade, max_shade):
@@ -29,7 +29,7 @@ def set_dynamic_step(min_shade, max_shade):
             return step
 
 
-def set_colour_level_alt(rate, min_shade, max_shade, step):
+def set_colour_level(rate, min_shade, max_shade, step):
 
     i = 1
     if math.isnan(rate) or rate == 0:
@@ -38,67 +38,19 @@ def set_colour_level_alt(rate, min_shade, max_shade, step):
         for x in range(min_shade, max_shade+step, step):
             if rate <= x:
                 return i
+
             else:
                 i += 1
-
-
-def set_colour_level(rate, min_shade, max_shade, dynamic_shading=False, reversed=False):
-
-    if dynamic_shading:
-
-        shade_range = max_shade - min_shade
-        step = math.ceil(shade_range/5)
-        min_value = int(min_shade)
-
-        i = 0
-
-        if math.isnan(rate):
-            i = 0
-        elif rate < min_value + step:
-            i = 1
-        elif rate < min_value + step*2:
-            i = 2
-        elif rate < min_value + step*3:
-            i = 3
-        elif rate < min_value + step*4:
-            i = 4
-        elif rate <= min_value + step*5:
-            i = 5
-
-        if reversed and i != 0:
-            return 6-i
-        else:
-            return i
-
-    else:
-
-        i = 0
-
-        if math.isnan(rate) or rate == 0:
-            i = 0
-        elif rate < 80:
-            i = 1
-        elif rate < 85:
-            i = 2
-        elif rate < 90:
-            i = 3
-        elif rate < 95:
-            i = 4
-        elif rate <= 100:
-            i = 5
-
-        if reversed and i != 0:
-            return 6-i
-        else:
-            return i
 
 
 def define_features(map_features, shade_data, key, source_dict, min_range, max_range, step, colours, dynamic):
 
     shade = []
     district_names = []
+    district_code = []
     district_xs = []
     district_ys = []
+
 
     name_key = 'LAD11NM'  # 'LSOA11NM' # 'LAD11NM'
     id_key = 'LAD11CD'  # 'LSOA11CD' # 'LAD11CD'
@@ -108,6 +60,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
         if feature['geometry']['type'] == 'Polygon':
 
             district_names.append(str(feature['properties'][name_key]))
+            district_code.append(str(feature['properties'][id_key]))
 
             sub_xs = []
             sub_ys = []
@@ -134,6 +87,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
             for sub_list in feature['geometry']['coordinates']:
 
                 district_names.append(str(feature['properties'][name_key]))
+                district_code.append(str(feature['properties'][id_key]))
 
                 sub_xs = []
                 sub_ys = []
@@ -153,7 +107,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
                 district_xs.append(sub_xs)
                 district_ys.append(sub_ys)
 
-    district_colors = [colours[set_colour_level_alt(rate, min_range, max_range, step)]
+    district_colors = [colours[set_colour_level(rate, min_range, max_range, step)]
                        for rate in shade]
 
     source_dict[key] = ColumnDataSource(data=dict(
@@ -161,6 +115,7 @@ def define_features(map_features, shade_data, key, source_dict, min_range, max_r
         y=district_ys,
         color=district_colors,
         name=district_names,
+        code=district_code,
         rate=shade,
     ))
 
@@ -172,7 +127,6 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     # separate data file used to define shade
     results_data = pd.read_csv(shade_data_file)
-    print(results_data)
 
     # calculate the maximum number of shades to show in final output
     if dynamic:
@@ -181,9 +135,9 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
         step = set_dynamic_step(min_range, max_range)
 
     # check for a whole number in user defined values - return an error if not
-    shade_no = int((max_range-min_range)/step)
+    shade_no = int(((max_range+step)-min_range)/step)
 
-    plot_dict = {}  # dict used to store each plots data - max of one for each shade to display.
+    plot_dict = {}  # dict used to store each plots data - one for each shade to display.
 
     lower_limit = 0
     for upper_limit in range(min_range, max_range+step, step):
@@ -226,12 +180,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
         geojson_dict['0'] = [feature for feature in map_data['features']]
 
     # create the colour palette to use
-    colours = [(211, 211, 211)]
-    seaborn_pal = [(int(x[0]*255), int(x[1]*255), int(x[2]*255)) for x in select_palette(shade_no, palette_colour,
-                                                                                         reverse)]
-    colours = colours + seaborn_pal
-    colours = ["#{0:02x}{1:02x}{2:02x}".format(h.clamp(colour[0]), h.clamp(colour[1]), h.clamp(colour[2]))
-               for colour in colours]
+    colours = select_palette(shade_no, palette_colour, reverse)
 
     source_dict = {}  # a dict that will store all the columndatasources
     for key, value in geojson_dict.items():
@@ -257,6 +206,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     hover.tooltips = [
         ("Name", "@name"),
         (output_type, "@rate%"),
+        ("Code", "@code"),
     ]
 
     output_dir = os.path.join(output_path, "charts")
@@ -269,7 +219,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     output_file_path = os.path.join(output_dir, output_filename)
 
-    output_file(output_file_path, title=title)
+    output_file(output_file_path, title=title, mode='inline')
     # save(p)
     show(p)
 
