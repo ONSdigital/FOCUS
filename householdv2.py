@@ -35,8 +35,8 @@ class Household(object):
 
         # flags to keep track of what the hh is doing/has done
         self.resp_planned = False
-        self.resp_sent = False
-        self.resp_rec = False
+        self.responded = False
+        self.returned = False
         self.resp_time = 0
         self.status = ''
         self.visits = 0
@@ -46,6 +46,13 @@ class Household(object):
         self.help_level = 0
 
         self.rep.env.process(self.action())
+
+    def update_behaviour(self):
+
+        self.resp_level = self.set_behaviour('response')
+        self.help_level = 0
+
+        yield self.env.process(self.action())
 
     def action(self):
 
@@ -105,9 +112,9 @@ class Household(object):
     def respond(self, delay=0):
         """represents the hh responding - not the return being received by census"""
 
-        if self.resp_sent is False:
+        if self.responded is False:
 
-            self.resp_sent = True
+            self.responded = True
             self.resp_time = self.env.now
             # add to hh response event log
 
