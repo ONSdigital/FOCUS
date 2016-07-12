@@ -6,7 +6,9 @@ from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
 
-response = namedtuple('Responded', ['reps', 'District', 'digital', 'hh_type', 'Time'])  # time response sent
+response = namedtuple('Responded', ['reps', 'District', 'digital', 'hh_type', 'Time'])
+do_nothing = namedtuple('Do_nothing', ['reps', 'District', 'digital', 'hh_type', 'Time'])
+reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'digital', 'hh_type', 'time'])
 
 
 class Household(object):
@@ -41,24 +43,20 @@ class Household(object):
         self.status = ''
         self.visits = 0
 
+        self.resp_level = 0
+        self.help_level = 0
         # below define how the hh behaves depending on preference
+
         self.resp_level = self.set_behaviour('response')
         self.help_level = 0
 
         self.rep.env.process(self.action())
 
-    def update_behaviour(self):
-
-        self.resp_level = self.set_behaviour('response')
-        self.help_level = 0
-
-        yield self.env.process(self.action())
-
     def action(self):
 
         action_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
 
-        if action_test <= self.resp_level:
+        if action_test <= self.resp_level and not self.responded:
 
             self.resp_planned = True
 
@@ -80,8 +78,9 @@ class Household(object):
 
             response_date_time = datetime.datetime.combine(response_date, datetime.datetime.min.time())\
                                 + datetime.timedelta(hours=response_time)
+            # issue here with response time - gauss dist can create -ve time iof action is run during day
+            response_date_time_hours = max((response_date_time - current_date_time).total_seconds()/3600, 0)
 
-            response_date_time_hours = (response_date_time - current_date_time).total_seconds()/3600
 
             # wait until that time
             self.status = "Responding"
@@ -89,7 +88,7 @@ class Household(object):
             # then respond
             yield self.env.process(self.respond(self.delay))
 
-        elif self.resp_level < action_test <= self.help_level:
+        elif self.resp_level < action_test <= self.help_level and not self.responded:
 
             print('call')
             contact_time = 1  # all call at same time for testing really some dist...from call centre patterns
@@ -97,11 +96,15 @@ class Household(object):
             yield self.env.timeout(contact_time)
             yield self.env.process(self.contact())
 
-        else:
+        elif not self.responded:
+            self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
+                                                             self.district.name,
+                                                             self.digital,
+                                                             self.hh_type,
+                                                             self.env.now))
 
-            pass
-            # yield until end of sim
-            #print('nothing')
+            self.status = "Do nothing"
+            yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # do nothing more
 
     def contact(self):
 
@@ -131,6 +134,24 @@ class Household(object):
 
             yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
 
+    def receive_reminder(self, reminder_type):
+
+        # first check if by the time it is received the household has responded
+        # type of reminder (inc pq)
+        if self.responded:
+            self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
+                                                                           self.district.name,
+                                                                           self.digital,
+                                                                           self.hh_type,
+                                                                           self.env.now))
+
+            yield self.env.timeout((self.rep.sim_hours) - self.env.now)
+
+        elif not self.responded and reminder_type == 'pq':
+            self.resp_level = self.set_behaviour('response')
+            self.help_level = self.set_behaviour('help')
+            yield self.env.process(self.action())
+
     def set_behaviour(self, behaviour):
 
         if self.digital or self.paper_allowed is True:
@@ -140,11 +161,11 @@ class Household(object):
             return self.input_data['behaviours']['alt'][behaviour]
 
 
-def set_preference(hh):
+def set_preference(household):
     """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
-    paper_test = hh.rep.rnd.uniform(0, 100)
+    paper_test = household.rep.rnd.uniform(0, 100)
 
-    if paper_test <= int(hh.input_data['paper_prop']):
+    if paper_test <= int(household.input_data['paper_prop']):
 
         return False
 

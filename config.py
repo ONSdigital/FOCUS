@@ -21,8 +21,8 @@ def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name)
 
     # numbers of HH per htc hh
     hh_per_co = [1290, 1050, 580, 390, 290]
-    #hh_per_co = [1290, 1050, 580, 200, 150]
-
+    hh_per_co = [1290, 1050, 580, 200, 150]
+    #hh_per_co = [500, 250, 250, 100, 75]
     with open(new_district_list, 'r') as f:
 
         reader = csv.reader(f)

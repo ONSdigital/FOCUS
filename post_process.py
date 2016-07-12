@@ -84,7 +84,7 @@ def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_typ
 
     # count the number of visits that had the input outcome
     for df in data_lists[visit_type]:
-        df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
+        df.columns = ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id']
         int_df = pd.DataFrame({'result': df.groupby(['rep', 'district']).size()}).reset_index()
         visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['result']))
 

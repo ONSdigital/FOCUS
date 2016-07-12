@@ -26,9 +26,11 @@
         "paper_trigger": 80,
         "RMT_update": 24,
         "district_area": 79.4,
+        "posting_time": 48,
         "census officer": {
           "walking": {
             "number": 1,
+            "has_paper": "False",
             "travel_speed": 5,
             "start_date": "2017, 4, 19",
             "end_date": "2017, 5, 17",
@@ -218,6 +220,7 @@
             },
             "visit_times": {
               "out": 3,
+              "out_paper": 4,
               "convert": 5,
               "success": 30,
               "wasted": 5,
@@ -250,12 +253,12 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
             "paper_prop": 86,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
-            "max_visits": 15,
+            "max_visits": 1,
             "paper_after_max_visits": 0,
             "conversion_rate": {
               "0": {
@@ -396,7 +399,7 @@
                 "help": 0
               }
             },
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -405,7 +408,7 @@
               "digital": 0
             },
             "priority": -1,
-            "max_visits": 15,
+            "max_visits": 1,
             "paper_after_max_visits": 0,
             "conversion_rate": {
               "0": {
@@ -546,12 +549,12 @@
             },
             "call_conversion_rate": 31,
             "paper_prop": 82,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -2,
-            "max_visits": 15,
+            "max_visits": 1,
             "paper_after_max_visits": 0,
             "contact_rate": 25,
             "conversion_rate": {
@@ -679,7 +682,7 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 27,
             "paper_prop": 78,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "behaviours": {
               "default": {
                 "response": 73,
@@ -694,7 +697,7 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -3,
-            "max_visits": 15,
+            "max_visits": 1,
             "delay": {
               "paper": 72,
               "digital": 0
@@ -840,12 +843,12 @@
                 "help": 0
               }
             },
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -4,
-            "max_visits": 15,
+            "max_visits": 1,
             "paper_after_max_visits": 0,
             "conversion_rate": {
               "0": {

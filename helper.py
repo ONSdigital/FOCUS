@@ -100,3 +100,7 @@ def clamp(x):
     return max(0, min(x, 255))
 
 
+def next_day(simpy_time):
+    # round up to next nearest day...
+    next = math.ceil(simpy_time/24)*24
+    return next - simpy_time + 9
