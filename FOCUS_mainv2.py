@@ -58,6 +58,7 @@ def start_run(run_input, seeds, out_path):
 def produce_default_output():
 
     aggregated_data = post_process.aggregate(output_path)
+    #post_process.create_story(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson')
 
     post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
@@ -67,8 +68,8 @@ def produce_default_output():
     post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="light sage", response_type='digital',
                                      dynamic=True)
-    #post_process.create_visit_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
-    #                              palette_colour="maize", visit_type="Visit_success")
+    post_process.create_visit_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
+                                  palette_colour="maize", visit_type="Visit_success")
 
 if __name__ == '__main__':
 

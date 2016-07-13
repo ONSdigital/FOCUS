@@ -126,7 +126,12 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     reset_output()
 
     # separate data file used to define shade
-    results_data = pd.read_csv(shade_data_file)
+    # detect if csv or other...
+
+    if isinstance(shade_data_file, str):
+        results_data = pd.read_csv(shade_data_file)
+    else:
+        results_data = shade_data_file
 
     # calculate the maximum number of shades to show in final output
     if dynamic:
@@ -193,8 +198,6 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     p = figure(width=900, height=900, title=title, tools=tools)
 
-    # draw each patch
-
     for key in sorted(source_dict.keys(), key=int, reverse=True):
 
         p.patches('x', 'y', source=source_dict[key],
@@ -220,7 +223,7 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     output_file_path = os.path.join(output_dir, output_filename)
 
     output_file(output_file_path, title=title, mode='inline')
-    # save(p)
+    #save(p)
     show(p)
 
 

@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import glob
 import create_maps
+import numpy as np
 
 
 def aggregate(output_path):
@@ -76,7 +77,7 @@ def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_typ
     # count the number of visits per district
     for df in data_lists["Visit"]:
 
-        df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time']
+        df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time', 'id']
         int_df = pd.DataFrame({'Visits': df.groupby(['rep', 'district']).size()}).reset_index()
         visit_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Visits']))
 
@@ -101,6 +102,45 @@ def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_typ
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
                                       "run " + str(index) + " " + visit_type,  step, min_range, max_range, reverse)
         index += 1
+
+
+def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_colour='muted purple',
+                 response_type="story", step=5, min_range=0, max_range=100, reverse=False, dynamic=False):
+
+    output_dir = os.path.join(output_path, "return stories")
+
+    if os.path.isdir(output_dir) is False:
+        os.mkdir(output_dir)
+
+    input_data = data_lists['Return'][run]
+
+    input_hh_data = data_lists['Total_hh'][run]
+    input_hh_data.columns = ['rep', 'district', 'hh_count']
+    input_hh_data = pd.DataFrame(input_hh_data.groupby(['district']).mean()['hh_count'])
+
+    input_data.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
+    split_range = np.arange(0, sim_end, 24)
+
+    for item in split_range:
+
+        response_type = str(item) + 'story'
+
+        int_df = input_data[input_data.time < item + 24]
+        int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep']).size()}).reset_index()
+        int_df = pd.DataFrame(int_df.groupby(['district']).mean()['result'])
+
+        # int df is sum of daily responses
+        # divide by total hh
+        returns = pd.DataFrame(int_df.join(input_hh_data))
+
+        returns = returns[['result']].div(returns.hh_count, axis=0)
+        print(returns)
+
+        plot_data = os.path.join(output_dir, str(item) + " story.csv")
+        returns.to_csv(plot_data)
+
+        create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour, response_type,
+                                      step, min_range, max_range, reverse, dynamic)
 
 
 
