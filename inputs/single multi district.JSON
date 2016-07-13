@@ -258,8 +258,8 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
-            "max_visits": 1,
-            "paper_after_max_visits": 0,
+            "max_visits": 2,
+            "paper_after_max_visits": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -408,8 +408,8 @@
               "digital": 0
             },
             "priority": -1,
-            "max_visits": 1,
-            "paper_after_max_visits": 0,
+            "max_visits": 2,
+            "paper_after_max_visits": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -554,8 +554,8 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -2,
-            "max_visits": 1,
-            "paper_after_max_visits": 0,
+            "max_visits": 2,
+            "paper_after_max_visits": "True",
             "contact_rate": 25,
             "conversion_rate": {
               "0": {
@@ -697,12 +697,12 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -3,
-            "max_visits": 1,
+            "max_visits": 2,
             "delay": {
               "paper": 72,
               "digital": 0
             },
-            "paper_after_max_visits": 0,
+            "paper_after_max_visits": "True",
             "contact_rate": 22,
             "conversion_rate": {
               "0": {
@@ -848,8 +848,8 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -4,
-            "max_visits": 1,
-            "paper_after_max_visits": 0,
+            "max_visits": 2,
+            "paper_after_max_visits": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
