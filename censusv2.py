@@ -33,6 +33,10 @@ def send_reminder(household, reminder_type):
                                                                     household.hh_type,
                                                                     reminder_type))
 
+    if reminder_type == 'pq':
+        household.rep.global_counter += 1
+        print(household.rep.global_counter, "visits:", household.visits)
+
     household.env.process(household.receive_reminder(reminder_type))
     yield household.env.timeout(0)
 
@@ -122,7 +126,7 @@ class CensusOfficer(object):
         self.action_plan = []
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
-        self.has_paper = h.str2bool(self.input_data['has_paper'] )
+        self.has_paper = h.str2bool(self.input_data['has_paper'])
 
         self.env.process(self.co_working_test())
 

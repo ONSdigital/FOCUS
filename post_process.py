@@ -27,7 +27,7 @@ def aggregate(output_path):
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson, palette_colour, response_type="all",
+def create_response_map(output_path, data_lists, geojson, palette_colour='heather', ret_type="Return", response_type="all",
                         step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
 
     # create overall response rate by district or just for paper/digital
@@ -39,7 +39,7 @@ def create_response_map(output_path, data_lists, geojson, palette_colour, respon
     else:
         type_filter = [1]
 
-    for df in data_lists['Return']:
+    for df in data_lists[ret_type]:
 
         df.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
         int_df = df.loc[df['digital'].isin(type_filter)]
@@ -60,10 +60,10 @@ def create_response_map(output_path, data_lists, geojson, palette_colour, respon
         output_dir = os.path.join(output_path, "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
-        plot_data = os.path.join(output_dir, "run " + str(index) + " returns.csv")
+        plot_data = os.path.join(output_dir, "run " + str(index) + " " + ret_type + " " + response_type + ".csv")
         returns.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
-                                      "run " + str(index) + " " + response_type + " " + "returns",
+                                      "run " + str(index) + " " + ret_type + " " + response_type + " " + "returns",
                                       step, min_range, max_range, reverse, dynamic)
         index += 1
 
@@ -139,8 +139,8 @@ def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_
         plot_data = os.path.join(output_dir, str(item) + " story.csv")
         returns.to_csv(plot_data)
 
-        create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour, response_type,
-                                      step, min_range, max_range, reverse, dynamic)
+        #create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour, response_type,
+        #                              step, min_range, max_range, reverse, dynamic)
 
 
 

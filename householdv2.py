@@ -7,8 +7,10 @@ from collections import namedtuple
 import helper as h
 
 response = namedtuple('Responded', ['reps', 'district', 'digital', 'hh_type', 'time'])
+response_planned = namedtuple('Response_planned', ['reps', 'district', 'digital', 'hh_type', 'time'])
 do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'digital', 'hh_type', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
+reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
 
 
 class Household(object):
@@ -58,6 +60,13 @@ class Household(object):
 
         if action_test <= self.resp_level and not self.responded:
 
+            if not self.resp_planned and self.env.now == 0:
+
+                self.output_data['Response_planned'].append(response_planned(self.rep.reps,
+                                                                             self.district.name,
+                                                                             self.digital,
+                                                                             self.hh_type,
+                                                                             self.env.now))
             self.resp_planned = True
 
             # determine date and time of response
@@ -136,29 +145,47 @@ class Household(object):
 
     def receive_reminder(self, reminder_type):
 
-        # first check if by the time it is received the household has responded
-        # type of reminder (inc pq)
+        if self.resp_planned:
 
-        if self.responded:
-            self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
+            if self.resp_planned and self.responded:
+                self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
                                                                            self.district.name,
                                                                            self.digital,
                                                                            self.hh_type,
                                                                            self.env.now,
                                                                            reminder_type))
 
-            yield self.env.timeout((self.rep.sim_hours) - self.env.now)
+            elif self.resp_planned and not self.responded:
 
-        elif not self.responded and reminder_type == 'pq':
-            self.resp_level = self.set_behaviour('response')
-            self.help_level = self.set_behaviour('help')
+                self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
+                                                                                         self.district.name,
+                                                                                         self.digital,
+                                                                                         self.hh_type,
+                                                                                         self.env.now,
+                                                                                         reminder_type))
+
+            yield self.env.timeout(0)
 
         else:
-            # some other reminder received
-            self.resp_level = self.set_behaviour('response')
-            self.help_level = self.set_behaviour('help')
 
-        yield self.env.process(self.action())
+            if not self.responded and reminder_type == 'pq' and not self.digital:
+                # hh who have chosen not to respond due to not having paper are now given paper
+
+                self.resp_level = self.set_behaviour('response')
+                self.help_level = self.set_behaviour('help')
+
+            elif not self.responded and reminder_type == 'pq' and self.digital:
+                # hh who have chosen not to respond despite happy toi use digital - paper makes no/little difference?
+
+                self.resp_level = 0
+                self.help_level = 0
+
+            else:
+                # some other reminder received - will need to understand the effectiveness of these whatever they are
+                self.resp_level = 0
+                self.help_level = 0
+
+            yield self.env.process(self.action())
 
     def set_behaviour(self, behaviour):
 
