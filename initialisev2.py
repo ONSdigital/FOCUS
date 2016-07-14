@@ -29,8 +29,6 @@ class Rep(object):
         self.ad_avail = []  # list of all the available advisers
         self.total_hh = 0  # used to store total number of hh created across all districts
 
-
-        self.global_counter = 0
         # methods to run on start
         self.total_ad_instances = self.input_data['advisers']['number']
         if self.total_ad_instances > 0:

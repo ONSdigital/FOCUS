@@ -62,8 +62,8 @@ def produce_default_output():
 
     post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
-    post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
-                                     palette_colour="red", ret_type="Response_planned", dynamic=True)
+    #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
+    #                                 palette_colour="red", ret_type="Response_planned", dynamic=True)
     #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
     #                                 palette_colour="faded blue", response_type='paper', dynamic=True,
     #                                 reverse=True)

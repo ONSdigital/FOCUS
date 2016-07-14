@@ -33,10 +33,6 @@ def send_reminder(household, reminder_type):
                                                                     household.hh_type,
                                                                     reminder_type))
 
-    if reminder_type == 'pq':
-        household.rep.global_counter += 1
-        print(household.rep.global_counter, "visits:", household.visits)
-
     household.env.process(household.receive_reminder(reminder_type))
     yield household.env.timeout(0)
 
@@ -275,6 +271,7 @@ class CensusOfficer(object):
             self.rep.env.process(household.respond(household.delay))
 
         # hh have not responded but do not respond as a result of the visit.
+        # need extra here fro when you fail but not at max visits...
         elif (not household.responded and
               outcome_test > conversion_dict[h.return_time_key(conversion_dict, self.env.now)] and
               h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and

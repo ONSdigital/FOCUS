@@ -90,8 +90,6 @@ class Household(object):
             # issue here with response time - gauss dist can create -ve time iof action is run during day
             response_date_time_hours = max((response_date_time - current_date_time).total_seconds()/3600, 0)
 
-
-            # wait until that time
             self.status = "Responding"
             yield self.env.timeout(response_date_time_hours)
             # then respond
@@ -145,16 +143,17 @@ class Household(object):
 
     def receive_reminder(self, reminder_type):
 
+        self.status = "received reminder"
+
         if self.resp_planned:
 
             if self.resp_planned and self.responded:
                 self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
-                                                                           self.district.name,
-                                                                           self.digital,
-                                                                           self.hh_type,
-                                                                           self.env.now,
-                                                                           reminder_type))
-
+                                                                               self.district.name,
+                                                                               self.digital,
+                                                                               self.hh_type,
+                                                                               self.env.now,
+                                                                               reminder_type))
             elif self.resp_planned and not self.responded:
 
                 self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
@@ -163,7 +162,6 @@ class Household(object):
                                                                                          self.hh_type,
                                                                                          self.env.now,
                                                                                          reminder_type))
-
             yield self.env.timeout(0)
 
         else:

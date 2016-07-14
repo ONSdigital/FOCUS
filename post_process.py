@@ -129,8 +129,6 @@ def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_
         int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep']).size()}).reset_index()
         int_df = pd.DataFrame(int_df.groupby(['district']).mean()['result'])
 
-        # int df is sum of daily responses
-        # divide by total hh
         returns = pd.DataFrame(int_df.join(input_hh_data))
 
         returns = returns[['result']].div(returns.hh_count, axis=0)

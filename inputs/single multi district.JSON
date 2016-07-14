@@ -2,8 +2,8 @@
   "1": {
     "replications": 1,
     "replication seeds": {},
-    "start_date": "2017, 3, 19, 0, 0, 0",
-    "end_date": "2017, 5, 17, 0, 0, 0",
+    "start_date": "2011, 3, 7, 0, 0, 0",
+    "end_date": "2011, 5, 6, 0, 0, 0",
     "advisers": {
       "number": 1,
       "start_date": "2011, 3, 8",
@@ -32,8 +32,8 @@
             "number": 1,
             "has_paper": "False",
             "travel_speed": 5,
-            "start_date": "2017, 4, 19",
-            "end_date": "2017, 5, 17",
+            "start_date": "2011, 4, 6",
+            "end_date": "2011, 5, 6",
             "availability": {
               "0": [
                 [
