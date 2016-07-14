@@ -3,6 +3,7 @@ import math
 import datetime as dt
 from collections import namedtuple
 import helper as h
+import datetime
 from simpy.util import start_delayed
 
 return_times = namedtuple('Returned', ['rep', 'district', 'digital', 'hh_type', 'time'])  # time return received
@@ -54,16 +55,42 @@ def ret_rec(hh, rep):
 class Adviser(object):
     """Call centre adviser - multitasking"""
 
-    def __init__(self, rep):
+    def __init__(self, rep, id_num, input_data):
 
         self.rep = rep
-        self.rep.env.process(self.add_to_store())
+        self.id_num = id_num
+        self.input_data = input_data
+
+        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
+        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
+
+        # start the processes to add and remove from the store...
+
+        self.set_availability()
+
+    def set_availability(self):
+
+        for single_date in h.date_range(self.start_date, self.end_date):
+            for time_slot in self.input_data['availability'][str(single_date.weekday())]:
+
+                in_time = h.make_time(time_slot[0][0], time_slot[0][1], time_slot[0][2])
+                out_time = h.make_time(time_slot[1][0], time_slot[1][1], time_slot[1][2])
+                days_in_hours = int((single_date - self.start_date).days)*24
+
+                start_delayed(self.rep.env, self.add_to_store(), h.make_time_decimal(in_time) + days_in_hours)
+                start_delayed(self.rep.env, self.remove_from_store(), h.make_time_decimal(out_time) + days_in_hours)
 
     # method to transfer the adviser to the store ready to be claimed
     def add_to_store(self):
 
         self.rep.ad_avail.remove(self)
         self.rep.adviser_store.put(self)
+        yield self.rep.env.timeout(0)
+
+    def remove_from_store(self):
+
+        current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
+        self.rep.ad_avail.append(current_ad)
         yield self.rep.env.timeout(0)
 
 

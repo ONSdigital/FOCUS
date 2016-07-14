@@ -50,7 +50,7 @@ class Household(object):
         # below define how the hh behaves depending on preference
 
         self.resp_level = self.set_behaviour('response')
-        self.help_level = 0
+        self.help_level = self.set_behaviour('help')
 
         self.rep.env.process(self.action())
 
@@ -97,8 +97,7 @@ class Household(object):
 
         elif self.resp_level < action_test <= self.help_level and not self.responded:
 
-            print('call')
-            contact_time = 1  # all call at same time for testing really some dist...from call centre patterns
+            contact_time = 10.5  # all call at same time for testing really some dist...from call centre patterns
             self.status = "making contact"
             yield self.env.timeout(contact_time)
             yield self.env.process(self.contact())
@@ -116,7 +115,9 @@ class Household(object):
     def contact(self):
 
         current_ad = yield self.rep.adviser_store.get()
+        print(self.id, ' got through at ', self.env.now)
         yield self.env.timeout(0.5)
+        print(self.id, ' call ended at ', self.env.now)
         self.rep.adviser_store.put(current_ad)
 
     def respond(self, delay=0):

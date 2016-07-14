@@ -104,3 +104,8 @@ def next_day(simpy_time):
     # round up to next nearest day...
     next = math.ceil(simpy_time/24)*24
     return next - simpy_time + 9
+
+
+def date_range(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + dt.timedelta(n)

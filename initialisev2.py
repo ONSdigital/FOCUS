@@ -46,7 +46,7 @@ class Rep(object):
         id_ad_num = 0
         for i in range(int(input_data["number"])):
 
-            self.ad_avail.append(censusv2.Adviser(self))
+            self.ad_avail.append(censusv2.Adviser(self, id_ad_num, input_data))
 
             id_ad_num += 1
 
