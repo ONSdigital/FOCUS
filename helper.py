@@ -109,3 +109,33 @@ def next_day(simpy_time):
 def date_range(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + dt.timedelta(n)
+
+
+def return_resp_time(obj):
+    # determine date and time of response
+    current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
+    sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
+
+    days_until_response = beta_dist(obj.rep,
+                                    obj.input_data['beta_dist'][0],
+                                    obj.input_data['beta_dist'][1],
+                                    sim_days_left)
+
+    response_date = current_date_time.date() + dt.timedelta(days=days_until_response)
+
+    response_day = response_date.weekday()
+    response_time = gauss_dist(obj.rnd,
+                               obj.input_data['response_time'][str(response_day)][0],
+                               obj.input_data['response_time'][str(response_day)][1])
+
+    response_date_time = dt.datetime.combine(response_date, dt.datetime.min.time()) \
+                         + dt.timedelta(hours=response_time)
+    # issue here with response time - gauss dist can create -ve time if action is run during day not at start
+    response_date_time_hours = max((response_date_time - current_date_time).total_seconds() / 3600, 0)
+
+    return response_date_time_hours
+
+
+def renege_time(obj):
+
+    return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])

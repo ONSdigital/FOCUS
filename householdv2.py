@@ -11,18 +11,22 @@ response_planned = namedtuple('Response_planned', ['reps', 'district', 'digital'
 do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'digital', 'hh_type', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
 reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
+call = namedtuple('Call', ['rep', 'district', 'digital', 'hh_type', 'time'])
+call_renege = namedtuple('Call_renege', ['rep', 'district', 'digital', 'hh_type', 'time'])
+call_contact = namedtuple('Call_contact', ['rep', 'district', 'digital', 'hh_type', 'time'])
+call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'digital', 'hh_type', 'time', 'wait_time'])
 
 
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, rnd, env, district, id, hh_type, input_data, output_data):
+    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, output_data):
 
         self.rep = rep
         self.rnd = rnd
         self.env = env
         self.district = district
-        self.id = id
+        self.id = hh_id
         self.hh_type = hh_type
         self.input_data = input_data
         self.output_data = output_data
@@ -70,35 +74,18 @@ class Household(object):
             self.resp_planned = True
 
             # determine date and time of response
-            current_date_time = self.rep.start_date + datetime.timedelta(hours=self.rep.env.now)
-            sim_days_left = (self.rep.end_date.date() - current_date_time.date()).days
-
-            days_until_response = h.beta_dist(self.rep,
-                                              self.input_data['beta_dist'][0],
-                                              self.input_data['beta_dist'][1],
-                                              sim_days_left)
-
-            response_date = current_date_time.date() + datetime.timedelta(days=days_until_response)
-
-            response_day = response_date.weekday()
-            response_time = h.gauss_dist(self.rnd,
-                                         self.input_data['response_time'][str(response_day)][0],
-                                         self.input_data['response_time'][str(response_day)][1])
-
-            response_date_time = datetime.datetime.combine(response_date, datetime.datetime.min.time())\
-                                + datetime.timedelta(hours=response_time)
-            # issue here with response time - gauss dist can create -ve time iof action is run during day
-            response_date_time_hours = max((response_date_time - current_date_time).total_seconds()/3600, 0)
+            response_time = h.return_resp_time(self)
 
             self.status = "Responding"
-            yield self.env.timeout(response_date_time_hours)
+            yield self.env.timeout(response_time)
             # then respond
             yield self.env.process(self.respond(self.delay))
 
         elif self.resp_level < action_test <= self.help_level and not self.responded:
 
-            contact_time = 10.5  # all call at same time for testing really some dist...from call centre patterns
+            contact_time = self.rnd.uniform(10, 100)  # all call at same time for testing really some dist...from call centre patterns
             self.status = "making contact"
+            contact_time = h.return_resp_time(self)
             yield self.env.timeout(contact_time)
             yield self.env.process(self.contact())
 
@@ -114,10 +101,41 @@ class Household(object):
 
     def contact(self):
 
+        self.output_data['Call'].append(call(self.rep.reps,
+                                             self.district.name,
+                                             self.digital,
+                                             self.hh_type,
+                                             self.env.now))
+
+        called_at = self.env.now
         current_ad = yield self.rep.adviser_store.get()
-        print(self.id, ' got through at ', self.env.now)
-        yield self.env.timeout(0.5)
-        print(self.id, ' call ended at ', self.env.now)
+        wait_time = self.env.now - called_at
+
+        if wait_time >= h.renege_time(self):
+            yield self.env.timeout(0)
+
+            self.output_data['Call_renege'].append(call_renege(self.rep.reps,
+                                                               self.district.name,
+                                                               self.digital,
+                                                               self.hh_type,
+                                                               self.env.now))
+
+        else:
+
+            self.output_data['Call_contact'].append(call_contact(self.rep.reps,
+                                                                 self.district.name,
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.env.now))
+            yield self.env.timeout(0.5)
+
+        self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
+                                                                   self.district.name,
+                                                                   self.digital,
+                                                                   self.hh_type,
+                                                                   self.env.now,
+                                                                   min(wait_time, h.renege_time(self))))
+
         self.rep.adviser_store.put(current_ad)
 
     def respond(self, delay=0):

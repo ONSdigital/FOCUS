@@ -89,15 +89,9 @@ class Adviser(object):
 
     def remove_from_store(self):
 
-        b = self.rep.adviser_store.get_queue
-        self.rep.adviser_store.get_queue = []
-
         current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
         print('adviser finishes at', self.rep.env.now)
         self.rep.ad_avail.append(current_ad)
-
-        self.rep.adviser_store.get_queue = b
-        b = []
 
         yield self.rep.env.timeout(0)
 

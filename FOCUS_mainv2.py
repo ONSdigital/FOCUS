@@ -134,6 +134,7 @@ if __name__ == '__main__':
                 seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
                 seed = abs(now - seed_date).total_seconds() + int(run) + rep
                 seed_dict[str(input_data[run]['id'])][str(rep)] = seed
+                print(seed)
                 create_new_config = True
 
             else:
@@ -143,7 +144,6 @@ if __name__ == '__main__':
 
             input_data[run]['rep id'] = rep
             run_list.append(copy.deepcopy(input_data[run]))
-
 
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
