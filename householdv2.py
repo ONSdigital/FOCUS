@@ -15,6 +15,7 @@ call = namedtuple('Call', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_renege = namedtuple('Call_renege', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_contact = namedtuple('Call_contact', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'digital', 'hh_type', 'time', 'wait_time'])
+post_paper = namedtuple('Post_paper', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 class Household(object):
@@ -48,13 +49,15 @@ class Household(object):
         self.resp_time = 0
         self.status = ''
         self.visits = 0
+        self.calls = 0
 
         self.resp_level = 0
         self.help_level = 0
         # below define how the hh behaves depending on preference
 
         self.resp_level = self.set_behaviour('response')
-        self.help_level = self.set_behaviour('help')
+        #self.help_level = 0
+        self.help_level = self.resp_level + self.set_behaviour('help')
 
         self.rep.env.process(self.action())
 
@@ -83,7 +86,6 @@ class Household(object):
 
         elif self.resp_level < action_test <= self.help_level and not self.responded:
 
-            contact_time = self.rnd.uniform(10, 100)  # all call at same time for testing really some dist...from call centre patterns
             self.status = "making contact"
             contact_time = h.return_resp_time(self)
             yield self.env.timeout(contact_time)
@@ -101,42 +103,63 @@ class Household(object):
 
     def contact(self):
 
+        yield self.env.process(self.phone_call())
+
+    def phone_call(self):
+
         self.output_data['Call'].append(call(self.rep.reps,
                                              self.district.name,
                                              self.digital,
                                              self.hh_type,
                                              self.env.now))
 
-        called_at = self.env.now
-        current_ad = yield self.rep.adviser_store.get()
-        wait_time = self.env.now - called_at
+        self.calls += 1
 
-        if wait_time >= h.renege_time(self):
+        if (not self.digital and not self.paper_allowed and
+            h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
+            h.str2bool(self.input_data['paper_after_max_visits'])):
+            # so this will provide paper if the conditions are met...
+
+            censusv2.schedule_paper_drop(self, self, False)
             yield self.env.timeout(0)
-
-            self.output_data['Call_renege'].append(call_renege(self.rep.reps,
-                                                               self.district.name,
-                                                               self.digital,
-                                                               self.hh_type,
-                                                               self.env.now))
 
         else:
 
-            self.output_data['Call_contact'].append(call_contact(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.env.now))
-            yield self.env.timeout(0.5)
+            # speak to someone
+            called_at = self.env.now
+            current_ad = yield self.rep.adviser_store.get()
+            wait_time = self.env.now - called_at
+            renege_time = h.renege_time(self)
 
-        self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
+            if wait_time >= renege_time:
+
+                self.output_data['Call_renege'].append(call_renege(self.rep.reps,
                                                                    self.district.name,
                                                                    self.digital,
                                                                    self.hh_type,
-                                                                   self.env.now,
-                                                                   min(wait_time, h.renege_time(self))))
+                                                                   self.env.now))
 
-        self.rep.adviser_store.put(current_ad)
+                self.resp_level = 0
+                self.help_level = self.resp_level + (self.set_behaviour('help', self.calls) * 0.5)
+                self.rep.adviser_store.put(current_ad)
+                yield self.env.process(self.action())
+
+            else:
+
+                self.output_data['Call_contact'].append(call_contact(self.rep.reps,
+                                                                     self.district.name,
+                                                                     self.digital,
+                                                                     self.hh_type,
+                                                                     self.env.now))
+                yield self.env.timeout(0.1)
+                self.rep.adviser_store.put(current_ad)
+
+            self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
+                                                                       self.district.name,
+                                                                       self.digital,
+                                                                       self.hh_type,
+                                                                       self.env.now,
+                                                                       min(wait_time, renege_time)))
 
     def respond(self, delay=0):
         """represents the hh responding - not the return being received by census"""
@@ -204,13 +227,16 @@ class Household(object):
 
             yield self.env.process(self.action())
 
-    def set_behaviour(self, behaviour):
+    def set_behaviour(self, behaviour, interactions=0):
+        # number of interactions used to reduce the effect of visits/calls etc the more they have...
 
         if self.digital or self.paper_allowed is True:
             # use default
-            return self.input_data['behaviours']['default'][behaviour]
+            len_beh = len(self.input_data['behaviours']['default'][behaviour])
+            return self.input_data['behaviours']['default'][behaviour][min(len_beh - 1, interactions)]
         else:
-            return self.input_data['behaviours']['alt'][behaviour]
+            len_beh = len(self.input_data['behaviours']['alt'][behaviour])
+            return self.input_data['behaviours']['alt'][behaviour][min(len_beh - 1, interactions)]
 
 
 def set_preference(household):

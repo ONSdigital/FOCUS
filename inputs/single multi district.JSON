@@ -12,13 +12,13 @@
       "end_time": 17,
       "FU_on": 0,
       "availability": {
-              "0": [[[10,30,0],[12, 0, 0]]],
-              "1": [[[10,30,0],[12, 0, 0]]],
-              "2": [[[10,30,0],[12, 0, 0]]],
-              "3": [[[10,30,0],[12, 0, 0]]],
-              "4": [[[10,30,0],[12, 0, 0]]],
-              "5": [[[10,30,0],[12, 0, 0]]],
-              "6": [[[10,30,0],[12, 0, 0]]]
+              "0": [[[9,0,0],[17, 0, 0]]],
+              "1": [[[9,0,0],[17, 0, 0]]],
+              "2": [[[9,0,0],[17, 0, 0]]],
+              "3": [[[9,0,0],[17, 0, 0]]],
+              "4": [[[9,0,0],[17, 0, 0]]],
+              "5": [[[9,0,0],[17, 0, 0]]],
+              "6": [[[9,0,0],[17, 0, 0]]]
             }
     },
     "webchat": {
@@ -250,19 +250,19 @@
           "htc1": {
             "behaviours": {
               "default": {
-                "response": 89.5,
-                "help": 0
+                "response": [84.5],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [89.5]
               }
             },
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
             "paper_prop": 86,
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -400,15 +400,15 @@
             "paper_prop": 85,
             "behaviours": {
               "default": {
-                "response": 85,
-                "help": 0
+                "response": [80],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [85]
               }
             },
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -548,17 +548,17 @@
             },
             "behaviours": {
               "default": {
-                "response": 78.5,
-                "help": 0
+                "response": [73.5],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [78.5]
               }
             },
             "call_conversion_rate": 31,
             "paper_prop": 82,
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -691,15 +691,15 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 27,
             "paper_prop": 78,
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "behaviours": {
               "default": {
-                "response": 73,
-                "help": 0
+                "response": [68],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [73]
               }
             },
             "number": 1,
@@ -844,15 +844,15 @@
             },
             "behaviours": {
               "default": {
-                "response": 69,
-                "help": 0
+                "response": [64],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 69
+                "response": [0],
+                "help": [69]
               }
             },
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,

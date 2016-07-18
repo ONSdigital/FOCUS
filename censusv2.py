@@ -90,9 +90,7 @@ class Adviser(object):
     def remove_from_store(self):
 
         current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
-        print('adviser finishes at', self.rep.env.now)
         self.rep.ad_avail.append(current_ad)
-
         yield self.rep.env.timeout(0)
 
 
@@ -206,7 +204,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["out_paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -257,7 +255,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -315,12 +313,7 @@ class CensusOfficer(object):
                                                                      household.id))
             # leave paper in hope they respond?
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
-
-            #if self.has_paper:
-                #self.env.process(send_reminder(household, 'pq'))
-            #else:
-                #start_delayed(self.env, send_reminder(household, 'pq'), h.next_day(self.env.now))
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -346,20 +339,6 @@ class CensusOfficer(object):
                     return True
 
         return False
-
-    def schedule_paper_drop(self, household):
-
-        self.rep.output_data['Visit_paper'].append(visit_paper(self.rep.reps,
-                                                               self.district.name,
-                                                               household.digital,
-                                                               household.hh_type,
-                                                               self.rep.env.now,
-                                                               household.id))
-
-        if self.has_paper:
-            self.env.process(send_reminder(household, 'pq'))
-        else:
-            start_delayed(self.env, send_reminder(household, 'pq'), h.next_day(self.env.now))
 
 
 def next_available(co):
@@ -391,3 +370,18 @@ def next_available(co):
     elif current_date > co.end_date:
         # past last day of work so yield until the end of the simulation.
         return co.rep.sim_hours - co.rep.env.now
+
+
+def schedule_paper_drop(obj, household, has_paper=False):
+
+    obj.rep.output_data['Visit_paper'].append(visit_paper(obj.rep.reps,
+                                                          obj.district.name,
+                                                          household.digital,
+                                                          household.hh_type,
+                                                          obj.rep.env.now,
+                                                          household.id))
+
+    if has_paper:
+        obj.env.process(send_reminder(household, 'pq'))
+    else:
+        start_delayed(obj.env, send_reminder(household, 'pq'), h.next_day(obj.env.now))

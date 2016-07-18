@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/spec_LA_hh.JSON'
+        file_name = 'inputs/all_LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -134,7 +134,6 @@ if __name__ == '__main__':
                 seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
                 seed = abs(now - seed_date).total_seconds() + int(run) + rep
                 seed_dict[str(input_data[run]['id'])][str(rep)] = seed
-                print(seed)
                 create_new_config = True
 
             else:
