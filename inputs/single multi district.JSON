@@ -5,12 +5,21 @@
     "start_date": "2011, 3, 7, 0, 0, 0",
     "end_date": "2011, 5, 6, 0, 0, 0",
     "advisers": {
-      "number": 1,
-      "start_date": "2011, 3, 8",
-      "end_date": "2011, 4, 5",
+      "number": 20,
+      "start_date": "2011, 3, 7, 0, 0, 0",
+      "end_date": "2011, 5, 6, 0, 0, 0",
       "start_time": 9,
       "end_time": 17,
-      "FU_on": 0
+      "FU_on": 0,
+      "availability": {
+              "0": [[[9,0,0],[17, 0, 0]]],
+              "1": [[[9,0,0],[17, 0, 0]]],
+              "2": [[[9,0,0],[17, 0, 0]]],
+              "3": [[[9,0,0],[17, 0, 0]]],
+              "4": [[[9,0,0],[17, 0, 0]]],
+              "5": [[[9,0,0],[17, 0, 0]]],
+              "6": [[[9,0,0],[17, 0, 0]]]
+            }
     },
     "webchat": {
       "number": 1,
@@ -241,12 +250,12 @@
           "htc1": {
             "behaviours": {
               "default": {
-                "response": 89.5,
-                "help": 0
+                "response": [84.5],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [89.5]
               }
             },
             "call_renege_lower": 0.05,
@@ -260,6 +269,7 @@
             "priority": 0,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -391,12 +401,12 @@
             "paper_prop": 85,
             "behaviours": {
               "default": {
-                "response": 85,
-                "help": 0
+                "response": [80],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [85]
               }
             },
             "paper_allowed": "False",
@@ -410,6 +420,7 @@
             "priority": -1,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -539,12 +550,12 @@
             },
             "behaviours": {
               "default": {
-                "response": 78.5,
-                "help": 0
+                "response": [73.5],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [78.5]
               }
             },
             "call_conversion_rate": 31,
@@ -556,6 +567,7 @@
             "priority": -2,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "contact_rate": 25,
             "conversion_rate": {
               "0": {
@@ -685,12 +697,12 @@
             "paper_allowed": "False",
             "behaviours": {
               "default": {
-                "response": 73,
-                "help": 0
+                "response": [68],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [73]
               }
             },
             "number": 1,
@@ -703,6 +715,7 @@
               "digital": 0
             },
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "contact_rate": 22,
             "conversion_rate": {
               "0": {
@@ -835,12 +848,12 @@
             },
             "behaviours": {
               "default": {
-                "response": 69,
-                "help": 0
+                "response": [64],
+                "help": [5]
               },
               "alt": {
-                "response": 0,
-                "help": 0
+                "response": [0],
+                "help": [69]
               }
             },
             "paper_allowed": "False",
@@ -850,6 +863,7 @@
             "priority": -4,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,

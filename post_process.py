@@ -6,29 +6,31 @@ import create_maps
 import numpy as np
 
 
-def aggregate(output_path):
+def aggregate(output_path, output_type):
 
     folder_list = glob.glob(output_path + '/*/')
     data_lists = {}
 
     for folder in folder_list:
-
         folder_name = folder.split(os.path.sep)[-2]
-        data_lists[folder_name] = []
+        if folder_name in output_type:
 
-        glob_folder = os.path.join('outputs', folder_name, '*.csv')
-        file_list = glob.glob(glob_folder)
+            folder_name = folder.split(os.path.sep)[-2]
+            data_lists[folder_name] = []
 
-        # for each file add to a list in the top level dictionary
-        for file in file_list:
-            # add the raw file to dataLists ready for
-            data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
+            glob_folder = os.path.join('outputs', folder_name, '*.csv')
+            file_list = glob.glob(glob_folder)
+
+            # for each file add to a list in the top level dictionary
+            for file in file_list:
+
+                data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
 
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson, palette_colour='heather', ret_type="Return", response_type="all",
-                        step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
+def create_response_map(output_path, data_lists, geojson, palette_colour='heather', ret_type="Returned",
+                        response_type="all", step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
 
     # create overall response rate by district or just for paper/digital
     return_list = []
@@ -69,7 +71,7 @@ def create_response_map(output_path, data_lists, geojson, palette_colour='heathe
 
 
 def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_type="Visit_contact",
-                     step=10, min_range=20, max_range=100, reverse=False):
+                     step=10, min_range=20, max_range=100, reverse=False, dynamic=False):
 
     # create some output
     visit_list = []
@@ -100,7 +102,8 @@ def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_typ
         plot_data = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
         visits_done.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
-                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range, reverse)
+                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range,
+                                      reverse, dynamic=False)
         index += 1
 
 

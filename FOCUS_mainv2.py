@@ -57,11 +57,13 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    aggregated_data = post_process.aggregate(output_path)
+    aggregated_data = post_process.aggregate(output_path, ['Returned', 'Total_hh'])
     #post_process.create_story(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson')
 
     post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
+    #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson', ret_type='Post_paper',
+    #                                 palette_colour="heather", dynamic=True)
     #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
     #                                 palette_colour="red", ret_type="Response_planned", dynamic=True)
     #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
@@ -89,7 +91,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/spec_LA_hh.JSON'
+        file_name = 'inputs/all_LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -144,7 +146,6 @@ if __name__ == '__main__':
             input_data[run]['rep id'] = rep
             run_list.append(copy.deepcopy(input_data[run]))
 
-
     ts = time.time()
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
@@ -166,6 +167,7 @@ if __name__ == '__main__':
         output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)
+
     if produce_default:
         produce_default_output()
 

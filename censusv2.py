@@ -3,6 +3,7 @@ import math
 import datetime as dt
 from collections import namedtuple
 import helper as h
+import datetime
 from simpy.util import start_delayed
 
 return_times = namedtuple('Returned', ['rep', 'district', 'digital', 'hh_type', 'time'])  # time return received
@@ -16,6 +17,7 @@ visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'digital', 'hh_typ
 visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+post_paper = namedtuple('Post_paper', ['rep', 'district', 'digital', 'hh_type', 'time'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -33,7 +35,7 @@ def send_reminder(household, reminder_type):
                                                                     household.hh_type,
                                                                     reminder_type))
 
-    household.env.process(household.receive_reminder(reminder_type))
+    start_delayed(household.env, household.receive_reminder(reminder_type), 24)
     yield household.env.timeout(0)
 
 
@@ -42,11 +44,11 @@ def ret_rec(hh, rep):
     hh.returned = True
     rep.total_returns += 1
 
-    rep.output_data['Return'].append(return_times(rep.reps,
-                                                  hh.district.name,
-                                                  hh.digital,
-                                                  hh.hh_type,
-                                                  rep.env.now))
+    rep.output_data['Returned'].append(return_times(rep.reps,
+                                                    hh.district.name,
+                                                    hh.digital,
+                                                    hh.hh_type,
+                                                    rep.env.now))
 
     yield rep.env.timeout(0)
 
@@ -54,16 +56,42 @@ def ret_rec(hh, rep):
 class Adviser(object):
     """Call centre adviser - multitasking"""
 
-    def __init__(self, rep):
+    def __init__(self, rep, id_num, input_data):
 
         self.rep = rep
-        self.rep.env.process(self.add_to_store())
+        self.id_num = id_num
+        self.input_data = input_data
+
+        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
+        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
+
+        # start the processes to add and remove from the store...
+
+        self.set_availability()
+
+    def set_availability(self):
+
+        for single_date in h.date_range(self.start_date, self.end_date):
+            for time_slot in self.input_data['availability'][str(single_date.weekday())]:
+
+                in_time = h.make_time(time_slot[0][0], time_slot[0][1], time_slot[0][2])
+                out_time = h.make_time(time_slot[1][0], time_slot[1][1], time_slot[1][2])
+                days_in_hours = int((single_date - self.start_date).days)*24
+
+                start_delayed(self.rep.env, self.add_to_store(), h.make_time_decimal(in_time) + days_in_hours)
+                start_delayed(self.rep.env, self.remove_from_store(), h.make_time_decimal(out_time) + days_in_hours)
 
     # method to transfer the adviser to the store ready to be claimed
     def add_to_store(self):
 
         self.rep.ad_avail.remove(self)
         self.rep.adviser_store.put(self)
+        yield self.rep.env.timeout(0)
+
+    def remove_from_store(self):
+
+        current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
+        self.rep.ad_avail.append(current_ad)
         yield self.rep.env.timeout(0)
 
 
@@ -146,7 +174,7 @@ class CensusOfficer(object):
                                                    household.digital,
                                                    household.hh_type,
                                                    self.rep.env.now,
-                                                   household.id))
+                                                   household.hh_id))
 
         if household.resp_planned:
             self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
@@ -154,7 +182,7 @@ class CensusOfficer(object):
                                                                                household.digital,
                                                                                household.hh_type,
                                                                                self.rep.env.now,
-                                                                               household.id))
+                                                                               household.hh_id))
 
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
@@ -168,7 +196,7 @@ class CensusOfficer(object):
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
-                                                                       household.id))
+                                                                       household.hh_id))
 
             yield self.rep.env.process(self.fu_visit_assist(household))
 
@@ -177,7 +205,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["out_paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -189,7 +217,7 @@ class CensusOfficer(object):
                                                                household.digital,
                                                                household.hh_type,
                                                                self.env.now,
-                                                               household.id))
+                                                               household.hh_id))
 
             self.env.process(send_reminder(household, 'postcard'))
 
@@ -216,7 +244,7 @@ class CensusOfficer(object):
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.rep.env.now,
-                                                                       household.id))
+                                                                       household.hh_id))
 
             household.digital = True
             yield self.rep.env.process(self.fu_visit_outcome(household))
@@ -228,7 +256,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -247,10 +275,10 @@ class CensusOfficer(object):
         if household.responded is True:
             self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
                                                                      self.district.name,
-                                                                     household.id,
+                                                                     household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,
-                                                                     household.id))
+                                                                     household.hh_id))
 
             visit_time = self.input_data["visit_times"]["wasted"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -261,10 +289,10 @@ class CensusOfficer(object):
 
             self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
                                                                        self.district.name,
-                                                                       household.id,
+                                                                       household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
-                                                                       household.id))
+                                                                       household.hh_id))
             household.resp_planned = True
             visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -280,18 +308,13 @@ class CensusOfficer(object):
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
                                                                      self.district.name,
-                                                                     household.id,
+                                                                     household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,
-                                                                     household.id))
+                                                                     household.hh_id))
             # leave paper in hope they respond?
             household.paper_allowed = True
-            self.schedule_paper_drop(household)
-
-            #if self.has_paper:
-                #self.env.process(send_reminder(household, 'pq'))
-            #else:
-                #start_delayed(self.env, send_reminder(household, 'pq'), h.next_day(self.env.now))
+            schedule_paper_drop(self, household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -317,20 +340,6 @@ class CensusOfficer(object):
                     return True
 
         return False
-
-    def schedule_paper_drop(self, household):
-
-        self.rep.output_data['Visit_paper'].append(visit_paper(self.rep.reps,
-                                                               self.district.name,
-                                                               household.digital,
-                                                               household.hh_type,
-                                                               self.rep.env.now,
-                                                               household.id))
-
-        if self.has_paper:
-            self.env.process(send_reminder(household, 'pq'))
-        else:
-            start_delayed(self.env, send_reminder(household, 'pq'), h.next_day(self.env.now))
 
 
 def next_available(co):
@@ -362,3 +371,27 @@ def next_available(co):
     elif current_date > co.end_date:
         # past last day of work so yield until the end of the simulation.
         return co.rep.sim_hours - co.rep.env.now
+
+
+def schedule_paper_drop(obj, household, has_paper=False):
+
+    if has_paper:
+
+        obj.rep.output_data['Visit_paper'].append(visit_paper(obj.rep.reps,
+                                                              obj.district.name,
+                                                              household.digital,
+                                                              household.hh_type,
+                                                              obj.rep.env.now,
+                                                              household.hh_id))
+    else:
+
+        household.output_data['Post_paper'].append(post_paper(household.rep.reps,
+                                                              household.district.name,
+                                                              household.digital,
+                                                              household.hh_type,
+                                                              household.env.now))
+
+    if has_paper:
+        obj.env.process(send_reminder(household, 'pq'))
+    else:
+        start_delayed(obj.env, send_reminder(household, 'pq'), h.next_day(obj.env.now))

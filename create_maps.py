@@ -125,15 +125,12 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     reset_output()
 
-    # separate data file used to define shade
-    # detect if csv or other...
-
     if isinstance(shade_data_file, str):
         results_data = pd.read_csv(shade_data_file)
     else:
         results_data = shade_data_file
 
-    # calculate the maximum number of shades to show in final output
+    # calculate the maximum number of shades to show in final output if not user specified
     if dynamic:
         min_range = h.rounddown_nearest_ten(np.nanmin(list(results_data.result*100)))
         max_range = h.roundup_nearest_ten(np.nanmax(list(results_data.result*100)))
