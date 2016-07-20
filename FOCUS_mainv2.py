@@ -57,11 +57,13 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    aggregated_data = post_process.aggregate(output_path)
+    aggregated_data = post_process.aggregate(output_path, ['Returned', 'Total_hh'])
     #post_process.create_story(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson')
 
     post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
                                      palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
+    #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson', ret_type='Post_paper',
+    #                                 palette_colour="heather", dynamic=True)
     #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
     #                                 palette_colour="red", ret_type="Response_planned", dynamic=True)
     #post_process.create_response_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
@@ -165,6 +167,7 @@ if __name__ == '__main__':
         output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)
+
     if produce_default:
         produce_default_output()
 

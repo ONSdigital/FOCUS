@@ -14,7 +14,7 @@ def rounddown_nearest_ten(x):
 
 def returns_to_date(district, output_format=""):
 
-    count = len([hh.id for hh in district.households if hh.returned])
+    count = len([household.hh_id for household in district.households if household.returned])
 
     if output_format == "%":
 

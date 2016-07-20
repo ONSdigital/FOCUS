@@ -262,13 +262,14 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
             "paper_prop": 86,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -408,7 +409,7 @@
                 "help": [85]
               }
             },
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -419,6 +420,7 @@
             "priority": -1,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -558,13 +560,14 @@
             },
             "call_conversion_rate": 31,
             "paper_prop": 82,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -2,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "contact_rate": 25,
             "conversion_rate": {
               "0": {
@@ -691,7 +694,7 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 27,
             "paper_prop": 78,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "behaviours": {
               "default": {
                 "response": [68],
@@ -712,6 +715,7 @@
               "digital": 0
             },
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "contact_rate": 22,
             "conversion_rate": {
               "0": {
@@ -852,13 +856,14 @@
                 "help": [69]
               }
             },
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -4,
             "max_visits": 15,
             "paper_after_max_visits": "True",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 20,
