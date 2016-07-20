@@ -8,7 +8,7 @@ from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
 
-total_hh = namedtuple('Total_hh', ['reps', 'district', 'count'])
+hh_count = namedtuple('hh_count', ['reps', 'district', 'hh_count'])
 
 
 class District(object):
@@ -30,7 +30,7 @@ class District(object):
 
         # processes to run
         self.create_households()
-        self.output_data['Total_hh'].append(total_hh(self.rep.reps, self.name, len(self.households)))
+        self.output_data['hh_count'].append(hh_count(self.rep.reps, self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
         self.create_co(self.input_data["census officer"])
 

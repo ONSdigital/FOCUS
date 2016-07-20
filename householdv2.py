@@ -246,7 +246,6 @@ class Household(object):
                                                                    min(wait_time, renege_time)))
 
 
-
 def set_preference(household):
     """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
     paper_test = household.rep.rnd.uniform(0, 100)

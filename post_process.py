@@ -24,16 +24,17 @@ def aggregate(output_path, output_type):
             # for each file add to a list in the top level dictionary
             for file in file_list:
 
-                data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=-1))
+                data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=0))
 
     return data_lists
 
 
-def create_response_map(output_path, data_lists, geojson, palette_colour='heather', ret_type="Returned",
-                        response_type="all", step=5, min_range=80, max_range=100, reverse=False, dynamic=False):
+def create_map(output_path, data_lists, geojson, palette_colour='heather', data_numerator="Returned",
+               data_denominator="hh_count", response_type="all", step=5, min_range=80, max_range=100,
+               reverse=False, dynamic=False):
 
     # create overall response rate by district or just for paper/digital
-    return_list = []
+    numerator_list = []
     if response_type == 'all':
         type_filter = [0, 1]
     elif response_type == 'paper':
@@ -41,70 +42,41 @@ def create_response_map(output_path, data_lists, geojson, palette_colour='heathe
     else:
         type_filter = [1]
 
-    for df in data_lists[ret_type]:
+    for df in data_lists[data_numerator]:
 
-        df.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
         int_df = df.loc[df['digital'].isin(type_filter)]
-        int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep']).size()}).reset_index()
-        return_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['result']))
+        int_df = pd.DataFrame({'numerator_result': int_df.groupby(['district', 'rep']).size()}).reset_index()
+        numerator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['numerator_result']))
 
-    district_size_list = []
+    denominator_list = []
 
     # collate total hh outputs
-    for df in data_lists['Total_hh']:
-        df.columns = ['rep', 'district', 'hh_count']
-        district_size_list.append(pd.DataFrame(df.groupby(['district']).mean()['hh_count']))
+    if data_denominator == 'hh_count':
+        for df in data_lists['hh_count']:
+
+            denominator_list.append(pd.DataFrame({'denominator_result': (df.groupby(['district']).mean()['hh_count'])}))
+
+    else:
+        for df in data_lists[data_denominator]:
+            int_df = df.loc[df['digital'].isin(type_filter)]
+            int_df = pd.DataFrame({'denominator_result': int_df.groupby(['district', 'rep']).size()}).reset_index()
+            denominator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['denominator_result']))
 
     index = 1
-    for item in return_list:
-        returns = pd.DataFrame((item.join(district_size_list[index-1])))
-        returns = returns[['result']].div(returns.hh_count, axis=0)
+    for item in numerator_list:
+        returns = pd.DataFrame((item.join(denominator_list[index-1])))
+        returns = returns[['numerator_result']].div(getattr(returns, 'denominator_result'), axis=0)
         output_dir = os.path.join(output_path, "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
-        plot_data = os.path.join(output_dir, "run " + str(index) + " " + ret_type + " " + response_type + ".csv")
+        plot_data = os.path.join(output_dir, "run " + str(index) + " " + data_numerator + " " + response_type + ".csv")
         returns.to_csv(plot_data)
         create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
-                                      "run " + str(index) + " " + ret_type + " " + response_type + " " + "returns",
+                                      "run " + str(index) + " " + data_numerator + " " + response_type + " " + "returns",
                                       step, min_range, max_range, reverse, dynamic)
         index += 1
 
 
-def create_visit_map(output_path, data_lists, geojson, palette_colour, visit_type="Visit_contact",
-                     step=10, min_range=20, max_range=100, reverse=False, dynamic=False):
-
-    # create some output
-    visit_list = []
-
-    # count the number of visits per district
-    for df in data_lists["Visit"]:
-
-        df.columns = ['rep', 'district', 'hh_id', 'hh_type', 'time', 'id']
-        int_df = pd.DataFrame({'Visits': df.groupby(['rep', 'district']).size()}).reset_index()
-        visit_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['Visits']))
-
-    visit_outcome_list = []
-
-    # count the number of visits that had the input outcome
-    for df in data_lists[visit_type]:
-        df.columns = ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id']
-        int_df = pd.DataFrame({'result': df.groupby(['rep', 'district']).size()}).reset_index()
-        visit_outcome_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['result']))
-
-    index = 1
-    for item in visit_outcome_list:
-        visits_done = pd.DataFrame((visit_list[index-1].join(item)))
-        visits_done = visits_done[['result']].div(visits_done.Visits, axis=0)
-        # output the percentage of visits that have the outcome as per the input.
-        output_dir = os.path.join("outputs", "csv")
-        if os.path.isdir(output_dir) is False:
-            os.mkdir(output_dir)
-        plot_data = os.path.join(output_dir, "run " + str(index) + " " + visit_type + ".csv")
-        visits_done.to_csv(plot_data)
-        create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour,
-                                      "run " + str(index) + " " + visit_type,  step, min_range, max_range,
-                                      reverse, dynamic=False)
-        index += 1
 
 
 def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_colour='muted purple',
