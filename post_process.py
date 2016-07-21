@@ -126,7 +126,7 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
     create_graphs.bar_response(plot_list, output_path)
 
 
-def simple_split(data_lists, output_type, start=0, end=1440, step=24, cumulative=True):
+def simple_split(data_lists, output_type, start=0, end=1440, step=24, cumulative=True, run=0):
 
     split_dict = defaultdict(list)  # return a dict of a list of df to work with current create maps
 
@@ -135,19 +135,19 @@ def simple_split(data_lists, output_type, start=0, end=1440, step=24, cumulative
     for key in data_lists:
         if key in output_type:
 
-            for df in data_lists[key]:
+            df = data_lists[key][run]
 
-                # split data by passed variables and append result to new dataframe
-                # cumulative
-                for day in split_range:
-                    if cumulative:
-                        int_df = df.loc[df.time <= day + 24]
-                    else:
-                        int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
+            # split data by passed variables and append result to new dataframe
+            # cumulative
+            for day in split_range:
+                if cumulative:
+                    int_df = df.loc[df.time <= day + 24]
+                else:
+                    int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
 
-                    split_dict[key].append(int_df)
+                split_dict[key].append(int_df)
 
-                return split_dict
+            return split_dict
 
 
 def add_hh_count(data_lists):
