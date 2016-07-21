@@ -132,8 +132,8 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     # calculate the maximum number of shades to show in final output if not user specified
     if dynamic:
-        min_range = h.rounddown_nearest_ten(np.nanmin(list(results_data.numerator_result*100)))
-        max_range = h.roundup_nearest_ten(np.nanmax(list(results_data.numerator_result*100)))
+        min_range = h.rounddown_nearest_ten(np.nanmin(list(results_data.result*100)))
+        max_range = h.roundup_nearest_ten(np.nanmax(list(results_data.result*100)))
         step = set_dynamic_step(min_range, max_range)
 
     # check for a whole number in user defined values - return an error if not
@@ -143,9 +143,9 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
 
     lower_limit = 0
     for upper_limit in range(min_range, max_range+step, step):
-        temp_df = results_data[(results_data['numerator_result'] > lower_limit/100) & (results_data['numerator_result'] <= upper_limit/100)]
+        temp_df = results_data[(results_data['result'] > lower_limit/100) & (results_data['result'] <= upper_limit/100)]
         if len(temp_df.index) > 0:
-            plot_dict[str(upper_limit)] = dict(zip(temp_df.district, temp_df.numerator_result))
+            plot_dict[str(upper_limit)] = dict(zip(temp_df.district, temp_df.result))
         lower_limit = upper_limit
 
     # separate geojson file to match the plots above
@@ -194,7 +194,6 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     title = output_type + " by LA"
 
     p = figure(width=900, height=900, title=title, tools=tools)
-
 
     for key in sorted(source_dict.keys(), key=int, reverse=True):
 

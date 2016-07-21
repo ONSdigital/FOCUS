@@ -3,7 +3,9 @@ import pandas as pd
 import os
 import glob
 import create_maps
+import create_graphs
 import numpy as np
+from collections import defaultdict
 
 
 def aggregate(output_path, output_type):
@@ -33,8 +35,9 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
                data_denominator="hh_count", response_type="all", step=5, min_range=80, max_range=100,
                reverse=False, dynamic=False):
 
-    # create overall response rate by district or just for paper/digital
     numerator_list = []
+    denominator_list = []
+
     if response_type == 'all':
         type_filter = [0, 1]
     elif response_type == 'paper':
@@ -48,9 +51,6 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
         int_df = pd.DataFrame({'numerator_result': int_df.groupby(['district', 'rep']).size()}).reset_index()
         numerator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['numerator_result']))
 
-    denominator_list = []
-
-    # collate total hh outputs
     if data_denominator == 'hh_count':
         for df in data_lists['hh_count']:
 
@@ -66,6 +66,7 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
     for item in numerator_list:
         returns = pd.DataFrame((item.join(denominator_list[index-1])))
         returns = returns[['numerator_result']].div(getattr(returns, 'denominator_result'), axis=0)
+        returns.rename(columns={'numerator_result': 'result'}, inplace=True)
         output_dir = os.path.join(output_path, "csv")
         if os.path.isdir(output_dir) is False:
             os.mkdir(output_dir)
@@ -77,11 +78,42 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
         index += 1
 
 
+def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_denominator="hh_record"):
+
+    numerator_list = []
+    total_hh = defaultdict(list)
+
+    for df in data_lists[data_denominator]:
+
+        for index, row in df.iterrows():
+            total_hh[row[2]].append(row[2])
+
+        for key, value in total_hh.items():
+            total_hh[key] = len(total_hh[key])
+
+    for df in data_lists[data_numerator]:
+
+        int_df = pd.DataFrame({'numerator_result': df.groupby(['rep', 'hh_type', 'digital']).size()}).reset_index()
+        out_df = pd.DataFrame(int_df.groupby(['hh_type', 'digital']).mean()['numerator_result']).reset_index()
+
+        # at this point go through the rows adding relavent h count...
+        for index, row in out_df.iterrows():
+            out_df.ix[index, 'total_hh'] = total_hh[row[0]]
+
+        out_df.rename(columns={'numerator_result': 'result'}, inplace=True)
+        out_df['digital'].replace(bool(True), 'digital', inplace=True)
+        out_df['digital'].replace(bool(False), 'paper', inplace=True)
+        out_df['perc_res'] = out_df[['result']].div(getattr(out_df, 'total_hh'), axis=0)
+        numerator_list.append(out_df)
+
+    create_graphs.bar_response(numerator_list, output_path)
 
 
 def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_colour='muted purple',
                  response_type="story", step=5, min_range=0, max_range=100, reverse=False, dynamic=False):
 
+
+    # take the required gap...and filter files by that...then pass to crearte maps above to create totals?
     output_dir = os.path.join(output_path, "return stories")
 
     if os.path.isdir(output_dir) is False:

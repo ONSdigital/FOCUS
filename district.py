@@ -7,8 +7,10 @@ import math
 from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
+from collections import defaultdict
 
 hh_count = namedtuple('hh_count', ['reps', 'district', 'hh_count'])
+hh_record = namedtuple('hh_record', ['rep', 'district', 'hh_type'])
 
 
 class District(object):
@@ -68,6 +70,10 @@ class District(object):
                                                              self.input_data['households'][hh],
                                                              self.output_data))
 
+                self.output_data['hh_record'].append(hh_record(self.rep.reps,
+                                                               self.name,
+                                                               hh))
+
                 self.rep.total_hh += 1
 
     def start_fu(self):
@@ -100,4 +106,8 @@ class District(object):
                 break
 
         return input_key
+
+
+
+
 

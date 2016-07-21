@@ -63,14 +63,20 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    aggregated_data = post_process.aggregate(output_path, ['Returned', 'hh_count', 'Visit', 'Visit_success', 'Visit_wasted'])
+    aggregated_data = post_process.aggregate(output_path, ['Returned',
+                                                           'hh_count',
+                                                           'Visit',
+                                                           'Visit_success',
+                                                           'Visit_wasted',
+                                                           'hh_record'])
 
-    post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
-                            palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
+    #post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
+    #                        palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
 
-    post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
-                            palette_colour="maize", data_numerator="Visit_wasted", data_denominator="Visit",
-                            dynamic=True)
+    #post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
+    #                        palette_colour="maize", data_numerator="Visit_wasted", data_denominator="Visit",
+    #                        dynamic=True)
+    post_process.create_bar_chart(output_path, aggregated_data)
 
 
 if __name__ == '__main__':
