@@ -1,6 +1,6 @@
 """module for containing the code that produces charts"""
 import os
-from bokeh.charts import Bar, output_file, show
+from bokeh.charts import Bar, output_file, show, Line
 from bokeh.models import HoverTool
 
 
@@ -28,3 +28,7 @@ def bar_response(results_list, output_path):
         show(p)
 
 
+def line_response(results_list, output_path):
+    # as http://bokeh.pydata.org/en/0.10.0/docs/gallery/line_chart.html
+    # create df in correct format...
+    pass

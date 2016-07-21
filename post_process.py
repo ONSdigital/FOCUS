@@ -53,7 +53,6 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
 
     if data_denominator == 'hh_count':
         for df in data_lists['hh_count']:
-
             denominator_list.append(pd.DataFrame({'denominator_result': (df.groupby(['district']).mean()['hh_count'])}))
 
     else:
@@ -78,9 +77,27 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
         index += 1
 
 
+def create_line_chart(output_path, data_lists,  data_numerator="Returned"):
+
+    # list of df of raw data...
+    plot_list = []
+
+    for df in data_lists[data_numerator]:
+
+        int_df = pd.DataFrame({'numerator_result': df.groupby(['rep', 'hh_type', 'digital']).size()}).reset_index()
+        out_df = pd.DataFrame(int_df.groupby(['hh_type', 'digital']).mean()['numerator_result']).reset_index()
+
+        out_df.rename(columns={'numerator_result': 'result'}, inplace=True)
+        out_df['digital'].replace(bool(True), 'digital', inplace=True)
+        out_df['digital'].replace(bool(False), 'paper', inplace=True)
+        plot_list.append(out_df)
+
+    create_graphs.line_response(plot_list, output_path)
+
+
 def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_denominator="hh_record"):
 
-    numerator_list = []
+    plot_list = []
     total_hh = defaultdict(list)
 
     for df in data_lists[data_denominator]:
@@ -98,54 +115,92 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
 
         # at this point go through the rows adding relavent h count...
         for index, row in out_df.iterrows():
-            out_df.ix[index, 'total_hh'] = total_hh[row[0]]
+            out_df.ix[index, 'total_hh'] = total_hh[row['hh_type']]
 
         out_df.rename(columns={'numerator_result': 'result'}, inplace=True)
         out_df['digital'].replace(bool(True), 'digital', inplace=True)
         out_df['digital'].replace(bool(False), 'paper', inplace=True)
         out_df['perc_res'] = out_df[['result']].div(getattr(out_df, 'total_hh'), axis=0)
-        numerator_list.append(out_df)
+        plot_list.append(out_df)
 
-    create_graphs.bar_response(numerator_list, output_path)
-
-
-def create_story(output_path, data_lists, geojson, sim_end=1400, run=0, palette_colour='muted purple',
-                 response_type="story", step=5, min_range=0, max_range=100, reverse=False, dynamic=False):
+    create_graphs.bar_response(plot_list, output_path)
 
 
-    # take the required gap...and filter files by that...then pass to crearte maps above to create totals?
-    output_dir = os.path.join(output_path, "return stories")
+def simple_split(data_lists, output_type, start=0, end=1440, step=24, cumulative=True):
 
-    if os.path.isdir(output_dir) is False:
-        os.mkdir(output_dir)
+    split_dict = defaultdict(list)  # return a dict of a list of df to work with current create maps
 
-    input_data = data_lists['Return'][run]
+    split_range = np.arange(start, end, step)
 
-    input_hh_data = data_lists['Total_hh'][run]
-    input_hh_data.columns = ['rep', 'district', 'hh_count']
-    input_hh_data = pd.DataFrame(input_hh_data.groupby(['district']).mean()['hh_count'])
+    for key in data_lists:
+        if key in output_type:
 
-    input_data.columns = ['rep', 'district', 'digital', 'hh_type', 'time']
-    split_range = np.arange(0, sim_end, 24)
+            for df in data_lists[key]:
 
-    for item in split_range:
+                # split data by passed variables and append result to new dataframe
+                # cumulative
+                for day in split_range:
+                    if cumulative:
+                        int_df = df.loc[df.time <= day + 24]
+                    else:
+                        int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
 
-        response_type = str(item) + 'story'
+                    split_dict[key].append(int_df)
 
-        int_df = input_data[input_data.time < item + 24]
-        int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep']).size()}).reset_index()
-        int_df = pd.DataFrame(int_df.groupby(['district']).mean()['result'])
+                return split_dict
 
-        returns = pd.DataFrame(int_df.join(input_hh_data))
 
-        returns = returns[['result']].div(returns.hh_count, axis=0)
-        print(returns)
+def add_hh_count(data_lists):
 
-        plot_data = os.path.join(output_dir, str(item) + " story.csv")
-        returns.to_csv(plot_data)
+    hh_count = defaultdict(list)
 
-        #create_maps.create_choropleth(output_path, geojson, plot_data, palette_colour, response_type,
-        #                              step, min_range, max_range, reverse, dynamic)
+    for df in data_lists['hh_count']:
+        hh_count['hh_count'].append(df)
+
+    return hh_count
+
+
+def split_by_time(output_path, data_lists, start=0, end=1440, step=24, data_numerator="Returned",
+                  data_denominator="hh_record", cumulative=True):
+
+    # take the required gap...and filter files by that...then pass to create maps above to create totals?
+    split_range = np.arange(start, end, step)
+    story_list = []
+
+    total_hh = defaultdict(list)
+
+    for df in data_lists[data_denominator]:
+
+        for index, row in df.iterrows():
+            total_hh[row[2]].append(row[2])
+
+        for key, value in total_hh.items():
+            total_hh[key] = len(total_hh[key])
+
+    for df in data_lists[data_numerator]:
+
+        # split data by passed variables and append result to new dataframe
+        # cumulative
+        for day in split_range:
+            if cumulative:
+                int_df = df.loc[df.time <= day+24]
+            else:
+                int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
+
+            int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep', 'hh_type']).size()}).reset_index()
+            int_df = pd.DataFrame(int_df.groupby(['hh_type', 'district']).mean()['result']).reset_index()
+
+            for index, row in int_df.iterrows():
+                int_df.ix[index, 'total_hh'] = total_hh[row['hh_type']]
+
+            int_df['perc_res'] = int_df[['result']].div(getattr(int_df, 'total_hh'), axis=0)
+
+            story_list.append(int_df)
+
+        return story_list
+
+
+
 
 
 
