@@ -11,14 +11,14 @@ from collections import defaultdict
 def aggregate(output_path, output_type):
 
     folder_list = glob.glob(output_path + '/*/')
-    data_lists = {}
+    data_dict = {}
 
     for folder in folder_list:
         folder_name = folder.split(os.path.sep)[-2]
         if folder_name in output_type:
 
             folder_name = folder.split(os.path.sep)[-2]
-            data_lists[folder_name] = []
+            data_dict[folder_name] = []
 
             glob_folder = os.path.join('outputs', folder_name, '*.csv')
             file_list = glob.glob(glob_folder)
@@ -26,9 +26,9 @@ def aggregate(output_path, output_type):
             # for each file add to a list in the top level dictionary
             for file in file_list:
 
-                data_lists[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=0))
+                data_dict[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=0))
 
-    return data_lists
+    return data_dict
 
 
 def create_map(output_path, data_lists, geojson, palette_colour='heather', data_numerator="Returned",
@@ -126,7 +126,7 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
     create_graphs.bar_response(plot_list, output_path)
 
 
-def simple_split(data_lists, output_type, start=0, end=1440, step=24, cumulative=True, run=0):
+def simple_split(data_lists, output_type, start=0, end=1440, step=360, cumulative=True, run=0):
 
     split_dict = defaultdict(list)  # return a dict of a list of df to work with current create maps
 

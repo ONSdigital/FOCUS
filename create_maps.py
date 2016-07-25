@@ -10,7 +10,10 @@ import helper as h
 from bokeh.models import HoverTool
 from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, reset_output, gridplot
 import seaborn as sns
+import glob
 
+from PIL import Image
+from selenium import webdriver
 
 def select_palette(shade_no, palette_colour, reverse=False):
     missing = ["#d8dcd6"]
@@ -220,8 +223,36 @@ def create_choropleth(output_path, json_file, shade_data_file, palette_colour, o
     output_file_path = os.path.join(output_dir, output_filename)
 
     output_file(output_file_path, title=title, mode='inline')
-    #save(p)
-    show(p)
+    save(p)
+    #show(p)
+
+
+def create_movie_files(file_location):
+
+
+    glob_folder = os.path.join(file_location, '*.html')
+
+    file_list = glob.glob(glob_folder)
+    index = 1
+
+    for html_file in file_list:
+
+        temp_name = "file://" + html_file
+
+        driver = webdriver.Chrome()
+        driver.get(temp_name)
+        if index < 10:
+            save_name = '00' + str(index) + '.png'
+        else:
+            save_name = '0' + str(index) + '.png'
+        driver.save_screenshot(os.path.join(os.getcwd(), 'outputs', 'charts', save_name))
+        driver.quit()
+        index += 1
+
+         #img = Image.open(file_name)
+         #box = (1, 1, 1000, 1000)
+         #area = img.crop(box)
+         #area.save('cropped_0_388_image1', 'png')
 
 
 
