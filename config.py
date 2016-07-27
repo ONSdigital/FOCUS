@@ -243,10 +243,7 @@ output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')
 spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 
 #generate_multiple_districts(input_path, new_districts, output_path, [1290, 1050, 580, 390, 290])
-#generate_specified_districts(input_path, new_districts, spec_output_path, ['E06000054',
-#                                                                           'E09000009',
-#                                                                           'E09000020',
-#                                                                           'E07000094'])
+
 
 
 #generate_test_file('inputs/all_LA_hh.JSON', 'inputs/test_LA_hh.JSON', 50)
@@ -262,7 +259,16 @@ spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 
 generate_multiple_districts_runs(input_path, new_districts, output_path, [[1290, 1050, 580, 390, 290]])
 
-generate_specified_districts(input_path, new_districts, spec_output_path, ['E06000054'])
+# 2017 test
+#generate_specified_districts(input_path, new_districts, spec_output_path, ['E08000016',
+#                                                                           'E08000019',
+#                                                                           'W06000023',
+#                                                                           'E07000189',
+#                                                                           'E07000052',
+#                                                                           'E09000028'])
+
+generate_specified_districts(input_path, new_districts, spec_output_path, ['E08000016'])
+
 
 
 

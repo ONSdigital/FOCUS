@@ -55,8 +55,8 @@ class Household(object):
         # below define how the hh behaves depending on preference
 
         self.resp_level = self.set_behaviour('response')
-        self.help_level = self.resp_level + self.set_behaviour('help')
-        #self.help_level = 0
+        #self.help_level = self.resp_level + self.set_behaviour('help')
+        self.help_level = 0
 
         self.rep.env.process(self.action())
 

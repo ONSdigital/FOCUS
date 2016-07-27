@@ -15,6 +15,9 @@ import create_maps
 from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
+import pandas as pd
+
+__version__ = "0.2"
 
 l = Lock()  # global declaration...can I avoid this?
 
@@ -64,26 +67,35 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    aggregated_data = post_process.aggregate(output_path, ['Returned',
+    pandas_data = post_process.csv_to_pandas(output_path, ['Returned',
                                                            'hh_count',
-                                                           'Visit',
-                                                           'Visit_success',
-                                                           'Visit_wasted',
                                                            'hh_record'])
 
-    story_data = post_process.simple_split(aggregated_data, ["Returned"], start=0, end=1440, step=24)
-    hh_count = post_process.add_hh_count(aggregated_data)
-    for df in story_data['Returned']:
-        story_data['hh_count'].append(hh_count['hh_count'][0])
+    story_data = post_process.simple_split(pandas_data["Returned"], start=0, end=1440, step=360)
 
-    #
+    line_df_dict = {}
+    bar_dict = {}
 
-    post_process.create_map(output_path, story_data, 'inputs/geog_E+W_LAs.geojson',
-                            palette_colour="heather", step=10, min_range=0, max_range=100,
-                            dynamic=False)  # http://xkcd.com/color/rgb/
+    for key, value in pandas_data["Returned"].items():
 
-    file_location = "/home/bigdata/Desktop/nas/projects/FOCUS/outputs/charts/"
-    create_maps.create_movie_files(file_location)
+        bar_dict[key] = post_process.divide_single(value, pandas_data["hh_record"][key])
+
+    for key, value in story_data.items():
+
+        line_df_dict[key] = post_process.divide_all(value, pandas_data["hh_record"][key])
+
+    #hh_count = post_process.add_hh_count(aggregated_data)
+    #for df in story_data['Returned']:
+        #story_data['hh_count'].append(hh_count['hh_count'][0])
+
+    # by this point you have, in story data, the data required to show responses over time by type?
+
+    #post_process.create_map(output_path, story_data, 'inputs/geog_E+W_LAs.geojson',
+    #                        palette_colour="heather", step=10, min_range=0, max_range=100,
+    #                        dynamic=False)  # http://xkcd.com/color/rgb/
+
+    #file_location = "/home/bigdata/Desktop/nas/projects/FOCUS/outputs/charts/"
+    #create_maps.create_movie_files(file_location)
 
     #post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
     #                        palette_colour="heather", dynamic=True)  # http://xkcd.com/color/rgb/
@@ -92,6 +104,7 @@ def produce_default_output():
     #                        palette_colour="maize", data_numerator="Visit_wasted", data_denominator="Visit",
     #                        dynamic=True)
     #post_process.create_bar_chart(output_path, aggregated_data)
+
 
 
 if __name__ == '__main__':
@@ -110,7 +123,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/all_LA_hh.JSON'
+        file_name = 'inputs/spec_LA_hh.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

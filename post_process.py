@@ -8,25 +8,28 @@ import numpy as np
 from collections import defaultdict
 
 
-def aggregate(output_path, output_type):
+def csv_to_pandas(output_path, output_type):
 
     folder_list = glob.glob(output_path + '/*/')
-    data_dict = {}
+    data_dict = defaultdict(list)
+    #data_dict = {}
 
     for folder in folder_list:
         folder_name = folder.split(os.path.sep)[-2]
         if folder_name in output_type:
 
             folder_name = folder.split(os.path.sep)[-2]
-            data_dict[folder_name] = []
+            #data_dict[folder_name] = []
 
             glob_folder = os.path.join('outputs', folder_name, '*.csv')
             file_list = glob.glob(glob_folder)
 
+            data_dict[folder_name] = defaultdict(list)
+
             # for each file add to a list in the top level dictionary
             for file in file_list:
-
-                data_dict[file.split(os.path.sep)[1]].append(pd.read_csv(file, header=0))
+                file_name = file.split(os.path.sep)[-1][0]
+                data_dict[folder_name][file_name] = pd.read_csv(file, header=0)
 
     return data_dict
 
@@ -77,20 +80,43 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
         index += 1
 
 
-def create_line_chart(output_path, data_lists,  data_numerator="Returned"):
+def create_line_chart(output_path, data_lists,  data_numerator="Returned", data_denominator="hh_record"):
 
     # list of df of raw data...
     plot_list = []
+    total_hh = defaultdict(list)
+
+    for df in data_lists[data_denominator]:
+
+        # below returns the total number of each class of HH
+        for index, row in df.iterrows():
+            total_hh[row[2]].append(row[2])
+
+        for key, value in total_hh.items():
+            total_hh[key] = len(total_hh[key])
 
     for df in data_lists[data_numerator]:
 
         int_df = pd.DataFrame({'numerator_result': df.groupby(['rep', 'hh_type', 'digital']).size()}).reset_index()
         out_df = pd.DataFrame(int_df.groupby(['hh_type', 'digital']).mean()['numerator_result']).reset_index()
 
+        # at this point go through the rows adding relavent h count...
+        for index, row in out_df.iterrows():
+            out_df.ix[index, 'total_hh'] = total_hh[row['hh_type']]
+
         out_df.rename(columns={'numerator_result': 'result'}, inplace=True)
         out_df['digital'].replace(bool(True), 'digital', inplace=True)
         out_df['digital'].replace(bool(False), 'paper', inplace=True)
+
+        # tghen divide
+        out_df['perc_res'] = out_df[['result']].div(getattr(out_df, 'total_hh'), axis=0)
+
+        # now have % returns total...but need over time...more post processing required...
+        # so for each period get total and return result to lsit... then plot
+
         plot_list.append(out_df)
+
+        simple_split(plot_list, "returned")
 
     create_graphs.line_response(plot_list, output_path)
 
@@ -102,6 +128,7 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
 
     for df in data_lists[data_denominator]:
 
+        # below returns the total number of each class of HH
         for index, row in df.iterrows():
             total_hh[row[2]].append(row[2])
 
@@ -126,28 +153,67 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
     create_graphs.bar_response(plot_list, output_path)
 
 
-def simple_split(data_lists, output_type, start=0, end=1440, step=360, cumulative=True, run=0):
+def simple_split(data_lists, start=0, end=1440, step=360, cumulative=True, runs=()):
 
-    split_dict = defaultdict(list)  # return a dict of a list of df to work with current create maps
+    split_runs = defaultdict(list)
+    index = 0
 
+    for key, value in data_lists.items():
+        if index in runs or len(runs) == 0:
+            split_runs[key] = split_single(value, start, end, step, cumulative)
+            index += 1
+
+    return split_runs
+
+
+def split_single(df, start, end, step, cumulative=True):
+
+    split_dict = defaultdict(list)
     split_range = np.arange(start, end, step)
 
-    for key in data_lists:
-        if key in output_type:
+    for split in split_range:
+        if cumulative:
+            int_df = df.loc[df.time <= split + step]
+        else:
+            int_df = df.loc[(df["time"] > split) & (df["time"] <= split + step)]
 
-            df = data_lists[key][run]
+        split_dict[split+step] = int_df
 
-            # split data by passed variables and append result to new dataframe
-            # cumulative
-            for day in split_range:
-                if cumulative:
-                    int_df = df.loc[df.time <= day + 24]
-                else:
-                    int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
+    return split_dict
 
-                split_dict[key].append(int_df)
 
-            return split_dict
+def divide_all(data_numerator, data_denominator, runs=()):
+
+    divide_runs = defaultdict(list)
+
+    for key, value in data_numerator.items():
+        divide_runs[key] = divide_single(data_numerator[key], data_denominator)
+
+    return divide_runs
+
+
+def divide_single(data_numerator, data_denominator):
+
+    int_num_df = pd.DataFrame({'numerator_result': data_numerator.groupby(['rep', 'hh_type']).size()}).reset_index()
+    out_num_df = pd.DataFrame(int_num_df.groupby(['hh_type']).mean()['numerator_result']).reset_index()
+
+    # add item to divide by do div and keep only new...
+    int_den_df = pd.DataFrame({'denominator_result': data_denominator.groupby(['rep', 'hh_type']).size()}).reset_index()
+    out_den_df = pd.DataFrame(int_den_df.groupby(['hh_type']).mean()['denominator_result']).reset_index()
+
+    returns = pd.merge(out_num_df, out_den_df, on='hh_type')
+
+    returns['returns'] = returns[['numerator_result']].div(getattr(returns, 'denominator_result'), axis=0)
+    returns = returns[['hh_type', 'returns']]
+
+    return returns
+
+
+
+
+    # join and divide
+
+    # work out total of each type of hh and divide by total number of that type...
 
 
 def add_hh_count(data_lists):
@@ -158,46 +224,6 @@ def add_hh_count(data_lists):
         hh_count['hh_count'].append(df)
 
     return hh_count
-
-
-def split_by_time(output_path, data_lists, start=0, end=1440, step=24, data_numerator="Returned",
-                  data_denominator="hh_record", cumulative=True):
-
-    # take the required gap...and filter files by that...then pass to create maps above to create totals?
-    split_range = np.arange(start, end, step)
-    story_list = []
-
-    total_hh = defaultdict(list)
-
-    for df in data_lists[data_denominator]:
-
-        for index, row in df.iterrows():
-            total_hh[row[2]].append(row[2])
-
-        for key, value in total_hh.items():
-            total_hh[key] = len(total_hh[key])
-
-    for df in data_lists[data_numerator]:
-
-        # split data by passed variables and append result to new dataframe
-        # cumulative
-        for day in split_range:
-            if cumulative:
-                int_df = df.loc[df.time <= day+24]
-            else:
-                int_df = df.loc[(df["time"] > day) & (df["time"] <= day + 24)]
-
-            int_df = pd.DataFrame({'result': int_df.groupby(['district', 'rep', 'hh_type']).size()}).reset_index()
-            int_df = pd.DataFrame(int_df.groupby(['hh_type', 'district']).mean()['result']).reset_index()
-
-            for index, row in int_df.iterrows():
-                int_df.ix[index, 'total_hh'] = total_hh[row['hh_type']]
-
-            int_df['perc_res'] = int_df[['result']].div(getattr(int_df, 'total_hh'), axis=0)
-
-            story_list.append(int_df)
-
-        return story_list
 
 
 

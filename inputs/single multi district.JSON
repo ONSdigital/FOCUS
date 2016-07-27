@@ -267,7 +267,7 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
-            "max_visits": 15,
+            "max_visits": 5,
             "paper_after_max_visits": "True",
             "paper_on_request": "True",
             "conversion_rate": {
@@ -418,7 +418,7 @@
               "digital": 0
             },
             "priority": -1,
-            "max_visits": 15,
+            "max_visits": 5,
             "paper_after_max_visits": "True",
             "paper_on_request": "True",
             "conversion_rate": {
@@ -565,7 +565,7 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -2,
-            "max_visits": 15,
+            "max_visits": 5,
             "paper_after_max_visits": "True",
             "paper_on_request": "True",
             "contact_rate": 25,
@@ -709,7 +709,7 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -3,
-            "max_visits": 15,
+            "max_visits": 5,
             "delay": {
               "paper": 72,
               "digital": 0
@@ -861,7 +861,7 @@
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -4,
-            "max_visits": 15,
+            "max_visits": 5,
             "paper_after_max_visits": "True",
             "paper_on_request": "True",
             "conversion_rate": {

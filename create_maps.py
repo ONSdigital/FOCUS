@@ -249,10 +249,11 @@ def create_movie_files(file_location):
         driver.quit()
         index += 1
 
-         #img = Image.open(file_name)
-         #box = (1, 1, 1000, 1000)
-         #area = img.crop(box)
-         #area.save('cropped_0_388_image1', 'png')
+        img = Image.open(os.path.join(os.getcwd(), 'outputs', 'charts', save_name))
+        box = (1, 1, 1000, 1000)
+        area = img.crop(box)
+        area.save('cropped_image' + str(index), 'png')
+
 
 
 
