@@ -5,6 +5,7 @@ import censusv2
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
+import district
 
 response = namedtuple('Responded', ['reps', 'district', 'digital', 'hh_type', 'time'])
 response_planned = namedtuple('Response_planned', ['reps', 'district', 'digital', 'hh_type', 'time'])
@@ -15,6 +16,9 @@ call = namedtuple('Call', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_renege = namedtuple('Call_renege', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_contact = namedtuple('Call_contact', ['rep', 'district', 'digital', 'hh_type', 'time'])
 call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'digital', 'hh_type', 'time', 'wait_time'])
+call_convert = namedtuple('Call_convert', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+call_success = namedtuple('Call_success', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+call_failed = namedtuple('Call_failed', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 class Household(object):
@@ -48,15 +52,17 @@ class Household(object):
         self.resp_time = 0
         self.status = ''
         self.visits = 0
+        self.visit_times = []
         self.calls = 0
+        self.arranged_visit = ''
 
         self.resp_level = 0
         self.help_level = 0
         # below define how the hh behaves depending on preference
 
         self.resp_level = self.set_behaviour('response')
-        #self.help_level = self.resp_level + self.set_behaviour('help')
-        self.help_level = 0
+        self.help_level = self.resp_level + self.set_behaviour('help')
+        #self.help_level = 0
 
         self.rep.env.process(self.action())
 
@@ -101,6 +107,7 @@ class Household(object):
             yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # do nothing more
 
     def contact(self):
+        # routing for the type of contact
 
         if not self.responded:
 
@@ -127,42 +134,136 @@ class Household(object):
 
         else:
 
-            # speak to someone - go from here to a more complex assist/outcome section
-            called_at = self.env.now
-            current_ad = yield self.rep.adviser_store.get()
-            wait_time = self.env.now - called_at
-            renege_time = h.renege_time(self)
+            yield self.env.process(self.phone_call_connect())
 
-            if wait_time >= renege_time:
+    def phone_call_connect(self):
 
-                self.output_data['Call_renege'].append(call_renege(self.rep.reps,
-                                                                   self.district.name,
-                                                                   self.digital,
-                                                                   self.hh_type,
-                                                                   self.env.now))
+        # speak to someone - go from here to a more complex assist/outcome section
+        called_at = self.env.now
+        current_ad = yield self.rep.adviser_store.get()
+        wait_time = self.env.now - called_at
 
-                self.resp_level = 0
-                self.help_level = self.resp_level + (self.set_behaviour('help', self.calls) * 0.5)
-                self.rep.adviser_store.put(current_ad)
-                if wait_time > 0:
-                    self.record_wait_time(wait_time, renege_time)
+        if wait_time >= h.renege_time(self):
+            # hang up
 
-                yield self.env.process(self.action())
+            self.output_data['Call_renege'].append(call_renege(self.rep.reps,
+                                                               self.district.name,
+                                                               self.digital,
+                                                               self.hh_type,
+                                                               self.env.now))
 
-            else:
+            self.resp_level = 0
+            self.help_level = self.resp_level + (self.set_behaviour('help', self.calls) * 0.5)
+            self.rep.adviser_store.put(current_ad)
+            if wait_time > 0:
 
-                self.output_data['Call_contact'].append(call_contact(self.rep.reps,
+                self.record_wait_time(wait_time, h.renege_time(self))
+
+            yield self.env.process(self.action())
+
+        else:
+            # got through
+
+            self.output_data['Call_contact'].append(call_contact(self.rep.reps,
+                                                                 self.district.name,
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.env.now))
+
+            if wait_time > 0:
+                self.record_wait_time(wait_time, h.renege_time(self))
+
+            yield self.env.process(self.phone_call_assist(current_ad))
+
+    def phone_call_assist(self, current_ad):
+
+        # similar to CO?
+        # got to here which means either a problem or want paper but not allowed it...
+        # if a problem go straight to outcome
+        # else try to convert?
+
+        da_test = self.rep.rnd.uniform(0, 100)
+        da_effectiveness = current_ad.input_data['da_effectiveness'][self.hh_type]
+
+        # if digital or have already responded skip straight to the outcome of the visit
+        if self.digital:
+
+            yield self.env.timeout(current_ad.input_data['call_times']['query'] / 60)
+
+            yield self.rep.env.process(self.phone_call_outcome(current_ad))
+
+        elif not self.digital and da_test <= da_effectiveness:
+            # want paper but not allowed it...but do convert to digital
+
+            yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
+
+            self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
                                                                      self.district.name,
                                                                      self.digital,
                                                                      self.hh_type,
-                                                                     self.env.now))
-                yield self.env.timeout(0.1)
-                self.resp_level = 0
-                self.help_level = self.resp_level + (self.set_behaviour('help', self.calls) * 0.1)
-                self.rep.adviser_store.put(current_ad)
-                if wait_time > 0:
-                    self.record_wait_time(wait_time, renege_time)
-                yield self.env.process(self.action())
+                                                                     self.rep.env.now,
+                                                                     self.hh_id))
+
+            self.digital = True
+            yield self.env.process(self.phone_call_outcome(current_ad))
+
+        elif not self.digital and da_test > da_effectiveness:
+
+            yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
+            # up priority and scedule a visit at most likely time to be in?
+            self.priority -= 10
+
+            #least_busy_CO = district.least_busy_CO(self.district)
+            #least_busy_CO.action_plan.append(self)
+            #dicta = self.input_data['at_home'][str(h.current_day(self))]
+            #self.arranged_visit = max(dicta, key=dicta.get)
+            self.rep.adviser_store.put(current_ad)
+
+            # add to top of list...if working it will check next
+            # if not it will be added again with high pri and can then check times each time
+
+
+
+
+
+
+            # could select least busy CO
+            # and insert hh....at some point...
+            # add tag to denote time of visit and give high pri
+            # when CO selects hh if tag exists and not that time push it down the list?
+
+    def phone_call_outcome(self, current_ad):
+
+        # digital by this point so just can you convince them to reply?
+        outcome_test = self.rep.rnd.uniform(0, 100)
+        conversion_dict = self.input_data['conversion_rate'][str(h.current_day(self))]
+
+        if outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]:
+
+            yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
+
+            self.rep.output_data['Call_success'].append(call_success(self.rep.reps,
+                                                                     self.district.name,
+                                                                     self.digital,
+                                                                     self.hh_type,
+                                                                     self.env.now,
+                                                                     self.hh_id))
+            self.resp_planned = True
+            self.rep.adviser_store.put(current_ad)
+            self.rep.env.process(self.respond(self.delay))
+
+        else:
+
+            yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
+
+            self.rep.output_data['Call_failed'].append(call_failed(self.rep.reps,
+                                                                   self.district.name,
+                                                                   self.digital,
+                                                                   self.hh_type,
+                                                                   self.env.now,
+                                                                   self.hh_id))
+
+            self.rep.adviser_store.put(current_ad)
 
     def respond(self, delay=0):
         """represents the hh responding - not the return being received by census"""

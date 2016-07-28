@@ -19,7 +19,24 @@
               "4": [[[9,0,0],[17, 0, 0]]],
               "5": [[[9,0,0],[17, 0, 0]]],
               "6": [[[9,0,0],[17, 0, 0]]]
-            }
+            },
+      "da_effectiveness": {
+                            "htc1": 50,
+                            "htc2": 40,
+                            "htc3": 35,
+                            "htc4": 30,
+                            "htc5": 20
+                        },
+      "call_times": {
+                            "convert": 5,
+                            "failed": 5,
+                            "out": 3,
+                            "out_paper": 4,
+                            "paper": 5,
+                            "query": 1,
+                            "success": 30,
+                            "wasted": 5
+                        }
     },
     "webchat": {
       "number": 1,

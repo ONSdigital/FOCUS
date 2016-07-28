@@ -97,7 +97,10 @@ class District(object):
                             self.district_co.append(censusv2.CensusOfficer(self.rep,
                                                                            self.env,
                                                                            self,
-                                                                           input_data))
+                                                                           input_data,
+                                                                           self.rep.total_co))
+
+                            self.rep.total_co += 1
 
                 except IOError as e:
                     print(e)
@@ -105,6 +108,15 @@ class District(object):
                 break
 
         return input_key
+
+
+def least_busy_CO(district):
+
+    min_length = min([len(co.action_plan) for co in district.district_co])
+
+    coord = [co for co in district.district_co if len(co.action_plan) == min_length]
+
+    return coord[0]
 
 
 

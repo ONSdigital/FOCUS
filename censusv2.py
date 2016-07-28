@@ -140,12 +140,13 @@ class StartFU(object):
 class CensusOfficer(object):
     """represents an individual Census Officer. Each instance can be different"""
 
-    def __init__(self, rep,  env, district, input_data):
+    def __init__(self, rep,  env, district, input_data, co_id):
 
         self.rep = rep
         self.env = env
         self.district = district
         self.input_data = input_data
+        self.co_id = co_id
 
         self.action_plan = []
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()

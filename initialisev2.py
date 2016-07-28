@@ -28,6 +28,7 @@ class Rep(object):
         self.districts = []  # list containing each instance of the district class
         self.ad_avail = []  # list of all the available advisers
         self.total_hh = 0  # used to store total number of hh created across all districts
+        self.total_co = 0
 
         # methods to run on start
         self.total_ad_instances = self.input_data['advisers']['number']
