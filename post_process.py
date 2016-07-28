@@ -12,14 +12,12 @@ def csv_to_pandas(output_path, output_type):
 
     folder_list = glob.glob(output_path + '/*/')
     data_dict = defaultdict(list)
-    #data_dict = {}
 
     for folder in folder_list:
         folder_name = folder.split(os.path.sep)[-2]
         if folder_name in output_type:
 
             folder_name = folder.split(os.path.sep)[-2]
-            #data_dict[folder_name] = []
 
             glob_folder = os.path.join('outputs', folder_name, '*.csv')
             file_list = glob.glob(glob_folder)
@@ -48,19 +46,19 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
     else:
         type_filter = [1]
 
-    for df in data_lists[data_numerator]:
+    for key, value in data_lists[data_numerator].items():
 
-        int_df = df.loc[df['digital'].isin(type_filter)]
+        int_df = value.loc[value['digital'].isin(type_filter)]
         int_df = pd.DataFrame({'numerator_result': int_df.groupby(['district', 'rep']).size()}).reset_index()
         numerator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['numerator_result']))
 
     if data_denominator == 'hh_count':
-        for df in data_lists['hh_count']:
-            denominator_list.append(pd.DataFrame({'denominator_result': (df.groupby(['district']).mean()['hh_count'])}))
+        for key, value in data_lists['hh_count'].items():
+            denominator_list.append(pd.DataFrame({'denominator_result': (value.groupby(['district']).mean()['hh_count'])}))
 
     else:
-        for df in data_lists[data_denominator]:
-            int_df = df.loc[df['digital'].isin(type_filter)]
+        for key, value in data_lists[data_denominator].items():
+            int_df = value.loc[value['digital'].isin(type_filter)]
             int_df = pd.DataFrame({'denominator_result': int_df.groupby(['district', 'rep']).size()}).reset_index()
             denominator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['denominator_result']))
 
@@ -108,7 +106,7 @@ def create_line_chart(output_path, data_lists,  data_numerator="Returned", data_
         out_df['digital'].replace(bool(True), 'digital', inplace=True)
         out_df['digital'].replace(bool(False), 'paper', inplace=True)
 
-        # tghen divide
+        # then divide
         out_df['perc_res'] = out_df[['result']].div(getattr(out_df, 'total_hh'), axis=0)
 
         # now have % returns total...but need over time...more post processing required...
@@ -209,11 +207,19 @@ def divide_single(data_numerator, data_denominator):
     return returns
 
 
+def divide_single_count(data_numerator, data_denominator):
 
+    int_num_df = pd.DataFrame({'numerator_result': data_numerator.groupby(['rep', 'district']).size()}).reset_index()
+    out_num_df = pd.DataFrame(int_num_df.groupby(['district']).mean()['numerator_result']).reset_index()
 
-    # join and divide
+    out_den_df = pd.DataFrame(data_denominator.groupby(['district']).mean()['hh_count']).reset_index()
 
-    # work out total of each type of hh and divide by total number of that type...
+    returns = pd.merge(out_num_df, out_den_df, on='district')
+
+    returns['returns'] = returns[['numerator_result']].div(getattr(returns, 'hh_count'), axis=0)
+    returns = returns[['returns']]
+
+    return returns
 
 
 def add_hh_count(data_lists):

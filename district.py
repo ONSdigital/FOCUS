@@ -8,7 +8,7 @@ from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
 
-hh_count = namedtuple('hh_count', ['reps', 'district', 'hh_count'])
+hh_count = namedtuple('hh_count', ['rep', 'district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['rep', 'district', 'hh_type'])
 
 
