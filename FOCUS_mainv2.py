@@ -11,11 +11,10 @@ import shutil
 import post_process
 import time
 import copy
-import create_maps
 from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
-import pandas as pd
+
 
 __version__ = "0.2"
 
