@@ -75,7 +75,7 @@ class Household(object):
             if not self.resp_planned and self.env.now == 0:
 
                 self.output_data['Response_planned'].append(response_planned(self.rep.reps,
-                                                                             self.district.name,
+                                                                             self.district.input_data["LA"],
                                                                              self.digital,
                                                                              self.hh_type,
                                                                              self.env.now))
@@ -98,7 +98,7 @@ class Household(object):
 
         elif not self.responded and not self.resp_planned:
             self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
-                                                             self.district.name,
+                                                             self.district.input_data["LA"],
                                                              self.digital,
                                                              self.hh_type,
                                                              self.env.now))
@@ -116,7 +116,7 @@ class Household(object):
     def phone_call(self):
 
         self.output_data['Call'].append(call(self.rep.reps,
-                                             self.district.name,
+                                             self.district.input_data["LA"],
                                              self.digital,
                                              self.hh_type,
                                              self.env.now))
@@ -147,7 +147,7 @@ class Household(object):
             # hang up
 
             self.output_data['Call_renege'].append(call_renege(self.rep.reps,
-                                                               self.district.name,
+                                                               self.district.input_data["LA"],
                                                                self.digital,
                                                                self.hh_type,
                                                                self.env.now))
@@ -165,7 +165,7 @@ class Household(object):
             # got through
 
             self.output_data['Call_contact'].append(call_contact(self.rep.reps,
-                                                                 self.district.name,
+                                                                 self.district.input_data["LA"],
                                                                  self.digital,
                                                                  self.hh_type,
                                                                  self.env.now))
@@ -198,7 +198,7 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
             self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
-                                                                     self.district.name,
+                                                                     self.district.input_data["LA"],
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.rep.env.now,
@@ -243,7 +243,7 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
 
             self.rep.output_data['Call_success'].append(call_success(self.rep.reps,
-                                                                     self.district.name,
+                                                                     self.district.input_data["LA"],
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.env.now,
@@ -257,7 +257,7 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
             self.rep.output_data['Call_failed'].append(call_failed(self.rep.reps,
-                                                                   self.district.name,
+                                                                   self.district.input_data["LA"],
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.env.now,
@@ -275,7 +275,7 @@ class Household(object):
             # add to hh response event log
 
             self.output_data['Respond'].append(response(self.rep.reps,
-                                                        self.district.name,
+                                                        self.district.input_data["LA"],
                                                         self.digital,
                                                         self.hh_type,
                                                         self.resp_time))
@@ -294,7 +294,7 @@ class Household(object):
         if self.resp_planned and self.responded:
 
             self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
-                                                                           self.district.name,
+                                                                           self.district.input_data["LA"],
                                                                            self.digital,
                                                                            self.hh_type,
                                                                            self.env.now,
@@ -302,7 +302,7 @@ class Household(object):
         elif self.resp_planned and not self.responded:
 
             self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
-                                                                                     self.district.name,
+                                                                                     self.district.input_data["LA"],
                                                                                      self.digital,
                                                                                      self.hh_type,
                                                                                      self.env.now,
@@ -340,7 +340,7 @@ class Household(object):
     def record_wait_time(self, wait_time, renege_time):
 
         self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
-                                                                   self.district.name,
+                                                                   self.district.input_data["LA"],
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.env.now,

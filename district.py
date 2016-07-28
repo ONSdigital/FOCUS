@@ -31,7 +31,7 @@ class District(object):
 
         # processes to run
         self.create_households()
-        self.output_data['hh_count'].append(hh_count(self.rep.reps, self.name, len(self.households)))
+        self.output_data['hh_count'].append(hh_count(self.rep.reps, self.input_data["LA"], len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
         self.create_co(self.input_data["census officer"])
 
@@ -70,7 +70,7 @@ class District(object):
                                                              self.output_data))
 
                 self.output_data['hh_record'].append(hh_record(self.rep.reps,
-                                                               self.name,
+                                                               self.input_data["LA"],
                                                                hh))
 
                 self.rep.total_hh += 1

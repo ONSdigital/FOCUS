@@ -45,7 +45,7 @@ def ret_rec(hh, rep):
     rep.total_returns += 1
 
     rep.output_data['Returned'].append(return_times(rep.reps,
-                                                    hh.district.name,
+                                                    hh.district.input_data["LA"],
                                                     hh.digital,
                                                     hh.hh_type,
                                                     rep.env.now))
@@ -171,7 +171,7 @@ class CensusOfficer(object):
 
         household = self.action_plan.pop(0)
         self.rep.output_data['Visit'].append(visit(self.rep.reps,
-                                                   self.district.name,
+                                                   household.district.input_data["LA"],
                                                    household.digital,
                                                    household.hh_type,
                                                    self.rep.env.now,
@@ -179,7 +179,7 @@ class CensusOfficer(object):
 
         if household.resp_planned:
             self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
-                                                                               self.district.name,
+                                                                               household.district.input_data["LA"],
                                                                                household.digital,
                                                                                household.hh_type,
                                                                                self.rep.env.now,
@@ -193,7 +193,7 @@ class CensusOfficer(object):
         if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
             #in
             self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.reps,
-                                                                       self.district.name,
+                                                                       household.district.input_data["LA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
@@ -214,7 +214,7 @@ class CensusOfficer(object):
         else:
             # out - add drop of of a note
             self.rep.output_data['Visit_out'].append(visit_out(self.rep.reps,
-                                                               self.district.name,
+                                                               household.district.input_data["LA"],
                                                                household.digital,
                                                                household.hh_type,
                                                                self.env.now,
@@ -241,7 +241,7 @@ class CensusOfficer(object):
             yield self.env.timeout(self.input_data['visit_times']['convert']/60)
 
             self.rep.output_data['Visit_convert'].append(visit_convert(self.rep.reps,
-                                                                       self.district.name,
+                                                                       household.district.input_data["LA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.rep.env.now,
@@ -275,7 +275,7 @@ class CensusOfficer(object):
 
         if household.responded is True:
             self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
-                                                                     self.district.name,
+                                                                     household.district.input_data["LA"],
                                                                      household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,
@@ -289,7 +289,7 @@ class CensusOfficer(object):
                 outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]):
 
             self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
-                                                                       self.district.name,
+                                                                       household.district.input_data["LA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
@@ -308,7 +308,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
-                                                                     self.district.name,
+                                                                     household.district.input_data["LA"],
                                                                      household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,

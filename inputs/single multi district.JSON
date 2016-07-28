@@ -48,6 +48,8 @@
     },
     "districts": {
       "E06000001": {
+        "LA": "",
+        "LSOA": "",
         "trigger": 90,
         "paper_trigger": 80,
         "RMT_update": 24,

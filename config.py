@@ -87,8 +87,6 @@ def generate_specified_districts(input_JSON, all_district_list, output_JSON_name
 
     # numbers of HH per htc hh
     hh_per_co = [1290, 1050, 580, 390, 290]
-    #hh_per_co = [1290, 1050, 580, 200, 150]
-    #hh_per_co = [500, 250, 250, 100, 75]
     with open(all_district_list, 'r') as f:
 
         reader = csv.reader(f)
@@ -102,14 +100,15 @@ def generate_specified_districts(input_JSON, all_district_list, output_JSON_name
         if row[0] in specified_district:
 
             co_number = 0
-            district = row[0]
+            #district = row[0]
+            district = row[2]
             input_data["1"]["districts"][district] = copy.deepcopy(district_template)
             # then populate each sub dictionary appropriately
             # number of households
             hh_count = 0
 
             for HH in list_of_current_hh:
-                hh_number = int(row[int(HH[-1])+1])  # number as in new district list input
+                hh_number = int(row[int(HH[-1])+2])  # number as in new district list input
                 hh_count += hh_number
 
                 if hh_number == 0:
@@ -134,7 +133,9 @@ def generate_specified_districts(input_JSON, all_district_list, output_JSON_name
                 input_data["1"]["districts"][district]["census officer"]["standard"]["travel_speed"] = 10
 
             input_data["1"]["districts"][district]["census officer"]["standard"]["number"] = int(math.ceil(co_number))
-            input_data["1"]["districts"][district]["district_area"] = float(row[7])
+            #input_data["1"]["districts"][district]["district_area"] = float(row[7])
+            input_data["1"]["districts"][district]["district_area"] = float(row[8])
+            input_data["1"]["districts"][district]["LA"] = str(row[0])
 
     # dump as new json file
     with open(os.path.join(output_JSON_name), 'w') as outfile:
@@ -196,12 +197,13 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
             co_number = 0
             hh_count = 0
-            district = row[0]
+            #district = row[0]
+            district = row[2]
             input_data[str(run_counter)]["districts"][district] = copy.deepcopy(district_template)
             # then populate each sub dictionary appropriately
             # number of households
             for HH in list_of_current_hh:
-                hh_number = int(row[int(HH[-1])+1])  # number as in new district list input
+                hh_number = int(row[int(HH[-1])+2])  # number as in new district list input
                 hh_count += hh_number
 
                 if hh_number == 0:
@@ -212,7 +214,7 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
                     co_number += hh_number/ratios[int(HH[-1])-1]
 
                     # update CO speed according to area? So do simple travel calc and if average above X set to driving?
-            area = float(row[7])
+            area = float(row[8])
             hh_area = area / hh_count
             hh_sep = 2 * (math.sqrt(hh_area / math.pi))
             est_travel_time = (hh_sep / 5) * 60
@@ -228,7 +230,9 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
                 co_number = co_number * 1.5
 
             input_data[str(run_counter)]["districts"][district]["census officer"]["standard"]["number"] = int(math.ceil(co_number))
-            input_data[str(run_counter)]["districts"][district]["district_area"] = float(row[7])
+            #input_data[str(run_counter)]["districts"][district]["district_area"] = float(row[7])
+            input_data[str(run_counter)]["districts"][district]["district_area"] = float(row[8])
+            input_data[str(run_counter)]["districts"][district]["LA"] = str(row[0])
 
         run_counter += 1
 
@@ -238,7 +242,7 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
-new_districts = os.path.join(os.getcwd(), 'inputs', 'LA_hh.csv')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'CCA_hh.csv')
 output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')
 spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 
@@ -267,7 +271,12 @@ generate_multiple_districts_runs(input_path, new_districts, output_path, [[1290,
 #                                                                           'E07000052',
 #                                                                           'E09000028'])
 
-generate_specified_districts(input_path, new_districts, spec_output_path, ['E08000016'])
+generate_specified_districts(input_path, new_districts, spec_output_path, ['E07000026',
+                                                                           'E07000032',
+                                                                           'E07000170',
+                                                                           'E07000223',
+                                                                           'E07000224'
+                                                                           ])
 
 
 
