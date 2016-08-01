@@ -60,8 +60,6 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
             print(int_df)
             denominator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['denominator_result']))
 
-
-
     else:
         for key, value in data_lists[data_denominator].items():
             int_df = value.loc[value['digital'].isin(type_filter)]

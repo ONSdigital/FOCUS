@@ -54,7 +54,7 @@ class Household(object):
         self.visits = 0
         self.visit_times = []
         self.calls = 0
-        self.arranged_visit = ''
+        self.arranged_visit = False
 
         self.resp_level = 0
         self.help_level = 0
@@ -208,29 +208,21 @@ class Household(object):
             yield self.env.process(self.phone_call_outcome(current_ad))
 
         elif not self.digital and da_test > da_effectiveness:
+            # not digital and not converted so arrange a visit
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
-            # up priority and scedule a visit at most likely time to be in?
+            # up priority and schedule a visit at most likely time to be in?
             self.priority -= 10
 
-            #least_busy_CO = district.least_busy_CO(self.district)
-            #least_busy_CO.action_plan.append(self)
-            #dicta = self.input_data['at_home'][str(h.current_day(self))]
-            #self.arranged_visit = max(dicta, key=dicta.get)
             self.rep.adviser_store.put(current_ad)
+            self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
 
-            # add to top of list...if working it will check next
-            # if not it will be added again with high pri and can then check times each time
+            for co in self.district.district_co:
 
-
-
-
-
-
-            # could select least busy CO
-            # and insert hh....at some point...
-            # add tag to denote time of visit and give high pri
-            # when CO selects hh if tag exists and not that time push it down the list?
+                if self in co.action_plan:
+                    # update action plan...bring to top...if exists
+                    co.action_plan.pop(co.action_plan.index(self))
+                    co.action_plan = [self] + co.action_plan
 
     def phone_call_outcome(self, current_ad):
 

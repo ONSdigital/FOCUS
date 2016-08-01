@@ -160,16 +160,34 @@ class CensusOfficer(object):
         if (self.working() and h.returns_to_date(self.district) < self.district.input_data["trigger"] and
                 len(self.action_plan) > 0):
 
-            yield self.env.process(self.fu_visit_contact())
+            yield self.env.process(self.fu_household_test())
 
         else:
             yield self.env.timeout(next_available(self))
 
         self.env.process(self.co_working_test())
 
-    def fu_visit_contact(self):
+    def fu_household_test(self):
 
+        # take household to visit out but check if a visit has been arranged
         household = self.action_plan.pop(0)
+        d = household.input_data['at_home'][str(h.current_day(household))]
+
+        # check arrange time vs current time...and day...
+        if household.arranged_visit and h.return_time_key(d, self.env.now) != max(d, key=d.get) and not self.catch_all_arranged():
+            # put back  until after first valid visit...or if only visit go anyway...or if don't work those times visit anyway
+
+            #print('hh_id:', household.hh_id)
+            self.action_plan.insert(self.return_index(), household)
+        else:
+            yield self.env.process(self.fu_visit_contact(household))
+
+    def catch_all_arranged(self):
+
+        return all(hh.arranged_visit for hh in self.action_plan)
+
+    def fu_visit_contact(self, household):
+
         self.rep.output_data['Visit'].append(visit(self.rep.reps,
                                                    household.district.input_data["LA"],
                                                    household.digital,
@@ -342,6 +360,19 @@ class CensusOfficer(object):
 
         return False
 
+    def return_index(self):
+
+        return_index = 0
+
+        for household in self.action_plan:
+
+            if not household.arranged_visit:
+
+                return_index = self.action_plan.index(household) + 1
+                print(return_index)
+
+        return max(return_index, 0)
+
 
 def next_available(co):
 
@@ -387,7 +418,7 @@ def schedule_paper_drop(obj, household, has_paper=False):
     else:
 
         household.output_data['Post_paper'].append(post_paper(household.rep.reps,
-                                                              household.district.name,
+                                                              household.district.input_data["LA"],
                                                               household.digital,
                                                               household.hh_type,
                                                               household.env.now))
