@@ -175,9 +175,7 @@ class CensusOfficer(object):
 
         # check arrange time vs current time...and day...
         if household.arranged_visit and h.return_time_key(d, self.env.now) != max(d, key=d.get) and not self.catch_all_arranged():
-            # put back  until after first valid visit...or if only visit go anyway...or if don't work those times visit anyway
 
-            #print('hh_id:', household.hh_id)
             self.action_plan.insert(self.return_index(), household)
         else:
             yield self.env.process(self.fu_visit_contact(household))

@@ -195,6 +195,9 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
         for row in my_area_data:
 
+            # if CCA solit across LA/LSOA need to check here if CCA already added and add new hh to same district
+            # but HH will have ID which shows they belong to a different  LA LSOA...
+
             co_number = 0
             hh_count = 0
             #district = row[0]
@@ -242,7 +245,7 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')
-new_districts = os.path.join(os.getcwd(), 'inputs', 'CCA_hh.csv')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'all_CCA_LA_hh.csv')
 output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')
 spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 

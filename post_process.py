@@ -57,7 +57,6 @@ def create_map(output_path, data_lists, geojson, palette_colour='heather', data_
         for key, value in data_lists['hh_count'].items():
 
             int_df = pd.DataFrame({'denominator_result': (value.groupby(['district', 'rep']).sum()['hh_count'])}).reset_index()
-            print(int_df)
             denominator_list.append(pd.DataFrame(int_df.groupby(['district']).mean()['denominator_result']))
 
     else:
