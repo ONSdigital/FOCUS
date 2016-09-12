@@ -81,6 +81,8 @@ class District(object):
         delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
         start_delayed(self.env, censusv2.start_fu(self.env, self), delay)
 
+    # add as above for trigger as to when to send letters
+
     def create_co(self, input_data, input_key=""):
 
         id_num = 0

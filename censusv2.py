@@ -26,6 +26,8 @@ def start_fu(env, district):
     StartFU(env, district)
     yield env.timeout(0)
 
+# add a helper process to start the sending of a letter phase.
+
 
 def send_reminder(household, reminder_type):
 
