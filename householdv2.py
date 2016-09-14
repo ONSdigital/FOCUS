@@ -7,19 +7,20 @@ from collections import namedtuple
 import helper as h
 import district
 
-response = namedtuple('Responded', ['reps', 'district', 'digital', 'hh_type', 'time'])
-response_planned = namedtuple('Response_planned', ['reps', 'district', 'digital', 'hh_type', 'time'])
-do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'digital', 'hh_type', 'time'])
-reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
-reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'type'])
-call = namedtuple('Call', ['rep', 'district', 'digital', 'hh_type', 'time'])
-call_renege = namedtuple('Call_renege', ['rep', 'district', 'digital', 'hh_type', 'time'])
-call_contact = namedtuple('Call_contact', ['rep', 'district', 'digital', 'hh_type', 'time'])
-call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'digital', 'hh_type', 'time', 'wait_time'])
-call_convert = namedtuple('Call_convert', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-call_success = namedtuple('Call_success', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-call_failed = namedtuple('Call_failed', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-received_letter = namedtuple('Received_letter', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+response = namedtuple('Responded', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+response_planned = namedtuple('Response_planned', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
+reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
+call = namedtuple('Call', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'wait_time'])
+call_convert = namedtuple('Call_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+call_failed = namedtuple('Call_failed', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 class Household(object):
@@ -77,7 +78,9 @@ class Household(object):
             if not self.resp_planned and self.env.now == 0:
 
                 self.output_data['Response_planned'].append(response_planned(self.rep.reps,
-                                                                             self.district.input_data["LA"],
+                                                                             self.district.name,
+                                                                             self.input_data["LA"],
+                                                                             self.input_data["LSOA"],
                                                                              self.digital,
                                                                              self.hh_type,
                                                                              self.env.now))
@@ -100,7 +103,9 @@ class Household(object):
 
         elif not self.responded and not self.resp_planned:
             self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
-                                                             self.district.input_data["LA"],
+                                                             self.district.name,
+                                                             self.input_data["LA"],
+                                                             self.input_data["LSOA"],
                                                              self.digital,
                                                              self.hh_type,
                                                              self.env.now))
@@ -118,7 +123,9 @@ class Household(object):
     def phone_call(self):
 
         self.output_data['Call'].append(call(self.rep.reps,
-                                             self.district.input_data["LA"],
+                                             self.district.name,
+                                             self.input_data["LA"],
+                                             self.input_data["LSOA"],
                                              self.digital,
                                              self.hh_type,
                                              self.env.now))
@@ -149,7 +156,9 @@ class Household(object):
             # hang up
 
             self.output_data['Call_renege'].append(call_renege(self.rep.reps,
-                                                               self.district.input_data["LA"],
+                                                               self.district.name,
+                                                               self.input_data["LA"],
+                                                               self.input_data["LSOA"],
                                                                self.digital,
                                                                self.hh_type,
                                                                self.env.now))
@@ -167,7 +176,9 @@ class Household(object):
             # got through
 
             self.output_data['Call_contact'].append(call_contact(self.rep.reps,
-                                                                 self.district.input_data["LA"],
+                                                                 self.district.name,
+                                                                 self.input_data["LA"],
+                                                                 self.input_data["LSOA"],
                                                                  self.digital,
                                                                  self.hh_type,
                                                                  self.env.now))
@@ -200,7 +211,9 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
             self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
-                                                                     self.district.input_data["LA"],
+                                                                     self.district.name,
+                                                                     self.input_data["LA"],
+                                                                     self.input_data["LSOA"],
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.rep.env.now,
@@ -237,7 +250,9 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
 
             self.rep.output_data['Call_success'].append(call_success(self.rep.reps,
-                                                                     self.district.input_data["LA"],
+                                                                     self.district.name,
+                                                                     self.input_data["LA"],
+                                                                     self.input_data["LSOA"],
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.env.now,
@@ -251,7 +266,9 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
             self.rep.output_data['Call_failed'].append(call_failed(self.rep.reps,
-                                                                   self.district.input_data["LA"],
+                                                                   self.district.name,
+                                                                   self.input_data["LA"],
+                                                                   self.input_data["LSOA"],
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.env.now,
@@ -269,7 +286,9 @@ class Household(object):
             # add to hh response event log
 
             self.output_data['Respond'].append(response(self.rep.reps,
-                                                        self.district.input_data["LA"],
+                                                        self.district.name,
+                                                        self.input_data["LA"],
+                                                        self.input_data["LSOA"],
                                                         self.digital,
                                                         self.hh_type,
                                                         self.resp_time))
@@ -288,7 +307,9 @@ class Household(object):
         if self.resp_planned and self.responded:
 
             self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
-                                                                           self.district.input_data["LA"],
+                                                                           self.district.name,
+                                                                           self.input_data["LA"],
+                                                                           self.input_data["LSOA"],
                                                                            self.digital,
                                                                            self.hh_type,
                                                                            self.env.now,
@@ -296,7 +317,9 @@ class Household(object):
         elif self.resp_planned and not self.responded:
 
             self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
-                                                                                     self.district.input_data["LA"],
+                                                                                     self.district.name,
+                                                                                     self.input_data["LA"],
+                                                                                     self.input_data["LSOA"],
                                                                                      self.digital,
                                                                                      self.hh_type,
                                                                                      self.env.now,
@@ -334,26 +357,48 @@ class Household(object):
     def record_wait_time(self, wait_time, renege_time):
 
         self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
-                                                                   self.district.input_data["LA"],
+                                                                   self.district.name,
+                                                                   self.input_data["LA"],
+                                                                   self.input_data["LSOA"],
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.env.now,
                                                                    min(wait_time, renege_time)))
 
-    def receive_letter(self, effect):
+    def receive_letter(self, effect, pq):
         """represents the hh receiving a letter"""
 
         self.letter_count += 1
 
-        self.resp_level = effect
-        self.help_level = 0
+        if h.str2bool(pq) is True:
 
-        self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
-                                                                       self.district.input_data["LA"],
-                                                                       self.digital,
-                                                                       self.hh_type,
-                                                                       self.rep.env.now,
-                                                                       self.hh_id))
+            # then it's a paper questionnaire so now follow the default behaviour
+            self.rep.output_data['Received_pq'].append(received_pq(self.rep.reps,
+                                                                   self.district.name,
+                                                                   self.input_data["LA"],
+                                                                   self.input_data["LSOA"],
+                                                                   self.digital,
+                                                                   self.hh_type,
+                                                                   self.rep.env.now,
+                                                                   self.hh_id))
+
+            self.paper_allowed = True
+            self.resp_level = self.set_behaviour('response')
+            self.help_level = self.resp_level + self.set_behaviour('help')
+
+        else:
+
+            self.resp_level = effect
+            self.help_level = 0
+
+            self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
+                                                                           self.district.name,
+                                                                           self.input_data["LA"],
+                                                                           self.input_data["LSOA"],
+                                                                           self.digital,
+                                                                           self.hh_type,
+                                                                           self.rep.env.now,
+                                                                           self.hh_id))
 
         yield self.env.process(self.action())
 

@@ -48,8 +48,6 @@
     },
     "districts": {
       "E06000001": {
-        "LA": "an LA",
-        "LSOA": "an LSOA",
         "letter_phases": {
           "reminder": {
             "send_time": 129,
@@ -57,6 +55,13 @@
             "targets": ["htc1"],
             "effect": 5,
             "pq": 0
+          },
+          "pq": {
+            "send_time": 369,
+            "postal_delay": 48,
+            "targets": ["htc5"],
+            "effect": 5,
+            "pq": "True"
           }
         },
         "trigger": 90,
@@ -279,6 +284,8 @@
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
             "paper_prop": 86,
+            "LA": "an LA",
+            "LSOA": "an LSOA",
             "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
@@ -418,6 +425,8 @@
               }
             },
             "paper_allowed": "False",
+            "LA": "an LA",
+            "LSOA": "an LSOA",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
@@ -568,6 +577,8 @@
             },
             "call_conversion_rate": 31,
             "paper_prop": 82,
+            "LA": "an LA",
+            "LSOA": "an LSOA",
             "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
@@ -714,6 +725,8 @@
               }
             },
             "number": 1,
+            "LA": "an LA",
+            "LSOA": "an LSOA",
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -3,
@@ -848,6 +861,8 @@
           "htc5": {
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
+            "LA": "an LA",
+            "LSOA": "an LSOA",
             "call_conversion_rate": 29,
             "paper_prop": 76,
             "delay": {

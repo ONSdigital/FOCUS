@@ -7,19 +7,19 @@ import datetime
 from simpy.util import start_delayed
 import householdv2
 
-return_times = namedtuple('Returned', ['rep', 'district', 'digital', 'hh_type', 'time'])  # time return received
+return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'household',  'hh_type', 'type'])
-visit = namedtuple('Visit', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_out = namedtuple('Visit_out', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_wasted = namedtuple('Visit_wasted', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_success = namedtuple('Visit_success', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
-post_paper = namedtuple('Post_paper', ['rep', 'district', 'digital', 'hh_type', 'time'])
-sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
+visit_out = namedtuple('Visit_out', ['rep', 'district', 'LA', 'LSOA', 'digital','hh_type', 'time', 'hh_id'])
+visit_wasted = namedtuple('Visit_wasted', ['rep', 'district', 'LA', 'LSOA','digital', 'hh_type', 'time', 'hh_id'])
+visit_success = namedtuple('Visit_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+post_paper = namedtuple('Post_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -47,7 +47,9 @@ def ret_rec(hh, rep):
     rep.total_returns += 1
 
     rep.output_data['Returned'].append(return_times(rep.reps,
-                                                    hh.district.input_data["LA"],
+                                                    hh.district.name,
+                                                    hh.input_data["LA"],
+                                                    hh.input_data["LSOA"],
                                                     hh.digital,
                                                     hh.hh_type,
                                                     rep.env.now))
@@ -189,7 +191,9 @@ class CensusOfficer(object):
     def fu_visit_contact(self, household):
 
         self.rep.output_data['Visit'].append(visit(self.rep.reps,
-                                                   household.district.input_data["LA"],
+                                                   self.district.name,
+                                                   household.input_data["LA"],
+                                                   household.input_data["LSOA"],
                                                    household.digital,
                                                    household.hh_type,
                                                    self.rep.env.now,
@@ -197,7 +201,9 @@ class CensusOfficer(object):
 
         if household.resp_planned:
             self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
-                                                                               household.district.input_data["LA"],
+                                                                               self.district.name,
+                                                                               household.input_data["LA"],
+                                                                               household.input_data["LSOA"],
                                                                                household.digital,
                                                                                household.hh_type,
                                                                                self.rep.env.now,
@@ -211,7 +217,9 @@ class CensusOfficer(object):
         if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
             #in
             self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.reps,
-                                                                       household.district.input_data["LA"],
+                                                                       self.district.name,
+                                                                       household.input_data["LA"],
+                                                                       household.input_data["LSOA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
@@ -232,7 +240,9 @@ class CensusOfficer(object):
         else:
             # out - add drop of of a note
             self.rep.output_data['Visit_out'].append(visit_out(self.rep.reps,
-                                                               household.district.input_data["LA"],
+                                                               self.district.name,
+                                                               household.input_data["LA"],
+                                                               household.input_data["LSOA"],
                                                                household.digital,
                                                                household.hh_type,
                                                                self.env.now,
@@ -259,7 +269,9 @@ class CensusOfficer(object):
             yield self.env.timeout(self.input_data['visit_times']['convert']/60)
 
             self.rep.output_data['Visit_convert'].append(visit_convert(self.rep.reps,
-                                                                       household.district.input_data["LA"],
+                                                                       household.district.name,
+                                                                       household.input_data["LA"],
+                                                                       household.input_data["LSOA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.rep.env.now,
@@ -293,7 +305,9 @@ class CensusOfficer(object):
 
         if household.responded is True:
             self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
-                                                                     household.district.input_data["LA"],
+                                                                     household.district.name,
+                                                                     household.input_data["LA"],
+                                                                     household.input_data["LSOA"],
                                                                      household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,
@@ -307,7 +321,9 @@ class CensusOfficer(object):
                 outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]):
 
             self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
-                                                                       household.district.input_data["LA"],
+                                                                       household.district.name,
+                                                                       household.input_data["LA"],
+                                                                       household.input_data["LSOA"],
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
@@ -326,7 +342,9 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
-                                                                     household.district.input_data["LA"],
+                                                                     household.district.name,
+                                                                     household.input_data["LA"],
+                                                                     household.input_data["LSOA"],
                                                                      household.digital,
                                                                      household.hh_type,
                                                                      self.env.now,
@@ -389,28 +407,29 @@ class LetterPhase(object):
 
         # send a letter but only if hh type matches targets
         for household in self.district.households:
-            if household.hh_type in self.input_data["targets"]:
+            if household.hh_type in self.input_data["targets"] and household.responded is False:
 
                 # send a letter
                 self.env.process(self.co_send_letter(household,
                                                      self.input_data["effect"],
-                                                     self.input_data["postal_delay"]))
+                                                     self.input_data["postal_delay"],
+                                                     self.input_data["pq"]))
 
         yield self.env.timeout(0)
 
-    def co_send_letter(self, household, effect, delay):
-
-        print("hh:", household.hh_type, "effect:", effect, "delay:", delay, self.env.now)
+    def co_send_letter(self, household, effect, delay, pq):
 
         self.rep.output_data['Sent_letter'].append(sent_letter(self.rep.reps,
-                                                               household.district.input_data["LA"],
+                                                               household.district.name,
+                                                               household.input_data["LA"],
+                                                               household.input_data["LSOA"],
                                                                household.digital,
                                                                household.hh_type,
                                                                self.rep.env.now,
                                                                household.hh_id))
 
         yield self.env.timeout(delay)
-        self.env.process(household.receive_letter(effect))
+        self.env.process(household.receive_letter(effect, pq))
 
 
 def next_available(co):
@@ -449,7 +468,9 @@ def schedule_paper_drop(obj, household, has_paper=False):
     if has_paper:
 
         obj.rep.output_data['Visit_paper'].append(visit_paper(obj.rep.reps,
-                                                              obj.district.name,
+                                                              household.district.name,
+                                                              household.input_data["LA"],
+                                                              household.input_data["LSOA"],
                                                               household.digital,
                                                               household.hh_type,
                                                               obj.rep.env.now,
@@ -457,7 +478,9 @@ def schedule_paper_drop(obj, household, has_paper=False):
     else:
 
         household.output_data['Post_paper'].append(post_paper(household.rep.reps,
-                                                              household.district.input_data["LA"],
+                                                              household.district.name,
+                                                              household.input_data["LA"],
+                                                              household.input_data["LSOA"],
                                                               household.digital,
                                                               household.hh_type,
                                                               household.env.now))
