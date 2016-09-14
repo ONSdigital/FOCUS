@@ -18,6 +18,7 @@ visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'LA', 'LSOA', 'dig
 visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_assist = namedtuple('Visit_assist', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 post_paper = namedtuple('Post_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
@@ -295,6 +296,14 @@ class CensusOfficer(object):
         else:
             # or suggest other forms of assistance to be decided...
             # no more - another visit will be scheduled...
+            self.rep.output_data['Visit_assist'].append(visit_assist(self.rep.reps,
+                                                                     self.district.name,
+                                                                     household.input_data["LA"],
+                                                                     household.input_data["LSOA"],
+                                                                     household.digital,
+                                                                     household.hh_type,
+                                                                     self.env.now,
+                                                                     household.hh_id))
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
 

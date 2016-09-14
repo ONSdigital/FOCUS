@@ -12,6 +12,7 @@ response_planned = namedtuple('Response_planned', ['reps', 'district', 'LA', 'LS
 do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
 reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
+reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
 call = namedtuple('Call', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
@@ -21,6 +22,7 @@ call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'dig
 call_failed = namedtuple('Call_failed', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 class Household(object):
@@ -225,6 +227,15 @@ class Household(object):
         elif not self.digital and da_test > da_effectiveness:
             # not digital and not converted so arrange a visit
 
+            self.rep.output_data['Visit_request'].append(call_convert(self.rep.reps,
+                                                                      self.district.name,
+                                                                      self.input_data["LA"],
+                                                                      self.input_data["LSOA"],
+                                                                      self.digital,
+                                                                      self.hh_type,
+                                                                      self.rep.env.now,
+                                                                      self.hh_id))
+
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
             # up priority and schedule a visit at most likely time to be in?
             self.priority -= 10
@@ -328,12 +339,21 @@ class Household(object):
         elif not self.resp_planned and not self.responded and reminder_type == 'pq' and not self.digital:
             # hh who have chosen not to respond due to not having paper but are now given paper
 
+            self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
+                                                                                 self.district.name,
+                                                                                 self.input_data["LA"],
+                                                                                 self.input_data["LSOA"],
+                                                                                 self.digital,
+                                                                                 self.hh_type,
+                                                                                 self.env.now,
+                                                                                 reminder_type))
+
             self.resp_level = self.set_behaviour('response')
             self.help_level = self.resp_level + self.set_behaviour('help')
             yield self.env.process(self.action())
 
         elif not self.resp_planned and not self.responded and reminder_type == 'pq' and self.digital:
-                # hh who have chosen not to respond despite happy toi use digital - paper makes no/little difference?
+                # hh who have chosen not to respond despite happy to use digital - paper makes no/little difference?
 
                 self.resp_level = 0
                 self.help_level = 0
