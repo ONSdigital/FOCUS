@@ -19,6 +19,7 @@ call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'digital', '
 call_convert = namedtuple('Call_convert', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 call_success = namedtuple('Call_success', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 call_failed = namedtuple('Call_failed', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
+received_letter = namedtuple('Received_letter', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 class Household(object):
@@ -55,6 +56,7 @@ class Household(object):
         self.visit_times = []
         self.calls = 0
         self.arranged_visit = False
+        self.letter_count = 0
 
         self.resp_level = 0
         self.help_level = 0
@@ -337,6 +339,23 @@ class Household(object):
                                                                    self.hh_type,
                                                                    self.env.now,
                                                                    min(wait_time, renege_time)))
+
+    def receive_letter(self, effect):
+        """represents the hh receiving a letter"""
+
+        self.letter_count += 1
+
+        self.resp_level = effect
+        self.help_level = 0
+
+        self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
+                                                                       self.district.input_data["LA"],
+                                                                       self.digital,
+                                                                       self.hh_type,
+                                                                       self.rep.env.now,
+                                                                       self.hh_id))
+
+        yield self.env.process(self.action())
 
 
 def set_preference(household):

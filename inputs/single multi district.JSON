@@ -48,8 +48,17 @@
     },
     "districts": {
       "E06000001": {
-        "LA": "",
-        "LSOA": "",
+        "LA": "an LA",
+        "LSOA": "an LSOA",
+        "letter_phases": {
+          "reminder": {
+            "send_time": 129,
+            "postal_delay": 48,
+            "targets": ["htc1"],
+            "effect": 5,
+            "pq": 0
+          }
+        },
         "trigger": 90,
         "paper_trigger": 80,
         "RMT_update": 24,
@@ -321,15 +330,6 @@
               0.1,
               2
             ],
-            "letter_phases": {
-              "reminder": {
-                "date": "2011, 3, 12, 9, 0, 0",
-                "delay": 48,
-                "effect": 5,
-                "targeted": 1,
-                "pq": 0
-              }
-            },
             "response_time": {
               "0": [
                 12,

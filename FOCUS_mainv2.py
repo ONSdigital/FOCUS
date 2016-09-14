@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/all_LA_hh.JSON'
+        file_name = 'inputs/single multi district.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

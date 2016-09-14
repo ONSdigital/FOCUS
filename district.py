@@ -26,6 +26,7 @@ class District(object):
         # belong to the class
         self.households = []  # list of households in the district
         self.district_co = []  # list of CO assigned to the district
+        self.reminders = []  # list of reminders to be sent
         self.return_rate = 0
         self.travel_dist = 0
 
@@ -34,6 +35,8 @@ class District(object):
         self.output_data['hh_count'].append(hh_count(self.rep.reps, self.input_data["LA"], len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
         self.create_co(self.input_data["census officer"])
+
+        self.create_letterphases()
 
         self.hh_area = self.input_data['district_area'] / len(self.households)
         self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
@@ -81,7 +84,16 @@ class District(object):
         delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
         start_delayed(self.env, censusv2.start_fu(self.env, self), delay)
 
-    # add as above for trigger as to when to send letters
+    def create_letterphases(self):
+
+        letter_list = sorted(list(self.input_data['letter_phases']))
+
+        for letter in letter_list:
+            letter_data = self.input_data['letter_phases'][letter]
+            self.reminders.append(censusv2.LetterPhase(self.env,
+                                                       self.rep,
+                                                       self,
+                                                       letter_data))
 
     def create_co(self, input_data, input_key=""):
 

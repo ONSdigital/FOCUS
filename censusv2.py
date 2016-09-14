@@ -5,6 +5,7 @@ from collections import namedtuple
 import helper as h
 import datetime
 from simpy.util import start_delayed
+import householdv2
 
 return_times = namedtuple('Returned', ['rep', 'district', 'digital', 'hh_type', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'household',  'hh_type', 'type'])
@@ -18,6 +19,7 @@ visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'digital', 'hh_t
 visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 post_paper = namedtuple('Post_paper', ['rep', 'district', 'digital', 'hh_type', 'time'])
+sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -25,8 +27,6 @@ def start_fu(env, district):
 
     StartFU(env, district)
     yield env.timeout(0)
-
-# add a helper process to start the sending of a letter phase.
 
 
 def send_reminder(household, reminder_type):
@@ -372,6 +372,45 @@ class CensusOfficer(object):
                 print(return_index)
 
         return max(return_index, 0)
+
+
+class LetterPhase(object):
+
+    def __init__(self, env, rep, district, input_data):
+        self.env = env
+        self.rep = rep
+        self.district = district
+        self.input_data = input_data
+        # add process to decide who to send letters too...but with a delay
+
+        start_delayed(self.env, self.fu_letter(), self.input_data["send_time"])
+
+    def fu_letter(self):
+
+        # send a letter but only if hh type matches targets
+        for household in self.district.households:
+            if household.hh_type in self.input_data["targets"]:
+
+                # send a letter
+                self.env.process(self.co_send_letter(household,
+                                                     self.input_data["effect"],
+                                                     self.input_data["postal_delay"]))
+
+        yield self.env.timeout(0)
+
+    def co_send_letter(self, household, effect, delay):
+
+        print("hh:", household.hh_type, "effect:", effect, "delay:", delay, self.env.now)
+
+        self.rep.output_data['Sent_letter'].append(sent_letter(self.rep.reps,
+                                                               household.district.input_data["LA"],
+                                                               household.digital,
+                                                               household.hh_type,
+                                                               self.rep.env.now,
+                                                               household.hh_id))
+
+        yield self.env.timeout(delay)
+        self.env.process(household.receive_letter(effect))
 
 
 def next_available(co):
