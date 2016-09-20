@@ -54,14 +54,16 @@
             "postal_delay": 48,
             "targets": ["htc1"],
             "effect": 5,
-            "pq": 0
+            "pq": 0,
+            "targeted": "False"
           },
           "pq": {
             "send_time": 369,
             "postal_delay": 48,
             "targets": ["htc5"],
             "effect": 5,
-            "pq": "True"
+            "pq": "True",
+            "targeted": "True"
           }
         },
         "trigger": 90,
@@ -287,13 +289,13 @@
             "LA": "an LA",
             "LSOA": "an LSOA",
             "paper_allowed": "False",
-            "number": 1,
+            "number": 100,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 5,
-            "paper_after_max_visits": "True",
-            "paper_on_request": "True",
+            "paper_after_max_visits": "False",
+            "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 20,

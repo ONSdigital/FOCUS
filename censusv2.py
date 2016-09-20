@@ -414,9 +414,14 @@ class LetterPhase(object):
 
     def fu_letter(self):
 
-        # send a letter but only if hh type matches targets
+        # send a letter if conditions met
         for household in self.district.households:
-            if household.hh_type in self.input_data["targets"] and household.responded is False:
+            print("all", household.hh_id)
+            if (self.input_data["targeted"] and household.hh_type in self.input_data["targets"] and
+                not household.responded) or \
+                    (not self.input_data["targeted"] and household.hh_type in self.input_data["targets"]):
+
+                print("letter", household.hh_id)
 
                 # send a letter
                 self.env.process(self.co_send_letter(household,
