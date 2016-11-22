@@ -16,8 +16,6 @@ from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 
 
-__version__ = "0.2"
-
 l = Lock()  # global declaration...can I avoid this?
 
 

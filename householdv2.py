@@ -21,7 +21,10 @@ call_convert = namedtuple('Call_convert', ['rep', 'district', 'LA', 'LSOA', 'dig
 call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 call_failed = namedtuple('Call_failed', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+
 visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
@@ -390,7 +393,7 @@ class Household(object):
 
         self.letter_count += 1
 
-        if h.str2bool(pq) is True:
+        if h.str2bool(pq) and not self.responded:
 
             # then it's a paper questionnaire so now follow the default behaviour
             self.rep.output_data['Received_pq'].append(received_pq(self.rep.reps,
@@ -405,11 +408,11 @@ class Household(object):
             self.paper_allowed = True
             self.resp_level = self.set_behaviour('response')
             self.help_level = self.resp_level + self.set_behaviour('help')
+            yield self.env.process(self.action())
 
-        else:
+        elif not h.str2bool(pq) and not self.responded:
 
-            self.resp_level = effect
-            self.help_level = 0
+
 
             self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
                                                                            self.district.name,
@@ -420,8 +423,31 @@ class Household(object):
                                                                            self.rep.env.now,
                                                                            self.hh_id))
 
-        yield self.env.process(self.action())
+            self.resp_level = effect
+            self.help_level = 0
+            yield self.env.process(self.action())
 
+        elif h.str2bool(pq) and self.responded:
+            # wasted pq
+            self.rep.output_data['Wasted_pq'].append(received_pq(self.rep.reps,
+                                                                 self.district.name,
+                                                                 self.input_data["LA"],
+                                                                 self.input_data["LSOA"],
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.rep.env.now,
+                                                                 self.hh_id))
+
+        elif not h.str2bool(pq) and self.responded:
+            # waster letter
+            self.rep.output_data['Wasted_letter'].append(received_pq(self.rep.reps,
+                                                                     self.district.name,
+                                                                     self.input_data["LA"],
+                                                                     self.input_data["LSOA"],
+                                                                     self.digital,
+                                                                     self.hh_type,
+                                                                     self.rep.env.now,
+                                                                     self.hh_id))
 
 def set_preference(household):
     """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""

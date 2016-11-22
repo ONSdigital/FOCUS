@@ -8,7 +8,7 @@ from simpy.util import start_delayed
 import householdv2
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received
-reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'household',  'hh_type', 'type'])
+reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
 visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
 visit_out = namedtuple('Visit_out', ['rep', 'district', 'LA', 'LSOA', 'digital','hh_type', 'time', 'hh_id'])
@@ -36,7 +36,8 @@ def send_reminder(household, reminder_type):
                                                                     household.env.now,
                                                                     household.digital,
                                                                     household.hh_type,
-                                                                    reminder_type))
+                                                                    reminder_type,
+                                                                    household.hh_id))
 
     start_delayed(household.env, household.receive_reminder(reminder_type), 24)
     yield household.env.timeout(0)
@@ -415,11 +416,13 @@ class LetterPhase(object):
     def fu_letter(self):
 
         # send a letter if conditions met
+        print("targeted ", self.input_data["targeted"])
         for household in self.district.households:
-            print("all", household.hh_id)
-            if (self.input_data["targeted"] and household.hh_type in self.input_data["targets"] and
+
+            print("all hh ", "id ",  household.hh_id, " type ", household.hh_type, " responded " , household.responded)
+            if (h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"] and
                 not household.responded) or \
-                    (not self.input_data["targeted"] and household.hh_type in self.input_data["targets"]):
+                    (not h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"]):
 
                 print("letter", household.hh_id)
 
@@ -441,6 +444,8 @@ class LetterPhase(object):
                                                                household.hh_type,
                                                                self.rep.env.now,
                                                                household.hh_id))
+
+        print("letter sent to hh ", household.hh_id)
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_letter(effect, pq))
