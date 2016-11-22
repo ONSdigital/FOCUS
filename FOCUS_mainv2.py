@@ -85,9 +85,9 @@ def produce_default_output():
 
     # now combine each run into one df
 
-    post_process.create_map(output_path, pandas_data, 'inputs/geog_E+W_LAs.geojson',
-                            palette_colour="heather", step=10, min_range=0, max_range=100,
-                            dynamic=False)  # http://xkcd.com/color/rgb/
+   # post_process.create_map(output_path, pandas_data, 'inputs/geog_E+W_LAs.geojson',
+          #                  palette_colour="heather", step=10, min_range=0, max_range=100,
+        #                    dynamic=False)  # http://xkcd.com/color/rgb/
 
 
 

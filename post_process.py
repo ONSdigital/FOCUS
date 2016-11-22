@@ -8,30 +8,40 @@ import numpy as np
 from collections import defaultdict
 
 
+# converts csv output files to a dictionary of dictionaries of Pandas Dataframes for each output type and run
 def csv_to_pandas(output_path, output_type):
+    # output_type is a list of the types of output to include (e.g. responses, visits)
 
-    folder_list = glob.glob(output_path + '/*/')
-    data_dict = defaultdict(list)
+    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
+    data_dict = defaultdict(list)  # create a dict ready for the dataframes
 
     for folder in folder_list:
         folder_name = folder.split(os.path.sep)[-2]
         if folder_name in output_type:
 
-            folder_name = folder.split(os.path.sep)[-2]
-
             glob_folder = os.path.join('outputs', folder_name, '*.csv')
-            file_list = glob.glob(glob_folder)
+            file_list = glob.glob(glob_folder)  # get a list of all files (sim runs) in the folder
 
             data_dict[folder_name] = defaultdict(list)
 
-            # for each file add to a list in the top level dictionary
+            # for each file (sim run) add to dictionary for that type of output
             for file in file_list:
                 file_name = file.split(os.path.sep)[-1][0]
-                data_dict[folder_name][file_name] = pd.read_csv(file, header=0)
+                data_dict[folder_name][file_name] = pd.read_csv(file, header=0)  # add each run to dict
 
     return data_dict
 
 
+
+
+
+
+
+
+
+
+
+# deprecation function used to create interactive maps using the bokeh package
 def create_map(output_path, data_lists, geojson, palette_colour='heather', data_numerator="Returned",
                data_denominator="hh_count", response_type="all", step=5, min_range=80, max_range=100,
                reverse=False, dynamic=False):
@@ -154,6 +164,13 @@ def create_bar_chart(output_path, data_lists, data_numerator="Returned", data_de
     create_graphs.bar_response(plot_list, output_path)
 
 
+# check and think if this is the best and correct way to handle these files
+# must be able to summarise each runs output and store appropriately
+# just do simple average counts to start
+# for all output types
+# then add in proportions
+
+# function to take data_lists (a list of Pandas dataframes) with a time dimension and produce aggregated values
 def simple_split(data_lists, start=0, end=1440, step=360, cumulative=True, runs=()):
 
     split_runs = defaultdict(list)
@@ -166,7 +183,7 @@ def simple_split(data_lists, start=0, end=1440, step=360, cumulative=True, runs=
 
     return split_runs
 
-
+# function to take a dataframe (with a time dimension) and produce aggregated values
 def split_single(df, start, end, step, cumulative=True):
 
     split_dict = defaultdict(list)
