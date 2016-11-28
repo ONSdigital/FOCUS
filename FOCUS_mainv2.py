@@ -64,52 +64,10 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    pandas_data = post_process.csv_to_pandas(output_path, ['Returned',
-                                                           'hh_count',
-                                                           'hh_record'])
-
-    story_data = post_process.simple_split(pandas_data["Returned"], start=0, end=1440, step=360)
-
-    line_df_dict = {}
-    #bar_dict = {}
-
-    #for key, value in pandas_data["Returned"].items():
-
-        #bar_dict[key] = post_process.divide_single_count(value, pandas_data["hh_count"][key])
-
-    for key, value in story_data.items():
-
-        line_df_dict[key] = post_process.divide_all(value, pandas_data["hh_record"][key])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Returned'])
+    post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
 
 
-
-    # now combine each run into one df
-
-   # post_process.create_map(output_path, pandas_data, 'inputs/geog_E+W_LAs.geojson',
-          #                  palette_colour="heather", step=10, min_range=0, max_range=100,
-        #                    dynamic=False)  # http://xkcd.com/color/rgb/
-
-
-
-
-    #hh_count = post_process.add_hh_count(aggregated_data)
-    #for df in story_data['Returned']:
-        #story_data['hh_count'].append(hh_count['hh_count'][0])
-
-    # by this point you have, in story data, the data required to show responses over time by type?
-
-    #post_process.create_map(output_path, story_data, 'inputs/geog_E+W_LAs.geojson',
-    #                        palette_colour="heather", step=10, min_range=0, max_range=100,
-    #                        dynamic=False)  # http://xkcd.com/color/rgb/
-
-    #file_location = "/home/bigdata/Desktop/nas/projects/FOCUS/outputs/charts/"
-    #create_maps.create_movie_files(file_location)
-
-
-    #post_process.create_map(output_path, aggregated_data, 'inputs/geog_E+W_LAs.geojson',
-    #                        palette_colour="maize", data_numerator="Visit_wasted", data_denominator="Visit",
-    #                        dynamic=True)
-    #post_process.create_bar_chart(output_path, aggregated_data)
 
 
 if __name__ == '__main__':

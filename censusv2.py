@@ -397,7 +397,7 @@ class CensusOfficer(object):
             if not household.arranged_visit:
 
                 return_index = self.action_plan.index(household) + 1
-                print(return_index)
+                #print(return_index)
 
         return max(return_index, 0)
 
