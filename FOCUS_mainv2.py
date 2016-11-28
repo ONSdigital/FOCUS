@@ -64,10 +64,9 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    pandas_data = post_process.csv_to_pandas(output_path, ['Returned'])
-    post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
-
-
+    pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit'])
+    post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    # then divide by a denominator of user selection to get final data
 
 
 if __name__ == '__main__':
