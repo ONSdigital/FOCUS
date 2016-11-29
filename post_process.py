@@ -30,7 +30,6 @@ def csv_to_pandas(output_path, output_type):
             for file in file_list:
                 file_name = file.split(os.path.sep)[-1][0]
                 data_dict[folder_name][file_name] = pd.read_csv(file, header=0)  # add each run to dict
-
     return data_dict
 
 
