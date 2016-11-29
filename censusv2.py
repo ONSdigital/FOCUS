@@ -416,15 +416,15 @@ class LetterPhase(object):
     def fu_letter(self):
 
         # send a letter if conditions met
-        print("targeted ", self.input_data["targeted"])
+        #print("targeted ", self.input_data["targeted"])
         for household in self.district.households:
 
-            print("all hh ", "id ",  household.hh_id, " type ", household.hh_type, " responded " , household.responded)
+            #print("all hh ", "id ",  household.hh_id, " type ", household.hh_type, " responded " , household.responded)
             if (h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"] and
                 not household.responded) or \
                     (not h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"]):
 
-                print("letter", household.hh_id)
+                #print("letter", household.hh_id)
 
                 # send a letter
                 self.env.process(self.co_send_letter(household,
@@ -445,7 +445,7 @@ class LetterPhase(object):
                                                                self.rep.env.now,
                                                                household.hh_id))
 
-        print("letter sent to hh ", household.hh_id)
+        #print("letter sent to hh ", household.hh_id)
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_letter(effect, pq))

@@ -12,8 +12,8 @@ from bokeh.plotting import figure, show, output_file, ColumnDataSource, save, re
 import seaborn as sns
 import glob
 
-from PIL import Image
-from selenium import webdriver
+#from PIL import Image
+#from selenium import webdriver
 
 def select_palette(shade_no, palette_colour, reverse=False):
     missing = ["#d8dcd6"]

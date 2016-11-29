@@ -9,13 +9,13 @@ from collections import defaultdict
 
 
 def csv_to_pandas(output_path, output_type):
-    """converts csv output files to a dictionary of dictionaries of Pandas data frames for each output type and run.
-    output_type is a list of the types of output to include (e.g. responses, visits). to refer to the finished data
-    dict use: data_dict['type of output']['run']. Data frame will be every repliciation of that output type for that
-     run"""
+    """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
+    and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished
+    data_dict use: data_dict['type of output']['run']. Data frame will be every replication of that output type for
+    that run"""
 
     folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
-    data_dict = defaultdict(list)  # create a dict ready for the dataframes
+    data_dict = defaultdict(list)  # create a dict ready for the data frames
 
     for folder in folder_list:
         folder_name = folder.split(os.path.sep)[-2]
@@ -34,29 +34,25 @@ def csv_to_pandas(output_path, output_type):
 
 
 def cumulative_sum(df, start, end, step, geog):
-    """takes a data frame and creates cumulative totals for specified geography"""
+    """takes a data frame and creates cumulative totals for specified geography in correct format for data vis teams
+    map template"""
 
-    # create bins and group names
+    # create bins and group names to use
     bin_values = np.arange(start, end + step, step)
     group_names = np.arange(start, end, step)
 
-    print(df)
-
-    # add a new column containing the categories the entry belongs too
+    # add a new column to passed data frame containing the categories the entry belongs too
     df['categories'] = pd.cut(df['time'], bin_values, labels=group_names)
-
-    print(df)
-
     # group by each combination of district and category and count the number of each category
     cat_sum = df.groupby([geog, 'categories'])['categories'].size()
-    # calculate and the cum sum of the totals
+    # calculate the cum sum of the totals
     cat_sum = cat_sum.groupby(level=[0]).cumsum().reset_index(name='cum_sum')
-    print(cat_sum)
+    # pivot it so the categories become the columns
+    cat_sum_flipped = cat_sum.pivot(index='district', columns='categories', values='cum_sum')
+    # and then add back in any missing categories
+    cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1)
 
-    # now get them in the right output format for visualisation
-
-
-    return cat_sum
+    return cat_sum_flipped
 
 
 def divide_all(data_numerator, data_denominator, runs=()):
