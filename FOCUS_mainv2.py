@@ -64,10 +64,41 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit'])
-    post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-    # then divide by a denominator of user selection to get final data
+    # select data to read into dataframes
+    pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
 
+    # produce summary of overall returns
+    returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
+    hh_count = pandas_data['hh_count']['1']
+    returns_summary = returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    # output to csv
+    returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
+    # also need an E+W average
+
+    # produce summary of digital returns
+    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
+    dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    # output to csv
+    dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+
+    # produce summary of paper returns
+    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
+    pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    # output to csv
+    pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+
+    # visits summary as proportion of total number of visits
+    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    # divide by the max visits for each district
+    visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
+    visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+
+    # proportion of visits where contact was made
+    visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
+    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
+    visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
+    visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
 
 if __name__ == '__main__':
 

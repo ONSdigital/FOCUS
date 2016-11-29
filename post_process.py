@@ -33,13 +33,20 @@ def csv_to_pandas(output_path, output_type):
     return data_dict
 
 
-def cumulative_sum(df, start, end, step, geog):
-    """takes a data frame and creates cumulative totals for specified geography in correct format for data vis teams
-    map template"""
+def cumulative_sum(df, start, end, step, geog, digital='all'):
+    """takes a data frame and returns average cumulative totals for specified geography in correct format for data
+     vis teams map template"""
 
     # create bins and group names to use
     bin_values = np.arange(start, end + step, step)
     group_names = np.arange(start, end, step)
+
+    # filter df to only have correct entries
+    if digital == 'True':
+        df = df[df['digital'] == True].copy()
+
+    elif digital == 'False':
+        df = df[df['digital'] == False].copy()
 
     # add a new column to passed data frame containing the categories the entry belongs too
     df['categories'] = pd.cut(df['time'], bin_values, labels=group_names)
@@ -51,6 +58,8 @@ def cumulative_sum(df, start, end, step, geog):
     cat_sum_flipped = cat_sum.pivot(index='district', columns='categories', values='cum_sum')
     # and then add back in any missing categories
     cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1)
+    reps = df['rep'].max()
+    cat_sum_flipped = cat_sum_flipped.div(reps, axis=0).replace('Nan', 0, regex=True)
 
     return cat_sum_flipped
 
