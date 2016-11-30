@@ -5,7 +5,7 @@ from collections import namedtuple
 import helper as h
 import datetime
 from simpy.util import start_delayed
-import householdv2
+
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
@@ -44,6 +44,9 @@ def send_reminder(household, reminder_type):
 
 
 def ret_rec(hh, rep):
+    # print out every 100 returns?
+    if rep.total_returns % 100 == 0:
+        print(rep.total_returns)
 
     hh.returned = True
     rep.total_returns += 1

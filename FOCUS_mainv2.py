@@ -26,7 +26,8 @@ def start_run(run_input, seeds, out_path):
     sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_hours = (sim_end - sim_start).total_seconds()/3600
 
-    output_data = defaultdict(list)
+    output_data = defaultdict(list) # was list
+
     rnd = random.Random()
     rnd.seed(str(seeds))
 
@@ -64,27 +65,30 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    # select data to read into dataframes
+    # select data to read into data frames
     pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
 
     # produce summary of overall returns
     returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
     hh_count = pandas_data['hh_count']['1']
     returns_summary = returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    # output to csv
     returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
-    # also need an E+W average
+    # also need an E+W average for each?
+    # so add each column and divide each result by sum of hh_count
+    overall_returns = returns_summary.sum(axis='columns')
+    print(overall_returns)
+    overall_returns = overall_returns.div(hh_count['hh_count'].ix[0], axis='columns')
+    print(overall_returns)
+
 
     # produce summary of digital returns
     dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
     dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    # output to csv
     dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
     # produce summary of paper returns
     pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
     pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    # output to csv
     pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
     # visits summary as proportion of total number of visits
@@ -99,6 +103,19 @@ def produce_default_output():
     visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
     visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
     visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
+
+    # proportion of wasted visits
+    # volume of paper sent
+    # proportion of returns (for dig and paper) by type of hh (htc for now)?
+    # volume of reminders/pq sent
+    # travel time/hours worked  total
+    #
+
+    # other
+    # queues for call centre over time
+
+
+    # etc etc
 
 if __name__ == '__main__':
 
