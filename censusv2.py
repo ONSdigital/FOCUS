@@ -5,10 +5,6 @@ from collections import namedtuple
 import helper as h
 import datetime
 from simpy.util import start_delayed
-import sys
-import pylab
-import numpy as np
-
 
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received

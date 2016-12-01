@@ -252,7 +252,7 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 # set paths to use
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-new_districts = os.path.join(os.getcwd(), 'inputs', 'Management areas.csv')  # csv input file with management areas
+new_districts = os.path.join(os.getcwd(), 'inputs', 'Management areas(smallest).csv')  # csv input file with management areas
 output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')  # output JSON file
 #spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 

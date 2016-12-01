@@ -87,27 +87,27 @@ def produce_default_output():
 
 
     # produce summary of digital returns
-    #dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
-    #dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    #dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
+    dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
     # produce summary of paper returns
-    #pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
-    #pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    #pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
+    pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
     # visits summary as proportion of total number of visits
-    #visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
     # divide by the max visits for each district
-   # visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
-   # visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+    visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
+    visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
 
     # proportion of visits where contact was made
-    ##visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
-    #visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-    #visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
-    #visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
-    #visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
+    visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
+    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
+    visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
+    visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
 
     # proportion of wasted visits
     # volume of paper sent
@@ -197,9 +197,9 @@ if __name__ == '__main__':
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
-    #pool = Pool(cpu_count())
-    #Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
-    start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
+    pool = Pool(cpu_count())
+    Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+    #start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:

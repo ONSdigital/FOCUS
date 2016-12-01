@@ -9,7 +9,6 @@ import helper as h
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-
     def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, out_path):
 
         # values passed to the class
