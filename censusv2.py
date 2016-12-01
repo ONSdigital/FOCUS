@@ -5,6 +5,10 @@ from collections import namedtuple
 import helper as h
 import datetime
 from simpy.util import start_delayed
+import sys
+import pylab
+import numpy as np
+
 
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received
@@ -44,13 +48,14 @@ def send_reminder(household, reminder_type):
 
 
 def ret_rec(hh, rep):
-    # print out every 100 returns?
-    if rep.total_returns % 100 == 0:
+    # print out every 100000 returns?
+    if rep.total_returns % 100000 == 0:
         print(rep.total_returns)
 
     hh.returned = True
     rep.total_returns += 1
 
+    # check size of output data - if over an amount, size or length write to file?
     rep.output_data['Returned'].append(return_times(rep.reps,
                                                     hh.district.name,
                                                     hh.input_data["LA"],
@@ -58,6 +63,10 @@ def ret_rec(hh, rep):
                                                     hh.digital,
                                                     hh.hh_type,
                                                     rep.env.now))
+
+    # checks size of output and writes to file if too large
+    if (h.dict_size(rep.output_data)) > 10000000:
+        h.write_output(rep.output_data, rep.output_path, rep.reps)
 
     yield rep.env.timeout(0)
 
@@ -77,6 +86,7 @@ class Adviser(object):
         # start the processes to add and remove from the store...
 
         self.set_availability()
+
 
     def set_availability(self):
 

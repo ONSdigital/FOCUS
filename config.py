@@ -4,7 +4,6 @@ import copy
 import os
 import csv
 import math
-import pandas
 
 
 def generate_multiple_districts(input_JSON, new_district_list, output_JSON_name, hh_per_co):
@@ -161,7 +160,7 @@ def generate_test_file(input_JSON, output_JSON_name, number):
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
 
 
-def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_name, hh_per_co):
+def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_name, hh_per_co = []):
     # read in JSON file
 
     with open(input_JSON) as data_file:
@@ -214,8 +213,15 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
                     # delete entry
                     del input_data[str(run_counter)]["districts"][district]["households"][HH]
                 else:
-                    input_data[str(run_counter)]["districts"][district]["households"][HH]["number"] = int(hh_number)
-                    co_number += hh_number/ratios[int(HH[-1])-1]
+                    if ratios[int(HH[-1])-1] == 0:
+
+                        input_data[str(run_counter)]["districts"][district]["households"][HH]["number"] = int(hh_number)
+                        co_number = 0
+
+                    else:
+
+                        input_data[str(run_counter)]["districts"][district]["households"][HH]["number"] = int(hh_number)
+                        co_number += hh_number/ratios[int(HH[-1])-1]
 
             # update CO speed according to area? So do simple travel calc and if average above X set to driving?
             area = float(row[7])
@@ -246,8 +252,8 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 # set paths to use
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-new_districts = os.path.join(os.getcwd(), 'inputs', 'Management areas(small).csv')  # csv input file with management areas
-output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh(small).JSON')  # output JSON file
+new_districts = os.path.join(os.getcwd(), 'inputs', 'Management areas.csv')  # csv input file with management areas
+output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')  # output JSON file
 #spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
 
 #generate_multiple_districts(input_path, new_districts, output_path, [1290, 1050, 580, 390, 290])
@@ -268,7 +274,7 @@ output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh(small).JSON')  # ou
 
 # generate a JSON file [] is ratio of HH to CO to use
 
-generate_multiple_districts_runs(input_path, new_districts, output_path, [[129/2, 105/2, 58/2, 39/2, 29/2]])
+generate_multiple_districts_runs(input_path, new_districts, output_path, [[1290, 1050, 580, 390, 290]])
 
 # 2017 test
 #generate_specified_districts(input_path, new_districts, spec_output_path, ['E08000016',

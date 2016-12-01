@@ -14,6 +14,7 @@ import copy
 from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
+from helper import write_output
 
 
 l = Lock()  # global declaration...can I avoid this?
@@ -26,41 +27,44 @@ def start_run(run_input, seeds, out_path):
     sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_hours = (sim_end - sim_start).total_seconds()/3600
 
-    output_data = defaultdict(list) # was list
+    output_data = defaultdict(list)
 
     rnd = random.Random()
     rnd.seed(str(seeds))
 
     # define simpy env for current rep
+
     env = simpy.Environment()
 
     # initialise replication
-    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'])
+    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'], out_path)
 
     # and run it
     env.run(until=sim_hours)
 
     # write the output to csv files
-    list_of_output = sorted(list(output_data.keys()))
-    l.acquire()
 
-    for row in list_of_output:
-        if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
-            os.mkdir(out_path + '/{}'.format(row) + '/')
-        # test here if file exists, in no create headers if yes don't
-        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv'):
+    write_output(output_data, out_path, run_input['id'])
+    #list_of_output = sorted(list(output_data.keys()))
+    #l.acquire()
 
-            with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
-                csv_output = csv.writer(f_output)
-                csv_output.writerow(list(output_data[row][0]._fields))
+    #for row in list_of_output:
+    #    if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
+    #        os.mkdir(out_path + '/{}'.format(row) + '/')
+    #    # test here if file exists, in no create headers if yes don't
+    #    if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv'):
+    #
+    #        with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
+    #            csv_output = csv.writer(f_output)
+    #            csv_output.writerow(list(output_data[row][0]._fields))
 
-        with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
-            csv_output = csv.writer(f_output)
-            for data_row in output_data[row]:
-                rows = list(data_row)
-                csv_output.writerow(list(rows))
+    #    with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
+    #        csv_output = csv.writer(f_output)
+    #        for data_row in output_data[row]:
+    #            rows = list(data_row)
+    #            csv_output.writerow(list(rows))
 
-    l.release()
+    #l.release()
 
 
 def produce_default_output():
@@ -74,35 +78,36 @@ def produce_default_output():
     returns_summary = returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
     returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
     # also need an E+W average for each?
+
     # so add each column and divide each result by sum of hh_count
-    overall_returns = returns_summary.sum(axis='columns')
-    print(overall_returns)
-    overall_returns = overall_returns.div(hh_count['hh_count'].ix[0], axis='columns')
-    print(overall_returns)
+    #overall_returns = returns_summary.sum(axis='columns')
+    #print(overall_returns)
+    #overall_returns = overall_returns.div(hh_count['hh_count'].ix[0], axis='columns')
+    #print(overall_returns)
 
 
     # produce summary of digital returns
-    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
-    dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+    #dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
+    #dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    #dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
     # produce summary of paper returns
-    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
-    pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
-    pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+    #pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
+    #pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    #pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
     # visits summary as proportion of total number of visits
-    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    #visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
     # divide by the max visits for each district
-    visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
-    visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+   # visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
+   # visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
 
     # proportion of visits where contact was made
-    visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
-    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-    visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
-    visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
-    visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
+    ##visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
+    #visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    #visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
+    #visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
+    #visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
 
     # proportion of wasted visits
     # volume of paper sent
@@ -192,8 +197,9 @@ if __name__ == '__main__':
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
-    pool = Pool(cpu_count())
-    Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+    #pool = Pool(cpu_count())
+    #Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+    start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:

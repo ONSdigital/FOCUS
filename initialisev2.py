@@ -3,12 +3,14 @@ import district
 import simpy
 import censusv2
 import datetime
+import helper as h
 
 
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps):
+
+    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, out_path):
 
         # values passed to the class
         self.env = env
@@ -20,6 +22,7 @@ class Rep(object):
         self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
         self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
         self.reps = reps
+        self.output_path = out_path
 
         # variables created within the class - belonging to it
         self.total_ad_instances = 0
@@ -56,6 +59,10 @@ class Rep(object):
         list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
         for distr in list_of_districts:
+
+            # checks size of output and writes to file if too large
+            if (h.dict_size(self.output_data)) > 10000000:
+                h.write_output(self.output_data, self.output_path, self.reps)
 
             self.districts.append(district.District(self,
                                                     self.rnd,

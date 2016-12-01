@@ -2,6 +2,12 @@
 import datetime as dt
 import ntpath
 import math
+import os
+import csv
+from multiprocessing import Lock
+from sys import getsizeof
+
+l = Lock()  # global declaration...can I avoid this
 
 
 def roundup_nearest_ten(x):
@@ -49,7 +55,8 @@ def make_time(hours, mins, secs):
 
     time = str(hours) + "," + str(mins) + "," + str(secs)
 
-    return dt.datetime.strptime(time, '%H,%M,%S').time()
+    #return dt.datetime.strptime(time, '%H,%M,%S').time()
+    return dt.time(*map(int, time.split(',')))  # this is much quicker!
 
 
 def make_time_decimal(time_object):
@@ -112,7 +119,7 @@ def date_range(start_date, end_date):
 
 
 def return_resp_time(obj):
-    # determine date and time of response
+    # determine date and time of response -  look to speed this up...
     current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
     sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
 
@@ -139,3 +146,40 @@ def return_resp_time(obj):
 def renege_time(obj):
 
     return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
+
+
+def write_output(output_data, out_path, run_input_id):
+    # write the output to csv files
+    list_of_output = sorted(list(output_data.keys()))
+    l.acquire()
+
+    for row in list_of_output:
+        if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
+            os.mkdir(out_path + '/{}'.format(row) + '/')
+        # test here if file exists, in no create headers if yes don't
+        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv'):
+            with open(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv', 'a', newline='') as f_output:
+                csv_output = csv.writer(f_output)
+                csv_output.writerow(list(output_data[row][0]._fields))
+
+        with open(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv', 'a', newline='') as f_output:
+            csv_output = csv.writer(f_output)
+            for data_row in output_data[row]:
+                rows = list(data_row)
+                csv_output.writerow(list(rows))
+
+    # clear output file
+    output_data.clear()
+
+    l.release()
+
+
+def dict_size(a_dict):
+
+    size = 0
+
+    for key, value in a_dict.items():
+
+            size += getsizeof(value)
+
+    return size

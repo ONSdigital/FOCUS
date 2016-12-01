@@ -40,24 +40,7 @@
     },
     "districts": {
       "E06000001": {
-        "letter_phases": {
-          "reminder": {
-            "send_time": 129,
-            "postal_delay": 48,
-            "targets": ["htc1"],
-            "effect": 5,
-            "pq": 0,
-            "targeted": "True"
-          },
-          "pq": {
-            "send_time": 369,
-            "postal_delay": 96,
-            "targets": ["htc1"],
-            "effect": 5,
-            "pq": "True",
-            "targeted": "True"
-          }
-        },
+        "letter_phases": {},
         "trigger": 90,
         "paper_trigger": 80,
         "RMT_update": 24,
@@ -267,7 +250,7 @@
             "behaviours": {
               "default": {
                 "response": [84.5],
-                "help": [0]
+                "help": [5]
               },
               "alt": {
                 "response": [0],
@@ -411,7 +394,7 @@
             "behaviours": {
               "default": {
                 "response": [80],
-                "help": [0]
+                "help": [5]
               },
               "alt": {
                 "response": [0],
@@ -430,8 +413,8 @@
             },
             "priority": -1,
             "max_visits": 5,
-            "paper_after_max_visits": "True",
-            "paper_on_request": "True",
+            "paper_after_max_visits": "False",
+            "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 20,
@@ -562,7 +545,7 @@
             "behaviours": {
               "default": {
                 "response": [73.5],
-                "help": [0]
+                "help": [5]
               },
               "alt": {
                 "response": [0],
@@ -580,7 +563,7 @@
             "priority": -2,
             "max_visits": 5,
             "paper_after_max_visits": "True",
-            "paper_on_request": "True",
+            "paper_on_request": "False",
             "contact_rate": 25,
             "conversion_rate": {
               "0": {
@@ -711,7 +694,7 @@
             "behaviours": {
               "default": {
                 "response": [68],
-                "help": [0]
+                "help": [5]
               },
               "alt": {
                 "response": [0],
@@ -866,20 +849,20 @@
             "behaviours": {
               "default": {
                 "response": [64],
-                "help": [0]
+                "help": [5]
               },
               "alt": {
                 "response": [0],
                 "help": [69]
               }
             },
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": -4,
             "max_visits": 5,
-            "paper_after_max_visits": "True",
+            "paper_after_max_visits": "False",
             "paper_on_request": "False",
             "conversion_rate": {
               "0": {

@@ -24,7 +24,6 @@ received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA'
 wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-
 visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 
 
@@ -448,6 +447,7 @@ class Household(object):
                                                                      self.hh_type,
                                                                      self.rep.env.now,
                                                                      self.hh_id))
+
 
 def set_preference(household):
     """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
