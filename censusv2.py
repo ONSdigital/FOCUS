@@ -45,7 +45,7 @@ def send_reminder(household, reminder_type):
 
 def ret_rec(hh, rep):
     # print out every 100000 returns?
-    if rep.total_returns % 100000 == 0:
+    if rep.total_returns % 1000 == 0:
         print(rep.total_returns)
 
     hh.returned = True
@@ -61,7 +61,7 @@ def ret_rec(hh, rep):
                                                     rep.env.now))
 
     # checks size of output and writes to file if too large
-    if (h.dict_size(rep.output_data)) > 10000000:
+    if (h.dict_size(rep.output_data)) > 1000000:
         h.write_output(rep.output_data, rep.output_path, rep.reps)
 
     yield rep.env.timeout(0)

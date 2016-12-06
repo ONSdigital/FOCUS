@@ -119,7 +119,6 @@ def produce_default_output():
     # other
     # queues for call centre over time
 
-
     # etc etc
 
 if __name__ == '__main__':
@@ -138,7 +137,8 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/single multi district.JSON'
+        #file_name = 'inputs/single multi district.JSON'
+        file_name = 'inputs/all_LA_hh(small).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -197,9 +197,9 @@ if __name__ == '__main__':
     st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
-    pool = Pool(cpu_count())
-    Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
-    #start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
+    #pool = Pool(cpu_count())
+    #Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+    start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:

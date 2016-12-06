@@ -232,14 +232,15 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
             if est_travel_time > 10:
                 # give them a car and increase the numbers!
                 input_data[str(run_counter)]["districts"][district]["census officer"]["standard"]["travel_speed"] = 40
-                co_number = co_number*3
+                #co_number = co_number*3
 
             elif est_travel_time > 5:
                 # give them a bike and increase the numbers!
                 input_data[str(run_counter)]["districts"][district]["census officer"]["standard"]["travel_speed"] = 10
-                co_number = co_number * 1.5
+                #co_number = co_number * 1.5
 
             input_data[str(run_counter)]["districts"][district]["census officer"]["standard"]["number"] = int(math.ceil(co_number))
+            print(district, " ", int(math.ceil(co_number)))
             #input_data[str(run_counter)]["districts"][district]["district_area"] = float(row[7])
             input_data[str(run_counter)]["districts"][district]["district_area"] = float(row[7])
             #input_data[str(run_counter)]["districts"][district]["LA"] = str(row[0]) # move to households...
@@ -252,9 +253,9 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 # set paths to use
 input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-new_districts = os.path.join(os.getcwd(), 'inputs', 'Management areas(smallest).csv')  # csv input file with management areas
-output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')  # output JSON file
-#spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh.JSON')
+new_districts = os.path.join(os.getcwd(), 'inputs', 'management areas(small).csv')  # csv input file with management areas
+output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh(small).JSON')  # output JSON file
+#spec_output_path = os.path.join(os.getcwd(), 'inputs', 'spec_LA_hh(smallest).JSON')
 
 #generate_multiple_districts(input_path, new_districts, output_path, [1290, 1050, 580, 390, 290])
 
@@ -274,15 +275,10 @@ output_path = os.path.join(os.getcwd(), 'inputs', 'all_LA_hh.JSON')  # output JS
 
 # generate a JSON file [] is ratio of HH to CO to use
 
-generate_multiple_districts_runs(input_path, new_districts, output_path, [[1290, 1050, 580, 390, 290]])
+generate_multiple_districts_runs(input_path, new_districts, output_path, [[1612, 1312, 725, 487, 362]])
 
 # 2017 test
-#generate_specified_districts(input_path, new_districts, spec_output_path, ['E08000016',
-#                                                                           'E08000019',
-#                                                                           'W06000023',
-#                                                                           'E07000189',
-#                                                                           'E07000052',
-#                                                                           'E09000028'])
+#generate_specified_districts(input_path, new_districts, spec_output_path, ['E06000001'])
 
 #generate_specified_districts(input_path, new_districts, spec_output_path, ['E07000026',
 #                                                                           'E07000032',

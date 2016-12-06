@@ -55,6 +55,8 @@ class Rep(object):
 
     def create_districts(self):
 
+        CO_number = 0
+
         list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
         for distr in list_of_districts:
@@ -69,3 +71,7 @@ class Rep(object):
                                                     distr,
                                                     self.input_data['districts'][distr],
                                                     self.output_data))
+
+            CO_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
+
+        print("number of CO: ", CO_number)

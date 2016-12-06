@@ -7,7 +7,7 @@ from collections import namedtuple
 import helper as h
 import district
 
-response = namedtuple('Responded', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+response = namedtuple('Response', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 response_planned = namedtuple('Response_planned', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
@@ -71,7 +71,8 @@ class Household(object):
         self.help_level = self.resp_level + self.set_behaviour('help')
         #self.help_level = 0
 
-        self.rep.env.process(self.action())
+        self.rep.env.process(self.action())  # alt is to have 1 process for each district that kicks off the HH
+        # then as HH respond/do nothing remove from sim? delete instance from list?
 
     def action(self):
 
@@ -146,6 +147,7 @@ class Household(object):
             yield self.env.timeout(0)
 
         else:
+            # otherwise carry on to the call centre to speak to an adviser
 
             yield self.env.process(self.phone_call_connect())
 

@@ -43,6 +43,14 @@ class District(object):
         self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
 
         self.env.process(self.hh_separation())
+        #self.env.process(self.start_hh())
+
+    def start_hh(self):
+
+        for household in self.households:
+            household.action()
+
+        yield self.env.timeout(2000)
 
     # takes current response rate and calculates hh separation based on current response rate.
     def hh_separation(self):
