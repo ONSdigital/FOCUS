@@ -80,11 +80,13 @@ def produce_default_output():
     # also need an E+W average for each?
 
     # so add each column and divide each result by sum of hh_count
-    #overall_returns = returns_summary.sum(axis='columns')
-    #print(overall_returns)
-    #overall_returns = overall_returns.div(hh_count['hh_count'].ix[0], axis='columns')
-    #print(overall_returns)
-
+    # gives pandas series object showing totals by timestep
+    overall_returns = returns_summary.sum(axis=0)
+    # get hh_totals
+    hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
+    overall_returns = overall_returns / hh_totals
+    print("E&W average response rates")
+    print(overall_returns.tolist())
 
     # produce summary of digital returns
     dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
