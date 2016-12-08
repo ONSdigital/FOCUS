@@ -76,7 +76,7 @@ def produce_default_output():
     cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
     hh_count = pandas_data['hh_count']['1']
     hh_count.index = cumulative_returns.index
-    returns_summary = cumulative_returns.div(hh_count['count'], axis='index')
+    returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
     returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
 
     # also need an E+W average for each
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/single multi district.JSON'
-        file_name = 'inputs/all_LA_hh(smallest).JSON'
+        file_name = 'inputs/all_LA_hh(smallest of 2).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
