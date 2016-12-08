@@ -33,7 +33,7 @@ def csv_to_pandas(output_path, output_type):
     return data_dict
 
 
-def cumulative_sum(df, start, end, step, geog, digital='all'):
+def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     """takes a data frame and returns average cumulative totals for specified geography in correct format for data
      vis teams map template"""
 
@@ -42,10 +42,10 @@ def cumulative_sum(df, start, end, step, geog, digital='all'):
     group_names = np.arange(start, end, step)
 
     # filter df to only have correct entries
-    if digital == 'True':
+    if resp_type == 'digital':
         df = df[df['digital'] == True].copy()
 
-    elif digital == 'False':
+    elif resp_type == 'paper':
         df = df[df['digital'] == False].copy()
 
     # add a new column to passed data frame containing the categories the entry belongs too

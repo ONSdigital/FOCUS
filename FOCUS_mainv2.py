@@ -72,29 +72,35 @@ def produce_default_output():
     # select data to read into data frames
     pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
 
-    # produce summary of overall returns
-    returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
+    # produce cumulative summary of overall returns
+    cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
     hh_count = pandas_data['hh_count']['1']
-    returns_summary = returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    hh_count.index = cumulative_returns.index
+    returns_summary = cumulative_returns.div(hh_count['count'], axis='index')
     returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
-    # also need an E+W average for each?
 
-    # so add each column and divide each result by sum of hh_count
-    # gives pandas series object showing totals by timestep
-    overall_returns = returns_summary.sum(axis=0)
+    # also need an E+W average for each
+    overall_returns = cumulative_returns.sum(axis=0)
     # get hh_totals
     hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
-    overall_returns = overall_returns / hh_totals
+    average_returns = (overall_returns / hh_totals)*100
     print("E&W average response rates")
-    print(overall_returns.tolist())
+    print(average_returns.tolist())
 
     # produce summary of digital returns
-    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'True')
-    dig_returns_summary = dig_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
+
+
     dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
+    overall_dig_returns = dig_returns_summary.sum(axis=0)
+    average_dig_returns = (overall_dig_returns / hh_totals)*100
+    print("E&W average digital response rates")
+    print(average_dig_returns.tolist())
+
+
     # produce summary of paper returns
-    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'False')
+    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
     pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
     pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
@@ -111,17 +117,11 @@ def produce_default_output():
     visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
     visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
 
-    # proportion of wasted visits
-    # volume of paper sent
-    # proportion of returns (for dig and paper) by type of hh (htc for now)?
-    # volume of reminders/pq sent
-    # travel time/hours worked  total
-    #
+    # proportion of wasted visits over time
 
-    # other
-    # queues for call centre over time
+    # chart for resource utilisation over time by htc
+    # response rates over time by htc
 
-    # etc etc
 
 if __name__ == '__main__':
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/single multi district.JSON'
-        file_name = 'inputs/all_LA_hh(small).JSON'
+        file_name = 'inputs/all_LA_hh(smallest).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
