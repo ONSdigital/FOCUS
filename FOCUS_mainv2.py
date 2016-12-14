@@ -45,26 +45,6 @@ def start_run(run_input, seeds, out_path):
     # write the output to csv files
 
     write_output(output_data, out_path, run_input['id'])
-    #list_of_output = sorted(list(output_data.keys()))
-    #l.acquire()
-
-    #for row in list_of_output:
-    #    if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
-    #        os.mkdir(out_path + '/{}'.format(row) + '/')
-    #    # test here if file exists, in no create headers if yes don't
-    #    if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv'):
-    #
-    #        with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
-    #            csv_output = csv.writer(f_output)
-    #            csv_output.writerow(list(output_data[row][0]._fields))
-
-    #    with open(out_path + '/{}'.format(row) + '/' + str(run_input['id']) + '.csv', 'a', newline='') as f_output:
-    #        csv_output = csv.writer(f_output)
-    #        for data_row in output_data[row]:
-    #            rows = list(data_row)
-    #            csv_output.writerow(list(rows))
-
-    #l.release()
 
 
 def produce_default_output():
