@@ -121,7 +121,7 @@ class StartFU(object):
 
         self.visit_list = []
 
-        self.env.process(self.create_visit_lists())
+        # self.env.process(self.create_visit_lists())
 
     def create_visit_lists(self):
 

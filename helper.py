@@ -124,16 +124,16 @@ def return_resp_time(obj):
     sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
 
     days_until_response = beta_dist(obj.rep,
-                                    obj.input_data['beta_dist'][0],
-                                    obj.input_data['beta_dist'][1],
+                                    obj.input_data['response_day'][0],
+                                    obj.input_data['response_day'][1],
                                     sim_days_left)
 
     response_date = current_date_time.date() + dt.timedelta(days=days_until_response)
 
     response_day = response_date.weekday()
     response_time = gauss_dist(obj.rnd,
-                               obj.input_data['response_time'][str(response_day)][0],
-                               obj.input_data['response_time'][str(response_day)][1])
+                               obj.input_data['response_time']['other'][0],
+                               obj.input_data['response_time']['other'][1])
 
     response_date_time = dt.datetime.combine(response_date, dt.datetime.min.time()) \
                          + dt.timedelta(hours=response_time)

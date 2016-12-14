@@ -7,6 +7,7 @@ import math
 from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
+import helper as h
 
 hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'hh_type'])
@@ -35,22 +36,23 @@ class District(object):
         if self.rep.reps == 1:
             self.output_data['hh_count'].append(hh_count(self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
-        self.create_co(self.input_data["census officer"])
+        # self.create_co(self.input_data["census officer"])
 
-        self.create_letterphases()
+        # self.create_letterphases()
 
         self.hh_area = self.input_data['district_area'] / len(self.households)
         self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
 
         self.env.process(self.hh_separation())
-        #self.env.process(self.start_hh())
+        self.env.process(self.start_hh())
 
     def start_hh(self):
+        # all start at the same time at present - in reality not all will receive IAC at same time
 
         for household in self.households:
-            household.action()
+            self.env.process(household.action())
 
-        yield self.env.timeout(2000)
+        yield self.env.timeout((self.rep.sim_hours) - self.env.now)
 
     # takes current response rate and calculates hh separation based on current response rate.
     def hh_separation(self):

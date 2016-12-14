@@ -9,7 +9,7 @@ import helper as h
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, reps, out_path):
+    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, census_day, reps, out_path):
 
         # values passed to the class
         self.env = env
@@ -20,6 +20,7 @@ class Rep(object):
         self.sim_hours = sim_hours
         self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
         self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
+        self.census_day = census_day
         self.reps = reps
         self.output_path = out_path
 
@@ -38,7 +39,7 @@ class Rep(object):
             self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
 
         # create common resources
-        self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
+        # self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
 
         # create districts
         self.create_districts()

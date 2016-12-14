@@ -5,6 +5,7 @@ import censusv2
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
+import math
 import district
 
 response = namedtuple('Response', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
@@ -71,7 +72,7 @@ class Household(object):
         self.help_level = self.resp_level + self.set_behaviour('help')
         #self.help_level = 0
 
-        self.rep.env.process(self.action())  # alt is to have 1 process for each district that kicks off the HH
+        # self.rep.env.process(self.action())  # alt is to have 1 process for each district that kicks off the HH
         # then as HH respond/do nothing remove from sim? delete instance from list?
 
     def action(self):
@@ -93,6 +94,10 @@ class Household(object):
 
             # determine date and time of response
             response_time = h.return_resp_time(self)
+            #response_time = set_household_response_time(self.rep,
+            #                                            self,
+            #                                            self.rep.sim_hours)
+            print(response_time)
 
             self.status = "Responding"
             yield self.env.timeout(response_time)
@@ -458,6 +463,30 @@ def set_preference(household):
         return False
 
     return True
+
+
+def set_household_response_time(rep, household, sim_hours):
+
+    # returns a day of response from a beta dist - the final dist that will be used is still to be determined.
+    raw_response_time = (rep.rnd.betavariate(household.input_data['response_day'][0],
+                                             household.input_data['response_day'][1]))*sim_hours
+    response_day = math.ceil(raw_response_time/24)
+
+    # returns the time of day the response is received - again final number and type of dists to use to be determined.
+    if response_day == rep.census_day:
+        # use census day profile
+        day_response_time = rep.rnd.gauss(household.input_data['response_time']['census_day'][0],
+                                          household.input_data['response_time']['census_day'][1])
+    else:
+        # use some other profile
+        day_response_time = rep.rnd.gauss(household.input_data['response_time']['other'][0],
+                                          household.input_data['response_time']['other'][1])
+
+    final_response_time = ((response_day-1)*24) + day_response_time
+
+    return final_response_time
+
+
 
 
 

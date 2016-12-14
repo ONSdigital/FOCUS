@@ -6,13 +6,11 @@ import random
 import simpy
 import initialisev2
 import os
-import csv
 import shutil
 import post_process
 import time
 import copy
 from collections import defaultdict
-from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 from helper import write_output
 
@@ -26,6 +24,8 @@ def start_run(run_input, seeds, out_path):
     sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
     sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
     sim_hours = (sim_end - sim_start).total_seconds()/3600
+    census_date = datetime.datetime.strptime(run_input['census_date'], '%Y, %m, %d, %H, %M, %S')
+    census_day = ((census_date - sim_start).total_seconds()/86400)+1
 
     output_data = defaultdict(list)
 
@@ -37,7 +37,15 @@ def start_run(run_input, seeds, out_path):
     env = simpy.Environment()
 
     # initialise replication
-    initialisev2.Rep(env, run_input, output_data, rnd, run_input['id'], sim_hours, run_input['rep id'], out_path)
+    initialisev2.Rep(env,
+                     run_input,
+                     output_data,
+                     rnd,
+                     run_input['id'],
+                     sim_hours,
+                     census_day,
+                     run_input['rep id'],
+                     out_path)
 
     # and run it
     env.run(until=sim_hours)
@@ -52,53 +60,63 @@ def produce_default_output():
     # select data to read into data frames
     pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
 
-    # produce cumulative summary of overall returns
-    cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
-    hh_count = pandas_data['hh_count']['1']
-    hh_count.index = cumulative_returns.index
-    returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
-    returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
+    try:
+        # produce cumulative summary of overall returns
+        cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
+        hh_count = pandas_data['hh_count']['1']
+        hh_count.index = cumulative_returns.index
+        returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
+        returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
 
-    # also need an E+W average for each
-    overall_returns = cumulative_returns.sum(axis=0)
-    # get hh_totals
-    hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
-    average_returns = (overall_returns / hh_totals)*100
-    print("E&W average response rates")
-    print(average_returns.tolist())
+        # also need an E+W average for each
+        overall_returns = cumulative_returns.sum(axis=0)
+        # get hh_totals
+        hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
+        average_returns = (overall_returns / hh_totals) * 100
+        print("E&W average response rates")
+        print(average_returns.tolist())
 
-    # produce summary of digital returns
-    cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
-    hh_count.index = cumulative_dig_returns.index
-    dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
-    dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+        # produce summary of digital returns
+        cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
+        hh_count.index = cumulative_dig_returns.index
+        dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
+        dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
-    overall_dig_returns = dig_returns_summary.sum(axis=0)
-    average_dig_returns = (overall_dig_returns / hh_totals)*100
-    print("E&W average digital response rates")
-    print(average_dig_returns.tolist())
+        overall_dig_returns = cumulative_dig_returns.sum(axis=0)
+        average_dig_returns = (overall_dig_returns / hh_totals)*100
+        print("E&W average digital response rates")
+        print(average_dig_returns.tolist())
 
-    # produce summary of paper returns
-    cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
-    hh_count.index = cumulative_pap_returns.index
-    pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
-    pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+        # produce summary of paper returns
+        cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
+        hh_count.index = cumulative_pap_returns.index
+        pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
+        pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
-    overall_pap_returns = pap_returns_summary.sum(axis=0)
-    average_pap_returns = (overall_pap_returns / hh_totals)*100
-    print("E&W average paper response rates")
-    print(average_pap_returns.tolist())
+        overall_pap_returns = cumulative_pap_returns.sum(axis=0)
+        average_pap_returns = (overall_pap_returns / hh_totals)*100
+        print("E&W average paper response rates")
+        print(average_pap_returns.tolist())
 
-    # visits summary as proportion of total number of visits
-    cumulative_visits = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-    # divide by the max visits for each district
-    visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
-    visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+    # if something goes wrong exit with error
+    except TypeError as e:
+        print("There is no input named Returned")
 
-    overall_visits = cumulative_visits.sum(axis=0)
-    average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
-    print("E&W average visits")
-    print(average_visits.tolist())
+    try:
+
+        # visits summary as proportion of total number of visits
+        cumulative_visits = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+        # divide by the max visits for each district
+        visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
+        visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+
+        overall_visits = cumulative_visits.sum(axis=0)
+        average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
+        print("E&W average visits")
+        print(average_visits.tolist())
+
+    except TypeError as e:
+        print("There is no input named Visit")
 
     # proportion of visits where contact was made
     # proportion of wasted visits over time
@@ -123,7 +141,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/single multi district.JSON'
-        file_name = 'inputs/all_LA_hh(smallest of 2).JSON'
+        file_name = 'inputs/management areas.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
