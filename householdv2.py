@@ -97,7 +97,7 @@ class Household(object):
             #response_time = set_household_response_time(self.rep,
             #                                            self,
             #                                            self.rep.sim_hours)
-            print(response_time)
+            #print(response_time)
 
             self.status = "Responding"
             yield self.env.timeout(response_time)

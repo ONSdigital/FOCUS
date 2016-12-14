@@ -117,7 +117,7 @@ def date_range(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + dt.timedelta(n)
 
-
+@profile
 def return_resp_time(obj):
     # determine date and time of response -  look to speed this up...
     current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
