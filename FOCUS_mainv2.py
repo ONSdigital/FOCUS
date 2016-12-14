@@ -88,9 +88,9 @@ def produce_default_output():
     print(average_returns.tolist())
 
     # produce summary of digital returns
-    dig_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
-
-
+    cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
+    hh_count.index = cumulative_dig_returns.index
+    dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
     dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
     overall_dig_returns = dig_returns_summary.sum(axis=0)
@@ -98,27 +98,30 @@ def produce_default_output():
     print("E&W average digital response rates")
     print(average_dig_returns.tolist())
 
-
     # produce summary of paper returns
-    pap_returns_summary = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
-    pap_returns_summary = pap_returns_summary.div(hh_count['hh_count'].ix[0], axis='columns')
+    cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
+    hh_count.index = cumulative_pap_returns.index
+    pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
     pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
+    overall_pap_returns = pap_returns_summary.sum(axis=0)
+    average_pap_returns = (overall_pap_returns / hh_totals)*100
+    print("E&W average paper response rates")
+    print(average_pap_returns.tolist())
+
     # visits summary as proportion of total number of visits
-    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
+    cumulative_visits = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
     # divide by the max visits for each district
-    visit_summary = visit_summary.divide(visit_summary.max(axis=1), axis=0)
+    visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
     visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
 
+    overall_visits = cumulative_visits.sum(axis=0)
+    average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
+    print("E&W average visits")
+    print(average_visits.tolist())
+
     # proportion of visits where contact was made
-    visit_contact_summary = post_process.cumulative_sum(pandas_data['Visit_contact']['1'], 0, 1440, 24, 'district')
-    visit_summary = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-    visit_contact_summary = visit_contact_summary.divide(visit_summary, axis=0)
-    visit_contact_summary = visit_contact_summary.replace('Nan', 0, regex=True)
-    visit_contact_summary.to_csv(os.path.join(output_path, "visit contact summary.csv"))
-
     # proportion of wasted visits over time
-
     # chart for resource utilisation over time by htc
     # response rates over time by htc
 

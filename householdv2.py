@@ -344,13 +344,13 @@ class Household(object):
             # hh who have chosen not to respond due to not having paper but are now given paper
 
             self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
-                                                                                 self.district.name,
-                                                                                 self.input_data["LA"],
-                                                                                 self.input_data["LSOA"],
-                                                                                 self.digital,
-                                                                                 self.hh_type,
-                                                                                 self.env.now,
-                                                                                 reminder_type))
+                                                                             self.district.name,
+                                                                             self.input_data["LA"],
+                                                                             self.input_data["LSOA"],
+                                                                             self.digital,
+                                                                             self.hh_type,
+                                                                             self.env.now,
+                                                                             reminder_type))
 
             self.resp_level = self.set_behaviour('response')
             self.help_level = self.resp_level + self.set_behaviour('help')
@@ -412,8 +412,6 @@ class Household(object):
             yield self.env.process(self.action())
 
         elif not h.str2bool(pq) and not self.responded:
-
-
 
             self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
                                                                            self.district.name,
