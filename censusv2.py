@@ -65,6 +65,7 @@ def ret_rec(hh, rep):
         h.write_output(rep.output_data, rep.output_path, rep.reps)
 
     yield rep.env.timeout(0)
+    # so returned and we know it! remove from simulation??
 
 
 class Adviser(object):

@@ -127,7 +127,7 @@ def produce_default_output():
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     freeze_support()
 
     # delete all old output files from default location except generated JSON files.

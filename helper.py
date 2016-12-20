@@ -117,7 +117,7 @@ def date_range(start_date, end_date):
     for n in range(int((end_date - start_date).days)):
         yield start_date + dt.timedelta(n)
 
-@profile
+
 def return_resp_time(obj):
     # determine date and time of response -  look to speed this up...
     current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
@@ -183,3 +183,47 @@ def dict_size(a_dict):
             size += getsizeof(value)
 
     return size
+
+
+def set_preference(paper_prop, rnd):
+    """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
+    paper_test = rnd.uniform(0, 100)
+
+    if paper_test <= int(paper_prop):
+
+        return False
+
+    return True
+
+
+def set_behaviour(digital, input_data, behaviour, rnd):
+
+    if digital or input_data["paper_allowed"]:
+        # use default
+        len_beh = len(input_data['behaviours']['default'][behaviour])
+        return input_data['behaviours']['default'][behaviour][min(len_beh - 1)]
+    else:
+        len_beh = len(input_data['behaviours']['alt'][behaviour])
+        return input_data['behaviours']['alt'][behaviour][min(len_beh - 1)]
+
+
+def set_household_response_time(rep, input_data, sim_hours):
+
+    # returns a day of response from a beta dist - the final dist that will be used is still to be determined.
+    raw_response_time = (rep.rnd.betavariate(input_data['response_day'][0],
+                                             input_data['response_day'][1]))*sim_hours
+    response_day = math.ceil(raw_response_time/24)
+
+    # returns the time of day the response is received - again final number and type of dists to use to be determined.
+    if response_day == rep.census_day:
+        # use census day profile
+        day_response_time = rep.rnd.gauss(input_data['response_time']['census_day'][0],
+                                          input_data['response_time']['census_day'][1])
+    else:
+        # use some other profile
+        day_response_time = rep.rnd.gauss(input_data['response_time']['other'][0],
+                                          input_data['response_time']['other'][1])
+
+    final_response_time = ((response_day-1)*24) + day_response_time
+
+    return final_response_time

@@ -200,7 +200,6 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
             co_number = 0
             hh_count = 0
-            #district = row[0]
             district = row[0]
             input_data[str(run_counter)]["districts"][district] = copy.deepcopy(district_template)
             # then populate each sub dictionary appropriately

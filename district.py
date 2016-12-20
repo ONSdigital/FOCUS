@@ -11,6 +11,8 @@ import helper as h
 
 hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'hh_type'])
+return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 
 
 class District(object):
@@ -32,7 +34,12 @@ class District(object):
         self.travel_dist = 0
 
         # processes to run
+        # new process to determine time of first interaction - visits, letters
+        # simple value for now
+        self.first_interaction = 24*10
+
         self.create_households()
+        # need to include totals inc earliers in the below count ****
         if self.rep.reps == 1:
             self.output_data['hh_count'].append(hh_count(self.name, len(self.households)))
         self.start_fu()  # process used to commence FU activities for the district
@@ -40,15 +47,18 @@ class District(object):
 
         # self.create_letterphases()
 
-        self.hh_area = self.input_data['district_area'] / len(self.households)
-        self.initial_hh_sep = 2*(math.sqrt(self.hh_area/math.pi))
+        try:
+            self.hh_area = self.input_data['district_area'] / len(self.households)
+            self.initial_hh_sep = 2 * (math.sqrt(self.hh_area / math.pi))
+        except ZeroDivisionError as e:
+            print(e, " in district ", self.name)
+            sys.exit()
 
         self.env.process(self.hh_separation())
         self.env.process(self.start_hh())
 
     def start_hh(self):
         # all start at the same time at present - in reality not all will receive IAC at same time
-
         for household in self.households:
             self.env.process(household.action())
 
@@ -71,22 +81,41 @@ class District(object):
         list_of_hh = sorted(list(self.input_data['households'].keys()))
         for hh in list_of_hh:
 
-            for i in range(self.input_data['households'][hh]['number']):
+            # get hh data for current type
+            hh_input_data = self.input_data['households'][hh]
 
-                # create instance of HH class
-                self.households.append(householdv2.Household(self.rep,
-                                                             self.rnd,
-                                                             self.env,
-                                                             self,
-                                                             self.rep.total_hh,
-                                                             hh,
-                                                             self.input_data['households'][hh],
-                                                             self.output_data))
+            for i in range(hh_input_data['number']):
+
+                # determine initial HH action
+                initial_action = self.initial_action(hh_input_data, self.first_interaction, hh)
+
+                if initial_action[0] == 'early':
+                    # don't need an instance of a household just directly record a response/return at correct time
+
+                    self.rep.total_returns += 1
+
+                    self.rep.output_data['Returned'].append(return_times(self.rep.reps,
+                                                                         self.name,
+                                                                         hh_input_data["LA"],
+                                                                         hh_input_data["LSOA"],
+                                                                         initial_action[1],
+                                                                         hh,
+                                                                         initial_action[2]))
+                else:
+                    # create a household instance passing initial state
+                    self.households.append(householdv2.Household(self.rep,
+                                                                 self.rnd,
+                                                                 self.env,
+                                                                 self,
+                                                                 self.rep.total_hh,
+                                                                 hh,
+                                                                 hh_input_data,
+                                                                 self.output_data,
+                                                                 initial_action))
 
                 if self.rep.reps == 1:
                     self.output_data['hh_record'].append(hh_record(self.name,
                                                                    hh))
-
                 self.rep.total_hh += 1
 
     def start_fu(self):
@@ -134,6 +163,75 @@ class District(object):
 
         return input_key
 
+    def initial_action(self, input_data, first_interaction, hh):
+
+        digital = h.set_preference(input_data['paper_prop'],
+                                   self.rnd)
+
+        if digital or h.str2bool(input_data['paper_allowed']):
+            # use default
+            behaviour = 'default'
+        else:
+            # use alt
+            behaviour = 'alt'
+
+        # set values to use
+        hh_resp = input_data['behaviours'][behaviour]['response']
+        hh_help = input_data['behaviours'][behaviour]['help']
+
+        response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
+        if response_test <= hh_resp:
+            # respond but test when
+            return self.early_responder(input_data, digital, first_interaction, hh)
+        elif hh_resp < response_test <= hh_help:
+            # call for help return when
+            return self.help(input_data, digital, first_interaction, hh)
+        else:
+            # do nothing return 0 time
+            return self.do_nothing(input_data, digital, first_interaction, hh)
+
+    def early_responder(self, input_data, digital, first_interaction, hh):
+
+        response_time = h.set_household_response_time(self.rep,
+                                                      input_data,
+                                                      self.rep.sim_hours)
+
+        if digital and response_time + input_data['delay']['digital'] <= first_interaction:
+
+            self.rep.output_data['Response'].append(response(self.rep.reps,
+                                                             self.name,
+                                                             input_data["LA"],
+                                                             input_data["LSOA"],
+                                                             digital,
+                                                             hh,
+                                                             response_time))
+
+            return ['early', digital, response_time + input_data['delay']['digital']]
+
+        elif not digital and h.str2bool(input_data['paper_allowed']) \
+                and response_time + input_data['delay']['paper'] <= first_interaction:
+
+            self.rep.output_data['Response'].append(response(self.rep.reps,
+                                                             self.name,
+                                                             input_data["LA"],
+                                                             input_data["LSOA"],
+                                                             digital,
+                                                             hh,
+                                                             response_time))
+
+            return ['early', digital, response_time + input_data['delay']['paper']]
+
+        else:
+
+            return ['late', digital, response_time]
+
+    def help(self, input_data, digital, first_interaction, hh):
+
+        return ['help', digital, 0]
+
+    def do_nothing(self, input_data, digital, first_interaction, hh):
+        return ['do_nothing', digital, 0]
+
 
 def least_busy_CO(district):
 
@@ -142,6 +240,7 @@ def least_busy_CO(district):
     coord = [co for co in district.district_co if len(co.action_plan) == min_length]
 
     return coord[0]
+
 
 
 
