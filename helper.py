@@ -55,8 +55,7 @@ def make_time(hours, mins, secs):
 
     time = str(hours) + "," + str(mins) + "," + str(secs)
 
-    #return dt.datetime.strptime(time, '%H,%M,%S').time()
-    return dt.time(*map(int, time.split(',')))  # this is much quicker!
+    return dt.time(*map(int, time.split(',')))
 
 
 def make_time_decimal(time_object):
@@ -227,3 +226,18 @@ def set_household_response_time(rep, input_data, sim_hours):
     final_response_time = ((response_day-1)*24) + day_response_time
 
     return final_response_time
+
+
+def co_start_time(rep, input_data):
+    # returns the simpy time as to when the co starts work
+
+    # convert start date to simpy time
+    start_date = dt.date(*map(int, input_data['start_date'].split(',')))
+    start_date_simpy = (start_date - rep.start_date).total_seconds()/3600
+
+    # convert start time of that day to simpy time
+    start_time = input_data['availability'][str(start_date.day)][0]
+    start_time_simpy = make_time_decimal(dt.time(*map(int, start_time.split(':'))))
+
+    return start_date_simpy + start_time_simpy
+

@@ -9,24 +9,23 @@ import helper as h
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, run, sim_hours, census_day, reps, out_path):
+    def __init__(self, env, input_data, output_data, rnd, sim_hours, start_date, census_day, out_path):
 
         # values passed to the class
         self.env = env
         self.input_data = input_data
         self.output_data = output_data
         self.rnd = rnd
-        self.run = run
+        self.run = self.input_data['run id']
         self.sim_hours = sim_hours
-        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
-        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
+        self.start_date = start_date
+        self.start_day = start_date.day
         self.census_day = census_day
-        self.reps = reps
+        self.reps = self.input_data['rep id']
         self.output_path = out_path
 
         # variables created within the class - belonging to it
         self.total_ad_instances = 0
-        self.total_web_chat_instances = 0
         self.total_returns = 0
         self.districts = []  # list containing each instance of the district class
         self.ad_avail = []  # list of all the available advisers
@@ -56,23 +55,19 @@ class Rep(object):
 
     def create_districts(self):
 
-        CO_number = 0
+        co_number = 0
 
         list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
         for distr in list_of_districts:
 
             # checks size of output and writes to file if too large
-            if (h.dict_size(self.output_data)) > 10000000:
+            if (h.dict_size(self.output_data)) > 100000000:
                 h.write_output(self.output_data, self.output_path, self.reps)
 
             self.districts.append(district.District(self,
-                                                    self.rnd,
-                                                    self.env,
-                                                    distr,
-                                                    self.input_data['districts'][distr],
-                                                    self.output_data))
+                                                    distr))
 
-            CO_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
+            co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
 
-        print("number of CO: ", CO_number)
+        #print("number of CO: ", co_number)

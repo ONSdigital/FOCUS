@@ -7,7 +7,7 @@ import datetime
 from simpy.util import start_delayed
 
 
-return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])  # time return received
+return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
 visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
@@ -45,7 +45,7 @@ def send_reminder(household, reminder_type):
 
 def ret_rec(hh, rep):
     # print out every 100000 returns?
-    if rep.total_returns % 1000 == 0:
+    if rep.total_returns % 10000 == 0:
         print(rep.total_returns)
 
     hh.returned = True
@@ -58,11 +58,12 @@ def ret_rec(hh, rep):
                                                     hh.input_data["LSOA"],
                                                     hh.digital,
                                                     hh.hh_type,
+                                                    hh.hh_id,
                                                     rep.env.now))
 
     # checks size of output and writes to file if too large
     if (h.dict_size(rep.output_data)) > 1000000:
-        h.write_output(rep.output_data, rep.output_path, rep.reps)
+        h.write_output(rep.output_data, rep.output_path, rep.run)
 
     yield rep.env.timeout(0)
     # so returned and we know it! remove from simulation??
@@ -156,20 +157,24 @@ class StartFU(object):
 class CensusOfficer(object):
     """represents an individual Census Officer. Each instance can be different"""
 
-    def __init__(self, rep,  env, district, input_data, co_id):
+    def __init__(self, rep,  env, district, input_data, co_id, start_time):
 
         self.rep = rep
         self.env = env
         self.district = district
         self.input_data = input_data
         self.co_id = co_id
+        self.start_time = start_time
 
         self.action_plan = []
+
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
         self.has_paper = h.str2bool(self.input_data['has_paper'])
 
-        self.env.process(self.co_working_test())
+        start_delayed(self.env, self.co_working_test(), self.start_time)
+
+        #self.env.process(self.co_working_test()) # at appropiate simpy time of course...start_time!
 
     def co_working_test(self):
 
@@ -378,6 +383,13 @@ class CensusOfficer(object):
 
     def working(self):
         """returns true or false to depending on whether or not a CO is available at current time"""
+        """need to redo now format of avail sch updated"""
+
+        # get day
+        days_gone = math.ceil(self.env.now/24)
+        weeks_gone = days_gone/7
+        self.rep.start_day
+
 
         current_date_time = self.rep.start_date + dt.timedelta(hours=self.rep.env.now)
         current_date = current_date_time.date()

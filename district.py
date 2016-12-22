@@ -11,23 +11,26 @@ import helper as h
 
 hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'hh_type'])
-return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
+return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+
+# name tuples used for purposes other than output
+initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
 
 
 class District(object):
 
-    def __init__(self, rep, rnd, env, name, input_data, output_data):
+    def __init__(self, rep, name):
         # values fed into class
         self.rep = rep
-        self.rnd = rnd
-        self.env = env
+        self.rnd = self.rep.rnd
+        self.env = self.rep.env
         self.name = name
-        self.input_data = input_data
-        self.output_data = output_data
+        self.input_data = self.rep.input_data['districts'][name]
 
         # belong to the class
-        self.households = []  # list of households in the district
+        self.households = []  # list of household objects in the district
+        self.total_households = 0  # count of total including those not represented by objects
         self.district_co = []  # list of CO assigned to the district
         self.reminders = []  # list of reminders to be sent
         self.return_rate = 0
@@ -38,12 +41,15 @@ class District(object):
         # simple value for now
         self.first_interaction = 24*10
 
+        # create households that exist in the district
         self.create_households()
-        # need to include totals inc earliers in the below count ****
         if self.rep.reps == 1:
-            self.output_data['hh_count'].append(hh_count(self.name, len(self.households)))
+            self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
+
         self.start_fu()  # process used to commence FU activities for the district
-        # self.create_co(self.input_data["census officer"])
+        self.create_co(self.input_data["census officer"])
+
+        #self.create_co(self.input_data["census officer"])
 
         # self.create_letterphases()
 
@@ -64,7 +70,7 @@ class District(object):
 
         yield self.env.timeout((self.rep.sim_hours) - self.env.now)
 
-    # takes current response rate and calculates hh separation based on current response rate.
+    # takes current response rate and calculates average hh separation based on current response rate.
     def hh_separation(self):
 
         while True:
@@ -86,10 +92,12 @@ class District(object):
 
             for i in range(hh_input_data['number']):
 
-                # determine initial HH action
-                initial_action = self.initial_action(hh_input_data, self.first_interaction, hh)
+                self.total_households += 1
 
-                if initial_action[0] == 'early':
+                # determine initial HH action
+                hh_action = self.initial_action(hh_input_data, self.first_interaction, hh)
+
+                if hh_action.type == 'early':
                     # don't need an instance of a household just directly record a response/return at correct time
 
                     self.rep.total_returns += 1
@@ -98,9 +106,10 @@ class District(object):
                                                                          self.name,
                                                                          hh_input_data["LA"],
                                                                          hh_input_data["LSOA"],
-                                                                         initial_action[1],
+                                                                         hh_action.digital,
                                                                          hh,
-                                                                         initial_action[2]))
+                                                                         None,
+                                                                         hh_action.time))
                 else:
                     # create a household instance passing initial state
                     self.households.append(householdv2.Household(self.rep,
@@ -110,15 +119,17 @@ class District(object):
                                                                  self.rep.total_hh,
                                                                  hh,
                                                                  hh_input_data,
-                                                                 self.output_data,
-                                                                 initial_action))
+                                                                 hh_action))
 
                 if self.rep.reps == 1:
-                    self.output_data['hh_record'].append(hh_record(self.name,
-                                                                   hh))
+                    self.rep.output_data['hh_record'].append(hh_record(self.name,
+                                                                       hh))
                 self.rep.total_hh += 1
 
     def start_fu(self):
+
+        # determines when FU starts for the district - ie, when does the first CO become available
+
 
         hh_list = sorted(list(self.input_data['households'].keys()))
         delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
@@ -146,13 +157,18 @@ class District(object):
             else:
                 try:
                     if 'number' in input_data:
+
+                        # calculate when this type of CO becomes available
+                        co_start_time = h.co_start_time(self.rep, input_data)
+
                         for i in range(int(input_data["number"])):
                             id_num += 1
                             self.district_co.append(censusv2.CensusOfficer(self.rep,
                                                                            self.env,
                                                                            self,
                                                                            input_data,
-                                                                           self.rep.total_co))
+                                                                           self.rep.total_co,
+                                                                           co_start_time))
 
                             self.rep.total_co += 1
 
@@ -204,9 +220,10 @@ class District(object):
                                                              input_data["LSOA"],
                                                              digital,
                                                              hh,
+                                                             None,
                                                              response_time))
 
-            return ['early', digital, response_time + input_data['delay']['digital']]
+            return initial_action('early', digital, response_time + input_data['delay']['digital'])
 
         elif not digital and h.str2bool(input_data['paper_allowed']) \
                 and response_time + input_data['delay']['paper'] <= first_interaction:
@@ -217,20 +234,22 @@ class District(object):
                                                              input_data["LSOA"],
                                                              digital,
                                                              hh,
+                                                             None,
                                                              response_time))
 
-            return ['early', digital, response_time + input_data['delay']['paper']]
+            return initial_action('early', digital, response_time + input_data['delay']['paper'])
 
         else:
 
-            return ['late', digital, response_time]
+            return initial_action('late', digital, response_time)
 
     def help(self, input_data, digital, first_interaction, hh):
 
-        return ['help', digital, 0]
+        return initial_action('help', digital, 0)
 
     def do_nothing(self, input_data, digital, first_interaction, hh):
-        return ['do_nothing', digital, 0]
+
+        return initial_action('do_nothing', digital, 0)
 
 
 def least_busy_CO(district):

@@ -1,7 +1,7 @@
 """Main control file"""
 import sys
 import json
-import datetime
+import datetime as dt
 import random
 import simpy
 import initialisev2
@@ -11,8 +11,9 @@ import post_process
 import time
 import copy
 from collections import defaultdict
+from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
-from helper import write_output
+import helper as hp
 
 
 l = Lock()  # global declaration...can I avoid this?
@@ -21,11 +22,11 @@ l = Lock()  # global declaration...can I avoid this?
 def start_run(run_input, seeds, out_path):
 
     # pull out length of sim for current run
-    sim_start = datetime.datetime.strptime(run_input['start_date'], '%Y, %m, %d, %H, %M, %S')
-    sim_end = datetime.datetime.strptime(run_input['end_date'], '%Y, %m, %d, %H, %M, %S')
-    sim_hours = (sim_end - sim_start).total_seconds()/3600
-    census_date = datetime.datetime.strptime(run_input['census_date'], '%Y, %m, %d, %H, %M, %S')
-    census_day = ((census_date - sim_start).total_seconds()/86400)+1
+    start_date = dt.date(*map(int, run_input['start_date'].split(',')))
+    end_date = dt.date(*map(int, run_input['end_date'].split(',')))
+    sim_hours = (end_date - start_date).total_seconds()/3600
+    census_date = dt.date(*map(int, run_input['census_date'].split(',')))
+    census_day = ((census_date - start_date).total_seconds()/86400)+1
 
     output_data = defaultdict(list)
 
@@ -33,7 +34,6 @@ def start_run(run_input, seeds, out_path):
     rnd.seed(str(seeds))
 
     # define simpy env for current rep
-
     env = simpy.Environment()
 
     # initialise replication
@@ -41,10 +41,9 @@ def start_run(run_input, seeds, out_path):
                      run_input,
                      output_data,
                      rnd,
-                     run_input['id'],
                      sim_hours,
+                     start_date,
                      census_day,
-                     run_input['rep id'],
                      out_path)
 
     # and run it
@@ -52,7 +51,7 @@ def start_run(run_input, seeds, out_path):
 
     # write the output to csv files
 
-    write_output(output_data, out_path, run_input['id'])
+    hp.write_output(output_data, out_path, run_input['run id'])
 
 
 def produce_default_output():
@@ -140,8 +139,8 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        #file_name = 'inputs/single multi district.JSON'
-        file_name = 'inputs/management areas.JSON'
+        file_name = 'inputs/single multi district.JSON'
+        #file_name = 'inputs/management areas(smallest).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -177,15 +176,15 @@ if __name__ == '__main__':
 
     # place, with random seeds, a copy of the run/rep into the run list
     for run in list_of_runs:
-        input_data[run]['id'] = run
+        input_data[run]['run id'] = run
         seed_dict[str(run)] = {}
         for rep in range(1, input_data[run]['replications'] + 1):
 
             if str(rep) not in input_data[run]['replication seeds']:
-                now = datetime.datetime.now()
-                seed_date = datetime.datetime(2012, 4, 12, 19, 00, 00)
+                now = dt.datetime.now()
+                seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                 seed = abs(now - seed_date).total_seconds() + int(run) + rep
-                seed_dict[str(input_data[run]['id'])][str(rep)] = seed
+                seed_dict[str(input_data[run]['run id'])][str(rep)] = seed
                 create_new_config = True
 
             else:
@@ -197,7 +196,7 @@ if __name__ == '__main__':
             run_list.append(copy.deepcopy(input_data[run]))
 
     ts = time.time()
-    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
     #pool = Pool(cpu_count())
@@ -212,10 +211,10 @@ if __name__ == '__main__':
         for run in list_of_seed_runs:
             input_data[run]['replication seeds'] = seed_dict[run]
             # delete ids
-            del input_data[run]['id']
+            del input_data[run]['run id']
             del input_data[run]['rep id']
 
-        output_JSON_name = str(datetime.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+        output_JSON_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)
 
@@ -223,5 +222,5 @@ if __name__ == '__main__':
         produce_default_output()
 
     ts = time.time()
-    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)

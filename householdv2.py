@@ -8,30 +8,30 @@ import helper as h
 import math
 import district
 
-response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-response_planned = namedtuple('Response_planned', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-do_nothing = namedtuple('Do_nothing', ['reps', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
-reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
-reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'type'])
-call = namedtuple('Call', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'wait_time'])
-call_convert = namedtuple('Call_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-call_failed = namedtuple('Call_failed', ['rep','district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+response_planned = namedtuple('Response_planned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+do_nothing = namedtuple('Do_nothing', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time','type'])
+reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
+reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
+call = namedtuple('Call', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'wait_time'])
+call_convert = namedtuple('Call_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_failed = namedtuple('Call_failed', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 
 
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, output_data, initial_action):
+    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, initial_action):
 
         self.rep = rep
         self.rnd = rnd
@@ -40,10 +40,10 @@ class Household(object):
         self.hh_id = hh_id
         self.hh_type = hh_type
         self.input_data = input_data
-        self.output_data = output_data
-        self.initial_status = initial_action[0]
-        self.digital = initial_action[1]
-        self.initial_time = initial_action[2]
+        self.output_data = self.rep.output_data
+        self.initial_status = initial_action.type
+        self.digital = initial_action.digital
+        self.initial_time = initial_action.time
 
         if self.digital:
             self.delay = self.input_data['delay']['digital']
@@ -85,6 +85,7 @@ class Household(object):
                                                              self.input_data["LSOA"],
                                                              self.digital,
                                                              self.hh_type,
+                                                             self.hh_id,
                                                              self.env.now))
 
         yield self.env.timeout(0)  # do nothing more
@@ -104,6 +105,7 @@ class Household(object):
                                              self.input_data["LSOA"],
                                              self.digital,
                                              self.hh_type,
+                                             self.hh_id,
                                              self.env.now))
         self.calls += 1
 
@@ -138,6 +140,7 @@ class Household(object):
                                                                self.input_data["LSOA"],
                                                                self.digital,
                                                                self.hh_type,
+                                                               self.hh_id,
                                                                self.env.now))
 
             self.resp_level = 0
@@ -158,6 +161,7 @@ class Household(object):
                                                                  self.input_data["LSOA"],
                                                                  self.digital,
                                                                  self.hh_type,
+                                                                 self.hh_id,
                                                                  self.env.now))
 
             if wait_time > 0:
@@ -193,8 +197,8 @@ class Household(object):
                                                                      self.input_data["LSOA"],
                                                                      self.digital,
                                                                      self.hh_type,
-                                                                     self.rep.env.now,
-                                                                     self.hh_id))
+                                                                     self.hh_id,
+                                                                     self.rep.env.now))
 
             self.digital = True
             yield self.env.process(self.phone_call_outcome(current_ad))
@@ -208,8 +212,8 @@ class Household(object):
                                                                       self.input_data["LSOA"],
                                                                       self.digital,
                                                                       self.hh_type,
-                                                                      self.rep.env.now,
-                                                                      self.hh_id))
+                                                                      self.hh_id,
+                                                                      self.rep.env.now))
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
             # up priority and schedule a visit at most likely time to be in?
@@ -241,8 +245,8 @@ class Household(object):
                                                                      self.input_data["LSOA"],
                                                                      self.digital,
                                                                      self.hh_type,
-                                                                     self.env.now,
-                                                                     self.hh_id))
+                                                                     self.hh_id,
+                                                                     self.env.now))
             self.resp_planned = True
             self.rep.adviser_store.put(current_ad)
             self.rep.env.process(self.respond(self.delay))
@@ -257,8 +261,8 @@ class Household(object):
                                                                    self.input_data["LSOA"],
                                                                    self.digital,
                                                                    self.hh_type,
-                                                                   self.env.now,
-                                                                   self.hh_id))
+                                                                   self.hh_id,
+                                                                   self.env.now))
 
             self.rep.adviser_store.put(current_ad)
 
@@ -277,6 +281,7 @@ class Household(object):
                                                         self.input_data["LSOA"],
                                                         self.digital,
                                                         self.hh_type,
+                                                        self.hh_id,
                                                         self.resp_time))
 
             if self.delay == 0:  # digital
@@ -298,6 +303,7 @@ class Household(object):
                                                                            self.input_data["LSOA"],
                                                                            self.digital,
                                                                            self.hh_type,
+                                                                           self.hh_id,
                                                                            self.env.now,
                                                                            reminder_type))
         elif self.resp_planned and not self.responded:
@@ -308,6 +314,7 @@ class Household(object):
                                                                                      self.input_data["LSOA"],
                                                                                      self.digital,
                                                                                      self.hh_type,
+                                                                                     self.hh_id,
                                                                                      self.env.now,
                                                                                      reminder_type))
 
@@ -320,6 +327,7 @@ class Household(object):
                                                                              self.input_data["LSOA"],
                                                                              self.digital,
                                                                              self.hh_type,
+                                                                             self.hh_id,
                                                                              self.env.now,
                                                                              reminder_type))
 
@@ -346,6 +354,7 @@ class Household(object):
                                                                    self.input_data["LSOA"],
                                                                    self.digital,
                                                                    self.hh_type,
+                                                                   self.hh_id,
                                                                    self.env.now,
                                                                    min(wait_time, renege_time)))
 
@@ -363,6 +372,7 @@ class Household(object):
                                                                    self.input_data["LSOA"],
                                                                    self.digital,
                                                                    self.hh_type,
+                                                                   self.hh_id,
                                                                    self.rep.env.now,
                                                                    self.hh_id))
 
@@ -379,8 +389,8 @@ class Household(object):
                                                                            self.input_data["LSOA"],
                                                                            self.digital,
                                                                            self.hh_type,
-                                                                           self.rep.env.now,
-                                                                           self.hh_id))
+                                                                           self.hh_id,
+                                                                           self.rep.env.now))
 
             self.resp_level = effect
             self.help_level = 0
@@ -394,8 +404,8 @@ class Household(object):
                                                                  self.input_data["LSOA"],
                                                                  self.digital,
                                                                  self.hh_type,
-                                                                 self.rep.env.now,
-                                                                 self.hh_id))
+                                                                 self.hh_id,
+                                                                 self.rep.env.now))
 
         elif not h.str2bool(pq) and self.responded:
             # waster letter
@@ -405,8 +415,8 @@ class Household(object):
                                                                      self.input_data["LSOA"],
                                                                      self.digital,
                                                                      self.hh_type,
-                                                                     self.rep.env.now,
-                                                                     self.hh_id))
+                                                                     self.hh_id,
+                                                                     self.rep.env.now))
 
 
 
