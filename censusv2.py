@@ -123,7 +123,7 @@ class StartFU(object):
 
         self.visit_list = []
 
-        # self.env.process(self.create_visit_lists())
+        self.env.process(self.create_visit_lists())
 
     def create_visit_lists(self):
 
@@ -135,6 +135,8 @@ class StartFU(object):
 
                 self.visit_list.append(household)
 
+        # need to look at logic as to how the visit lit is split up between co. High priority hh should be extracted
+        # first...
         self.district.rep.rnd.shuffle(self.visit_list)
 
         slices = len(self.district.district_co)
@@ -174,14 +176,14 @@ class CensusOfficer(object):
 
         start_delayed(self.env, self.co_working_test(), self.start_time)
 
-        #self.env.process(self.co_working_test()) # at appropiate simpy time of course...start_time!
-
     def co_working_test(self):
 
         if (self.working() and h.returns_to_date(self.district) < self.district.input_data["trigger"] and
                 len(self.action_plan) > 0):
 
-            yield self.env.process(self.fu_household_test())
+            #yield self.env.process(self.fu_household_test())
+            household = self.action_plan.pop(0)
+            yield self.env.process(self.fu_visit_contact(household))
 
         else:
             yield self.env.timeout(next_available(self))
@@ -189,6 +191,10 @@ class CensusOfficer(object):
         self.env.process(self.co_working_test())
 
     def fu_household_test(self):
+        # this logic will look to see if it is the optimal time to visit a hh that has asked for a visit
+        # if not it will add it back to the list and move to the next household
+        # if yes it will make the call
+        # not used for now
 
         # take household to visit out but check if a visit has been arranged
         household = self.action_plan.pop(0)
@@ -382,31 +388,20 @@ class CensusOfficer(object):
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
 
     def working(self):
-        """returns true or false to depending on whether or not a CO is available at current time"""
-        """need to redo now format of avail sch updated"""
+        """returns true or false depending on whether or not a CO is available at current time"""
 
-        # get day
-        days_gone = math.ceil(self.env.now/24)
-        weeks_gone = days_gone/7
-        self.rep.start_day
+        # get day of week we are now on
+        new_day = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
+        for i in range(0, len(self.input_data['availability'][str(new_day)]), 2):
 
+            start_hour = dt.time(*map(int, self.input_data['availability'][str(new_day)][i].split(':')))
+            end_hour = dt.time(*map(int, self.input_data['availability'][str(new_day)][i+1].split(':')))
 
-        current_date_time = self.rep.start_date + dt.timedelta(hours=self.rep.env.now)
-        current_date = current_date_time.date()
+            start_time = h.make_time_decimal(start_hour) + math.floor(self.env.now/24)*24
+            end_time = h.make_time_decimal(end_hour) + math.floor(self.env.now / 24) * 24
 
-        # first check if in correct date range
-        if self.start_date <= current_date < self.end_date:
-
-            current_time = current_date_time.time()
-            week_day = h.current_day(self)
-
-            avail_data = self.input_data['availability'][str(week_day)]
-
-            for row in avail_data:
-                # compare
-                if h.make_time(row[0][0], row[0][1], row[0][2]) <= \
-                        current_time < h.make_time(row[1][0], row[1][1], row[1][2]):
-                    return True
+            if start_time <= self.env.now < end_time:
+                return True
 
         return False
 

@@ -51,7 +51,7 @@ def simpy_to_time(simpy_time):
     return dt.datetime.strptime(time, '%H,%M,%S').time()
 
 
-def make_time(hours, mins, secs):
+def make_time(hours = 0, mins = 0, secs = 0):
 
     time = str(hours) + "," + str(mins) + "," + str(secs)
 
@@ -236,7 +236,7 @@ def co_start_time(rep, input_data):
     start_date_simpy = (start_date - rep.start_date).total_seconds()/3600
 
     # convert start time of that day to simpy time
-    start_time = input_data['availability'][str(start_date.day)][0]
+    start_time = input_data['availability'][str(start_date.weekday())][0]
     start_time_simpy = make_time_decimal(dt.time(*map(int, start_time.split(':'))))
 
     return start_date_simpy + start_time_simpy

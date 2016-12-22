@@ -19,7 +19,7 @@ class Rep(object):
         self.run = self.input_data['run id']
         self.sim_hours = sim_hours
         self.start_date = start_date
-        self.start_day = start_date.day
+        self.start_day = start_date.weekday()
         self.census_day = census_day
         self.reps = self.input_data['rep id']
         self.output_path = out_path

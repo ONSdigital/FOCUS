@@ -36,20 +36,15 @@ class District(object):
         self.return_rate = 0
         self.travel_dist = 0
 
-        # processes to run
-        # new process to determine time of first interaction - visits, letters
-        # simple value for now
-        self.first_interaction = 24*10
+        self.create_co(self.input_data["census officer"])
+        self.first_interaction = min([co.start_time for co in self.district_co])
+        start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
 
         # create households that exist in the district
         self.create_households()
         if self.rep.reps == 1:
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
 
-        self.start_fu()  # process used to commence FU activities for the district
-        self.create_co(self.input_data["census officer"])
-
-        #self.create_co(self.input_data["census officer"])
 
         # self.create_letterphases()
 
@@ -129,11 +124,7 @@ class District(object):
     def start_fu(self):
 
         # determines when FU starts for the district - ie, when does the first CO become available
-
-
-        hh_list = sorted(list(self.input_data['households'].keys()))
-        delay = min([self.input_data['households'][hh]['FU_start_time'] for hh in hh_list])
-        start_delayed(self.env, censusv2.start_fu(self.env, self), delay)
+        start_delayed(self.env, censusv2.start_fu(self.env, self), self.first_interaction)
 
     def create_letterphases(self):
 
@@ -199,6 +190,9 @@ class District(object):
         if response_test <= hh_resp:
             # respond but test when
             return self.early_responder(input_data, digital, first_interaction, hh)
+            # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND
+
+
         elif hh_resp < response_test <= hh_help:
             # call for help return when
             return self.help(input_data, digital, first_interaction, hh)
