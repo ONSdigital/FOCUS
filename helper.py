@@ -32,11 +32,9 @@ def returns_to_date(district, output_format=""):
 
 def current_day(obj):
 
-    current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
-    current_date = current_date_time.date()
-    day = current_date.weekday()
+    current_day = (obj.rep.start_day + math.floor(obj.env.now / 24) % 7) % 7
 
-    return day
+    return current_day
 
 
 def simpy_to_time(simpy_time):
@@ -48,7 +46,7 @@ def simpy_to_time(simpy_time):
 
     time = str(hours) + "," + str(int(mins)) + "," + str(secs)
 
-    return dt.datetime.strptime(time, '%H,%M,%S').time()
+    return dt.time(*map(int, time.split(',')))
 
 
 def make_time(hours = 0, mins = 0, secs = 0):
@@ -69,7 +67,7 @@ def make_time_decimal(time_object):
 
 def return_time_key(input_dict, time):
 
-    time = make_time_decimal(simpy_to_time(time))
+    time %= 24
 
     key_list = sorted(list(input_dict.keys()), key=int)
 
@@ -241,3 +239,16 @@ def co_start_time(rep, input_data):
 
     return start_date_simpy + start_time_simpy
 
+
+def co_end_time(rep, input_data):
+    # returns the simpy time as to when the co stops work
+
+    # convert end date to simpy time
+    end_date = dt.date(*map(int, input_data['end_date'].split(',')))
+    end_date_simpy = (end_date - rep.start_date).total_seconds()/3600
+
+    # convert end time of that day to simpy time
+    end_time = input_data['availability'][str(end_date.weekday())][-1]
+    end_time_simpy = make_time_decimal(dt.time(*map(int, end_time.split(':'))))
+
+    return end_date_simpy + end_time_simpy

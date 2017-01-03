@@ -26,7 +26,7 @@ def start_run(run_input, seeds, out_path):
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
     sim_hours = (end_date - start_date).total_seconds()/3600
     census_date = dt.date(*map(int, run_input['census_date'].split(',')))
-    census_day = ((census_date - start_date).total_seconds()/86400)+1
+    census_day = ((census_date - start_date).total_seconds()/86400)
 
     output_data = defaultdict(list)
 

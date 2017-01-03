@@ -159,14 +159,13 @@ class StartFU(object):
 class CensusOfficer(object):
     """represents an individual Census Officer. Each instance can be different"""
 
-    def __init__(self, rep,  env, district, input_data, co_id, start_time):
+    def __init__(self, rep,  env, district, input_data, co_id):
 
         self.rep = rep
         self.env = env
         self.district = district
         self.input_data = input_data
         self.co_id = co_id
-        self.start_time = start_time
 
         self.action_plan = []
 
@@ -174,7 +173,10 @@ class CensusOfficer(object):
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
         self.has_paper = h.str2bool(self.input_data['has_paper'])
 
-        start_delayed(self.env, self.co_working_test(), self.start_time)
+        self.start_simpy_time = h.co_start_time(self.rep, input_data)
+        self.end_simpy_time = h.co_end_time(self.rep, input_data)
+
+        start_delayed(self.env, self.co_working_test(), self.start_simpy_time)
 
     def co_working_test(self):
 
@@ -388,20 +390,21 @@ class CensusOfficer(object):
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
 
     def working(self):
-        """returns true or false depending on whether or not a CO is available at current time"""
+        """returns true or false depending on whether or not a CO is available at current date and time"""
 
-        # get day of week we are now on
-        new_day = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
-        for i in range(0, len(self.input_data['availability'][str(new_day)]), 2):
+        if self.start_simpy_time <= self.env.now < self.end_simpy_time:
+            # get day of week we are now on
+            new_day = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
+            for i in range(0, len(self.input_data['availability'][str(new_day)]), 2):
 
-            start_hour = dt.time(*map(int, self.input_data['availability'][str(new_day)][i].split(':')))
-            end_hour = dt.time(*map(int, self.input_data['availability'][str(new_day)][i+1].split(':')))
+                start_time = dt.time(*map(int, self.input_data['availability'][str(new_day)][i].split(':')))
+                end_time = dt.time(*map(int, self.input_data['availability'][str(new_day)][i+1].split(':')))
 
-            start_time = h.make_time_decimal(start_hour) + math.floor(self.env.now/24)*24
-            end_time = h.make_time_decimal(end_hour) + math.floor(self.env.now / 24) * 24
+                start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now/24)*24
+                end_simpy_time = h.make_time_decimal(end_time) + math.floor(self.env.now / 24) * 24
 
-            if start_time <= self.env.now < end_time:
-                return True
+                if start_simpy_time <= self.env.now < end_simpy_time:
+                    return True
 
         return False
 
@@ -469,34 +472,29 @@ class LetterPhase(object):
 
 
 def next_available(co):
+    """return the number of hours until the CO is next available or remove from sim if finished"""
 
-    current_date_time = co.rep.start_date + dt.timedelta(hours=co.rep.env.now)
-    current_date = current_date_time.date()
-    current_time = current_date_time.time()
+    current_day = (co.rep.start_day + math.floor(co.env.now/24) % 7) % 7
 
-    # check if correct day.
-    if current_date < co.start_date:
+    for i in range(0, len(co.input_data['availability'][str(current_day)]), 2):
 
-        return (co.start_date - current_date).total_seconds()/3600
+        start_time = dt.time(*map(int, co.input_data['availability'][str(current_day)][i].split(':')))
+        start_simpy_time = h.make_time_decimal(start_time) + math.floor(co.env.now / 24) * 24
 
-    # check if there is anyone to visit or if trigger has been reached
-    elif len(co.action_plan) == 0 or h.returns_to_date(co.district) >= co.district.input_data["trigger"]:
-        return 24 - h.make_time_decimal(current_time)
+        if co.env.now < start_simpy_time:
+            return start_simpy_time - co.env.now
 
-    # if the right day check if the right time.
-    elif co.start_date <= current_date <= co.end_date:
-        start_times = co.input_data['availability'][str(co.start_date.weekday())]
-        for times in start_times:
-            next_start = h.make_time(times[0][0], times[0][1], times[0][2])
-            if current_time <= next_start:
-                return h.make_time_decimal(next_start) - h.make_time_decimal(current_time)
+    # if doesn't jump into the above check next day
+    # but only if it doing so keeps co within working overall working times
+    time_left = (math.ceil(co.env.now / 24)*24) - co.env.now
+    next_day = (co.rep.start_day + math.ceil(co.env.now / 24) % 7) % 7
 
-        # if get to here must be past last start time so wait until next day.
-        return 24 - h.make_time_decimal(current_time)
-
-    elif current_date > co.end_date:
-        # past last day of work so yield until the end of the simulation.
-        return co.rep.sim_hours - co.rep.env.now
+    if next_day*24 < co.end_simpy_time:
+        start_time = dt.time(*map(int, co.input_data['availability'][str(next_day)][0].split(':')))
+        return h.make_time_decimal(start_time) + time_left
+    else:
+        # remove from sim
+        return 1000
 
 
 def schedule_paper_drop(obj, household, has_paper=False):

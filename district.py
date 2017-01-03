@@ -37,14 +37,13 @@ class District(object):
         self.travel_dist = 0
 
         self.create_co(self.input_data["census officer"])
-        self.first_interaction = min([co.start_time for co in self.district_co])
+        self.first_interaction = min([co.start_simpy_time for co in self.district_co])
         start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
 
         # create households that exist in the district
         self.create_households()
         if self.rep.reps == 1:
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
-
 
         # self.create_letterphases()
 
@@ -149,17 +148,13 @@ class District(object):
                 try:
                     if 'number' in input_data:
 
-                        # calculate when this type of CO becomes available
-                        co_start_time = h.co_start_time(self.rep, input_data)
-
-                        for i in range(int(input_data["number"])):
+                         for i in range(int(input_data["number"])):
                             id_num += 1
                             self.district_co.append(censusv2.CensusOfficer(self.rep,
                                                                            self.env,
                                                                            self,
                                                                            input_data,
-                                                                           self.rep.total_co,
-                                                                           co_start_time))
+                                                                           self.rep.total_co))
 
                             self.rep.total_co += 1
 

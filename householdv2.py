@@ -55,6 +55,7 @@ class Household(object):
 
         # flags to keep track of what the hh is doing/has done
         self.resp_planned = False
+        self.resp_time = 0
         self.responded = False
         self.returned = False
         self.status = ''
