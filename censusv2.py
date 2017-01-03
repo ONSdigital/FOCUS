@@ -9,7 +9,7 @@ from simpy.util import start_delayed
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
-visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id', 'co_id'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
 visit_out = namedtuple('Visit_out', ['rep', 'district', 'LA', 'LSOA', 'digital','hh_type', 'time', 'hh_id'])
 visit_wasted = namedtuple('Visit_wasted', ['rep', 'district', 'LA', 'LSOA','digital', 'hh_type', 'time', 'hh_id'])
@@ -188,7 +188,7 @@ class CensusOfficer(object):
             yield self.env.process(self.fu_visit_contact(household))
 
         else:
-            yield self.env.timeout(next_available(self))
+            yield self.env.timeout(self.next_available())
 
         self.env.process(self.co_working_test())
 
@@ -222,7 +222,8 @@ class CensusOfficer(object):
                                                    household.digital,
                                                    household.hh_type,
                                                    self.rep.env.now,
-                                                   household.hh_id))
+                                                   household.hh_id,
+                                                   self.co_id))
 
         if household.resp_planned:
             self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
@@ -394,11 +395,12 @@ class CensusOfficer(object):
 
         if self.start_simpy_time <= self.env.now < self.end_simpy_time:
             # get day of week we are now on
-            new_day = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
-            for i in range(0, len(self.input_data['availability'][str(new_day)]), 2):
+            # day_of_week = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
+            day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
+            for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
 
-                start_time = dt.time(*map(int, self.input_data['availability'][str(new_day)][i].split(':')))
-                end_time = dt.time(*map(int, self.input_data['availability'][str(new_day)][i+1].split(':')))
+                start_time = dt.time(*map(int, self.input_data['availability'][str(day_of_week)][i].split(':')))
+                end_time = dt.time(*map(int, self.input_data['availability'][str(day_of_week)][i+1].split(':')))
 
                 start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now/24)*24
                 end_simpy_time = h.make_time_decimal(end_time) + math.floor(self.env.now / 24) * 24
@@ -420,6 +422,31 @@ class CensusOfficer(object):
                 #print(return_index)
 
         return max(return_index, 0)
+
+    def next_available(self):
+        """return the number of hours until the CO is next available or remove from sim if finished"""
+
+        current_day = self.rep.start_day + math.floor(self.env.now / 24) % 7
+
+        for i in range(0, len(self.input_data['availability'][str(current_day)]), 2):
+
+            start_time = dt.time(*map(int, self.input_data['availability'][str(current_day)][i].split(':')))
+            start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now / 24) * 24
+
+            if self.env.now < start_simpy_time:
+                return start_simpy_time - self.env.now
+
+        # if doesn't jump into the above check next day
+        # but only if it doing so keeps co within working overall working times
+        time_left = (math.ceil(self.env.now / 24) * 24) - self.env.now
+        next_day = self.rep.start_day + math.ceil(self.env.now / 24) % 7
+
+        if next_day * 24 < self.end_simpy_time:
+            start_time = dt.time(*map(int, self.input_data['availability'][str(next_day)][0].split(':')))
+            return h.make_time_decimal(start_time) + time_left
+        else:
+            # remove from sim
+            return 1000
 
 
 class LetterPhase(object):
@@ -469,32 +496,6 @@ class LetterPhase(object):
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_letter(effect, pq))
-
-
-def next_available(co):
-    """return the number of hours until the CO is next available or remove from sim if finished"""
-
-    current_day = (co.rep.start_day + math.floor(co.env.now/24) % 7) % 7
-
-    for i in range(0, len(co.input_data['availability'][str(current_day)]), 2):
-
-        start_time = dt.time(*map(int, co.input_data['availability'][str(current_day)][i].split(':')))
-        start_simpy_time = h.make_time_decimal(start_time) + math.floor(co.env.now / 24) * 24
-
-        if co.env.now < start_simpy_time:
-            return start_simpy_time - co.env.now
-
-    # if doesn't jump into the above check next day
-    # but only if it doing so keeps co within working overall working times
-    time_left = (math.ceil(co.env.now / 24)*24) - co.env.now
-    next_day = (co.rep.start_day + math.ceil(co.env.now / 24) % 7) % 7
-
-    if next_day*24 < co.end_simpy_time:
-        start_time = dt.time(*map(int, co.input_data['availability'][str(next_day)][0].split(':')))
-        return h.make_time_decimal(start_time) + time_left
-    else:
-        # remove from sim
-        return 1000
 
 
 def schedule_paper_drop(obj, household, has_paper=False):

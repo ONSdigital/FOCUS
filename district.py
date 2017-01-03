@@ -148,7 +148,8 @@ class District(object):
                 try:
                     if 'number' in input_data:
 
-                         for i in range(int(input_data["number"])):
+                        for i in range(int(input_data["number"])):
+
                             id_num += 1
                             self.district_co.append(censusv2.CensusOfficer(self.rep,
                                                                            self.env,
