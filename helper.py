@@ -6,16 +6,17 @@ import os
 import csv
 from multiprocessing import Lock
 from sys import getsizeof
+import sys
 
 l = Lock()  # global declaration...can I avoid this
 
 
-def roundup_nearest_ten(x):
-    return int(math.ceil(x / 10.0)) * 10
+#def roundup_nearest_ten(x):
+#    return int(math.ceil(x / 10.0)) * 10
 
 
-def rounddown_nearest_ten(x):
-    return int(math.floor(x / 10.0)) * 10
+#def rounddown_nearest_ten(x):
+#    return int(math.floor(x / 10.0)) * 10
 
 
 def returns_to_date(district, output_format=""):
@@ -32,28 +33,27 @@ def returns_to_date(district, output_format=""):
 
 def current_day(obj):
 
-    current_day = (obj.rep.start_day + math.floor(obj.env.now / 24) % 7) % 7
+    return obj.rep.start_day + math.floor(obj.env.now / 24) % 7
 
-    return current_day
+#def simpy_to_time(simpy_time):
+# """converts simpy time to a datetime time"""
 
+ #   days = int(simpy_time/24)
+ #   hours = int(simpy_time - days*24)
+  #  mins = ((simpy_time - days*24) - hours)*60
+  #  secs = int((mins - int(mins))*60)
 
-def simpy_to_time(simpy_time):
+  #  time = str(hours) + "," + str(int(mins)) + "," + str(secs)
 
-    days = int(simpy_time/24)
-    hours = int(simpy_time - days*24)
-    mins = ((simpy_time - days*24) - hours)*60
-    secs = int((mins - int(mins))*60)
-
-    time = str(hours) + "," + str(int(mins)) + "," + str(secs)
-
-    return dt.time(*map(int, time.split(',')))
+  #  return dt.time(*map(int, time.split(',')))
 
 
-def make_time(hours = 0, mins = 0, secs = 0):
+#def make_time(hours = 0, mins = 0, secs = 0):
+# """take string and make a datetime time"""
 
-    time = str(hours) + "," + str(mins) + "," + str(secs)
+ #   time = str(hours) + "," + str(mins) + "," + str(secs)
 
-    return dt.time(*map(int, time.split(',')))
+ #   return dt.time(*map(int, time.split(',')))
 
 
 def make_time_decimal(time_object):
@@ -95,54 +95,54 @@ def gauss_dist(rnd, alpha, beta):
     return output
 
 
-def path_leaf(path):
-    head, tail = ntpath.split(path)
-    return tail or ntpath.basename(head)
+#def path_leaf(path):
+#    head, tail = ntpath.split(path)
+#    return tail or ntpath.basename(head)
 
 
-def clamp(x):
-    return max(0, min(x, 255))
+#def clamp(x):
+#    return max(0, min(x, 255))
 
 
-def next_day(simpy_time):
-    # round up to next nearest day...
-    next = math.ceil(simpy_time/24)*24
-    return next - simpy_time + 9
+#def next_day(simpy_time):
+#    # round up to next nearest day...
+#    next = math.ceil(simpy_time/24)*24
+#    return next - simpy_time + 9
 
 
-def date_range(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + dt.timedelta(n)
+#def date_range(start_date, end_date):
+#    for n in range(int((end_date - start_date).days)):
+#        yield start_date + dt.timedelta(n)
 
 
-def return_resp_time(obj):
+#def return_resp_time(obj):
     # determine date and time of response -  look to speed this up...
-    current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
-    sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
+  #  current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
+  #  sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
 
-    days_until_response = beta_dist(obj.rep,
-                                    obj.input_data['response_day'][0],
-                                    obj.input_data['response_day'][1],
-                                    sim_days_left)
+   # days_until_response = beta_dist(obj.rep,
+   #                                 obj.input_data['response_day'][0],
+   #                                 obj.input_data['response_day'][1],
+    #                                sim_days_left)
 
-    response_date = current_date_time.date() + dt.timedelta(days=days_until_response)
+   # response_date = current_date_time.date() + dt.timedelta(days=days_until_response)
 
-    response_day = response_date.weekday()
-    response_time = gauss_dist(obj.rnd,
-                               obj.input_data['response_time']['other'][0],
-                               obj.input_data['response_time']['other'][1])
+   # response_day = response_date.weekday()
+   # response_time = gauss_dist(obj.rnd,
+   #                            obj.input_data['response_time']['other'][0],
+   #                            obj.input_data['response_time']['other'][1])
 
-    response_date_time = dt.datetime.combine(response_date, dt.datetime.min.time()) \
-                         + dt.timedelta(hours=response_time)
+  #  response_date_time = dt.datetime.combine(response_date, dt.datetime.min.time()) \
+   #                      + dt.timedelta(hours=response_time)
     # issue here with response time - gauss dist can create -ve time if action is run during day not at start
-    response_date_time_hours = max((response_date_time - current_date_time).total_seconds() / 3600, 0)
+  #  response_date_time_hours = max((response_date_time - current_date_time).total_seconds() / 3600, 0)
 
-    return response_date_time_hours
+  #  return response_date_time_hours
 
 
-def renege_time(obj):
+#def renege_time(obj):
 
-    return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
+  #  return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
 
 
 def write_output(output_data, out_path, run_input_id):
@@ -226,29 +226,22 @@ def set_household_response_time(rep, input_data, sim_hours):
     return final_response_time
 
 
-def co_start_time(rep, input_data):
-    # returns the simpy time as to when the co starts work
+#def check_start_day(rep, input_data, current_date):
+#    # determine if start date has a valid avail sch
+#    day_delta = (current_date - dt.date(*map(int, input_data['start_date'].split(',')))).days
 
-    # convert start date to simpy time
-    start_date = dt.date(*map(int, input_data['start_date'].split(',')))
-    start_date_simpy = (start_date - rep.start_date).total_seconds()/3600
+  #  if day_delta > 7:
+   #     print("no co availability set for any day of week")
+  #      sys.exit()
 
-    # convert start time of that day to simpy time
-    start_time = input_data['availability'][str(start_date.weekday())][0]
-    start_time_simpy = make_time_decimal(dt.time(*map(int, start_time.split(':'))))
+  #  current_dow = current_date.weekday()
+  #  if not input_data['availability'][str(current_dow)]:
+  #      return check_start_day(rep, input_data, current_date + dt.timedelta(days=1))
 
-    return start_date_simpy + start_time_simpy
+  #  return current_date
 
 
-def co_end_time(rep, input_data):
-    # returns the simpy time as to when the co stops work
 
-    # convert end date to simpy time
-    end_date = dt.date(*map(int, input_data['end_date'].split(',')))
-    end_date_simpy = (end_date - rep.start_date).total_seconds()/3600
 
-    # convert end time of that day to simpy time
-    end_time = input_data['availability'][str(end_date.weekday())][-1]
-    end_time_simpy = make_time_decimal(dt.time(*map(int, end_time.split(':'))))
 
-    return end_date_simpy + end_time_simpy
+

@@ -126,7 +126,7 @@ def produce_default_output():
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
+    produce_default = True
     freeze_support()
 
     # delete all old output files from default location except generated JSON files.
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/single multi district.JSON'
-        file_name = 'inputs/management areas(smallest).JSON'
+        file_name = 'inputs/management areas(small).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

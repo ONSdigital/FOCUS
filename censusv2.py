@@ -5,6 +5,7 @@ from collections import namedtuple
 import helper as h
 import datetime
 from simpy.util import start_delayed
+import sys
 
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time return received
@@ -173,10 +174,42 @@ class CensusOfficer(object):
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
         self.has_paper = h.str2bool(self.input_data['has_paper'])
 
-        self.start_simpy_time = h.co_start_time(self.rep, input_data)
-        self.end_simpy_time = h.co_end_time(self.rep, input_data)
+        self.start_simpy_time = self.co_start_time()
+        self.end_simpy_time = self.co_end_time()
 
         start_delayed(self.env, self.co_working_test(), self.start_simpy_time)
+
+    def co_start_time(self):
+        # returns the simpy time as to when the co starts work
+
+        try:
+            # check start date has valid avail sch
+            start_date = dt.date(*map(int, self.input_data['start_date'].split(',')))
+            # convert start date to simpy time
+            start_date_simpy = (start_date - self.rep.start_date).total_seconds() / 3600
+
+            # convert start time of that day to simpy time
+            start_time = self.input_data['availability'][str(start_date.weekday())][0]
+            start_time_simpy = h.make_time_decimal(dt.time(*map(int, start_time.split(':'))))
+
+            return start_date_simpy + start_time_simpy
+
+        except IndexError as e:
+            print(e, "District ", self.district.name, " has no availability schedule set for CO on start day")
+            sys.exit()
+
+    def co_end_time(self):
+        # returns the simpy time as to when the co stops work
+
+        # convert end date to simpy time
+        end_date = dt.date(*map(int, self.input_data['end_date'].split(',')))
+        end_date_simpy = (end_date - self.rep.start_date).total_seconds() / 3600
+
+        # convert end time of that day to simpy time
+        end_time = self.input_data['availability'][str(end_date.weekday())][-1]
+        end_time_simpy = h.make_time_decimal(dt.time(*map(int, end_time.split(':'))))
+
+        return end_date_simpy + end_time_simpy
 
     def co_working_test(self):
 
@@ -393,10 +426,11 @@ class CensusOfficer(object):
     def working(self):
         """returns true or false depending on whether or not a CO is available at current date and time"""
 
-        if self.start_simpy_time <= self.env.now < self.end_simpy_time:
+        day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
+        if self.start_simpy_time <= self.env.now < self.end_simpy_time and self.input_data['availability'][str(day_of_week)]:
             # get day of week we are now on
             # day_of_week = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
-            day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
+
             for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
 
                 start_time = dt.time(*map(int, self.input_data['availability'][str(day_of_week)][i].split(':')))
@@ -423,14 +457,27 @@ class CensusOfficer(object):
 
         return max(return_index, 0)
 
+    def next_available_dow(self, time):
+        # this will find the next day of the week with a valid availability schedule
+
+        current_day = math.floor(time/24)
+        current_dow = self.rep.start_day + current_day % 7
+
+        if not self.input_data['availability'][str(current_dow)]:
+            return self.next_available_dow(time+24)
+
+        return current_dow
+
     def next_available(self):
         """return the number of hours until the CO is next available or remove from sim if finished"""
 
+        # for current time
+        next_avail_day = self.next_available_dow(self.env.now)
         current_day = self.rep.start_day + math.floor(self.env.now / 24) % 7
 
-        for i in range(0, len(self.input_data['availability'][str(current_day)]), 2):
+        for i in range(0, len(self.input_data['availability'][str(next_avail_day)]), 2):
 
-            start_time = dt.time(*map(int, self.input_data['availability'][str(current_day)][i].split(':')))
+            start_time = dt.time(*map(int, self.input_data['availability'][str(next_avail_day)][i].split(':')))
             start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now / 24) * 24
 
             if self.env.now < start_simpy_time:
@@ -441,6 +488,7 @@ class CensusOfficer(object):
         time_left = (math.ceil(self.env.now / 24) * 24) - self.env.now
         next_day = self.rep.start_day + math.ceil(self.env.now / 24) % 7
 
+        # recursive here to keep checking the next day until one found?
         if next_day * 24 < self.end_simpy_time:
             start_time = dt.time(*map(int, self.input_data['availability'][str(next_day)][0].split(':')))
             return h.make_time_decimal(start_time) + time_left
