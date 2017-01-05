@@ -40,6 +40,7 @@ class Household(object):
         self.hh_id = hh_id
         self.hh_type = hh_type
         self.input_data = input_data
+
         self.output_data = self.rep.output_data
         self.initial_status = initial_action.type
         self.digital = initial_action.digital
@@ -54,7 +55,12 @@ class Household(object):
         self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])
 
         # flags to keep track of what the hh is doing/has done
-        self.resp_planned = False
+
+        if self.initial_time > 0:
+            self.resp_planned = True
+        else:
+            self.resp_planned = False
+
         self.resp_time = 0
         self.responded = False
         self.returned = False

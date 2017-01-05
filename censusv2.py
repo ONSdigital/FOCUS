@@ -22,6 +22,7 @@ visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'LA', 'L
 visit_assist = namedtuple('Visit_assist', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 post_paper = namedtuple('Post_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
 sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -132,33 +133,27 @@ class StartFU(object):
 
             self.visit_list = []
 
+            # determine who needs to be followed up
             for household in self.households:
                 if (household.returned is False and household.visits < household.input_data['max_visits'] and
                         household.input_data['FU_start_time'] <= self.env.now):
 
                     self.visit_list.append(household)
 
-            # need to look at logic as to how the visit lit is split up between co. High priority hh should be extracted
-            # first...
-            self.district.rep.rnd.shuffle(self.visit_list)
+            # order by priority
+            self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
 
-            slices = len(self.district.district_co)
+            num_of_co = len(self.district.district_co)
 
-            try:
-                split = math.ceil(len(self.visit_list)/slices)
-            except ZeroDivisionError as e:
-                print(e, " ", "District ", self.district.name)
-                sys.exit()
-
+            # split the hh up between the CO with the higher pri hh the top of each list
             for co in self.district.district_co:
-                if split > len(self.visit_list):
-                    action_plan = self.visit_list[:]
-                    self.visit_list = []
-                else:
-                    action_plan = self.visit_list[:split]
-                    self.visit_list = self.visit_list[split:]
+                action_plan = self.visit_list[0::num_of_co]
+                self.visit_list = list(set(self.visit_list) - set(action_plan))
+                # re-order by pri as sets make the lists unordered
+                self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
 
-                action_plan.sort(key=lambda hh: hh.priority, reverse=False)
+                num_of_co -= 1
+
                 co.action_plan = action_plan
             yield self.env.timeout(self.update)
             self.env.process(self.create_visit_lists())
@@ -176,21 +171,19 @@ class CensusOfficer(object):
         self.co_id = co_id
 
         self.action_plan = []
-
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
         self.has_paper = h.str2bool(self.input_data['has_paper'])
+        self.start_sim_time = self.co_start_time()  # the sim time the co starts work
+        self.end_sim_time = self.co_end_time()  # the sim time the co ends work
 
-        self.start_simpy_time = self.co_start_time()
-        self.end_simpy_time = self.co_end_time()
-
-        start_delayed(self.env, self.co_working_test(), self.start_simpy_time)
+        start_delayed(self.env, self.co_working_test(), self.start_sim_time)
 
     def co_start_time(self):
         # returns the simpy time as to when the co starts work
 
         try:
-            # check start date has valid avail sch
+            # check start date has valid availability schedule
             start_date = dt.date(*map(int, self.input_data['start_date'].split(',')))
             # convert start date to simpy time
             start_date_simpy = (start_date - self.rep.start_date).total_seconds() / 3600
@@ -202,7 +195,8 @@ class CensusOfficer(object):
             return start_date_simpy + start_time_simpy
 
         except IndexError as e:
-            print(e, "District ", self.district.name, " has no availability schedule set for CO on start day")
+            print(e, "District ", self.district.name, " has no availability schedule set for CO on start day of ",
+                  start_date)
             sys.exit()
 
     def co_end_time(self):
@@ -220,9 +214,7 @@ class CensusOfficer(object):
 
     def co_working_test(self):
 
-        print(h.returns_to_date(self.district))
-
-        dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
+        #dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
 
         if h.returns_to_date(self.district) >= self.district.input_data["trigger"]:
             # trigger reached stop collection and remove CO from list of CO's but at end of current day only?
@@ -238,8 +230,6 @@ class CensusOfficer(object):
         else:
             yield self.env.timeout(self.next_available())
             self.env.process(self.co_working_test())
-
-
 
     def fu_household_test(self):
         # this logic will look to see if it is the optimal time to visit a hh that has asked for a visit
@@ -443,17 +433,17 @@ class CensusOfficer(object):
         """returns true or false depending on whether or not a CO is available at current date and time"""
 
         day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
-        if self.start_simpy_time <= self.env.now < self.end_simpy_time and self.input_data['availability'][str(day_of_week)]:
+        if self.start_sim_time <= self.env.now < self.end_sim_time and self.input_data['availability'][str(day_of_week)]:
 
             for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
 
                 start_time = dt.time(*map(int, self.input_data['availability'][str(day_of_week)][i].split(':')))
                 end_time = dt.time(*map(int, self.input_data['availability'][str(day_of_week)][i+1].split(':')))
 
-                start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now/24)*24
-                end_simpy_time = h.make_time_decimal(end_time) + math.floor(self.env.now / 24) * 24
+                start_sim_time = h.make_time_decimal(start_time) + math.floor(self.env.now/24)*24
+                end_sim_time = h.make_time_decimal(end_time) + math.floor(self.env.now / 24) * 24
 
-                if start_simpy_time <= self.env.now < end_simpy_time:
+                if start_sim_time <= self.env.now < end_sim_time:
                     return True
 
         return False
@@ -475,7 +465,8 @@ class CensusOfficer(object):
         # get next relavent dow based on current sim time
         current_dow = (self.rep.start_date + dt.timedelta(days=days_gone_from_start)).weekday()
 
-        if not self.input_data['availability'][str(current_dow)] or h.str_to_dec(self.input_data['availability'][str(current_dow)][-1]) <= original_tod:
+        if (not self.input_data['availability'][str(current_dow)] or
+           h.str_to_dec(self.input_data['availability'][str(current_dow)][-1]) <= original_tod):
             # empty list
             return self.return_dow(days_gone_from_start + 1, 0, count + 1)
         else:

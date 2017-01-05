@@ -21,6 +21,7 @@ l = Lock()  # global declaration...can I avoid this?
 
 def start_run(run_input, seeds, out_path):
 
+    max_output_file_size = 100000000
     # pull out length of sim for current run
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
@@ -44,7 +45,8 @@ def start_run(run_input, seeds, out_path):
                      sim_hours,
                      start_date,
                      census_day,
-                     out_path)
+                     out_path,
+                     max_output_file_size)
 
     # and run it
     env.run(until=sim_hours)
