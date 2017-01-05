@@ -128,33 +128,40 @@ class StartFU(object):
 
     def create_visit_lists(self):
 
-        self.visit_list = []
+        if h.returns_to_date(self.district) < self.district.input_data["trigger"]:
 
-        for household in self.households:
-            if (household.returned is False and household.visits < household.input_data['max_visits'] and
-                    household.input_data['FU_start_time'] <= self.env.now):
+            self.visit_list = []
 
-                self.visit_list.append(household)
+            for household in self.households:
+                if (household.returned is False and household.visits < household.input_data['max_visits'] and
+                        household.input_data['FU_start_time'] <= self.env.now):
 
-        # need to look at logic as to how the visit lit is split up between co. High priority hh should be extracted
-        # first...
-        self.district.rep.rnd.shuffle(self.visit_list)
+                    self.visit_list.append(household)
 
-        slices = len(self.district.district_co)
-        split = math.ceil(len(self.visit_list)/slices)
+            # need to look at logic as to how the visit lit is split up between co. High priority hh should be extracted
+            # first...
+            self.district.rep.rnd.shuffle(self.visit_list)
 
-        for co in self.district.district_co:
-            if split > len(self.visit_list):
-                action_plan = self.visit_list[:]
-                self.visit_list = []
-            else:
-                action_plan = self.visit_list[:split]
-                self.visit_list = self.visit_list[split:]
+            slices = len(self.district.district_co)
 
-            action_plan.sort(key=lambda hh: hh.priority, reverse=False)
-            co.action_plan = action_plan
-        yield self.env.timeout(self.update)
-        self.env.process(self.create_visit_lists())
+            try:
+                split = math.ceil(len(self.visit_list)/slices)
+            except ZeroDivisionError as e:
+                print(e, " ", "District ", self.district.name)
+                sys.exit()
+
+            for co in self.district.district_co:
+                if split > len(self.visit_list):
+                    action_plan = self.visit_list[:]
+                    self.visit_list = []
+                else:
+                    action_plan = self.visit_list[:split]
+                    self.visit_list = self.visit_list[split:]
+
+                action_plan.sort(key=lambda hh: hh.priority, reverse=False)
+                co.action_plan = action_plan
+            yield self.env.timeout(self.update)
+            self.env.process(self.create_visit_lists())
 
 
 class CensusOfficer(object):
@@ -213,17 +220,26 @@ class CensusOfficer(object):
 
     def co_working_test(self):
 
-        if (self.working() and h.returns_to_date(self.district) < self.district.input_data["trigger"] and
-                len(self.action_plan) > 0):
+        print(h.returns_to_date(self.district))
+
+        dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
+
+        if h.returns_to_date(self.district) >= self.district.input_data["trigger"]:
+            # trigger reached stop collection and remove CO from list of CO's but at end of current day only?
+            self.district.district_co.remove(self)
+
+        elif self.working() and len(self.action_plan) > 0:
 
             #yield self.env.process(self.fu_household_test())
             household = self.action_plan.pop(0)
             yield self.env.process(self.fu_visit_contact(household))
+            self.env.process(self.co_working_test())
 
         else:
             yield self.env.timeout(self.next_available())
+            self.env.process(self.co_working_test())
 
-        self.env.process(self.co_working_test())
+
 
     def fu_household_test(self):
         # this logic will look to see if it is the optimal time to visit a hh that has asked for a visit
@@ -428,8 +444,6 @@ class CensusOfficer(object):
 
         day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
         if self.start_simpy_time <= self.env.now < self.end_simpy_time and self.input_data['availability'][str(day_of_week)]:
-            # get day of week we are now on
-            # day_of_week = (self.rep.start_day + math.floor(self.env.now/24) % 7) % 7
 
             for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
 
@@ -457,44 +471,33 @@ class CensusOfficer(object):
 
         return max(return_index, 0)
 
-    def next_available_dow(self, time):
-        # this will find the next day of the week with a valid availability schedule
+    def return_dow(self, days_gone_from_start, original_tod, count=0):
+        # get next relavent dow based on current sim time
+        current_dow = (self.rep.start_date + dt.timedelta(days=days_gone_from_start)).weekday()
 
-        current_day = math.floor(time/24)
-        current_dow = self.rep.start_day + current_day % 7
-
-        if not self.input_data['availability'][str(current_dow)]:
-            return self.next_available_dow(time+24)
-
-        return current_dow
+        if not self.input_data['availability'][str(current_dow)] or h.str_to_dec(self.input_data['availability'][str(current_dow)][-1]) <= original_tod:
+            # empty list
+            return self.return_dow(days_gone_from_start + 1, 0, count + 1)
+        else:
+            # not empty
+            return [str(current_dow), count]
 
     def next_available(self):
         """return the number of hours until the CO is next available or remove from sim if finished"""
 
-        # for current time
-        next_avail_day = self.next_available_dow(self.env.now)
-        current_day = self.rep.start_day + math.floor(self.env.now / 24) % 7
+        current_dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
+        dow = self.return_dow(math.floor(self.env.now / 24), self.env.now % 24)
+        # if action plan is zero,so o houses to visits always delay to the start of the next valid day
+        if not self.action_plan:
+            # this actually just jumps it to the end of the day
+            return 24 - self.env.now % 24
 
-        for i in range(0, len(self.input_data['availability'][str(next_avail_day)]), 2):
+        elif int(dow[0]) == current_dow:
 
-            start_time = dt.time(*map(int, self.input_data['availability'][str(next_avail_day)][i].split(':')))
-            start_simpy_time = h.make_time_decimal(start_time) + math.floor(self.env.now / 24) * 24
-
-            if self.env.now < start_simpy_time:
-                return start_simpy_time - self.env.now
-
-        # if doesn't jump into the above check next day
-        # but only if it doing so keeps co within working overall working times
-        time_left = (math.ceil(self.env.now / 24) * 24) - self.env.now
-        next_day = self.rep.start_day + math.ceil(self.env.now / 24) % 7
-
-        # recursive here to keep checking the next day until one found?
-        if next_day * 24 < self.end_simpy_time:
-            start_time = dt.time(*map(int, self.input_data['availability'][str(next_day)][0].split(':')))
-            return h.make_time_decimal(start_time) + time_left
+            return h.str_to_dec(self.input_data['availability'][str(dow[0])][-2]) - self.env.now % 24
         else:
-            # remove from sim
-            return 1000
+
+            return ((24 - self.env.now % 24) + (int(dow[1]) - 1) * 24 + h.str_to_dec(self.input_data['availability'][str(dow[0])][0]))
 
 
 class LetterPhase(object):

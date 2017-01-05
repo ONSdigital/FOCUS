@@ -20,15 +20,17 @@ l = Lock()  # global declaration...can I avoid this
 
 
 def returns_to_date(district, output_format=""):
+    # need to add on those households who returned before the first interaction - and were therefore never added
+    # to the sim
 
     count = len([household.hh_id for household in district.households if household.returned])
 
     if output_format == "%":
 
-        return count/len(district.households)
+        return (count + district.early_responders)/(len(district.households) + district.early_responders)
 
     else:
-        return (count/len(district.households))*100
+        return ((count + district.early_responders)/(len(district.households) + district.early_responders))*100
 
 
 def current_day(obj):
@@ -54,6 +56,13 @@ def current_day(obj):
  #   time = str(hours) + "," + str(mins) + "," + str(secs)
 
  #   return dt.time(*map(int, time.split(',')))
+
+
+def str_to_dec(str_time):
+
+    times = str_time.split(":")
+
+    return float(times[0]) + float(times[1])/60
 
 
 def make_time_decimal(time_object):

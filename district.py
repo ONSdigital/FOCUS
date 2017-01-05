@@ -35,6 +35,7 @@ class District(object):
         self.reminders = []  # list of reminders to be sent
         self.return_rate = 0
         self.travel_dist = 0
+        self.early_responders = 0
 
         self.create_co(self.input_data["census officer"])
         self.first_interaction = min([co.start_simpy_time for co in self.district_co])
@@ -213,6 +214,9 @@ class District(object):
                                                              None,
                                                              response_time))
 
+            # add a counter to the district so we know how many hh have responded early
+            self.early_responders += 1
+
             return initial_action('early', digital, response_time + input_data['delay']['digital'])
 
         elif not digital and h.str2bool(input_data['paper_allowed']) \
@@ -227,6 +231,7 @@ class District(object):
                                                              None,
                                                              response_time))
 
+            self.early_responders += 1
             return initial_action('early', digital, response_time + input_data['delay']['paper'])
 
         else:
