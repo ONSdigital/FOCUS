@@ -55,8 +55,14 @@ class District(object):
             self.hh_area = self.input_data['district_area'] / len(self.households)
             self.initial_hh_sep = 2 * (math.sqrt(self.hh_area / math.pi))
         except ZeroDivisionError as e:
-            print(e, " in district ", self.name)
-            sys.exit()
+            warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
+                              " for district: ", self.name, ". HH separattion set to zero")
+            # write out a warning here but don't stop the sim just set the dist to zero
+            self.rep.output_data['Warnings'].append(warnings(self.rep.reps,
+                                                             e,
+                                                             warning_detail))
+
+            self.initial_hh_sep = 0
 
         self.env.process(self.av_travel_dist())
         self.env.process(self.start_hh())
