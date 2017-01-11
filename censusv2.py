@@ -211,6 +211,17 @@ class CensusOfficer(object):
 
         return end_date_simpy + end_time_simpy
 
+    def return_next_visit(self):
+        # tests if a return has been received since the action plans had been created.
+        # assumes a hand held device that connects live to HQ - may still need a delay?
+
+        household = self.action_plan.pop(0)
+
+        if household.returned:
+            return self.return_next_visit()
+        else:
+            return household
+
     def co_working_test(self):
 
         if h.returns_to_date(self.district) >= self.district.input_data["trigger"]:
@@ -220,7 +231,10 @@ class CensusOfficer(object):
         elif self.working() and len(self.action_plan) > 0:
 
             # yield self.env.process(self.fu_household_test())
-            household = self.action_plan.pop(0)
+            # get the first household that we think has not responded to date
+
+            household = self.return_next_visit()
+
             yield self.env.process(self.fu_visit_contact(household))
             self.env.process(self.co_working_test())
 
@@ -401,9 +415,10 @@ class CensusOfficer(object):
                                                                        self.env.now,
                                                                        household.hh_id))
             household.resp_planned = True
+            yield self.rep.env.process(household.respond(household.delay))
             visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
-            self.rep.env.process(household.respond(household.delay))
+
 
         # hh have not responded but do not respond as a result of the visit.
         # need extra here fro when you fail but not at max visits...

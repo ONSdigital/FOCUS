@@ -296,7 +296,9 @@ class Household(object):
             else:  # paper
                 start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
 
-            yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
+            #yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
+
+            yield self.env.timeout(0)  # hh does no more (without intervention)
 
     def receive_reminder(self, reminder_type):
 
