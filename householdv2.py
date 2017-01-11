@@ -31,10 +31,10 @@ visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'd
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, rnd, env, district, hh_id, hh_type, input_data, initial_action):
+    def __init__(self, rep, env, district, hh_id, hh_type, input_data, initial_action):
 
         self.rep = rep
-        self.rnd = rnd
+        self.rnd = self.rep.rnd
         self.env = env
         self.district = district
         self.hh_id = hh_id
@@ -183,7 +183,7 @@ class Household(object):
         # if a problem go straight to outcome
         # else try to convert?
 
-        da_test = self.rep.rnd.uniform(0, 100)
+        da_test = self.rnd.uniform(0, 100)
         da_effectiveness = current_ad.input_data['da_effectiveness'][self.hh_type]
 
         # if digital or have already responded skip straight to the outcome of the visit
@@ -239,7 +239,7 @@ class Household(object):
     def phone_call_outcome(self, current_ad):
 
         # digital by this point so just can you convince them to reply?
-        outcome_test = self.rep.rnd.uniform(0, 100)
+        outcome_test = self.rnd.uniform(0, 100)
         conversion_dict = self.input_data['conversion_rate'][str(h.current_day(self))]
 
         if outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]:

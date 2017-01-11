@@ -47,7 +47,7 @@ def send_reminder(household, reminder_type):
 
 def ret_rec(hh, rep):
     # print out every 100000 returns?
-    if rep.total_returns % 10000 == 0:
+    if rep.total_returns % 100000 == 0:
         print(rep.total_returns)
 
     hh.returned = True
@@ -148,9 +148,7 @@ class StartFU(object):
             # split the hh up between the CO with the higher pri hh the top of each list
             for co in self.district.district_co:
                 action_plan = self.visit_list[0::num_of_co]
-                self.visit_list = list(set(self.visit_list) - set(action_plan))
-                # re-order by pri as sets make the lists unordered
-                self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
+                self.visit_list = [hh for hh in self.visit_list if hh not in action_plan]
 
                 num_of_co -= 1
 
@@ -170,6 +168,7 @@ class CensusOfficer(object):
         self.input_data = input_data
         self.co_id = co_id
 
+        self.rnd = self.rep.rnd
         self.action_plan = []
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
@@ -214,15 +213,13 @@ class CensusOfficer(object):
 
     def co_working_test(self):
 
-        #dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
-
         if h.returns_to_date(self.district) >= self.district.input_data["trigger"]:
             # trigger reached stop collection and remove CO from list of CO's but at end of current day only?
             self.district.district_co.remove(self)
 
         elif self.working() and len(self.action_plan) > 0:
 
-            #yield self.env.process(self.fu_household_test())
+            # yield self.env.process(self.fu_household_test())
             household = self.action_plan.pop(0)
             yield self.env.process(self.fu_visit_contact(household))
             self.env.process(self.co_working_test())
@@ -276,7 +273,8 @@ class CensusOfficer(object):
 
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
-        contact_test = self.rep.rnd.uniform(0, 100)
+        contact_test = self.rnd.uniform(0, 100)
+        #print(contact_test)
         contact_dict = household.input_data['at_home'][str(h.current_day(self))]
 
         if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
@@ -320,7 +318,7 @@ class CensusOfficer(object):
 
     def fu_visit_assist(self, household):
 
-        da_test = self.rep.rnd.uniform(0, 100)
+        da_test = self.rnd.uniform(0, 100)
         da_effectiveness = self.input_data['da_effectiveness'][household.hh_type]
 
         yield self.env.timeout(self.input_data['visit_times']['query']/60)
@@ -373,7 +371,8 @@ class CensusOfficer(object):
 
     def fu_visit_outcome(self, household):
 
-        outcome_test = self.rep.rnd.uniform(0, 100)
+        outcome_test = self.rnd.uniform(0, 100)
+        #print(outcome_test)
         conversion_dict = household.input_data['conversion_rate'][str(h.current_day(self))]
 
         if household.responded is True:
@@ -433,6 +432,7 @@ class CensusOfficer(object):
         """returns true or false depending on whether or not a CO is available at current date and time"""
 
         day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
+
         if self.start_sim_time <= self.env.now < self.end_sim_time and self.input_data['availability'][str(day_of_week)]:
 
             for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
@@ -488,7 +488,8 @@ class CensusOfficer(object):
             return h.str_to_dec(self.input_data['availability'][str(dow[0])][-2]) - self.env.now % 24
         else:
 
-            return ((24 - self.env.now % 24) + (int(dow[1]) - 1) * 24 + h.str_to_dec(self.input_data['availability'][str(dow[0])][0]))
+            return ((24 - self.env.now % 24) + (int(dow[1]) - 1) * 24 + h.str_to_dec(self.input_data['availability']
+                                                                                     [str(dow[0])][0]))
 
 
 class LetterPhase(object):

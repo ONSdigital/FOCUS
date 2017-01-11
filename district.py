@@ -37,11 +37,12 @@ class District(object):
         # self.return_rate = 0  #
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
-
-        #self.create_co2(self.input_data["census officer"])  # process which creates co for district
         self.create_co()
-        self.first_interaction = min([co.start_sim_time for co in self.district_co])  # time of first interaction
-        start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
+        if self.district_co:
+            self.first_interaction = min([co.start_sim_time for co in self.district_co])  # time of first interaction
+            start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
+        else:
+            self.first_interaction = 0
 
         # create households that exist in the district
         self.create_households()
@@ -119,35 +120,6 @@ class District(object):
                 print("No key called number for CO in district: ", self.name)
                 sys.exit()
 
-    def create_co2(self, input_data, input_key=""):
-
-        id_num = 0
-        for key, value in input_data.items():
-            if isinstance(value, dict):
-
-                self.create_co(value, key)
-
-            else:
-                try:
-                    if 'number' in input_data:
-
-                        for i in range(int(input_data["number"])):
-                            id_num += 1
-                            self.district_co.append(censusv2.CensusOfficer(self.rep,
-                                                                           self.env,
-                                                                           self,
-                                                                           input_data,
-                                                                           self.rep.total_co))
-
-                            self.rep.total_co += 1
-
-                except KeyError as e:
-                    print(e, "No number key for co in district: ", self.name)
-                    sys.exit()
-                break
-
-        return input_key
-
     def create_households(self):
 
         list_of_hh_types = sorted(list(self.input_data['households'].keys()))
@@ -181,7 +153,6 @@ class District(object):
                     else:
                         # create a household instance passing initial state
                         self.households.append(householdv2.Household(self.rep,
-                                                                     self.rnd,
                                                                      self.env,
                                                                      self,
                                                                      self.rep.total_hh,
@@ -235,7 +206,6 @@ class District(object):
             # respond but test when
             return self.early_responder(input_data, digital, first_interaction, hh)
             # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND if not an early responder
-
 
         elif hh_resp < response_test <= hh_help:
             # call for help return when

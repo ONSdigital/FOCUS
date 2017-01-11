@@ -94,14 +94,14 @@ def beta_dist(rep, alpha, beta, sim_days_left):
     return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
 
 
-def gauss_dist(rnd, alpha, beta):
+#def gauss_dist(rnd, alpha, beta):
 
-    output = rnd.gauss(alpha, beta)
+#    output = rnd.gauss(alpha, beta)
 
-    if output < 0:
-        output = 0
+#    if output < 0:
+#        output = 0
 
-    return output
+#    return output
 
 
 #def path_leaf(path):
@@ -149,9 +149,9 @@ def gauss_dist(rnd, alpha, beta):
   #  return response_date_time_hours
 
 
-#def renege_time(obj):
+def renege_time(obj):
 
-  #  return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
+    return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
 
 
 def write_output(output_data, out_path, run_input_id):
