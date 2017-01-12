@@ -130,6 +130,7 @@ class StartFU(object):
     def create_visit_lists(self):
 
         if h.returns_to_date(self.district) < self.district.input_data["trigger"]:
+            # only create action plans if the target rate has not been reached
 
             self.visit_list = []
 
@@ -156,6 +157,13 @@ class StartFU(object):
             yield self.env.timeout(self.update)
             self.env.process(self.create_visit_lists())
 
+        else:
+            # returns to date over trigger point so no need to do any more FU...
+            for co in self.district.district_co:
+                co.action_plan = []
+
+            self.district.district_co = []
+
 
 class CensusOfficer(object):
     """represents an individual Census Officer. Each instance can be different"""
@@ -176,6 +184,7 @@ class CensusOfficer(object):
         self.start_sim_time = self.co_start_time()  # the sim time the co starts work
         self.end_sim_time = self.co_end_time()  # the sim time the co ends work
 
+        # start work at correct time
         start_delayed(self.env, self.co_working_test(), self.start_sim_time)
 
     def co_start_time(self):
@@ -211,28 +220,30 @@ class CensusOfficer(object):
 
         return end_date_simpy + end_time_simpy
 
-    def return_next_visit(self):
-        # tests if a return has been received since the action plans had been created.
-        # assumes a hand held device that connects live to HQ - may still need a delay?
+    def return_next_visit(self, live=False):
+        # if live tests if a return has been received since the action plans have been created.
 
         household = self.action_plan.pop(0)
 
-        if household.returned:
-            return self.return_next_visit()
+        if live and household.returned:
+            return self.return_next_visit(live)
         else:
             return household
 
     def co_working_test(self):
 
-        if h.returns_to_date(self.district) >= self.district.input_data["trigger"]:
-            # trigger reached stop collection and remove CO from list of CO's but at end of current day only?
-            self.district.district_co.remove(self)
+        if not self.district.district_co and not self.action_plan:
+            # NEEDS TESTING - am I removing the CO from the sim here?
 
-        elif self.working() and len(self.action_plan) > 0:
+            # end
+            yield self.env.timeout(0)
+            #print(self)
+
+        elif self.working() and self.action_plan:
 
             # yield self.env.process(self.fu_household_test())
-            # get the first household that we think has not responded to date
 
+            # get the first household to visit
             household = self.return_next_visit()
 
             yield self.env.process(self.fu_visit_contact(household))

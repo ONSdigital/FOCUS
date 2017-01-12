@@ -15,7 +15,6 @@ from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 
-
 l = Lock()  # global declaration...can I avoid this?
 
 
@@ -202,7 +201,7 @@ if __name__ == '__main__':
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
-    #pool = Pool(cpu_count())
+    #pool = Pool(cpu_count())  # use the next two lines to use multiple processors
     #Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
     start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
 
