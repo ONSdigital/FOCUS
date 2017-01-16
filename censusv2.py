@@ -233,11 +233,10 @@ class CensusOfficer(object):
     def co_working_test(self):
 
         if not self.district.district_co and not self.action_plan:
-            # NEEDS TESTING - am I removing the CO from the sim here?
-
-            # end
-            yield self.env.timeout(0)
-            #print(self)
+            #  if removed from district no more work to do
+            # timeout until end of sim
+            end_time = self.rep.sim_hours - self.env.now
+            yield self.env.timeout(end_time)
 
         elif self.working() and self.action_plan:
 
@@ -274,6 +273,30 @@ class CensusOfficer(object):
 
         return all(hh.arranged_visit for hh in self.action_plan)
 
+    def household_in(self, household):
+        # tests if hh is in!
+
+        contact_test = self.rnd.uniform(0, 100)
+        contact_dict = household.input_data['at_home'][str(h.current_day(self))]
+
+        if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
+            return True
+        else:
+            return False
+
+    def household_converted(self, household):
+        # tests if hh is converted to a return
+
+        outcome_test = self.rnd.uniform(0, 100)
+        conversion_dict = household.input_data['conversion_rate'][str(h.current_day(self))]
+
+        if outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]:
+            return True
+        else:
+            return False
+
+
+
     def fu_visit_contact(self, household):
 
         self.rep.output_data['Visit'].append(visit(self.rep.reps,
@@ -298,11 +321,10 @@ class CensusOfficer(object):
 
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
-        contact_test = self.rnd.uniform(0, 100)
-        #print(contact_test)
-        contact_dict = household.input_data['at_home'][str(h.current_day(self))]
 
-        if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
+        household_is_in = self.household_in(household)
+
+        if household_is_in:
             #in
             self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.reps,
                                                                        self.district.name,
@@ -315,8 +337,7 @@ class CensusOfficer(object):
 
             yield self.rep.env.process(self.fu_visit_assist(household))
 
-        elif (contact_test > contact_dict[h.return_time_key(contact_dict, self.env.now)] and
-              household.visits == household.input_data['max_visits'] and
+        elif (not household_is_in and household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
@@ -326,7 +347,7 @@ class CensusOfficer(object):
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         else:
-            # out - add drop of of a note
+            # out - add drop off of a note
             self.rep.output_data['Visit_out'].append(visit_out(self.rep.reps,
                                                                self.district.name,
                                                                household.input_data["LA"],
@@ -382,7 +403,7 @@ class CensusOfficer(object):
 
         else:
             # or suggest other forms of assistance to be decided...
-            # no more - another visit will be scheduled...
+            # non implemented at present so another visit will be scheduled - another visit will be scheduled...
             self.rep.output_data['Visit_assist'].append(visit_assist(self.rep.reps,
                                                                      self.district.name,
                                                                      household.input_data["LA"],
@@ -396,9 +417,7 @@ class CensusOfficer(object):
 
     def fu_visit_outcome(self, household):
 
-        outcome_test = self.rnd.uniform(0, 100)
-        #print(outcome_test)
-        conversion_dict = household.input_data['conversion_rate'][str(h.current_day(self))]
+        household_returns = self.household_converted(household)
 
         if household.responded is True:
             self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
@@ -413,9 +432,8 @@ class CensusOfficer(object):
             visit_time = self.input_data["visit_times"]["wasted"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
-        # hh have not responded yet and respond there and then either by paper or digital.
-        elif (not household.responded and
-                outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]):
+        elif not household.responded and household_returns:
+            # hh have not responded yet and respond there and then either by paper or digital.
 
             self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
                                                                        household.district.name,
@@ -426,18 +444,16 @@ class CensusOfficer(object):
                                                                        self.env.now,
                                                                        household.hh_id))
             household.resp_planned = True
-            yield self.rep.env.process(household.respond(household.delay))
+            yield self.rep.env.process(household.respond(household.calc_delay()))
             visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
-
-        # hh have not responded but do not respond as a result of the visit.
-        # need extra here fro when you fail but not at max visits...
-        elif (not household.responded and
-              outcome_test > conversion_dict[h.return_time_key(conversion_dict, self.env.now)] and
+        elif (not household.responded and not household_returns and
               h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
               household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
+            # hh have not responded but do not respond as a result of the visit.
+            # need extra here fro when you fail but not at max visits...
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
                                                                      household.district.name,
@@ -540,8 +556,6 @@ class LetterPhase(object):
                 not household.responded) or \
                     (not h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"]):
 
-                #print("letter", household.hh_id)
-
                 # send a letter
                 self.env.process(self.co_send_letter(household,
                                                      self.input_data["effect"],
@@ -579,6 +593,8 @@ def schedule_paper_drop(obj, household, has_paper=False):
                                                               household.hh_type,
                                                               obj.rep.env.now,
                                                               household.hh_id))
+
+        obj.env.process(send_reminder(household, 'pq'))
     else:
 
         household.output_data['Post_paper'].append(post_paper(household.rep.reps,
@@ -589,7 +605,6 @@ def schedule_paper_drop(obj, household, has_paper=False):
                                                               household.hh_type,
                                                               household.env.now))
 
-    if has_paper:
-        obj.env.process(send_reminder(household, 'pq'))
-    else:
         start_delayed(obj.env, send_reminder(household, 'pq'), h.next_day(obj.env.now))
+
+

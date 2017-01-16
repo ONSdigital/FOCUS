@@ -46,11 +46,6 @@ class Household(object):
         self.digital = initial_action.digital
         self.initial_time = initial_action.time
 
-        if self.digital:
-            self.delay = self.input_data['delay']['digital']
-        else:
-            self.delay = self.input_data['delay']['paper']
-
         self.priority = self.input_data['priority']
         self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])
 
@@ -78,7 +73,7 @@ class Household(object):
 
         if self.initial_status == 'late' and not self.responded:
             # normal response
-            yield self.env.process(self.respond(self.delay))
+            yield self.env.process(self.respond(self.calc_delay()))
 
         elif self.initial_status == 'help' and not self.responded:
             # help
@@ -256,7 +251,7 @@ class Household(object):
                                                                      self.env.now))
             self.resp_planned = True
             self.rep.adviser_store.put(current_ad)
-            self.rep.env.process(self.respond(self.delay))
+            self.rep.env.process(self.respond(self.calc_delay()))
 
         else:
 
@@ -291,7 +286,7 @@ class Household(object):
                                                         self.hh_id,
                                                         self.resp_time))
 
-            if self.delay == 0:  # digital
+            if self.calc_delay() == 0:  # digital
                 self.env.process(censusv2.ret_rec(self, self.rep))
             else:  # paper
                 start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
@@ -301,10 +296,28 @@ class Household(object):
             yield self.env.timeout(0)  # hh does no more (without intervention)
 
     def receive_reminder(self, reminder_type):
+        # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
 
-        self.status = "received reminder"
+        # default settings
+        responsed = "no_response"
+        digital = "paper"
+        mode = "digital_only"
 
-        if self.resp_planned and self.responded:
+        # update depending on actual state
+        if self.responded:
+            responsed = "response"
+        if self.digital:
+            digital = "digital"
+        if self.paper_allowed and not self.digital:
+            mode = "paper_allowed"
+
+        # and get relevant figures
+        response_data = self.input_data["reminders"][reminder_type][responsed][digital][mode]
+        self.resp_level = response_data["resp"]
+        self.help_level = response_data["help"]
+
+        # recorded if wasted, unnecessary or successful
+        if self.responded:
 
             self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
                                                                            self.district.name,
@@ -315,7 +328,8 @@ class Household(object):
                                                                            self.hh_id,
                                                                            self.env.now,
                                                                            reminder_type))
-        elif self.resp_planned and not self.responded:
+
+        elif self.resp_planned:
 
             self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
                                                                                      self.district.name,
@@ -327,9 +341,8 @@ class Household(object):
                                                                                      self.env.now,
                                                                                      reminder_type))
 
-        elif not self.resp_planned and not self.responded and reminder_type == 'pq' and not self.digital:
-            # hh who have chosen not to respond due to not having paper but are now given paper
-
+        else:
+            # if get here they have not responded or planned to do so, so a worthwhile reminder.
             self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
                                                                              self.district.name,
                                                                              self.input_data["LA"],
@@ -340,20 +353,27 @@ class Household(object):
                                                                              self.env.now,
                                                                              reminder_type))
 
-            self.resp_level = self.set_behaviour('response')
-            self.help_level = self.resp_level + self.set_behaviour('help')
-            yield self.env.process(self.action())
-
-        elif not self.resp_planned and not self.responded and reminder_type == 'pq' and self.digital:
-                # hh who have chosen not to respond despite happy to use digital - paper makes no/little difference?
-
-                self.resp_level = 0
-                self.help_level = 0
-
+        # now move on to the relevant action based on extracted values
+        # response test
+        reminder_test = self.rnd.uniform(0, 100)
+        if reminder_test <= self.resp_level:
+            # respond there and then
+            yield self.env.process(self.respond(self.calc_delay()))
+        elif self.resp_level < reminder_test <= self.resp_level + self.help_level:
+            # call for help
+            yield self.env.process(self.contact())
         else:
-            # some other reminder received - will need to understand the effectiveness of these whatever they are
-            self.resp_level = 0
-            self.help_level = 0
+            # nowt
+            self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
+                                                             self.district.name,
+                                                             self.input_data["LA"],
+                                                             self.input_data["LSOA"],
+                                                             self.digital,
+                                                             self.hh_type,
+                                                             self.hh_id,
+                                                             self.env.now))
+
+        yield self.env.timeout(0)
 
     def record_wait_time(self, wait_time, renege_time):
 
@@ -427,14 +447,9 @@ class Household(object):
                                                                      self.hh_id,
                                                                      self.rep.env.now))
 
-
-
-
-
-
-
-
-
-
-
+    def calc_delay(self):
+        if self.digital:
+            return self.input_data["delay"]["digital"]
+        else:
+            return self.input_data["delay"]["paper"]
 

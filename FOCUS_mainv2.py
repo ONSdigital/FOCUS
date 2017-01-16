@@ -51,7 +51,6 @@ def start_run(run_input, seeds, out_path):
     env.run(until=sim_hours)
 
     # write the output to csv files
-
     hp.write_output(output_data, out_path, run_input['run id'])
 
 

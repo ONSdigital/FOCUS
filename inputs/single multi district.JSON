@@ -186,6 +186,100 @@
                 "help": 89.5
               }
             },
+            "reminders":{
+              "pq":{
+                "response":{
+                  "paper":{
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  },
+                  "digital": {
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  }
+                },
+                "no_response":{
+                  "paper":{
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  },
+                  "digital": {
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  }
+                }
+              },
+              "postcard": {
+                "response":{
+                  "paper":{
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  },
+                  "digital": {
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  }
+                },
+                "no_response":{
+                  "paper":{
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  },
+                  "digital": {
+                    "digital_only":{
+                      "help": 0,
+                      "resp": 10
+                    },
+                    "paper_allowed": {
+                      "help": 0,
+                      "resp": 10
+                    }
+                  }
+                }
+              }
+            },
             "call_renege_lower": 0.05,
             "call_renege_upper": 0.25,
             "call_conversion_rate": 35,
