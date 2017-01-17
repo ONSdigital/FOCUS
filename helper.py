@@ -119,9 +119,9 @@ def next_day(simpy_time):
     return next - simpy_time + 9
 
 
-#def date_range(start_date, end_date):
-#    for n in range(int((end_date - start_date).days)):
-#        yield start_date + dt.timedelta(n)
+def date_range(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + dt.timedelta(n)
 
 
 #def return_resp_time(obj):
@@ -249,7 +249,38 @@ def set_household_response_time(rep, input_data, sim_hours):
 
   #  return current_date
 
+def get_entity_time(entity, type="start"):
 
+    date_type = type + "_date"
+    index = 0
+    if type == "end":
+        index = -1
+
+    try:
+        # check date has valid availability schedule
+        date = dt.date(*map(int, entity.input_data[date_type].split(',')))
+        # convert date to sim (simpy) time
+        date_sim = (date - entity.rep.start_date).total_seconds() / 3600
+
+        # convert time of that day to sim time
+        time = entity.input_data['availability'][str(date.weekday())][index]
+        time_sim = make_time_decimal(dt.time(*map(int, time.split(':'))))
+
+        return date_sim + time_sim
+
+    except IndexError as e:
+
+        if not entity.rep.districts:
+            # if no districts must be an error that applies to whole run (advisers)
+            print(e, "Run ", entity.rep.run, " has no availability schedule set for adviser on: ",
+                  entity.input_data[date_type])
+
+        else:
+
+            print(e, "District ", entity.district.name, " has no availability schedule set for CO on start day of ",
+                  entity.input_data[date_type])
+
+            sys.exit()
 
 
 

@@ -68,7 +68,7 @@ class Rep(object):
                     #self.total_ad_instances += 1
 
             except KeyError:
-                print("No key called \"number\" for advisers in run: ", self.run, " replication: ", self.reps)
+                print("Error when creating advisers in run: ", self.run, " replication: ", self.reps)
                 sys.exit()
 
     def create_districts(self):
