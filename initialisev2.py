@@ -1,9 +1,9 @@
 """rep class is the instance that contains all that is required for current rep of simulation"""
 import district
-import simpy
 import censusv2
-import datetime
 import helper as h
+import simpy
+import sys
 
 
 class Rep(object):
@@ -29,32 +29,47 @@ class Rep(object):
         self.start_day = start_date.weekday()
 
         self.districts = []  # list containing each instance of the district class
-        # self.ad_avail = []  # list of all the available advisers
+        self.ad_avail = []  # list of all the available advisers
 
-        # self.total_ad_instances = 0
+        self.total_ad_instances = 0
         self.total_returns = 0
         self.total_hh = 0  # total number of hh across all districts
         self.total_co = 0  # total number of co across all districts
 
         # methods to run on initiation
-        # self.total_ad_instances = self.input_data['advisers']['number']
-        # if self.total_ad_instances > 0:
-        #     self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
+        ad_inputs = self.input_data['advisers']
+        self.total_ad_instances = sum([ad_inputs[adviser]["number"] for adviser in ad_inputs])
+        if self.total_ad_instances > 0:
+            self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
 
         # create common resources
         # self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
 
+        self.create_advisers()
         self.create_districts()  # initialises districts
 
-    def create_advisers(self, input_data, input_key):
+    def create_advisers(self):
 
-        # create the advisers - both web and phone
-        id_ad_num = 0
-        for i in range(int(input_data["number"])):
+        id_num = 0
+        list_of_adviser_types = sorted(list(self.input_data['advisers'].keys()))
+        for adviser in list_of_adviser_types:
 
-            self.ad_avail.append(censusv2.Adviser(self, id_ad_num, input_data))
+            # get data for current type
+            adviser_input_data = self.input_data['advisers'][adviser]
 
-            id_ad_num += 1
+            try:
+
+                for i in range(int(adviser_input_data['number'])):
+                    id_num += 1
+                    self.ad_avail.append(censusv2.Adviser(self,
+                                                          id_num,
+                                                          adviser_input_data))
+
+                    #self.total_ad_instances += 1
+
+            except KeyError:
+                print("No key called \"number\" for advisers in run: ", self.run, " replication: ", self.reps)
+                sys.exit()
 
     def create_districts(self):
 

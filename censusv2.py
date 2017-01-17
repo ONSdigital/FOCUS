@@ -72,7 +72,7 @@ def ret_rec(hh, rep):
 
 
 class Adviser(object):
-    """Call centre adviser - multitasking"""
+    """Call centre adviser"""
 
     def __init__(self, rep, id_num, input_data):
 
@@ -80,15 +80,63 @@ class Adviser(object):
         self.id_num = id_num
         self.input_data = input_data
 
-        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d, %H, %M, %S')
-        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d, %H, %M, %S')
+        self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d').date()
+        self.end_date = datetime.datetime.strptime(self.input_data['end_date'], '%Y, %m, %d').date()
+
+        self.start_sim_time = self.adviser_start_time()  # the sim time the adviser starts work
+        self.end_sim_time = self.adviser_end_time()  # the sim time the adviser ends work
 
         # start the processes to add and remove from the store...
-
         self.set_availability()
 
 
+    def adviser_start_time(self):
+
+        try:
+            # check start date has valid availability schedule
+            start_date = dt.date(*map(int, self.input_data['start_date'].split(',')))
+            # convert start date to sim (simpy) time
+            start_date_sim = (start_date - self.rep.start_date).total_seconds() / 3600
+
+            # convert start time of that day to simpy time
+            start_time = self.input_data['availability'][str(start_date.weekday())][0]
+            start_time_sim = h.make_time_decimal(dt.time(*map(int, start_time.split(':'))))
+
+            return start_date_sim + start_time_sim
+
+        except IndexError as e:
+            print(e, "Run ", self.rep.run, " has no availability schedule set for adviser on start day")
+            sys.exit()
+
+    def adviser_end_time(self):
+
+        try:
+            # convert end date to sim time
+            end_date = dt.date(*map(int, self.input_data['end_date'].split(',')))
+            end_date_sim = (end_date - self.rep.start_date).total_seconds() / 3600
+
+            # convert end time of that day to simpy time
+            end_time = self.input_data['availability'][str(end_date.weekday())][-1]
+            end_time_sim = h.make_time_decimal(dt.time(*map(int, end_time.split(':'))))
+
+            return end_date_sim + end_time_sim
+
+        except IndexError as e:
+            print(e, "Run ", self.rep.run, " has no availability schedule set for adviser on end day")
+            sys.exit()
+
+
     def set_availability(self):
+
+        # for each adviser timeout until sim start time
+        # at start time add to store
+        # also create process to remove from store at next time
+        # when removed timeout until next time
+        # then add/remove again
+
+        # notes---next available code for CO may work here? return_dow function to get hours to next available
+
+
 
         for single_date in h.date_range(self.start_date, self.end_date):
             for time_slot in self.input_data['availability'][str(single_date.weekday())]:
@@ -294,8 +342,6 @@ class CensusOfficer(object):
             return True
         else:
             return False
-
-
 
     def fu_visit_contact(self, household):
 
@@ -520,7 +566,7 @@ class CensusOfficer(object):
 
         current_dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
         dow = self.return_dow(math.floor(self.env.now / 24), self.env.now % 24)
-        # if action plan is zero,so o houses to visits always delay to the start of the next valid day
+        # if action plan is zero,so no houses to visits always delay to the start of the next valid day
         if not self.action_plan:
             # this actually just jumps it to the end of the day
             return 24 - self.env.now % 24
