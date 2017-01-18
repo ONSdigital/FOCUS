@@ -257,7 +257,12 @@ class District(object):
 
     def help(self, input_data, digital, first_interaction, hh):
 
-        return initial_action('help', digital, 0)
+        # below uses response time profile - will need to update this to a "call" profile.
+        response_time = h.set_household_response_time(self.rep,
+                                                      input_data,
+                                                      self.rep.sim_hours)
+
+        return initial_action('help', digital, response_time)
 
     def do_nothing(self, input_data, digital, first_interaction, hh):
 

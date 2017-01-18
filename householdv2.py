@@ -123,8 +123,23 @@ class Household(object):
 
         else:
             # otherwise carry on to the call centre to speak to an adviser
-
             yield self.env.process(self.phone_call_connect())
+
+    def action_test(self, type):
+        # tests what a household will do next after an interaction
+        # returns action and time of action.
+
+        test_value = self.rnd.uniform(0, 100)
+        dict_value = self.input_data["behaviours"][type]
+
+        if test_value <= dict_value["response"]:
+            # respond straight away
+            return ["respond", self.env.now]
+        elif dict_value["response"] < test_value <= dict_value["response"] + dict_value["help"]:
+            # or call again sometime later, set at 1 hour later for now...
+            return ["contact", 1]
+        else:
+            return ["Do nothing", 0]
 
     def phone_call_connect(self):
 
@@ -133,7 +148,8 @@ class Household(object):
         current_ad = yield self.rep.adviser_store.get()
         wait_time = self.env.now - called_at
 
-        if wait_time >= h.renege_time(self):
+        # renege time a fixed value for now. Determine suitable distribution from paradata?
+        if wait_time >= self.input_data["renege"]:
             # hang up
 
             self.output_data['Call_renege'].append(call_renege(self.rep.reps,
@@ -144,15 +160,20 @@ class Household(object):
                                                                self.hh_type,
                                                                self.hh_id,
                                                                self.env.now))
-
-            self.resp_level = 0
-            self.help_level = self.resp_level + (self.set_behaviour('help', self.calls) * 0.5)
             self.rep.adviser_store.put(current_ad)
+
+            # record wait times for stats generation - wait time her eis how long they would of had to wait
+            # not how long they did wait - this is given by the renege time
             if wait_time > 0:
+                self.record_wait_time(wait_time, self.input_data["renege"])
 
-                self.record_wait_time(wait_time, h.renege_time(self))
-
-            yield self.env.process(self.action())
+            # so hh didn't get through - some may now respond with no extra tries but more will call again or give up.
+            action = self.action_test("renege")
+            # but when?
+            if not action[0] == "Do nothing":
+                function_to_call = getattr(self, action[0])
+                yield self.env.timeout(action[1])
+                yield self.env.process(function_to_call())
 
         else:
             # got through
@@ -167,7 +188,7 @@ class Household(object):
                                                                  self.env.now))
 
             if wait_time > 0:
-                self.record_wait_time(wait_time, h.renege_time(self))
+                self.record_wait_time(wait_time, self.input_data["renege"])
 
             yield self.env.process(self.phone_call_assist(current_ad))
 
@@ -179,6 +200,7 @@ class Household(object):
         # else try to convert?
 
         da_test = self.rnd.uniform(0, 100)
+        # how effective current adviser is at conversion to digital
         da_effectiveness = current_ad.input_data['da_effectiveness'][self.hh_type]
 
         # if digital or have already responded skip straight to the outcome of the visit
@@ -189,7 +211,7 @@ class Household(object):
             yield self.rep.env.process(self.phone_call_outcome(current_ad))
 
         elif not self.digital and da_test <= da_effectiveness:
-            # want paper but not allowed it...but do convert to digital
+            # want paper but not allowed it...but advisers converts hh to digital
 
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
@@ -201,12 +223,11 @@ class Household(object):
                                                                      self.hh_type,
                                                                      self.hh_id,
                                                                      self.rep.env.now))
-
             self.digital = True
             yield self.env.process(self.phone_call_outcome(current_ad))
 
         elif not self.digital and da_test > da_effectiveness:
-            # not digital and not converted so arrange a visit
+            # not digital and not converted so arrange a visit or something else?
 
             self.rep.output_data['Visit_request'].append(call_convert(self.rep.reps,
                                                                       self.district.name,
@@ -224,6 +245,7 @@ class Household(object):
             self.rep.adviser_store.put(current_ad)
             self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
 
+            # this brings the hh to the top straight away...but should only happen when RMT updates???
             for co in self.district.district_co:
 
                 if self in co.action_plan:

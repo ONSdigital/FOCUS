@@ -149,11 +149,6 @@ def date_range(start_date, end_date):
   #  return response_date_time_hours
 
 
-def renege_time(obj):
-
-    return obj.rep.rnd.uniform(obj.input_data['call_renege_lower'], obj.input_data['call_renege_upper'])
-
-
 def write_output(output_data, out_path, run_input_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))

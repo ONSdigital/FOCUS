@@ -38,7 +38,7 @@
       }
     },
       "late":{
-        "number": 2,
+        "number": 0,
         "start_date": "2011, 3, 7",
         "end_date": "2011, 5, 6",
         "availability": {
@@ -116,14 +116,18 @@
           "htc1": {
             "behaviours": {
               "default": {
-                "response":84.5
-                ,
-                "help": 0
+                "response":0,
+                "help": 100
               },
               "alt": {
                 "response": 0,
                 "help": 89.5
-              }
+              },
+              "renege":{
+                "response": 0,
+                "help": 100
+              },
+              "other":{}
             },
             "reminders":{
               "pq":{
@@ -219,15 +223,14 @@
                 }
               }
             },
-            "call_renege_lower": 0.05,
-            "call_renege_upper": 0.25,
+            "renege": 0.125,
             "call_conversion_rate": 35,
             "paper_prop": 86,
             "LA": "an LA",
             "LSOA": "an LSOA",
             "paper_allowed": "True",
-            "number": 100,
-            "FU_start_time": 336,
+            "number": 1,
+            "FU_start_time": 1500,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 10,
@@ -270,7 +273,6 @@
                 "24": 10
               }
             },
-            "FU_on": 1,
             "send_incomplete": 0,
             "response_day": [
               0.1,
@@ -286,7 +288,7 @@
                 1
               ]
             },
-            "at_home": {
+            "contact_rate": {
               "0": {
                 "9": 20,
                 "17": 60,

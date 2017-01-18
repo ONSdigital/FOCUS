@@ -59,13 +59,13 @@ class Rep(object):
 
             try:
 
-                for i in range(int(adviser_input_data['number'])):
-                    id_num += 1
-                    self.ad_avail.append(censusv2.Adviser(self,
-                                                          id_num,
-                                                          adviser_input_data))
+                if int(adviser_input_data['number']) > 0:
 
-                    #self.total_ad_instances += 1
+                    for i in range(int(adviser_input_data['number'])):
+                        id_num += 1
+                        self.ad_avail.append(censusv2.Adviser(self,
+                                                              id_num,
+                                                              adviser_input_data))
 
             except KeyError:
                 print("Error when creating advisers in run: ", self.run, " replication: ", self.reps)

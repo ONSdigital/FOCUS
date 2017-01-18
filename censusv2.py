@@ -249,24 +249,13 @@ class CensusOfficer(object):
 
         return all(hh.arranged_visit for hh in self.action_plan)
 
-    def household_in(self, household):
+    def household_test(self, household, type):
         # tests if hh is in!
 
-        contact_test = self.rnd.uniform(0, 100)
-        contact_dict = household.input_data['at_home'][str(h.current_day(self))]
+        test_value = self.rnd.uniform(0, 100)
+        dict_value = household.input_data[type][str(h.current_day(self))]
 
-        if contact_test <= contact_dict[h.return_time_key(contact_dict, self.env.now)]:
-            return True
-        else:
-            return False
-
-    def household_converted(self, household):
-        # tests if hh is converted to a return
-
-        outcome_test = self.rnd.uniform(0, 100)
-        conversion_dict = household.input_data['conversion_rate'][str(h.current_day(self))]
-
-        if outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]:
+        if test_value <= dict_value[h.return_time_key(dict_value, self.env.now)]:
             return True
         else:
             return False
@@ -296,7 +285,7 @@ class CensusOfficer(object):
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
 
-        household_is_in = self.household_in(household)
+        household_is_in = self.household_test(household, "contact_rate")
 
         if household_is_in:
             #in
@@ -391,7 +380,7 @@ class CensusOfficer(object):
 
     def fu_visit_outcome(self, household):
 
-        household_returns = self.household_converted(household)
+        household_returns = self.household_test(household, "conversion_rate")
 
         if household.responded is True:
             self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
