@@ -14,6 +14,7 @@ do_nothing = namedtuple('Do_nothing', ['rep', 'district', 'LA', 'LSOA', 'digital
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time','type'])
 reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
 reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
+reminder_received = namedtuple('Reminder_received', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
 call = namedtuple('Call', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
@@ -25,7 +26,7 @@ received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA'
 wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-visit_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 
 
 class Household(object):
@@ -51,7 +52,7 @@ class Household(object):
 
         # flags to keep track of what the hh is doing/has done
 
-        if self.initial_time > 0:
+        if self.initial_time > 0 and (self.initial_status == 'early' or self.initial_status == 'late'):
             self.resp_planned = True
         else:
             self.resp_planned = False
@@ -194,27 +195,22 @@ class Household(object):
 
     def phone_call_assist(self, current_ad):
 
-        # similar to CO?
-        # got to here which means either a problem or want paper but not allowed it...
-        # if a problem go straight to outcome
-        # else try to convert?
-
         da_test = self.rnd.uniform(0, 100)
-        # how effective current adviser is at conversion to digital
+        # how effective current adviser type at conversion to digital
         da_effectiveness = current_ad.input_data['da_effectiveness'][self.hh_type]
 
-        # if digital or have already responded skip straight to the outcome of the visit
+        # wait to determine if digital or paper preference
+        yield self.env.timeout(current_ad.input_data['call_times']['query'] / 60)
+
         if self.digital:
-
-            yield self.env.timeout(current_ad.input_data['call_times']['query'] / 60)
-
+            # no need to persuade go straight to the outcome
             yield self.rep.env.process(self.phone_call_outcome(current_ad))
 
         elif not self.digital and da_test <= da_effectiveness:
-            # want paper but not allowed it...but advisers converts hh to digital
-
+            # not digital and adviser converts household to digital but takes some time
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
+            # record event
             self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
                                                                      self.district.name,
                                                                      self.input_data["LA"],
@@ -223,35 +219,29 @@ class Household(object):
                                                                      self.hh_type,
                                                                      self.hh_id,
                                                                      self.rep.env.now))
+
             self.digital = True
             yield self.env.process(self.phone_call_outcome(current_ad))
 
         elif not self.digital and da_test > da_effectiveness:
-            # not digital and not converted so arrange a visit or something else?
-
-            self.rep.output_data['Visit_request'].append(call_convert(self.rep.reps,
-                                                                      self.district.name,
-                                                                      self.input_data["LA"],
-                                                                      self.input_data["LSOA"],
-                                                                      self.digital,
-                                                                      self.hh_type,
-                                                                      self.hh_id,
-                                                                      self.rep.env.now))
+            # not digital and not converted so arrange a visit or something else when we know what!
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
-            # up priority and schedule a visit at most likely time to be in?
+
+            self.rep.output_data['call_request'].append(call_convert(self.rep.reps,
+                                                                     self.district.name,
+                                                                     self.input_data["LA"],
+                                                                     self.input_data["LSOA"],
+                                                                     self.digital,
+                                                                     self.hh_type,
+                                                                     self.hh_id,
+                                                                     self.rep.env.now))
+
+            # up priority and tag so a visit happens at time likely time to be in - or just set it to succeed - or both?
             self.priority -= 10
 
             self.rep.adviser_store.put(current_ad)
             self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
-
-            # this brings the hh to the top straight away...but should only happen when RMT updates???
-            for co in self.district.district_co:
-
-                if self in co.action_plan:
-                    # update action plan...bring to top...if exists
-                    co.action_plan.pop(co.action_plan.index(self))
-                    co.action_plan = [self] + co.action_plan
 
     def phone_call_outcome(self, current_ad):
 
@@ -365,7 +355,7 @@ class Household(object):
 
         else:
             # if get here they have not responded or planned to do so, so a worthwhile reminder.
-            self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
+            self.rep.output_data['Reminder_received'].append(reminder_success(self.rep.reps,
                                                                              self.district.name,
                                                                              self.input_data["LA"],
                                                                              self.input_data["LSOA"],
@@ -380,6 +370,17 @@ class Household(object):
         reminder_test = self.rnd.uniform(0, 100)
         if reminder_test <= self.resp_level:
             # respond there and then
+
+            self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
+                                                                             self.district.name,
+                                                                             self.input_data["LA"],
+                                                                             self.input_data["LSOA"],
+                                                                             self.digital,
+                                                                             self.hh_type,
+                                                                             self.hh_id,
+                                                                             self.env.now,
+                                                                             reminder_type))
+
             yield self.env.process(self.respond(self.calc_delay()))
         elif self.resp_level < reminder_test <= self.resp_level + self.help_level:
             # call for help

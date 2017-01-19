@@ -196,12 +196,35 @@ class CensusOfficer(object):
         # start work at correct time
         start_delayed(self.env, self.co_working_test(), self.start_sim_time)
 
+    def optimal_time(self, household):
+        # determines if the current time is the best time to visit a hh that has asked for a visit
+
+        # get times avail
+        d = household.input_data['contact_rate'][str(h.current_day(household))]
+
+        # if current time is not best time don't visit
+        if h.return_time_key(d, self.env.now) != max(d, key=d.get):
+            return False
+        else:
+            # visit
+            return True
+
     def return_next_visit(self, live=False):
         # if live tests if a return has been received since the action plans have been created.
+
+        # add a check to see if the hh has requested a visit - if yes go at optimal time for hh type
 
         household = self.action_plan.pop(0)
 
         if live and household.returned:
+            return self.return_next_visit(live)
+        elif household.arranged_visit and not self.optimal_time(household):
+            # put hh back in list at correct place and then get the next one...unless no other hh to visit
+            if self.action_plan:
+                self.action_plan = self.action_plan[0] + household + self.action_plan[1:]
+            else:
+                return household
+
             return self.return_next_visit(live)
         else:
             return household
@@ -216,8 +239,6 @@ class CensusOfficer(object):
 
         elif self.working() and self.action_plan:
 
-            # yield self.env.process(self.fu_household_test())
-
             # get the first household to visit
             household = self.return_next_visit()
 
@@ -227,27 +248,6 @@ class CensusOfficer(object):
         else:
             yield self.env.timeout(self.next_available())
             self.env.process(self.co_working_test())
-
-    def fu_household_test(self):
-        # this logic will look to see if it is the optimal time to visit a hh that has asked for a visit
-        # if not it will add it back to the list and move to the next household
-        # if yes it will make the call
-        # not used for now
-
-        # take household to visit out but check if a visit has been arranged
-        household = self.action_plan.pop(0)
-        d = household.input_data['at_home'][str(h.current_day(household))]
-
-        # check arrange time vs current time...and day...
-        if household.arranged_visit and h.return_time_key(d, self.env.now) != max(d, key=d.get) and not self.catch_all_arranged():
-
-            self.action_plan.insert(self.return_index(), household)
-        else:
-            yield self.env.process(self.fu_visit_contact(household))
-
-    def catch_all_arranged(self):
-
-        return all(hh.arranged_visit for hh in self.action_plan)
 
     def household_test(self, household, type):
         # tests if hh is in!
