@@ -49,6 +49,7 @@ class Household(object):
 
         self.priority = self.input_data['priority']
         self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])
+        self.paper_on_request = h.str2bool(self.input_data['paper_on_request'])
 
         # flags to keep track of what the hh is doing/has done
 
@@ -114,11 +115,12 @@ class Household(object):
 
         if (not self.digital and not self.paper_allowed and
             h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
-            h.str2bool(self.input_data['paper_on_request'])):
+            self.paper_on_request):
             # so provide paper if the conditions are met...
 
             self.paper_allowed = True
-            censusv2.schedule_paper_drop(self, self, False)
+            self.priority += 5  # lower the priority as more likely to reply
+            censusv2.schedule_paper_drop(self, False)
 
             yield self.env.timeout(0)
 
@@ -126,12 +128,22 @@ class Household(object):
             # otherwise carry on to the call centre to speak to an adviser
             yield self.env.process(self.phone_call_connect())
 
+    def default_behaviour(self):
+        # depending on circumstances can follow one of two paths
+        if self.digital or self.paper_allowed:
+            return 'default'
+        else:
+            return 'alt'
+
     def action_test(self, type):
         # tests what a household will do next after an interaction
         # returns action and time of action.
 
         test_value = self.rnd.uniform(0, 100)
-        dict_value = self.input_data["behaviours"][type]
+        # test if default or alt
+        behaviour = self.default_behaviour()
+
+        dict_value = self.input_data["behaviours"][type][behaviour]
 
         if test_value <= dict_value["response"]:
             # respond straight away
@@ -310,22 +322,10 @@ class Household(object):
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
 
-        # default settings
-        responsed = "no_response"
-        digital = "paper"
-        mode = "digital_only"
-
-        # update depending on actual state
-        if self.responded:
-            responsed = "response"
-        if self.digital:
-            digital = "digital"
-        if self.paper_allowed and not self.digital:
-            mode = "paper_allowed"
-
+        behaviour = self.default_behaviour()
         # and get relevant figures
-        response_data = self.input_data["reminders"][reminder_type][responsed][digital][mode]
-        self.resp_level = response_data["resp"]
+        response_data = self.input_data["behaviours"][reminder_type][behaviour]
+        self.resp_level = response_data["response"]
         self.help_level = response_data["help"]
 
         # recorded if wasted, unnecessary or successful
@@ -368,7 +368,13 @@ class Household(object):
         # now move on to the relevant action based on extracted values
         # response test
         reminder_test = self.rnd.uniform(0, 100)
-        if reminder_test <= self.resp_level:
+
+        if self.responded or self.resp_planned:
+            # nothing but some may call to complain - do we care and need to represent this?
+            # impact likely to be very small operationally but reputation wise?
+            pass
+
+        elif reminder_test <= self.resp_level:
             # respond there and then
 
             self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,

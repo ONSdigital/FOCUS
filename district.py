@@ -169,11 +169,6 @@ class District(object):
                 print(e, "No key called number for HH in district: ", self.name)
                 sys.exit()
 
-    #def start_fu(self):
-
-        # determines when FU starts for the district - ie, when does the first CO become available
-     #   start_delayed(self.env, censusv2.start_fu(self.env, self), self.first_interaction)
-
     def create_letterphases(self):
 
         letter_list = sorted(list(self.input_data['letter_phases']))
@@ -198,8 +193,8 @@ class District(object):
             behaviour = 'alt'
 
         # set values to use
-        hh_resp = input_data['behaviours'][behaviour]['response']
-        hh_help = input_data['behaviours'][behaviour]['help']
+        hh_resp = input_data['behaviours']['initial'][behaviour]['response']
+        hh_help = input_data['behaviours']['initial'][behaviour]['help']
 
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
         if response_test <= hh_resp:

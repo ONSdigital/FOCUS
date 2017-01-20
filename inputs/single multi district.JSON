@@ -7,7 +7,7 @@
     "census_date": "2011, 3, 13",
     "advisers": {
       "early":{
-        "number": 2,
+        "number": 1,
         "start_date": "2011, 3, 7",
         "end_date": "2011, 5, 6",
         "availability": {
@@ -79,7 +79,7 @@
         "posting_time": 48,
         "census officer": {
           "standard": {
-            "number": 2,
+            "number": 1,
             "has_paper": "False",
             "travel_speed": 5,
             "start_date": "2011, 4, 6",
@@ -116,8 +116,8 @@
           "htc1": {
             "behaviours": {
               "default": {
-                "response":0,
-                "help": 100
+                "response":84.5,
+                "help": 5
               },
               "alt": {
                 "response": 0,
@@ -228,7 +228,7 @@
             "paper_prop": 86,
             "LA": "an LA",
             "LSOA": "an LSOA",
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 1,
             "FU_start_time": 336,
             "dig_assist_flex": 0,

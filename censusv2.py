@@ -213,8 +213,10 @@ class CensusOfficer(object):
         # if live tests if a return has been received since the action plans have been created.
 
         # add a check to see if the hh has requested a visit - if yes go at optimal time for hh type
-
-        household = self.action_plan.pop(0)
+        if self.action_plan:
+            household = self.action_plan.pop(0)
+        else:
+            return None
 
         if live and household.returned:
             return self.return_next_visit(live)
@@ -242,8 +244,12 @@ class CensusOfficer(object):
             # get the first household to visit
             household = self.return_next_visit()
 
-            yield self.env.process(self.fu_visit_contact(household))
-            self.env.process(self.co_working_test())
+            if not household:
+                # if no more visits to do that day finish until next day
+                yield self.env.timeout(self.next_available())
+            else:
+                yield self.env.process(self.fu_visit_contact(household))
+                self.env.process(self.co_working_test())
 
         else:
             yield self.env.timeout(self.next_available())
@@ -304,7 +310,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            schedule_paper_drop(self, household, self.has_paper)
+            schedule_paper_drop(household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["out_paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -359,14 +365,14 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            schedule_paper_drop(self, household, self.has_paper)
+            schedule_paper_drop(household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         else:
             # or suggest other forms of assistance to be decided...
-            # non implemented at present so another visit will be scheduled - another visit will be scheduled...
+            # non implemented at present so another visit will be scheduled.
             self.rep.output_data['Visit_assist'].append(visit_assist(self.rep.reps,
                                                                      self.district.name,
                                                                      household.input_data["LA"],
@@ -416,7 +422,7 @@ class CensusOfficer(object):
               household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
             # hh have not responded but do not respond as a result of the visit.
-            # need extra here fro when you fail but not at max visits...
+            # need extra here for when you fail but not at max visits?
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
                                                                      household.district.name,
@@ -428,7 +434,7 @@ class CensusOfficer(object):
                                                                      household.hh_id))
             # leave paper in hope they respond?
             household.paper_allowed = True
-            schedule_paper_drop(self, household, self.has_paper)
+            schedule_paper_drop(household, self.has_paper)
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -544,30 +550,30 @@ class LetterPhase(object):
         self.env.process(household.receive_letter(effect, pq))
 
 
-def schedule_paper_drop(obj, household, has_paper=False):
+def schedule_paper_drop(obj, has_paper=False):
 
     if has_paper:
 
         obj.rep.output_data['Visit_paper'].append(visit_paper(obj.rep.reps,
-                                                              household.district.name,
-                                                              household.input_data["LA"],
-                                                              household.input_data["LSOA"],
-                                                              household.digital,
-                                                              household.hh_type,
+                                                              obj.district.name,
+                                                              obj.input_data["LA"],
+                                                              obj.input_data["LSOA"],
+                                                              obj.digital,
+                                                              obj.hh_type,
                                                               obj.rep.env.now,
-                                                              household.hh_id))
+                                                              obj.hh_id))
 
-        obj.env.process(send_reminder(household, 'pq'))
+        obj.env.process(send_reminder(obj, 'pq'))
     else:
 
-        household.output_data['Post_paper'].append(post_paper(household.rep.reps,
-                                                              household.district.name,
-                                                              household.input_data["LA"],
-                                                              household.input_data["LSOA"],
-                                                              household.digital,
-                                                              household.hh_type,
-                                                              household.env.now))
+        obj.output_data['Post_paper'].append(post_paper(obj.rep.reps,
+                                                        obj.district.name,
+                                                        obj.input_data["LA"],
+                                                        obj.input_data["LSOA"],
+                                                        obj.digital,
+                                                        obj.hh_type,
+                                                        obj.env.now))
 
-        start_delayed(obj.env, send_reminder(household, 'pq'), h.next_day(obj.env.now))
+        start_delayed(obj.env, send_reminder(obj, 'pq'), h.next_day(obj.env.now))
 
 
