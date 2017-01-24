@@ -32,14 +32,16 @@ class District(object):
         self.input_data = self.rep.input_data['districts'][name]
         self.households = []  # list of household objects in the district
         self.district_co = []  # list of CO assigned to the district
-        self.reminders = []  # list of reminders to be sent
+        self.letters = []  # list of letters to be sent to hh in the district
         self.total_households = 0  # count of total including those not represented by objects
         # self.return_rate = 0  #
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
         self.create_co()
+        self.create_letterphases()  # set processes to start the sending of letters
         if self.district_co:
-            self.first_interaction = min([co.start_sim_time for co in self.district_co])  # time of first interaction
+            self.first_interaction = min(min([co.start_sim_time for co in self.district_co]),
+                                         min([letter.start_sim_time for letter in self.letters]))  # time of first interaction
             start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
         else:
             self.first_interaction = 0
@@ -50,7 +52,7 @@ class District(object):
             # record numbers for first replication
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
 
-        # self.create_letterphases()
+
 
         try:
             self.hh_area = self.input_data['district_area'] / len(self.households)
@@ -166,7 +168,7 @@ class District(object):
                     self.rep.total_hh += 1
 
             except KeyError as e:
-                print(e, "No key called number for HH in district: ", self.name)
+                print("No key ", e, " for ", hh, " in district: ", self.name, " when creating hh")
                 sys.exit()
 
     def create_letterphases(self):
@@ -175,10 +177,11 @@ class District(object):
 
         for letter in letter_list:
             letter_data = self.input_data['letter_phases'][letter]
-            self.reminders.append(censusv2.LetterPhase(self.env,
-                                                       self.rep,
-                                                       self,
-                                                       letter_data))
+            self.letters.append(censusv2.LetterPhase(self.env,
+                                                     self.rep,
+                                                     self,
+                                                     letter_data,
+                                                     letter))
 
     def initial_action(self, input_data, first_interaction, hh):
 
@@ -193,8 +196,8 @@ class District(object):
             behaviour = 'alt'
 
         # set values to use
-        hh_resp = input_data['behaviours']['initial'][behaviour]['response']
-        hh_help = input_data['behaviours']['initial'][behaviour]['help']
+        hh_resp = input_data['behaviours'][behaviour]['response']
+        hh_help = input_data['behaviours'][behaviour]['help']
 
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
         if response_test <= hh_resp:

@@ -315,8 +315,6 @@ class Household(object):
             else:  # paper
                 start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
 
-            #yield self.env.timeout((self.rep.sim_hours) - self.env.now)  # hh does no more (without intervention)
-
             yield self.env.timeout(0)  # hh does no more (without intervention)
 
     def receive_reminder(self, reminder_type):
@@ -340,7 +338,6 @@ class Household(object):
                                                                            self.hh_id,
                                                                            self.env.now,
                                                                            reminder_type))
-
         elif self.resp_planned:
 
             self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
@@ -352,18 +349,17 @@ class Household(object):
                                                                                      self.hh_id,
                                                                                      self.env.now,
                                                                                      reminder_type))
-
         else:
             # if get here they have not responded or planned to do so, so a worthwhile reminder.
             self.rep.output_data['Reminder_received'].append(reminder_success(self.rep.reps,
-                                                                             self.district.name,
-                                                                             self.input_data["LA"],
-                                                                             self.input_data["LSOA"],
-                                                                             self.digital,
-                                                                             self.hh_type,
-                                                                             self.hh_id,
-                                                                             self.env.now,
-                                                                             reminder_type))
+                                                                              self.district.name,
+                                                                              self.input_data["LA"],
+                                                                              self.input_data["LSOA"],
+                                                                              self.digital,
+                                                                              self.hh_type,
+                                                                              self.hh_id,
+                                                                              self.env.now,
+                                                                              reminder_type))
 
         # now move on to the relevant action based on extracted values
         # response test
@@ -415,66 +411,6 @@ class Household(object):
                                                                    self.hh_id,
                                                                    self.env.now,
                                                                    min(wait_time, renege_time)))
-
-    def receive_letter(self, effect, pq):
-        """represents the hh receiving a letter"""
-
-        self.letter_count += 1
-
-        if h.str2bool(pq) and not self.responded:
-
-            # then it's a paper questionnaire so now follow the default behaviour
-            self.rep.output_data['Received_pq'].append(received_pq(self.rep.reps,
-                                                                   self.district.name,
-                                                                   self.input_data["LA"],
-                                                                   self.input_data["LSOA"],
-                                                                   self.digital,
-                                                                   self.hh_type,
-                                                                   self.hh_id,
-                                                                   self.rep.env.now,
-                                                                   self.hh_id))
-
-            self.paper_allowed = True
-            self.resp_level = self.set_behaviour('response')
-            self.help_level = self.resp_level + self.set_behaviour('help')
-            yield self.env.process(self.action())
-
-        elif not h.str2bool(pq) and not self.responded:
-
-            self.rep.output_data['Received_letter'].append(received_letter(self.rep.reps,
-                                                                           self.district.name,
-                                                                           self.input_data["LA"],
-                                                                           self.input_data["LSOA"],
-                                                                           self.digital,
-                                                                           self.hh_type,
-                                                                           self.hh_id,
-                                                                           self.rep.env.now))
-
-            self.resp_level = effect
-            self.help_level = 0
-            yield self.env.process(self.action())
-
-        elif h.str2bool(pq) and self.responded:
-            # wasted pq
-            self.rep.output_data['Wasted_pq'].append(received_pq(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.input_data["LA"],
-                                                                 self.input_data["LSOA"],
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.hh_id,
-                                                                 self.rep.env.now))
-
-        elif not h.str2bool(pq) and self.responded:
-            # waster letter
-            self.rep.output_data['Wasted_letter'].append(received_pq(self.rep.reps,
-                                                                     self.district.name,
-                                                                     self.input_data["LA"],
-                                                                     self.input_data["LSOA"],
-                                                                     self.digital,
-                                                                     self.hh_type,
-                                                                     self.hh_id,
-                                                                     self.rep.env.now))
 
     def calc_delay(self):
         if self.digital:

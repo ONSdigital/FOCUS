@@ -278,7 +278,18 @@ class CensusOfficer(object):
                                                    household.hh_id,
                                                    self.co_id))
 
-        if household.resp_planned:
+        if household.responded:
+
+            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
+                                                                     self.district.name,
+                                                                     household.input_data["LA"],
+                                                                     household.input_data["LSOA"],
+                                                                     household.digital,
+                                                                     household.hh_type,
+                                                                     self.rep.env.now,
+                                                                     household.hh_id))
+
+        elif household.resp_planned:
             self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
                                                                                self.district.name,
                                                                                household.input_data["LA"],
@@ -505,35 +516,38 @@ class CensusOfficer(object):
 
 class LetterPhase(object):
 
-    def __init__(self, env, rep, district, input_data):
+    def __init__(self, env, rep, district, input_data, letter_type):
+
         self.env = env
         self.rep = rep
         self.district = district
         self.input_data = input_data
+        self.letter_type = letter_type
+
+        self.blanket = h.str2bool(self.input_data["blanket"])
+        self.targets = self.input_data["targets"]
+        self.start_sim_time = h.get_event_time(self)
         # add process to decide who to send letters too...but with a delay
 
-        start_delayed(self.env, self.fu_letter(), self.input_data["send_time"])
+        start_delayed(self.env, self.fu_letter(), self.start_sim_time)
 
     def fu_letter(self):
 
         # send a letter if conditions met
-        #print("targeted ", self.input_data["targeted"])
         for household in self.district.households:
 
-            #print("all hh ", "id ",  household.hh_id, " type ", household.hh_type, " responded " , household.responded)
-            if (h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"] and
-                not household.responded) or \
-                    (not h.str2bool(self.input_data["targeted"]) and household.hh_type in self.input_data["targets"]):
+            if (not self.blanket and household.hh_type in self.targets and not household.responded) or \
+                    (self.blanket and household.hh_type in self.targets):
 
                 # send a letter
-                self.env.process(self.co_send_letter(household,
-                                                     self.input_data["effect"],
-                                                     self.input_data["postal_delay"],
-                                                     self.input_data["pq"]))
+                if self.letter_type == 'pq':
+                    household.paper_allowed = True
 
+                self.env.process(self.co_send_letter(household,
+                                                     self.input_data["delay"]))
         yield self.env.timeout(0)
 
-    def co_send_letter(self, household, effect, delay, pq):
+    def co_send_letter(self, household, delay):
 
         self.rep.output_data['Sent_letter'].append(sent_letter(self.rep.reps,
                                                                household.district.name,
@@ -547,7 +561,7 @@ class LetterPhase(object):
         #print("letter sent to hh ", household.hh_id)
 
         yield self.env.timeout(delay)
-        self.env.process(household.receive_letter(effect, pq))
+        self.env.process(household.receive_reminder(self.letter_type))
 
 
 def schedule_paper_drop(obj, has_paper=False):

@@ -278,5 +278,16 @@ def get_entity_time(entity, type="start"):
             sys.exit()
 
 
+def get_event_time(event):
+
+    # check date has valid availability schedule
+    date = dt.date(*map(int, event.input_data["start_date"].split(',')))
+    # convert date to sim (simpy) time
+    date_sim = (date - event.rep.start_date).total_seconds() / 3600
+
+    # convert time of that day to sim time
+    time = event.input_data["time"]
+
+    return date_sim + time
 
 
