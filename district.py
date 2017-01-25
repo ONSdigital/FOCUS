@@ -38,11 +38,22 @@ class District(object):
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
         self.create_co()
-        self.create_letterphases()  # set processes to start the sending of letters
+        letters = False
+        if letters:
+            self.create_letterphases()  # set processes to start the sending of letters
+        try:
+            self.first_visit = min([co.start_sim_time for co in self.district_co])
+        except IndexError as e:
+            self.first_visit = 0
+
+        try:
+            self.first_letter = min([letter.start_sim_time for letter in self.letters])
+        except ValueError as e:
+            self.first_letter = 0
+
         if self.district_co:
-            self.first_interaction = min(min([co.start_sim_time for co in self.district_co]),
-                                         min([letter.start_sim_time for letter in self.letters]))  # time of first interaction
-            start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_interaction/24)*24)
+            self.first_interaction = min(self.first_visit, self.first_letter)  # time of first interaction
+            start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_visit/24)*24)
         else:
             self.first_interaction = 0
 
@@ -51,8 +62,6 @@ class District(object):
         if self.rep.reps == 1:
             # record numbers for first replication
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
-
-
 
         try:
             self.hh_area = self.input_data['district_area'] / len(self.households)

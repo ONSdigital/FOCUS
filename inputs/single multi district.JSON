@@ -71,7 +71,22 @@
     },
     "districts": {
       "E06000001": {
-        "letter_phases": {},
+        "letter_phases": {
+          "reminder": {
+            "start_date": "2011, 3, 15",
+            "time": 9,
+            "delay": 48,
+            "blanket": 0,
+            "targets": ["htc1"]
+          },
+          "pq": {
+            "start_date": "2011, 5, 1",
+            "time": 9,
+            "delay": 48,
+            "blanket": 0,
+            "targets": ["htc1"]
+          }
+        },
         "trigger": 90,
         "paper_trigger": 80,
         "RMT_update": 24,

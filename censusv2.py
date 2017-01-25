@@ -256,7 +256,7 @@ class CensusOfficer(object):
             self.env.process(self.co_working_test())
 
     def household_test(self, household, type):
-        # tests if hh is in!
+        # tests if hh is in or is converted to a return!
 
         test_value = self.rnd.uniform(0, 100)
         dict_value = household.input_data[type][str(h.current_day(self))]
@@ -367,6 +367,10 @@ class CensusOfficer(object):
                                                                        household.hh_id))
 
             household.digital = True
+            yield self.rep.env.process(self.fu_visit_outcome(household))
+
+        # not digital, do not convince to go online but allowed to use paper so go to outcome
+        elif not household.digital and da_test > da_effectiveness and household.paper_allowed:
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
         # if not digital, do not convince to complete online, and trigger and max visits not reached give paper if on.
