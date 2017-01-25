@@ -8,6 +8,7 @@ from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
+import random
 
 hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'hh_type'])
@@ -59,6 +60,8 @@ class District(object):
 
         # create households that exist in the district
         self.create_households()
+        # randomise list -  so ignore prio
+        random.shuffle(self.households)
         if self.rep.reps == 1:
             # record numbers for first replication
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
