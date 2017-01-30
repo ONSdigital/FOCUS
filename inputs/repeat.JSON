@@ -158,7 +158,7 @@
               "wasted": 5
             },
             "start_date": "2011, 4, 6",
-            "number": 150,
+            "number": 15,
             "da_effectiveness": {
               "htc5": 20,
               "htc4": 30,
@@ -223,7 +223,7 @@
               2
             ],
             "LSOA": "an LSOA",
-            "number": 10000,
+            "number": 1000,
             "response_time": {
               "other": [
                 12,
@@ -372,7 +372,7 @@
               2
             ],
             "LSOA": "an LSOA",
-            "number": 10000,
+            "number": 1000,
             "response_time": {
               "other": [
                 12,
@@ -521,7 +521,7 @@
               2
             ],
             "LSOA": "an LSOA",
-            "number": 10000,
+            "number": 1000,
             "response_time": {
               "other": [
                 12,
@@ -670,7 +670,7 @@
               2
             ],
             "LSOA": "an LSOA",
-            "number": 10000,
+            "number": 1000,
             "response_time": {
               "other": [
                 12,
@@ -819,7 +819,7432 @@
               2
             ],
             "LSOA": "an LSOA",
-            "number": 10000,
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000002": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000003": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000004": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000005": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000006": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000007": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000008": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000009": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 35,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "1": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "2": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "3": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "4": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "5": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              },
+              "6": {
+                "9": 10,
+                "17": 10,
+                "24": 10
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      },
+      "E06000010": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 15,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 75,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc2": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 65,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "1": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "2": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "3": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "4": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "5": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              },
+              "6": {
+                "9": 40,
+                "17": 40,
+                "24": 40
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc3": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 55,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "1": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "2": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "3": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "4": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "5": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              },
+              "6": {
+                "9": 30,
+                "17": 30,
+                "24": 30
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc4": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 86,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 45,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "1": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "2": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "3": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "4": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "5": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              },
+              "6": {
+                "9": 20,
+                "17": 20,
+                "24": 20
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          },
+          "htc5": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1000,
             "response_time": {
               "other": [
                 12,
@@ -967,6 +8392,8 @@
         "trigger": 90,
         "district_area": 79.4
       }
+
     }
   }
+
 }

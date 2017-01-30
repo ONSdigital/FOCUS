@@ -45,12 +45,14 @@ class District(object):
         try:
             self.first_visit = min([co.start_sim_time for co in self.district_co])
         except IndexError as e:
-            self.first_visit = 0
+            # if no visits then set to end of sim
+            self.first_visit = self.rep.sim_hours
 
         try:
             self.first_letter = min([letter.start_sim_time for letter in self.letters])
         except ValueError as e:
-            self.first_letter = 0
+            # if no letters then set to end of sim
+            self.first_letter = self.rep.sim_hours
 
         if self.district_co:
             self.first_interaction = min(self.first_visit, self.first_letter)  # time of first interaction
@@ -61,7 +63,8 @@ class District(object):
         # create households that exist in the district
         self.create_households()
         # randomise list -  so ignore prio
-        random.shuffle(self.households)
+        self.rnd.shuffle(self.households)
+        #random.shuffle(self.households)
         if self.rep.reps == 1:
             # record numbers for first replication
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
@@ -142,6 +145,9 @@ class District(object):
             # get hh data for current type
             hh_input_data = self.input_data['households'][hh]
 
+            # assign district level mix?
+
+
             try:
 
                 for i in range(hh_input_data['number']):
@@ -150,6 +156,8 @@ class District(object):
 
                     # determine initial HH action
                     hh_action = self.initial_action(hh_input_data, self.first_interaction, hh)
+
+                    # take off district level mix here as hh added?
 
                     if hh_action.type == 'early':
                         # don't need an instance of a household just directly record a response/return at correct time

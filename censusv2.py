@@ -10,11 +10,11 @@ import sys
 
 return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time return received
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
-visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id', 'co_id'])
+visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'attempt', 'contacts', 'hh_id'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
 visit_out = namedtuple('Visit_out', ['rep', 'district', 'LA', 'LSOA', 'digital','hh_type', 'time', 'hh_id'])
 visit_wasted = namedtuple('Visit_wasted', ['rep', 'district', 'LA', 'LSOA','digital', 'hh_type', 'time', 'hh_id'])
-visit_success = namedtuple('Visit_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+visit_success = namedtuple('Visit_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'attempt', 'contacts', 'hh_id'])
 visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
 visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
@@ -268,6 +268,9 @@ class CensusOfficer(object):
 
     def fu_visit_contact(self, household):
 
+        household.visits += 1
+        household.priority += 1  # automatically lower the priority of this hh after a visit
+
         self.rep.output_data['Visit'].append(visit(self.rep.reps,
                                                    self.district.name,
                                                    household.input_data["LA"],
@@ -275,8 +278,9 @@ class CensusOfficer(object):
                                                    household.digital,
                                                    household.hh_type,
                                                    self.rep.env.now,
-                                                   household.hh_id,
-                                                   self.co_id))
+                                                   household.visits,
+                                                   household.visits_contacted,
+                                                   household.hh_id))
 
         if household.responded:
 
@@ -299,9 +303,6 @@ class CensusOfficer(object):
                                                                                self.rep.env.now,
                                                                                household.hh_id))
 
-        household.visits += 1
-        household.priority += 1  # automatically lower the priority of this hh after a visit
-
         household_is_in = self.household_test(household, "contact_rate")
 
         if household_is_in:
@@ -315,6 +316,7 @@ class CensusOfficer(object):
                                                                        self.env.now,
                                                                        household.hh_id))
 
+            household.visits_contacted += 1
             yield self.rep.env.process(self.fu_visit_assist(household))
 
         elif (not household_is_in and household.visits == household.input_data['max_visits'] and
@@ -426,6 +428,8 @@ class CensusOfficer(object):
                                                                        household.digital,
                                                                        household.hh_type,
                                                                        self.env.now,
+                                                                       household.visits,
+                                                                       household.visits_contacted,
                                                                        household.hh_id))
             household.resp_planned = True
             yield self.rep.env.process(household.respond(household.calc_delay()))
