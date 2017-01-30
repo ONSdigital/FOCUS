@@ -137,6 +137,15 @@ class District(object):
                 print("No key called number for CO in district: ", self.name)
                 sys.exit()
 
+    def return_household_geog(self, input_dict):
+        # returns LA and LSOA codes for hh
+
+        for LA in input_dict:
+            for LSOA in input_dict[LA]:
+                if int(input_dict[LA][LSOA]) > 0:
+                    input_dict[LA][LSOA] = int(input_dict[LA][LSOA]) - 1
+                    return [LA, LSOA]
+
     def create_households(self):
 
         list_of_hh_types = sorted(list(self.input_data['households'].keys()))
@@ -145,12 +154,15 @@ class District(object):
             # get hh data for current type
             hh_input_data = self.input_data['households'][hh]
 
-            # assign district level mix?
-
-
             try:
 
                 for i in range(hh_input_data['number']):
+                    # number to add should equal number in mix dict for household type
+                    # so as you add take off the total using keys as codes for geography
+                    #HH_geog = self.return_household_geog(self.input_data['cca_makeup'])
+
+
+
 
                     self.total_households += 1
 

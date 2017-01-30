@@ -106,10 +106,18 @@ output_path = os.path.join(os.getcwd(), 'inputs', 'management areas(small).JSON'
 
 ###generate_multiple_districts_runs(input_path, new_districts, output_path, [[1612, 1312, 725, 487, 362]])
 
+def sum_dict(input_dict):
+
+    sum = 0
+
+    for LA in input_dict:
+        for LSOA in input_dict[LA]:
+            sum += int(input_dict[LA][LSOA])
+
+    return sum
 
 
-
-def generate_cca_makeup(input_JSON, input_path, output_path):
+def generate_cca_makeup(input_JSON, input_path, output_path,  hh_per_co = []):
     # used to create a JSON file showing numbers of each type of hh in EA in each LA/LSOA
 
     # open JSON template file
@@ -156,18 +164,38 @@ def generate_cca_makeup(input_JSON, input_path, output_path):
                 # hh type not in cca so add
                 input_data[run_counter]['districts'][row[0]]['households'][row[1]]['cca_makeup'] = defaultdict(dict)
 
-        input_data[run_counter]['districts'][row[0]]['households'][row[1]]['cca_makeup'][row[2]][row[3]] = [row[4]]
+        input_data[run_counter]['districts'][row[0]]['households'][row[1]]['cca_makeup'][row[2]][row[3]] = row[4]
 
 
     # then for each district add up total households of each type and as you do calc CO' required....
-    # add then exit converteing to JSON!
+    # add then exit converting to JSON!
+
+    list_of_new_districts = sorted(list(input_data[run_counter]['districts'].keys()), key=str)
+
+    for distr in list_of_new_districts:
+        co_number = 0
+        for hh_type in input_data[run_counter]['districts'][distr]['households']:
+            # check if any of this type of hh exist in this cca via looking for cca makeup key
+            if 'cca_makeup' in input_data[run_counter]['districts'][row[0]]['households'][hh_type]:
+                # number needs to equal sum of lowest level of cca dict...
+                input_data[run_counter]['districts'][distr]['households'][hh_type]['number'] = \
+                    sum_dict(input_data[run_counter]['districts'][row[0]]['households'][hh_type]['cca_makeup'])
+
+                # and calc the number of CO to add based on ratios..
+                co_number += input_data[run_counter]['districts'][distr]['households'][hh_type]['number']/\
+                            hh_per_co[int(hh_type[-1])-1]
+
+        co_number = math.ceil(co_number)
+        input_data[run_counter]['districts'][distr]['census officer']['standard']['number'] = co_number
 
 
 
 
-    # output a JSON file
+
+            # output a JSON file
     with open(os.path.join(output_path), 'w') as outfile:
             json.dump(input_data, outfile, indent=4, sort_keys=True)
+
 
 
 
@@ -181,5 +209,5 @@ input_JSON_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSO
 simple_input_path = os.path.join(os.getcwd(), 'inputs', 'simple_in.csv')
 simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.json')
 
-generate_cca_makeup(input_JSON_path, simple_input_path, simple_output_path)
+generate_cca_makeup(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
 
