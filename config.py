@@ -242,12 +242,19 @@ def create_CCA_data(input_path, output_path):
         current_co += hh / simple_ratio
 
         if current_co < 12:
-            ' then just add all of it - to an output file not direct to csv as need to update areas?'
+            # then just add all of it - to an output file not direct to csv as need to update areas?
+            pass
 
         else:
-            # greater than need to add only part of it then start again
+            # greater than so need to add only part of it then start with new CCA with rest
+            # so ger proportion over
+            proportion_over = current_co - 12
+            hh_over = proportion_over * simple_ratio
+            hh_to_add = hh - hh_over
+            hh_to_carry_forward = hh_over
+
             CCA += 1
-            current_co = 0
+            current_co = proportion_over
 
 
 
