@@ -86,6 +86,6 @@ class Rep(object):
             self.districts.append(district.District(self,
                                                     distr))
 
-            co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
+            #co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
 
         #print("number of CO: ", co_number)

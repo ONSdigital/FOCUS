@@ -62,9 +62,8 @@ class District(object):
 
         # create households that exist in the district
         self.create_households()
-        # randomise list -  so ignore prio
+        # randomise list -  so ignore priority
         self.rnd.shuffle(self.households)
-        #random.shuffle(self.households)
         if self.rep.reps == 1:
             # record numbers for first replication
             self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
@@ -157,12 +156,11 @@ class District(object):
             try:
 
                 for i in range(hh_input_data['number']):
+
                     # number to add should equal number in mix dict for household type
                     # so as you add take off the total using keys as codes for geography
-                    #HH_geog = self.return_household_geog(self.input_data['cca_makeup'])
-
-
-
+                    # returns a list with LA and LSOA details
+                    #HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
 
                     self.total_households += 1
 

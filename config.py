@@ -117,7 +117,7 @@ def sum_dict(input_dict):
     return sum
 
 
-def generate_cca_makeup(input_JSON, input_path, output_path,  hh_per_co = []):
+def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co = []):
     # used to create a JSON file showing numbers of each type of hh in EA in each LA/LSOA
 
     # open JSON template file
@@ -197,17 +197,74 @@ def generate_cca_makeup(input_JSON, input_path, output_path,  hh_per_co = []):
             json.dump(input_data, outfile, indent=4, sort_keys=True)
 
 
-
-
-
-
 # if new area create - else skip to existing
 # if new LA create - else add to exisit
 # if new LSOA add to existing
 
 input_JSON_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
 simple_input_path = os.path.join(os.getcwd(), 'inputs', 'simple_in.csv')
-simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.json')
+simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.JSON')
 
-generate_cca_makeup(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
+# below uses new format to generate CCA with hh across LSOA's and LA's
+# generate_cca_JSON(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
+
+def create_CCA_data(input_path, output_path):
+    # creates from the raw data - eventually the address register - the breakdown of CCAs
+
+    # simple ratio - number of hh per CO
+    simple_ratio = 75
+    CCA = 1
+    CCA_output = [] # list here but probably should be a pandas dataframe or numpy array?
+
+    # load file
+    # read in the csv cca data
+    with open(input_path, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)
+
+        raw_data = list(reader)
+
+    current_co = 0
+
+    for row in raw_data:
+
+        LA_code = row[0]
+        LA_name = row[1]
+        Longitude = float(row[2])
+        Latitude = float(row[3])
+        LSOA_code = row[4]
+        LSOA_name = row[5]
+        hh = int(row[6])
+        htc = int(row[7])
+        area = float(row[8])
+
+        # work out what it would take you too here
+        current_co += hh / simple_ratio
+
+        if current_co < 12:
+            ' then just add all of it - to an output file not direct to csv as need to update areas?'
+
+        else:
+            # greater than need to add only part of it then start again
+            CCA += 1
+            current_co = 0
+
+
+
+
+input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_small.csv')
+output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
+create_CCA_data(input_csv_path, output_csv_path)
+
+
+# go through row by row adding hh until at least 12 co needed.
+    # first ignore the fact they are geographically separate and different - just get a new list of CCA
+    # then add different hh types
+
+# if need another LSOA get next nearest
+# if next nearest within a set threshold distance - say 25 km  - use other wise add to current and then start again
+# with next LSOA
+
+
+
 
