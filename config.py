@@ -1,3 +1,5 @@
+"""A temporary file used to hold scripts that create input files in the right formats based on a template
+and some basic input data"""
 
 import json
 import copy

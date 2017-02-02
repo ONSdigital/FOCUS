@@ -143,7 +143,7 @@ class Household(object):
         # test if default or alt
         behaviour = self.default_behaviour()
 
-        dict_value = self.input_data["behaviours"][type][behaviour]
+        dict_value = self.input_data["behaviours"][type]
 
         if test_value <= dict_value["response"]:
             # respond straight away
