@@ -36,9 +36,10 @@ class District(object):
         # self.return_rate = 0  #
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
-        if self.district_co:
+
+        if self.input_data["census officer"]:
             self.create_co()
-        if self.letters:
+        if self.input_data["letter_phases"]:
             self.create_letterphases()  # set processes to start the sending of letters
         try:
             self.first_visit = min([co.start_sim_time for co in self.district_co])
@@ -158,7 +159,7 @@ class District(object):
                     # number to add should equal number in mix dict for household type
                     # so as you add take off the total using keys as codes for geography
                     # returns a list with LA and LSOA details
-                    HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
+                    #HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
 
                     self.total_households += 1
 

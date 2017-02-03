@@ -1,0 +1,6 @@
+LA_code, LA_name, Long, Lat, LSOA_code, LSOA_name, Number_hh, hh_type, LSOA_area
+LA1, York, -2, -2, LSOA1, York1, 124, 1, 10
+LA1, York, -2, -2, LSOA2, York1, 341, 1, 10
+LA1, York, -2, -2, LSOA3, York1, 781, 2, 10
+LA1, York, -2, -2, LSOA4, York1, 1035, 3, 10
+LA1, York, -2, -2, LSOA5, York1, 1157, 1, 10

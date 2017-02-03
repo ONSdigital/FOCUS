@@ -211,13 +211,33 @@ simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.JSON')
 # generate_cca_JSON(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
 
 
+def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, simple_ratio, current_co = 0):
+
+    current_co += hh_remaining / simple_ratio
+
+    if current_co < 12:
+        # pass return what to put in cca
+        return [[cca, la_code, lsoa_code, hh_remaining, htc, area], current_co]
+    else:
+
+        proportion_over = current_co - 12
+        hh_over = math.floor(proportion_over * simple_ratio)
+        hh_to_add = hh_remaining - hh_over
+        cca_output.append([cca, la_code, lsoa_code, hh_to_add, htc, area])
+
+        # get remainder here and check if that would be over as well
+        cca += 1
+        current_co = 0
+
+        return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area, simple_ratio, current_co)
+
 def create_cca_data(input_path, output_path):
     # creates from the raw data - eventually the address register - the breakdown of CCAs
 
     # simple ratio - number of hh per CO
     simple_ratio = 75
-    CCA = 1
-    CCA_output = [] # list here but probably should be a pandas dataframe or numpy array?
+    cca = 1
+    cca_output = []
 
     # load file
     # read in the csv cca data
@@ -229,39 +249,38 @@ def create_cca_data(input_path, output_path):
 
     current_co = 0
 
+    current_co = 0
+
     for row in raw_data:
 
-        LA_code = row[0]
-        LA_name = row[1]
-        Longitude = float(row[2])
-        Latitude = float(row[3])
-        LSOA_code = row[4]
-        LSOA_name = row[5]
+        la_code = row[0]
+        la_name = row[1]
+        longitude = float(row[2])
+        latitude = float(row[3])
+        lsoa_code = row[4]
+        lsoa_name = row[5]
         hh = int(row[6])
         htc = int(row[7])
         area = float(row[8])
 
-        # work out what it would take you too here
-        current_co += hh / simple_ratio
+        hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, simple_ratio, current_co)
+        cca_output.append(hh_to_add[0])
+        current_co = hh_to_add[1]
+        cca = hh_to_add[0][0]
 
-        if current_co < 12:
-            # then just add all of it - to an output file not direct to csv as need to update areas?
-            pass
+    with open(output_path, "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(cca_output)
 
-        else:
-            # greater than so need to add only part of it then start with new CCA with rest
-            # so ger proportion over
-            proportion_over = current_co - 12
-            hh_over = proportion_over * simple_ratio
-            hh_to_add = hh - hh_over
-            hh_to_carry_forward = hh_over
-
-            CCA += 1
-            current_co = proportion_over
 
 input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_small.csv')
 output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
 create_cca_data(input_csv_path, output_csv_path)
+
+
+
+
+
 
 
 # go through row by row adding hh until at least 12 co needed.

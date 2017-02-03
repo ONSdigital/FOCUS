@@ -149,14 +149,14 @@ class StartFU(object):
 
     def create_visit_lists(self):
 
-        if h.returns_to_date(self.district) < self.district.input_data["trigger"]:
+        if h.responses_to_date(self.district) < self.district.input_data["trigger"]:
             # only create action plans if the target rate has not been reached
 
             self.visit_list = []
 
             # determine who needs to be followed up
             for household in self.households:
-                if (household.returned is False and household.visits < household.input_data['max_visits'] and
+                if (household.responded is False and household.visits < household.input_data['max_visits'] and
                         household.input_data['FU_start_time'] <= self.env.now):
 
                     self.visit_list.append(household)
@@ -388,7 +388,7 @@ class CensusOfficer(object):
 
         # if not digital, do not convince to complete online, and trigger and max visits not reached give paper if on.
         elif (not household.digital and da_test > da_effectiveness and
-              h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
+              h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
               household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
@@ -416,20 +416,7 @@ class CensusOfficer(object):
 
         household_returns = self.household_test(household, "conversion_rate")
 
-        if household.responded is True:
-            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
-                                                                     household.district.name,
-                                                                     household.input_data["LA"],
-                                                                     household.input_data["LSOA"],
-                                                                     household.digital,
-                                                                     household.hh_type,
-                                                                     self.env.now,
-                                                                     household.hh_id))
-
-            visit_time = self.input_data["visit_times"]["wasted"]
-            yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
-
-        elif not household.responded and household_returns:
+        if not household.responded and household_returns:
             # hh have not responded yet and respond there and then either by paper or digital.
 
             self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
@@ -443,12 +430,12 @@ class CensusOfficer(object):
                                                                        household.visits_contacted,
                                                                        household.hh_id))
             household.resp_planned = True
-            yield self.rep.env.process(household.respond(household.calc_delay()))
+            yield self.rep.env.process(household.household_returns(household.calc_delay()))
             visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         elif (not household.responded and not household_returns and
-              h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
+              h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
               household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
             # hh have not responded but do not respond as a result of the visit.
@@ -465,6 +452,20 @@ class CensusOfficer(object):
             # leave paper in hope they respond?
             household.paper_allowed = True
             schedule_paper_drop(household, self.has_paper)
+
+            visit_time = self.input_data["visit_times"]["failed"]
+            yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
+
+        elif not household.responded and not household_returns:
+
+            self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
+                                                                     household.district.name,
+                                                                     household.input_data["LA"],
+                                                                     household.input_data["LSOA"],
+                                                                     household.digital,
+                                                                     household.hh_type,
+                                                                     self.env.now,
+                                                                     household.hh_id))
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
