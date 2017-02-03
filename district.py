@@ -158,7 +158,7 @@ class District(object):
                     # number to add should equal number in mix dict for household type
                     # so as you add take off the total using keys as codes for geography
                     # returns a list with LA and LSOA details
-                    #HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
+                    HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
 
                     self.total_households += 1
 
