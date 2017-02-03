@@ -1,4 +1,4 @@
-"""A temporary file used to hold scripts that create input files in the right formats based on a template
+"""A temporary file used to hold scripts that creates input files in the right formats based on a template
 and some basic input data"""
 
 import json
@@ -119,8 +119,8 @@ def sum_dict(input_dict):
     return sum
 
 
-def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co = []):
-    # used to create a JSON file showing numbers of each type of hh in EA in each LA/LSOA
+def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
+    # used to create a JSON file showing numbers of each type of hh in each CCA in each LA/LSOA
 
     # open JSON template file
     with open(input_JSON) as data_file:
@@ -210,7 +210,8 @@ simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.JSON')
 # below uses new format to generate CCA with hh across LSOA's and LA's
 # generate_cca_JSON(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
 
-def create_CCA_data(input_path, output_path):
+
+def create_cca_data(input_path, output_path):
     # creates from the raw data - eventually the address register - the breakdown of CCAs
 
     # simple ratio - number of hh per CO
@@ -258,12 +259,9 @@ def create_CCA_data(input_path, output_path):
             CCA += 1
             current_co = proportion_over
 
-
-
-
 input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_small.csv')
 output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-create_CCA_data(input_csv_path, output_csv_path)
+create_cca_data(input_csv_path, output_csv_path)
 
 
 # go through row by row adding hh until at least 12 co needed.

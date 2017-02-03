@@ -8,7 +8,8 @@ from simpy.util import start_delayed
 import sys
 
 
-return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time return received
+response_times = namedtuple('Responded', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
+return_received = namedtuple('Return_received', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
 visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'attempt', 'contacts', 'hh_id'])
 visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
@@ -47,21 +48,31 @@ def send_reminder(household, reminder_type):
 
 def ret_rec(hh, rep):
     # print out every 100000 returns?
-    if rep.total_returns % 100000 == 0:
-        print(rep.total_returns)
+    if rep.total_responses % 100000 == 0:
+        print(rep.total_responses)
 
-    hh.returned = True
-    rep.total_returns += 1
+    hh.return_received = True
+    rep.output_data['Return_received'].append(return_received(rep.reps,
+                                                              hh.district.name,
+                                                              hh.input_data["LA"],
+                                                              hh.input_data["LSOA"],
+                                                              hh.digital,
+                                                              hh.hh_type,
+                                                              hh.hh_id,
+                                                              rep.env.now))
+    # currently every return gets counted as a response as soon as it is received - this may need to change
+    hh.responded = True
+    rep.total_responses += 1
 
     # check size of output data - if over an amount, size or length write to file?
-    rep.output_data['Returned'].append(return_times(rep.reps,
-                                                    hh.district.name,
-                                                    hh.input_data["LA"],
-                                                    hh.input_data["LSOA"],
-                                                    hh.digital,
-                                                    hh.hh_type,
-                                                    hh.hh_id,
-                                                    rep.env.now))
+    rep.output_data['Responded'].append(response_times(rep.reps,
+                                                       hh.district.name,
+                                                       hh.input_data["LA"],
+                                                       hh.input_data["LSOA"],
+                                                       hh.digital,
+                                                       hh.hh_type,
+                                                       hh.hh_id,
+                                                       rep.env.now))
 
     # checks size of output and writes to file if too large
     if (h.dict_size(rep.output_data)) > 1000000:

@@ -4,15 +4,13 @@ import householdv2
 import sys
 import censusv2
 import math
-from helper import returns_to_date
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
-import random
 
 hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'hh_type'])
-return_times = namedtuple('Returned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+response_times = namedtuple('Responded', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
 response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 
@@ -38,13 +36,13 @@ class District(object):
         # self.return_rate = 0  #
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
-        self.create_co()
-        letters = False
-        if letters:
+        if self.district_co:
+            self.create_co()
+        if self.letters:
             self.create_letterphases()  # set processes to start the sending of letters
         try:
             self.first_visit = min([co.start_sim_time for co in self.district_co])
-        except IndexError as e:
+        except ValueError as e:
             # if no visits then set to end of sim
             self.first_visit = self.rep.sim_hours
 
@@ -95,7 +93,7 @@ class District(object):
     def av_travel_dist(self):
 
         try:
-            self.travel_dist = self.initial_hh_sep / (math.sqrt(1 - (returns_to_date(self, "%"))))
+            self.travel_dist = self.initial_hh_sep / (math.sqrt(1 - (h.responses_to_date(self, "%"))))
         except ZeroDivisionError as e:
 
             warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
@@ -174,14 +172,14 @@ class District(object):
 
                         self.rep.total_returns += 1
 
-                        self.rep.output_data['Returned'].append(return_times(self.rep.reps,
-                                                                             self.name,
-                                                                             hh_input_data["LA"],
-                                                                             hh_input_data["LSOA"],
-                                                                             hh_action.digital,
-                                                                             hh,
-                                                                             None,
-                                                                             hh_action.time))
+                        self.rep.output_data['Responded'].append(response_times(self.rep.reps,
+                                                                                self.name,
+                                                                                hh_input_data["LA"],
+                                                                                hh_input_data["LSOA"],
+                                                                                hh_action.digital,
+                                                                                hh,
+                                                                                None,
+                                                                                hh_action.time))
                     else:
                         # create a household instance passing initial state
                         self.households.append(householdv2.Household(self.rep,

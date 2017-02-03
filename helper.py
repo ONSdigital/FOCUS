@@ -19,11 +19,11 @@ l = Lock()  # global declaration...can I avoid this
 #    return int(math.floor(x / 10.0)) * 10
 
 
-def returns_to_date(district, output_format=""):
+def responses_to_date(district, output_format=""):
     # need to add on those households who returned before the first interaction - and were therefore never added
     # to the sim
 
-    count = len([household.hh_id for household in district.households if household.returned])
+    count = len([household.hh_id for household in district.households if household.responded])
 
     if output_format == "%":
 

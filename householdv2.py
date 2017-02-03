@@ -8,7 +8,7 @@ import helper as h
 import math
 import district
 
-response = namedtuple('Response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+return_sent = namedtuple('Return_sent', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 response_planned = namedtuple('Response_planned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 do_nothing = namedtuple('Do_nothing', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time','type'])
@@ -60,7 +60,8 @@ class Household(object):
 
         self.resp_time = 0
         self.responded = False
-        self.returned = False
+        self.return_sent = False
+        self.return_received = False
         self.status = ''
         self.visits = 0
         self.visits_contacted = 0
@@ -73,11 +74,11 @@ class Household(object):
 
         yield self.env.timeout(self.initial_time)
 
-        if self.initial_status == 'late' and not self.responded:
+        if self.initial_status == 'late' and not self.return_sent:
             # normal response
-            yield self.env.process(self.respond(self.calc_delay()))
+            yield self.env.process(self.household_returns(self.calc_delay()))
 
-        elif self.initial_status == 'help' and not self.responded:
+        elif self.initial_status == 'help' and not self.return_sent:
             # help
             yield self.env.process(self.contact())
 
@@ -114,7 +115,7 @@ class Household(object):
         self.calls += 1
 
         if (not self.digital and not self.paper_allowed and
-            h.returns_to_date(self.district) < self.district.input_data['paper_trigger'] and
+            h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
             self.paper_on_request):
             # so provide paper if the conditions are met...
 
@@ -275,7 +276,7 @@ class Household(object):
                                                                      self.env.now))
             self.resp_planned = True
             self.rep.adviser_store.put(current_ad)
-            self.rep.env.process(self.respond(self.calc_delay()))
+            self.rep.env.process(self.household_returns(self.calc_delay()))
 
         else:
 
@@ -292,23 +293,23 @@ class Household(object):
 
             self.rep.adviser_store.put(current_ad)
 
-    def respond(self, delay=0):
-        """represents the hh responding - not the return being received by census"""
+    def household_returns(self, delay=0):
+        """represents the hh returning their form - not the return being counted as a response by census"""
 
-        if self.responded is False:
+        if not self.return_sent:
 
-            self.responded = True
+            self.return_sent = True
             self.resp_time = self.env.now
             # add to hh response event log
 
-            self.output_data['Respond'].append(response(self.rep.reps,
-                                                        self.district.name,
-                                                        self.input_data["LA"],
-                                                        self.input_data["LSOA"],
-                                                        self.digital,
-                                                        self.hh_type,
-                                                        self.hh_id,
-                                                        self.resp_time))
+            self.output_data['Return_sent'].append(return_sent(self.rep.reps,
+                                                               self.district.name,
+                                                               self.input_data["LA"],
+                                                               self.input_data["LSOA"],
+                                                               self.digital,
+                                                               self.hh_type,
+                                                               self.hh_id,
+                                                               self.resp_time))
 
             if self.calc_delay() == 0:  # digital
                 self.env.process(censusv2.ret_rec(self, self.rep))
@@ -383,7 +384,7 @@ class Household(object):
                                                                              self.env.now,
                                                                              reminder_type))
 
-            yield self.env.process(self.respond(self.calc_delay()))
+            yield self.env.process(self.household_returns(self.calc_delay()))
         elif self.resp_level < reminder_test <= self.resp_level + self.help_level:
             # call for help
             yield self.env.process(self.contact())

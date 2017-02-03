@@ -1,0 +1,1040 @@
+{
+  "1": {
+    "Description": "single district, single household, self responds, online, no paper, no advisers, no census officers",
+    "replication seeds": {
+      "1": 150569632.406046
+    },
+    "replications": 1,
+    "start_date": "2011, 3, 7",
+    "end_date": "2011, 5, 6",
+    "census_date": "2011, 3, 13",
+    "advisers": {},
+    "districts": {
+      "E06000001": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {}
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 0,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 100,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "False",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      }
+    }
+  },
+  "2": {
+    "Description": "single district, single household, self responds, paper, paper allowed, no advisers, no census officers",
+    "replication seeds": {
+      "1": 150569632.406046
+    },
+    "replications": 1,
+    "start_date": "2011, 3, 7",
+    "end_date": "2011, 5, 6",
+    "census_date": "2011, 3, 13",
+    "advisers": {},
+    "districts": {
+      "E06000001": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 0,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 100,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 100,
+                "help": 0
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "True",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      }
+    }
+  },
+  "3": {
+    "Description": "single district, single household, calls helpline then responds, digital, no paper, 1 adviser, no census officers",
+    "replication seeds": {
+      "1": 150569632.406046
+    },
+    "replications": 1,
+    "start_date": "2011, 3, 7",
+    "end_date": "2011, 5, 6",
+    "census_date": "2011, 3, 13",
+    "advisers": {
+      "late": {
+        "start_date": "2011, 3, 7",
+        "number": 1,
+        "da_effectiveness": {
+          "htc5": 20,
+          "htc4": 30,
+          "htc1": 100,
+          "htc3": 35,
+          "htc2": 40
+        },
+        "availability": {
+          "0": [
+            "09:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "1": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "2": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "3": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "4": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "5": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "6": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ]
+        },
+        "end_date": "2011, 5, 6",
+        "call_times": {
+          "failed": 5,
+          "out": 3,
+          "query": 1,
+          "convert": 5,
+          "out_paper": 4,
+          "paper": 5,
+          "success": 30,
+          "wasted": 5
+        }
+      }
+    },
+    "districts": {
+      "E06000001": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 0,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 0,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 0,
+                "help": 100
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "False",
+            "paper_on_request": "False"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      }
+    }
+  },
+  "4": {
+    "Description": "single district, single household, calls helpline, gets paper, then responds, paper, paper on request, 1 adviser, no census officers",
+    "replication seeds": {
+      "1": 150569632.406046
+    },
+    "replications": 1,
+    "start_date": "2011, 3, 7",
+    "end_date": "2011, 5, 6",
+    "census_date": "2011, 3, 13",
+    "advisers": {
+      "late": {
+        "start_date": "2011, 3, 7",
+        "number": 1,
+        "da_effectiveness": {
+          "htc5": 20,
+          "htc4": 30,
+          "htc1": 100,
+          "htc3": 35,
+          "htc2": 40
+        },
+        "availability": {
+          "0": [
+            "09:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "1": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "2": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "3": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "4": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "5": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ],
+          "6": [
+            "10:00",
+            "13:00",
+            "14:00",
+            "18:00"
+          ]
+        },
+        "end_date": "2011, 5, 6",
+        "call_times": {
+          "failed": 5,
+          "out": 3,
+          "query": 1,
+          "convert": 5,
+          "out_paper": 4,
+          "paper": 5,
+          "success": 30,
+          "wasted": 5
+        }
+      }
+    },
+    "districts": {
+      "E06000001": {
+        "letter_phases": {},
+        "paper_trigger": 80,
+        "census officer": {
+          "standard": {
+            "visit_times": {
+              "failed": 5,
+              "out": 3,
+              "query": 1,
+              "convert": 5,
+              "success": 15,
+              "paper": 5,
+              "out_paper": 4,
+              "wasted": 5
+            },
+            "start_date": "2011, 4, 6",
+            "number": 0,
+            "da_effectiveness": {
+              "htc5": 20,
+              "htc4": 30,
+              "htc1": 50,
+              "htc3": 35,
+              "htc2": 40
+            },
+            "availability": {
+              "0": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "1": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "2": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "3": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "4": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "5": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ],
+              "6": [
+                "10:30",
+                "12:30",
+                "13:30",
+                "15:30"
+              ]
+            },
+            "end_date": "2011, 5, 6",
+            "travel_speed": 5,
+            "has_paper": "False"
+          }
+        },
+        "RMT_update": 24,
+        "households": {
+          "htc1": {
+            "response_day": [
+              0.1,
+              2
+            ],
+            "LSOA": "an LSOA",
+            "number": 1,
+            "response_time": {
+              "other": [
+                12,
+                1
+              ],
+              "census_day": [
+                12,
+                1
+              ]
+            },
+            "call_conversion_rate": 35,
+            "dig_assist_flex": 0,
+            "send_incomplete": 0,
+            "delay": {
+              "paper": 72,
+              "digital": 0
+            },
+            "LA": "an LA",
+            "renege": 0.125,
+            "priority": 0,
+            "paper_after_max_visits": "False",
+            "max_visits": 5,
+            "paper_prop": 100,
+            "FU_start_time": 336,
+            "behaviours": {
+              "default": {
+                "response": 0,
+                "help": 100
+              },
+              "alt": {
+                "response": 0,
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 100,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
+            },
+            "contact_rate": {
+              "0": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "1": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "2": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "3": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "4": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "5": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              },
+              "6": {
+                "9": 100,
+                "17": 100,
+                "24": 100
+              }
+            },
+            "conversion_rate": {
+              "0": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "1": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "2": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "3": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "4": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "5": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              },
+              "6": {
+                "9": 50,
+                "17": 50,
+                "24": 50
+              }
+            },
+            "paper_allowed": "False",
+            "paper_on_request": "True"
+          }
+        },
+        "posting_time": 48,
+        "trigger": 90,
+        "district_area": 79.4
+      }
+    }
+  }
+
+
+
+}

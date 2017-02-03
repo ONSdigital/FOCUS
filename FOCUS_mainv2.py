@@ -127,6 +127,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = False
+    multiple_processors = False
     freeze_support()
 
     # delete all old output files from default location except generated JSON files.
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/simple_out.JSON'
-        file_name = 'inputs/repeat.JSON'
+        file_name = 'inputs/testing.JSON'
         #file_name = 'inputs/single multi district.JSON'
         #file_name = 'inputs/management areas(small).JSON'
         input_path = os.path.join(os.getcwd(), file_name)
@@ -201,9 +202,13 @@ if __name__ == '__main__':
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     print(st)
 
-    #pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-    #Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
-    start_run(run_list[0], seed_list[0], output_path)  # uncomment this for a single run without multi processing
+    # different run methods - use single processor for debugging
+    if multiple_processors:
+        pool = Pool(cpu_count())  # use the next two lines to use multiple processors
+        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+    else:
+        for i in range(len(run_list)):
+            start_run(run_list[i], seed_list[i], output_path)
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:

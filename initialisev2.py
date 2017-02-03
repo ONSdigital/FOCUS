@@ -32,7 +32,7 @@ class Rep(object):
         self.ad_avail = []  # list of all the available advisers
 
         self.total_ad_instances = 0
-        self.total_returns = 0
+        self.total_responses = 0
         self.total_hh = 0  # total number of hh across all districts
         self.total_co = 0  # total number of co across all districts
 
