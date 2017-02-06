@@ -156,21 +156,19 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
     for row in cca_data:
         cca_unique.add(row[0])
 
-    # then run through each row adding hh
+    # then run through each row adding hh to CCA makeup entry
     for row in cca_data:
+
         if not row[0] in input_data[run_counter]['districts']:
-            #cca not in list so add
+            # cca not in list so add
             input_data[run_counter]['districts'][row[0]] = copy.deepcopy(district_template)
 
-            if not 'cca_makeup' in input_data[run_counter]['districts'][row[0]]['households'][row[1]]:
-                # hh type not in cca so add
-                input_data[run_counter]['districts'][row[0]]['households'][row[1]]['cca_makeup'] = defaultdict(dict)
+        hh_key = "htc" + row[4]
+        if not 'cca_makeup' in input_data[run_counter]['districts'][row[0]]['households'][hh_key]:
+            # hh type not in cca so add
+            input_data[run_counter]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
 
-        input_data[run_counter]['districts'][row[0]]['households'][row[1]]['cca_makeup'][row[2]][row[3]] = row[4]
-
-
-    # then for each district add up total households of each type and as you do calc CO' required....
-    # add then exit converting to JSON!
+        input_data[run_counter]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
 
     list_of_new_districts = sorted(list(input_data[run_counter]['districts'].keys()), key=str)
 
@@ -178,14 +176,16 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
         co_number = 0
         for hh_type in input_data[run_counter]['districts'][distr]['households']:
             # check if any of this type of hh exist in this cca via looking for cca makeup key
-            if 'cca_makeup' in input_data[run_counter]['districts'][row[0]]['households'][hh_type]:
+            if 'cca_makeup' in input_data[run_counter]['districts'][distr]['households'][hh_type]:
                 # number needs to equal sum of lowest level of cca dict...
                 input_data[run_counter]['districts'][distr]['households'][hh_type]['number'] = \
-                    sum_dict(input_data[run_counter]['districts'][row[0]]['households'][hh_type]['cca_makeup'])
+                    sum_dict(input_data[run_counter]['districts'][distr]['households'][hh_type]['cca_makeup'])
 
                 # and calc the number of CO to add based on ratios..
                 co_number += input_data[run_counter]['districts'][distr]['households'][hh_type]['number']/\
                             hh_per_co[int(hh_type[-1])-1]
+
+                # also need to add together areas....and update district area
 
         co_number = math.ceil(co_number)
         input_data[run_counter]['districts'][distr]['census officer']['standard']['number'] = co_number
@@ -199,29 +199,19 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
             json.dump(input_data, outfile, indent=4, sort_keys=True)
 
 
-# if new area create - else skip to existing
-# if new LA create - else add to exisit
-# if new LSOA add to existing
+def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, input_ratio, current_co=0):
 
-input_JSON_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'simple_in.csv')
-simple_output_path = os.path.join(os.getcwd(), 'inputs', 'simple_out.JSON')
-
-# below uses new format to generate CCA with hh across LSOA's and LA's
-# generate_cca_JSON(input_JSON_path, simple_input_path, simple_output_path, [1612, 1312, 725, 487, 362] )
-
-
-def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, simple_ratio, current_co = 0):
-
-    current_co += hh_remaining / simple_ratio
+    current_co += hh_remaining / input_ratio[htc-1]
 
     if current_co < 12:
         # pass return what to put in cca
         return [[cca, la_code, lsoa_code, hh_remaining, htc, area], current_co]
     else:
 
+        # when adding a proportion of an hh also return proportion of area?
+
         proportion_over = current_co - 12
-        hh_over = math.floor(proportion_over * simple_ratio)
+        hh_over = math.floor(proportion_over * input_ratio[htc-1])
         hh_to_add = hh_remaining - hh_over
         cca_output.append([cca, la_code, lsoa_code, hh_to_add, htc, area])
 
@@ -229,13 +219,15 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
         cca += 1
         current_co = 0
 
-        return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area, simple_ratio, current_co)
+        return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area, input_ratio, current_co)
 
-def create_cca_data(input_path, output_path):
-    # creates from the raw data - eventually the address register - the breakdown of CCAs
+
+def create_cca_data(input_path, output_path, input_ratios=[]):
+
+    # creates from the raw data - eventually the address register - a summary breakdown of CCAs ready for conversion
+    # to JSON format
 
     # simple ratio - number of hh per CO
-    simple_ratio = 75
     cca = 1
     cca_output = []
 
@@ -249,9 +241,9 @@ def create_cca_data(input_path, output_path):
 
     current_co = 0
 
-    current_co = 0
-
     for row in raw_data:
+
+        # for new row need to test if next LSOA is near enough???
 
         la_code = row[0]
         la_name = row[1]
@@ -263,33 +255,35 @@ def create_cca_data(input_path, output_path):
         htc = int(row[7])
         area = float(row[8])
 
-        hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, simple_ratio, current_co)
+        hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, input_ratios, current_co)
         cca_output.append(hh_to_add[0])
         current_co = hh_to_add[1]
         cca = hh_to_add[0][0]
 
     with open(output_path, "w") as f:
+        # add a header
         writer = csv.writer(f)
+        writer.writerow(["CCA", "LA", "LSOA", "number", "htc", "area"])
         writer.writerows(cca_output)
 
 
+# below sets input and output paths for creation of CCA csv summary
+ratios = [300, 150, 75, 50, 25]  # [1612, 1312, 725, 487, 362]
 input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_small.csv')
 output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-create_cca_data(input_csv_path, output_csv_path)
+create_cca_data(input_csv_path, output_csv_path, ratios)
+
+# below set input and output paths for creation of JSON file from CSV summary
+input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_out.JSON')
+generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 
 
 
 
 
-
-# go through row by row adding hh until at least 12 co needed.
-    # first ignore the fact they are geographically separate and different - just get a new list of CCA
-    # then add different hh types
-
-# if need another LSOA get next nearest
-# if next nearest within a set threshold distance - say 25 km  - use other wise add to current and then start again
-# with next LSOA
 
 
 
