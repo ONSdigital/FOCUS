@@ -16,6 +16,7 @@ warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 
 # name tuples used for purposes other than output
 initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
+hh_geography = namedtuple('hh_geography', ['la', 'lsoa'])
 
 
 class District(object):
@@ -138,11 +139,11 @@ class District(object):
     def return_household_geog(self, input_dict):
         # returns LA and LSOA codes for hh
 
-        for LA in input_dict:
-            for LSOA in input_dict[LA]:
-                if int(input_dict[LA][LSOA]) > 0:
-                    input_dict[LA][LSOA] = int(input_dict[LA][LSOA]) - 1
-                    return [LA, LSOA]
+        for la in input_dict:
+            for lsoa in input_dict[la]:
+                if int(input_dict[la][lsoa]) > 0:
+                    input_dict[la][lsoa] = int(input_dict[la][lsoa]) - 1
+                    return hh_geography(la, lsoa)
 
     def create_households(self):
 
@@ -159,24 +160,24 @@ class District(object):
                     # number to add should equal number in mix dict for household type
                     # so as you add take off the total using keys as codes for geography
                     # returns a list with LA and LSOA details
-                    #HH_geog = self.return_household_geog(hh_input_data['cca_makeup'])
+                    hh_geog = self.return_household_geog(hh_input_data['cca_makeup'])
 
                     self.total_households += 1
 
                     # determine initial HH action
-                    hh_action = self.initial_action(hh_input_data, self.first_interaction, hh)
+                    hh_action = self.initial_action(hh_input_data, self.first_interaction, hh, hh_geog)
 
                     # take off district level mix here as hh added?
 
                     if hh_action.type == 'early':
                         # don't need an instance of a household just directly record a response/return at correct time
 
-                        self.rep.total_returns += 1
+                        self.rep.total_responses += 1
 
                         self.rep.output_data['Responded'].append(response_times(self.rep.reps,
                                                                                 self.name,
-                                                                                hh_input_data["LA"],
-                                                                                hh_input_data["LSOA"],
+                                                                                hh_geog.la,
+                                                                                hh_geog.lsoa,
                                                                                 hh_action.digital,
                                                                                 hh,
                                                                                 None,
@@ -189,7 +190,10 @@ class District(object):
                                                                      self.rep.total_hh,
                                                                      hh,
                                                                      hh_input_data,
-                                                                     hh_action))
+                                                                     hh_action,
+                                                                     hh_geog.la,
+                                                                     hh_geog.lsoa
+                                                                     ))
 
                     if self.rep.reps == 1:
                         self.rep.output_data['hh_record'].append(hh_record(self.name,
@@ -212,7 +216,7 @@ class District(object):
                                                      letter_data,
                                                      letter))
 
-    def initial_action(self, input_data, first_interaction, hh):
+    def initial_action(self, input_data, first_interaction, hh, hh_geog):
 
         digital = h.set_preference(input_data['paper_prop'],
                                    self.rnd)
@@ -231,17 +235,17 @@ class District(object):
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
         if response_test <= hh_resp:
             # respond but test when
-            return self.early_responder(input_data, digital, first_interaction, hh)
+            return self.early_responder(input_data, digital, first_interaction, hh, hh_geog)
             # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND if not an early responder
 
         elif hh_resp < response_test <= hh_help:
             # call for help return when
-            return self.help(input_data, digital, first_interaction, hh)
+            return self.help(input_data, digital, first_interaction, hh, hh_geog)
         else:
             # do nothing return 0 time
-            return self.do_nothing(input_data, digital, first_interaction, hh)
+            return self.do_nothing(input_data, digital, first_interaction, hh, hh_geog)
 
-    def early_responder(self, input_data, digital, first_interaction, hh):
+    def early_responder(self, input_data, digital, first_interaction, hh, hh_geog):
 
         response_time = h.set_household_response_time(self.rep,
                                                       input_data,
@@ -251,8 +255,8 @@ class District(object):
 
             self.rep.output_data['Response'].append(response(self.rep.reps,
                                                              self.name,
-                                                             input_data["LA"],
-                                                             input_data["LSOA"],
+                                                             hh_geog.la,
+                                                             hh_geog.lsoa,
                                                              digital,
                                                              hh,
                                                              None,
@@ -268,8 +272,8 @@ class District(object):
 
             self.rep.output_data['Response'].append(response(self.rep.reps,
                                                              self.name,
-                                                             input_data["LA"],
-                                                             input_data["LSOA"],
+                                                             hh_geog.la,
+                                                             hh_geog.lsoa,
                                                              digital,
                                                              hh,
                                                              None,
@@ -282,7 +286,7 @@ class District(object):
 
             return initial_action('late', digital, response_time)
 
-    def help(self, input_data, digital, first_interaction, hh):
+    def help(self, input_data, digital, first_interaction, hh, hh_geog):
 
         # below uses response time profile - will need to update this to a "call" profile.
         response_time = h.set_household_response_time(self.rep,
@@ -291,7 +295,7 @@ class District(object):
 
         return initial_action('help', digital, response_time)
 
-    def do_nothing(self, input_data, digital, first_interaction, hh):
+    def do_nothing(self, input_data, digital, first_interaction, hh, hh_geog):
 
         return initial_action('do_nothing', digital, 0)
 

@@ -10,7 +10,7 @@
     "census_date": "2011, 3, 13",
     "advisers": {},
     "districts": {
-      "E06000001": {
+      "1": {
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {},
@@ -21,8 +21,12 @@
               0.1,
               2
             ],
-            "LSOA": "an LSOA",
             "number": 1,
+            "cca_makeup": {
+                            "A": {
+                                "a": "1"
+                            }
+                        },
             "response_time": {
               "other": [
                 12,
@@ -40,7 +44,6 @@
               "paper": 72,
               "digital": 0
             },
-            "LA": "an LA",
             "renege": 0.125,
             "priority": 0,
             "paper_after_max_visits": "False",
@@ -183,18 +186,22 @@
     "census_date": "2011, 3, 13",
     "advisers": {},
     "districts": {
-      "E06000001": {
+      "1": {
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {},
         "RMT_update": 24,
         "households": {
           "htc1": {
+            "cca_makeup": {
+                            "A": {
+                                "a": "1"
+                            }
+                        },
             "response_day": [
               0.1,
               2
             ],
-            "LSOA": "an LSOA",
             "number": 1,
             "response_time": {
               "other": [
@@ -213,7 +220,6 @@
               "paper": 72,
               "digital": 0
             },
-            "LA": "an LA",
             "renege": 0.125,
             "priority": 0,
             "paper_after_max_visits": "False",
@@ -423,7 +429,7 @@
       }
     },
     "districts": {
-      "E06000001": {
+      "1": {
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {},
@@ -434,7 +440,11 @@
               0.1,
               2
             ],
-            "LSOA": "an LSOA",
+            "cca_makeup": {
+                            "A": {
+                                "a": "1"
+                            }
+                        },
             "number": 1,
             "response_time": {
               "other": [
@@ -453,7 +463,6 @@
               "paper": 72,
               "digital": 0
             },
-            "LA": "an LA",
             "renege": 0.125,
             "priority": 0,
             "paper_after_max_visits": "False",
@@ -663,7 +672,7 @@
       }
     },
     "districts": {
-      "E06000001": {
+      "1": {
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {},
@@ -674,7 +683,11 @@
               0.1,
               2
             ],
-            "LSOA": "an LSOA",
+            "cca_makeup": {
+                            "A": {
+                                "a": "1"
+                            }
+                        },
             "number": 1,
             "response_time": {
               "other": [
@@ -693,7 +706,6 @@
               "paper": 72,
               "digital": 0
             },
-            "LA": "an LA",
             "renege": 0.125,
             "priority": 0,
             "paper_after_max_visits": "False",
@@ -836,7 +848,7 @@
     "census_date": "2011, 3, 13",
     "advisers": {},
     "districts": {
-      "E06000001": {
+      "1": {
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {
@@ -916,7 +928,11 @@
               0.1,
               2
             ],
-            "LSOA": "an LSOA",
+            "cca_makeup": {
+                            "A": {
+                                "a": "1"
+                            }
+                        },
             "number": 1,
             "response_time": {
               "other": [
@@ -935,7 +951,6 @@
               "paper": 72,
               "digital": 0
             },
-            "LA": "an LA",
             "renege": 0.125,
             "priority": 0,
             "paper_after_max_visits": "False",

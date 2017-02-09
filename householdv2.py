@@ -32,7 +32,7 @@ call_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'di
 class Household(object):
 
     # Create an instance of the class
-    def __init__(self, rep, env, district, hh_id, hh_type, input_data, initial_action):
+    def __init__(self, rep, env, district, hh_id, hh_type, input_data, initial_action, la, lsoa):
 
         self.rep = rep
         self.rnd = self.rep.rnd
@@ -41,6 +41,8 @@ class Household(object):
         self.hh_id = hh_id
         self.hh_type = hh_type
         self.input_data = input_data
+        self.la = la
+        self.lsoa = lsoa
 
         self.output_data = self.rep.output_data
         self.initial_status = initial_action.type
@@ -86,8 +88,8 @@ class Household(object):
             # nowt
             self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
                                                              self.district.name,
-                                                             self.input_data["LA"],
-                                                             self.input_data["LSOA"],
+                                                             self.la,
+                                                             self.lsoa,
                                                              self.digital,
                                                              self.hh_type,
                                                              self.hh_id,
@@ -106,8 +108,8 @@ class Household(object):
 
         self.output_data['Call'].append(call(self.rep.reps,
                                              self.district.name,
-                                             self.input_data["LA"],
-                                             self.input_data["LSOA"],
+                                             self.la,
+                                             self.lsoa,
                                              self.digital,
                                              self.hh_type,
                                              self.hh_id,
@@ -168,8 +170,8 @@ class Household(object):
 
             self.output_data['Call_renege'].append(call_renege(self.rep.reps,
                                                                self.district.name,
-                                                               self.input_data["LA"],
-                                                               self.input_data["LSOA"],
+                                                               self.la,
+                                                               self.lsoa,
                                                                self.digital,
                                                                self.hh_type,
                                                                self.hh_id,
@@ -194,8 +196,8 @@ class Household(object):
 
             self.output_data['Call_contact'].append(call_contact(self.rep.reps,
                                                                  self.district.name,
-                                                                 self.input_data["LA"],
-                                                                 self.input_data["LSOA"],
+                                                                 self.la,
+                                                                 self.lsoa,
                                                                  self.digital,
                                                                  self.hh_type,
                                                                  self.hh_id,
@@ -226,8 +228,8 @@ class Household(object):
             # record event
             self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
                                                                      self.district.name,
-                                                                     self.input_data["LA"],
-                                                                     self.input_data["LSOA"],
+                                                                     self.la,
+                                                                     self.lsoa,
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.hh_id,
@@ -243,8 +245,8 @@ class Household(object):
 
             self.rep.output_data['call_request'].append(call_convert(self.rep.reps,
                                                                      self.district.name,
-                                                                     self.input_data["LA"],
-                                                                     self.input_data["LSOA"],
+                                                                     self.la,
+                                                                     self.lsoa,
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.hh_id,
@@ -268,8 +270,8 @@ class Household(object):
 
             self.rep.output_data['Call_success'].append(call_success(self.rep.reps,
                                                                      self.district.name,
-                                                                     self.input_data["LA"],
-                                                                     self.input_data["LSOA"],
+                                                                     self.la,
+                                                                     self.lsoa,
                                                                      self.digital,
                                                                      self.hh_type,
                                                                      self.hh_id,
@@ -284,8 +286,8 @@ class Household(object):
 
             self.rep.output_data['Call_failed'].append(call_failed(self.rep.reps,
                                                                    self.district.name,
-                                                                   self.input_data["LA"],
-                                                                   self.input_data["LSOA"],
+                                                                   self.la,
+                                                                   self.lsoa,
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.hh_id,
@@ -304,8 +306,8 @@ class Household(object):
 
             self.output_data['Return_sent'].append(return_sent(self.rep.reps,
                                                                self.district.name,
-                                                               self.input_data["LA"],
-                                                               self.input_data["LSOA"],
+                                                               self.la,
+                                                               self.lsoa,
                                                                self.digital,
                                                                self.hh_type,
                                                                self.hh_id,
@@ -320,6 +322,9 @@ class Household(object):
 
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
+        # if a pq set paper allowed to true!
+        if reminder_type == 'pq':
+            self.paper_allowed = True
 
         behaviour = self.default_behaviour()
         # and get relevant figures
@@ -332,8 +337,8 @@ class Household(object):
 
             self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
                                                                            self.district.name,
-                                                                           self.input_data["LA"],
-                                                                           self.input_data["LSOA"],
+                                                                           self.la,
+                                                                           self.lsoa,
                                                                            self.digital,
                                                                            self.hh_type,
                                                                            self.hh_id,
@@ -343,8 +348,8 @@ class Household(object):
 
             self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
                                                                                      self.district.name,
-                                                                                     self.input_data["LA"],
-                                                                                     self.input_data["LSOA"],
+                                                                                     self.la,
+                                                                                     self.lsoa,
                                                                                      self.digital,
                                                                                      self.hh_type,
                                                                                      self.hh_id,
@@ -354,8 +359,8 @@ class Household(object):
             # if get here they have not responded or planned to do so, so a worthwhile reminder.
             self.rep.output_data['Reminder_received'].append(reminder_success(self.rep.reps,
                                                                               self.district.name,
-                                                                              self.input_data["LA"],
-                                                                              self.input_data["LSOA"],
+                                                                              self.la,
+                                                                              self.lsoa,
                                                                               self.digital,
                                                                               self.hh_type,
                                                                               self.hh_id,
@@ -376,8 +381,8 @@ class Household(object):
 
             self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
                                                                              self.district.name,
-                                                                             self.input_data["LA"],
-                                                                             self.input_data["LSOA"],
+                                                                             self.la,
+                                                                             self.lsoa,
                                                                              self.digital,
                                                                              self.hh_type,
                                                                              self.hh_id,
@@ -392,8 +397,8 @@ class Household(object):
             # nowt
             self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
                                                              self.district.name,
-                                                             self.input_data["LA"],
-                                                             self.input_data["LSOA"],
+                                                             self.la,
+                                                             self.lsoa,
                                                              self.digital,
                                                              self.hh_type,
                                                              self.hh_id,
@@ -405,8 +410,8 @@ class Household(object):
 
         self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
                                                                    self.district.name,
-                                                                   self.input_data["LA"],
-                                                                   self.input_data["LSOA"],
+                                                                   self.la,
+                                                                   self.lsoa,
                                                                    self.digital,
                                                                    self.hh_type,
                                                                    self.hh_id,

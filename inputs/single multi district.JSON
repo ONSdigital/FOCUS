@@ -7,7 +7,7 @@
     "census_date": "2011, 3, 13",
     "advisers": {
       "early":{
-        "number": 1,
+        "number": 50,
         "start_date": "2011, 3, 7",
         "end_date": "2011, 5, 6",
         "availability": {
@@ -38,7 +38,7 @@
       }
     },
       "late":{
-        "number": 0,
+        "number": 50,
         "start_date": "2011, 3, 7",
         "end_date": "2011, 5, 6",
         "availability": {
@@ -70,7 +70,7 @@
     }
     },
     "districts": {
-      "E06000001": {
+      "ED1": {
         "letter_phases": {
           "reminder": {
             "start_date": "2011, 3, 15",
@@ -131,120 +131,50 @@
           "htc1": {
             "behaviours": {
               "default": {
-                "response":84.5,
-                "help": 5
+                "response": 80,
+                "help": 0
               },
               "alt": {
                 "response": 0,
                 "help": 89.5
               },
-              "renege":{
+              "renege": {
                 "response": 0,
-                "help": 100
+                "help": 0
               },
-              "other":{}
-            },
-            "reminders":{
               "pq":{
-                "response":{
-                  "paper":{
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  },
-                  "digital": {
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  }
+                "default": {
+                  "response": 0,
+                  "help": 0
                 },
-                "no_response":{
-                  "paper":{
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  },
-                  "digital": {
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  }
-                }
-              },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
               "postcard": {
-                "response":{
-                  "paper":{
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  },
-                  "digital": {
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  }
+                "default": {
+                  "response": 0,
+                  "help": 0
                 },
-                "no_response":{
-                  "paper":{
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  },
-                  "digital": {
-                    "digital_only":{
-                      "help": 0,
-                      "resp": 10
-                    },
-                    "paper_allowed": {
-                      "help": 0,
-                      "resp": 10
-                    }
-                  }
-                }
-              }
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
             },
             "renege": 0.125,
             "call_conversion_rate": 35,
             "paper_prop": 86,
-            "LA": "an LA",
-            "LSOA": "an LSOA",
-            "paper_allowed": "False",
-            "number": 1,
+            "paper_allowed": "True",
+            "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
@@ -346,86 +276,96 @@
             }
           },
           "htc2": {
-            "call_renege_lower": 0.05,
-            "call_renege_upper": 0.25,
-            "call_conversion_rate": 33,
-            "paper_prop": 85,
             "behaviours": {
               "default": {
-                "response": 80,
+                "response": 70,
                 "help": 0
               },
               "alt": {
                 "response": 0,
-                "help": 85
-              }
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
             },
+            "renege": 0.125,
+            "call_conversion_rate": 35,
+            "paper_prop": 86,
             "paper_allowed": "True",
-            "LA": "an LA",
-            "LSOA": "an LSOA",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
-            "delay": {
-              "paper": 72,
-              "digital": 0
-            },
-            "priority": -1,
-            "max_visits": 5,
+            "priority": 0,
+            "max_visits": 10,
             "paper_after_max_visits": "False",
             "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "1": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "2": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 33,
+                "17": 35,
                 "24": 10
               }
             },
-            "FU_on": 1,
             "send_incomplete": 0,
-            "beta_dist": [
-              0.14,
-              2
-            ],
-            "letter_phases": {
-              "reminder": {
-                "date": "2011, 3, 12, 9, 0, 0",
-                "delay": 48,
-                "effect": 4,
-                "targeted": 1,
-                "pq": 0
-              }
-            },
             "response_day": [
               0.1,
               2
@@ -440,126 +380,139 @@
                 1
               ]
             },
-            "at_home": {
+            "contact_rate": {
               "0": {
-                "9": 20,
-                "17": 50,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "1": {
-                "9": 20,
-                "17": 50,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "2": {
-                "9": 20,
-                "17": 50,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 50,
+                "17": 60,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 50,
+                "17": 60,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 50,
+                "17": 60,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 50,
+                "17": 60,
                 "24": 10
               }
+            },
+            "delay": {
+              "paper": 72,
+              "digital": 0
             }
           },
           "htc3": {
-            "call_renege_lower": 0.05,
-            "call_renege_upper": 0.25,
-            "delay": {
-              "paper": 72,
-              "digital": 0
-            },
             "behaviours": {
               "default": {
-                "response": 73.5,
+                "response": 60,
                 "help": 0
               },
               "alt": {
                 "response": 0,
-                "help": 78.5
-              }
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
             },
-            "call_conversion_rate": 31,
-            "paper_prop": 82,
-            "LA": "an LA",
-            "LSOA": "an LSOA",
+            "renege": 0.125,
+            "call_conversion_rate": 35,
+            "paper_prop": 86,
             "paper_allowed": "True",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
-            "priority": -2,
-            "max_visits": 5,
+            "priority": 0,
+            "max_visits": 10,
             "paper_after_max_visits": "False",
             "paper_on_request": "False",
-            "contact_rate": 25,
             "conversion_rate": {
               "0": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "1": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "2": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 31,
+                "17": 35,
                 "24": 10
               }
             },
-            "FU_on": 1,
             "send_incomplete": 0,
-            "beta_dist": [
-              0.2,
-              2
-            ],
-            "letter_phases": {
-              "reminder": {
-                "date": "2011, 3, 12, 9, 0, 0",
-                "delay": 48,
-                "effect": 3,
-                "targeted": 1,
-                "pq": 0
-              }
-            },
             "response_day": [
               0.1,
               2
@@ -574,126 +527,139 @@
                 1
               ]
             },
-            "at_home": {
+            "contact_rate": {
               "0": {
-                "9": 20,
-                "17": 25,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "1": {
-                "9": 20,
-                "17": 25,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "2": {
-                "9": 20,
-                "17": 25,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 25,
+                "17": 60,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 25,
+                "17": 60,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 25,
+                "17": 60,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 25,
+                "17": 60,
                 "24": 10
               }
+            },
+            "delay": {
+              "paper": 72,
+              "digital": 0
             }
           },
           "htc4": {
-            "call_renege_lower": 0.05,
-            "call_renege_upper": 0.25,
-            "call_conversion_rate": 27,
-            "paper_prop": 78,
-            "paper_allowed": "True",
             "behaviours": {
               "default": {
-                "response": 68,
+                "response": 50,
                 "help": 0
               },
               "alt": {
                 "response": 0,
-                "help": 73
-              }
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
             },
+            "renege": 0.125,
+            "call_conversion_rate": 35,
+            "paper_prop": 86,
+            "paper_allowed": "True",
             "number": 0,
-            "LA": "an LA",
-            "LSOA": "an LSOA",
             "FU_start_time": 336,
             "dig_assist_flex": 0,
-            "priority": -3,
-            "max_visits": 5,
-            "delay": {
-              "paper": 72,
-              "digital": 0
-            },
+            "priority": 0,
+            "max_visits": 10,
             "paper_after_max_visits": "False",
             "paper_on_request": "False",
-            "contact_rate": 22,
             "conversion_rate": {
               "0": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "1": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "2": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 30,
+                "17": 35,
                 "24": 10
               }
             },
-            "FU_on": 1,
             "send_incomplete": 0,
-            "beta_dist": [
-              0.245,
-              2
-            ],
-            "letter_phases": {
-              "reminder": {
-                "date": "2011, 3, 12, 9, 0, 0",
-                "delay": 48,
-                "effect": 2,
-                "targeted": 1,
-                "pq": 0
-              }
-            },
             "response_day": [
               0.1,
               2
@@ -708,125 +674,139 @@
                 1
               ]
             },
-            "at_home": {
+            "contact_rate": {
               "0": {
-                "9": 10,
-                "17": 22,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "1": {
-                "9": 10,
-                "17": 25,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "2": {
-                "9": 10,
-                "17": 22,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "3": {
-                "9": 10,
-                "17": 22,
+                "9": 20,
+                "17": 60,
                 "24": 10
               },
               "4": {
-                "9": 10,
-                "17": 22,
+                "9": 20,
+                "17": 60,
                 "24": 10
               },
               "5": {
-                "9": 10,
-                "17": 22,
+                "9": 20,
+                "17": 60,
                 "24": 10
               },
               "6": {
-                "9": 10,
-                "17": 22,
+                "9": 20,
+                "17": 60,
                 "24": 10
               }
+            },
+            "delay": {
+              "paper": 72,
+              "digital": 0
             }
           },
           "htc5": {
-            "call_renege_lower": 0.05,
-            "call_renege_upper": 0.25,
-            "LA": "an LA",
-            "LSOA": "an LSOA",
-            "call_conversion_rate": 29,
-            "paper_prop": 76,
-            "delay": {
-              "paper": 72,
-              "digital": 0
-            },
             "behaviours": {
               "default": {
-                "response": 64,
+                "response": 40,
                 "help": 0
               },
               "alt": {
                 "response": 0,
-                "help": 69
-              }
+                "help": 89.5
+              },
+              "renege": {
+                "response": 0,
+                "help": 0
+              },
+              "pq":{
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "postcard": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }},
+              "reminder": {
+                "default": {
+                  "response": 0,
+                  "help": 0
+                },
+                "alt": {
+                "response": 0,
+                "help": 89.5
+              }}
             },
+            "renege": 0.125,
+            "call_conversion_rate": 35,
+            "paper_prop": 86,
             "paper_allowed": "True",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
-            "priority": -4,
-            "max_visits": 5,
+            "priority": 0,
+            "max_visits": 10,
             "paper_after_max_visits": "False",
             "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "1": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "2": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 25,
+                "17": 35,
                 "24": 10
               }
             },
-            "FU_on": 1,
             "send_incomplete": 0,
-            "beta_dist": [
-              0.255,
-              2
-            ],
-            "letter_phases": {
-              "reminder": {
-                "date": "2011, 3, 12, 9, 0, 0",
-                "delay": 48,
-                "effect": 1,
-                "targeted": 1,
-                "pq": 0
-              }
-            },
             "response_day": [
               0.1,
               2
@@ -841,42 +821,46 @@
                 1
               ]
             },
-            "at_home": {
+            "contact_rate": {
               "0": {
-                "9": 10,
-                "17": 20,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "1": {
-                "9": 20,
-                "17": 20,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "2": {
-                "9": 20,
-                "17": 20,
+                "11": 20,
+                "17": 60,
                 "24": 10
               },
               "3": {
                 "9": 20,
-                "17": 20,
+                "17": 60,
                 "24": 10
               },
               "4": {
                 "9": 20,
-                "17": 20,
+                "17": 60,
                 "24": 10
               },
               "5": {
                 "9": 20,
-                "17": 20,
+                "17": 60,
                 "24": 10
               },
               "6": {
                 "9": 20,
-                "17": 20,
+                "17": 60,
                 "24": 10
               }
+            },
+            "delay": {
+              "paper": 72,
+              "digital": 0
             }
           }
         }
