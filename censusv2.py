@@ -165,15 +165,26 @@ class StartFU(object):
             self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
 
             num_of_co = len(self.district.district_co)
+            action_plan_list = []
+
+            for i in range(num_of_co):
+                action_plan = self.visit_list[i::num_of_co]
+                action_plan_list .append(action_plan)
+
+            j = 0
+            for co in self.district.district_co:
+                co.action_plan = action_plan_list[j]
+                j += 1
+
 
             # split the hh up between the CO with the higher pri hh the top of each list
-            for co in self.district.district_co:
-                action_plan = self.visit_list[0::num_of_co]
-                self.visit_list = [hh for hh in self.visit_list if hh not in action_plan]
+            #for co in self.district.district_co:
+            #    action_plan = self.visit_list[0::num_of_co]
+            #    self.visit_list = [hh for hh in self.visit_list if hh not in action_plan]
 
-                num_of_co -= 1
+            #    num_of_co -= 1
 
-                co.action_plan = action_plan
+            #    co.action_plan = action_plan
             yield self.env.timeout(self.update)
             self.env.process(self.create_visit_lists())
 
@@ -214,7 +225,8 @@ class CensusOfficer(object):
         d = household.input_data['contact_rate'][str(h.current_day(household))]
 
         # if current time is not best time don't visit
-        if h.return_time_key(d, self.env.now) != max(d, key=d.get):
+        #if h.return_time_key(d, self.env.now) != max(d, key=d.get):
+        if d[h.return_time_key(d, self.env.now)] != d[max(d, key=d.get)]:
             return False
         else:
             # visit
@@ -234,7 +246,12 @@ class CensusOfficer(object):
         elif household.arranged_visit and not self.optimal_time(household):
             # put hh back in list at correct place and then get the next one...unless no other hh to visit
             if self.action_plan:
-                self.action_plan = self.action_plan[0] + household + self.action_plan[1:]
+                print(household.hh_id)
+                try:
+                    #self.action_plan = self.action_plan[0] + household + self.action_plan[1:]
+                    self.action_plan.insert(10, household)
+                except:
+                    print('error')
             else:
                 return household
 
@@ -505,6 +522,7 @@ class CensusOfficer(object):
 
     def return_dow(self, days_gone_from_start, original_tod, count=0):
         # get next relevant dow based on current sim time
+
         current_dow = (self.rep.start_date + dt.timedelta(days=days_gone_from_start)).weekday()
 
         if (not self.input_data['availability'][str(current_dow)] or
@@ -517,6 +535,9 @@ class CensusOfficer(object):
 
     def next_available(self):
         """return the number of hours until the CO is next available or remove from sim if finished"""
+
+        if self.env.now > self.end_sim_time:
+            return self.rep.sim_hours - self.env.now
 
         current_dow = (self.rep.start_date + dt.timedelta(days=math.floor(self.env.now / 24))).weekday()
         dow = self.return_dow(math.floor(self.env.now / 24), self.env.now % 24)

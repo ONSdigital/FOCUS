@@ -256,7 +256,8 @@ class Household(object):
             self.priority -= 10
 
             self.rep.adviser_store.put(current_ad)
-            self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
+            #self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
+            self.arranged_visit = False
 
     def phone_call_outcome(self, current_ad):
 
@@ -330,7 +331,10 @@ class Household(object):
         # and get relevant figures
         response_data = self.input_data["behaviours"][reminder_type][behaviour]
         self.resp_level = response_data["response"]
-        self.help_level = response_data["help"]
+        if self.rep.total_ad_instances > 0:
+            self.help_level = response_data["help"]
+        else:
+            self.help_level = 0
 
         # recorded if wasted, unnecessary or successful
         if self.responded:
@@ -371,13 +375,7 @@ class Household(object):
         # response test
         reminder_test = self.rnd.uniform(0, 100)
 
-        if self.responded or self.resp_planned:
-            # nothing but some may call to complain - do we care and need to represent this?
-            # impact likely to be very small operationally but reputation wise?
-            pass
-
-        elif reminder_test <= self.resp_level:
-            # respond there and then
+        if not self.responded and reminder_test <= self.resp_level:
 
             self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
                                                                              self.district.name,
@@ -390,10 +388,10 @@ class Household(object):
                                                                              reminder_type))
 
             yield self.env.process(self.household_returns(self.calc_delay()))
-        elif self.resp_level < reminder_test <= self.resp_level + self.help_level:
+        elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
             # call for help
             yield self.env.process(self.contact())
-        else:
+        elif not self.responded:
             # nowt
             self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
                                                              self.district.name,

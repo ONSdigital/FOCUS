@@ -55,7 +55,7 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     # calculate the cum sum of the totals
     cat_sum = cat_sum.groupby(level=[0]).cumsum().reset_index(name='cum_sum')
     # pivot it so the categories become the columns
-    cat_sum_flipped = cat_sum.pivot(index='district', columns='categories', values='cum_sum')
+    cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='cum_sum')
     # and then add back in any missing categories
     cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1)
     reps = df['rep'].max()

@@ -4,7 +4,9 @@ import censusv2
 import helper as h
 import simpy
 import sys
+from collections import namedtuple
 
+warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 
 class Rep(object):
     """contains the methods and data for an individual replication"""
@@ -44,8 +46,8 @@ class Rep(object):
 
         # create common resources
         # self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
-
-        self.create_advisers()
+        if self.total_ad_instances > 0:
+            self.create_advisers()
         self.create_districts()  # initialises districts
 
     def create_advisers(self):
@@ -79,6 +81,8 @@ class Rep(object):
 
         for distr in list_of_districts:
 
+            print(distr)
+
             # checks size of output file and writes to file if too large
             if (h.dict_size(self.output_data)) >= self.max_output_file_size:
                 h.write_output(self.output_data, self.output_path, self.reps)
@@ -86,6 +90,13 @@ class Rep(object):
             self.districts.append(district.District(self,
                                                     distr))
 
-            #co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
+            try:
+                co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
+            except KeyError as e:
+                warning_detail = "no CO for run, ", self.run, " in create districts"
+                self.output_data['Warnings'].append(warnings(self.reps,
+                                                             e,
+                                                             warning_detail))
+                co_number = 0
 
-        #print("number of CO: ", co_number)
+        print("number of CO: ", co_number)

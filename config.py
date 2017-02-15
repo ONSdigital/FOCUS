@@ -137,7 +137,6 @@ def next_nearest_LSOA(input_lsoa, input_long, input_lat, input_list):
             return i
 
 
-
 def sum_dict(input_dict):
 
     sum = 0
@@ -194,7 +193,6 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
             input_data[run_counter]['districts'][row[0]] = copy.deepcopy(district_template)
             input_data[run_counter]['districts'][row[0]]['district_area'] = 0
 
-
         hh_key = "htc" + row[4]
         if not 'cca_makeup' in input_data[run_counter]['districts'][row[0]]['households'][hh_key]:
             # hh type not in cca so add
@@ -219,6 +217,7 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
                             hh_per_co[int(hh_type[-1])-1]
 
         co_number = math.ceil(co_number)
+        # could split between early and late here??
         input_data[run_counter]['districts'][distr]['census officer']['standard']['number'] = co_number
 
             # output a JSON file
@@ -339,15 +338,16 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 
 # below sets input and output paths for creation of CCA csv summary
-ratios = [1612, 1312, 725, 487, 362]
-#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs.csv')
-#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA.csv')
+#ratios = [1612, 1312, 725, 487, 362]
+ratios = [1200, 1000, 600, 375, 280]
+#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div10.csv')
+#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.csv')
 #create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
-input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.JSON')
 generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 

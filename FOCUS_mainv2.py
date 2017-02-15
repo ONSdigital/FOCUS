@@ -57,11 +57,14 @@ def start_run(run_input, seeds, out_path):
 def produce_default_output():
 
     # select data to read into data frames
-    pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Responded', 'Visit', 'hh_record', 'Visit_contact'])
+
+    # to make use fo new json file format hh totals need to be calcualted based on geog type selected
+
 
     try:
         # produce cumulative summary of overall returns
-        cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
+        cumulative_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district')
         hh_count = pandas_data['hh_count']['1']
         hh_count.index = cumulative_returns.index
         returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
@@ -76,7 +79,7 @@ def produce_default_output():
         print(average_returns.tolist())
 
         # produce summary of digital returns
-        cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
+        cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district', 'digital')
         hh_count.index = cumulative_dig_returns.index
         dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
         dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
@@ -87,19 +90,19 @@ def produce_default_output():
         print(average_dig_returns.tolist())
 
         # produce summary of paper returns
-        cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
+        cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district', 'paper')
         hh_count.index = cumulative_pap_returns.index
         pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
         pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
         overall_pap_returns = cumulative_pap_returns.sum(axis=0)
         average_pap_returns = (overall_pap_returns / hh_totals)*100
-        print("E&W average paper response rates")
+        print("E&W average paper Responded rates")
         print(average_pap_returns.tolist())
 
     # if something goes wrong exit with error
     except TypeError as e:
-        print("There is no input named Returned")
+        print("There is no input named Response")
 
     try:
 
@@ -126,7 +129,7 @@ def produce_default_output():
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
+    produce_default = True
     multiple_processors = False
     freeze_support()
 
@@ -140,10 +143,9 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_small.JSON'
-        #file_name = 'inputs/testing.JSON'
-        #file_name = 'inputs/single multi district.JSON'
-        #file_name = 'inputs/management areas(small).JSON'
+        #file_name = 'inputs/CCA_all_div10.JSON'
+        file_name = 'inputs/testing.JSON'
+
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
