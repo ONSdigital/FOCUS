@@ -59,7 +59,7 @@ def produce_default_output():
     # select data to read into data frames
     pandas_data = post_process.csv_to_pandas(output_path, ['Responded', 'Visit', 'hh_record', 'Visit_contact'])
 
-    # to make use fo new json file format hh totals need to be calcualted based on geog type selected
+    # to make use of new json file format hh totals need to be calculated based on geog type selected
 
 
     try:
