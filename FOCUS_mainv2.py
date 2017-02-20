@@ -56,74 +56,74 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output():
 
-    # select data to read into data frames
+    # select data to read into data frame structure
     pandas_data = post_process.csv_to_pandas(output_path, ['Responded', 'Visit', 'hh_record', 'Visit_contact'])
 
-    # to make use of new json file format hh totals need to be calculated based on geog type selected
+    runs = sorted(list(pandas_data[list(pandas_data.keys())[0]].keys()))
+    for run in runs:
 
+        try:
+            # produce cumulative summary of overall returns
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district')
+            hh_count = pandas_data['hh_count'][str(run)]
+            hh_count.index = cumulative_returns.index
+            returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
+            returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
 
-    try:
-        # produce cumulative summary of overall returns
-        cumulative_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district')
-        hh_count = pandas_data['hh_count']['1']
-        hh_count.index = cumulative_returns.index
-        returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
-        returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
+            # also need an E+W average for each
+            overall_returns = cumulative_returns.sum(axis=0)
+            # get hh_totals
+            hh_totals = pandas_data['hh_count'][str(run)]['hh_count'].sum()
+            average_returns = (overall_returns / hh_totals) * 100
+            print("E&W average response rates")
+            print(average_returns.tolist())
 
-        # also need an E+W average for each
-        overall_returns = cumulative_returns.sum(axis=0)
-        # get hh_totals
-        hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
-        average_returns = (overall_returns / hh_totals) * 100
-        print("E&W average response rates")
-        print(average_returns.tolist())
+            # produce summary of digital returns
+            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded'][str(run)], 0, 1440, 24, 'district', 'digital')
+            hh_count.index = cumulative_dig_returns.index
+            dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
+            dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
-        # produce summary of digital returns
-        cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district', 'digital')
-        hh_count.index = cumulative_dig_returns.index
-        dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
-        dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+            overall_dig_returns = cumulative_dig_returns.sum(axis=0)
+            average_dig_returns = (overall_dig_returns / hh_totals)*100
+            print("E&W average digital response rates")
+            print(average_dig_returns.tolist())
 
-        overall_dig_returns = cumulative_dig_returns.sum(axis=0)
-        average_dig_returns = (overall_dig_returns / hh_totals)*100
-        print("E&W average digital response rates")
-        print(average_dig_returns.tolist())
+            # produce summary of paper returns
+            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded'][str(run)], 0, 1440, 24, 'district', 'paper')
+            hh_count.index = cumulative_pap_returns.index
+            pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
+            pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
-        # produce summary of paper returns
-        cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded']['1'], 0, 1440, 24, 'district', 'paper')
-        hh_count.index = cumulative_pap_returns.index
-        pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
-        pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+            overall_pap_returns = cumulative_pap_returns.sum(axis=0)
+            average_pap_returns = (overall_pap_returns / hh_totals)*100
+            print("E&W average paper Responded rates")
+            print(average_pap_returns.tolist())
 
-        overall_pap_returns = cumulative_pap_returns.sum(axis=0)
-        average_pap_returns = (overall_pap_returns / hh_totals)*100
-        print("E&W average paper Responded rates")
-        print(average_pap_returns.tolist())
+        # if something goes wrong exit with error
+        except TypeError as e:
+            print("There is no input named Responsed in run: ", run)
 
-    # if something goes wrong exit with error
-    except TypeError as e:
-        print("There is no input named Response")
+        try:
 
-    try:
+            # visits summary as proportion of total number of visits
+            cumulative_visits = post_process.cumulative_sum(pandas_data['Visit'][str(run)], 0, 1440, 24, 'district')
+            # divide by the max visits for each district
+            visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
+            visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
 
-        # visits summary as proportion of total number of visits
-        cumulative_visits = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-        # divide by the max visits for each district
-        visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
-        visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+            overall_visits = cumulative_visits.sum(axis=0)
+            average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
+            print("E&W average visits")
+            print(average_visits.tolist())
 
-        overall_visits = cumulative_visits.sum(axis=0)
-        average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
-        print("E&W average visits")
-        print(average_visits.tolist())
+        except TypeError as e:
+            print("There is no input named Visit in run: ", run)
 
-    except TypeError as e:
-        print("There is no input named Visit")
-
-    # proportion of visits where contact was made
-    # proportion of wasted visits over time
-    # chart for resource utilisation over time by htc
-    # response rates over time by htc
+        # proportion of visits where contact was made
+        # proportion of wasted visits over time
+        # chart for resource utilisation over time by htc
+        # response rates over time by htc
 
 
 if __name__ == '__main__':
