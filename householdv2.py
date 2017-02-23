@@ -104,6 +104,7 @@ class Household(object):
 
             yield self.env.process(self.phone_call())
 
+    @profile
     def phone_call(self):
 
         self.output_data['Call'].append(call(self.rep.reps,
@@ -157,6 +158,7 @@ class Household(object):
         else:
             return ["Do nothing", 0]
 
+    @profile
     def phone_call_connect(self):
 
         # speak to someone - go from here to a more complex assist/outcome section
@@ -208,6 +210,7 @@ class Household(object):
 
             yield self.env.process(self.phone_call_assist(current_ad))
 
+    @profile
     def phone_call_assist(self, current_ad):
 
         da_test = self.rnd.uniform(0, 100)
@@ -259,6 +262,7 @@ class Household(object):
             #self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
             self.arranged_visit = False
 
+    @profile
     def phone_call_outcome(self, current_ad):
 
         # digital by this point so just can you convince them to reply?
