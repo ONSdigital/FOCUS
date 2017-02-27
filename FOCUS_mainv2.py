@@ -54,79 +54,74 @@ def start_run(run_input, seeds, out_path):
     hp.write_output(output_data, out_path, run_input['run id'])
 
 
-def produce_default_output():
+def produce_default_output(geog='LA'):
+    # this simply produces some default processed data showing response rates over time
 
-    # select data to read into data frames
-    pandas_data = post_process.csv_to_pandas(output_path, ['Returned', 'Visit', 'hh_count', 'Visit_contact'])
+    # select data to read into data frame structure
+    pandas_data = post_process.csv_to_pandas(output_path, ['Responded', 'hh_record'])
 
-    try:
-        # produce cumulative summary of overall returns
-        cumulative_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district')
-        hh_count = pandas_data['hh_count']['1']
-        hh_count.index = cumulative_returns.index
-        returns_summary = cumulative_returns.div(hh_count['hh_count'], axis='index')
-        returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
+    # gets list if runs - uses hh_record as will always contain all the runs
+    runs = sorted(list(pandas_data['hh_record'].keys()))
+    for current_run in runs:
 
-        # also need an E+W average for each
-        overall_returns = cumulative_returns.sum(axis=0)
-        # get hh_totals
-        hh_totals = pandas_data['hh_count']['1']['hh_count'].sum()
-        average_returns = (overall_returns / hh_totals) * 100
-        print("E&W average response rates")
-        print(average_returns.tolist())
+        # calculate the total number of households in each area and in total
+        hh_count = pandas_data['hh_record'][str(current_run)].groupby(geog).size()  # hh per area
+        hh_totals = hh_count.sum()  # total of households
 
-        # produce summary of digital returns
-        cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'digital')
-        hh_count.index = cumulative_dig_returns.index
-        dig_returns_summary = cumulative_dig_returns.div(hh_count['hh_count'], axis='index')
-        dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+        try:
+            # produce cumulative summary of overall returns
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][current_run], 0, 1440, 24, geog)
+            hh_count.index = cumulative_returns.index
+            returns_summary = cumulative_returns.div(hh_count, axis='index')
+            returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
 
-        overall_dig_returns = cumulative_dig_returns.sum(axis=0)
-        average_dig_returns = (overall_dig_returns / hh_totals)*100
-        print("E&W average digital response rates")
-        print(average_dig_returns.tolist())
+            # also need an E+W average for each
+            overall_returns = cumulative_returns.sum(axis=0)
+            average_returns = (overall_returns / hh_totals) * 100
+            print("E&W average response rates")
+            print(average_returns.tolist())
 
-        # produce summary of paper returns
-        cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Returned']['1'], 0, 1440, 24, 'district', 'paper')
-        hh_count.index = cumulative_pap_returns.index
-        pap_returns_summary = cumulative_pap_returns.div(hh_count['hh_count'], axis='index')
-        pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+        except ValueError as e:
+            print(e, " in run: ", current_run)
 
-        overall_pap_returns = cumulative_pap_returns.sum(axis=0)
-        average_pap_returns = (overall_pap_returns / hh_totals)*100
-        print("E&W average paper response rates")
-        print(average_pap_returns.tolist())
+        try:
 
-    # if something goes wrong exit with error
-    except TypeError as e:
-        print("There is no input named Returned")
+            # produce summary of digital returns
+            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1440, 24,geog, 'digital')
+            hh_count.index = cumulative_dig_returns.index
+            dig_returns_summary = cumulative_dig_returns.div(hh_count, axis='index')
+            dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
 
-    try:
+            overall_dig_returns = cumulative_dig_returns.sum(axis=0)
+            average_dig_returns = (overall_dig_returns / hh_totals)*100
+            print("E&W average digital response rates")
+            print(average_dig_returns.tolist())
 
-        # visits summary as proportion of total number of visits
-        cumulative_visits = post_process.cumulative_sum(pandas_data['Visit']['1'], 0, 1440, 24, 'district')
-        # divide by the max visits for each district
-        visit_summary = cumulative_visits.divide(cumulative_visits.max(axis=1), axis=0)
-        visit_summary.to_csv(os.path.join(output_path, "visit summary.csv"))
+        except ValueError as e:
+            print(e, " in run: ", current_run)
 
-        overall_visits = cumulative_visits.sum(axis=0)
-        average_visits = (overall_visits / overall_visits.max(axis=0)) * 100
-        print("E&W average visits")
-        print(average_visits.tolist())
+        try:
 
-    except TypeError as e:
-        print("There is no input named Visit")
+            # produce summary of paper returns
+            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1440, 24, geog, 'paper')
+            hh_count.index = cumulative_pap_returns.index
+            pap_returns_summary = cumulative_pap_returns.div(hh_count, axis='index')
+            pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
 
-    # proportion of visits where contact was made
-    # proportion of wasted visits over time
-    # chart for resource utilisation over time by htc
-    # response rates over time by htc
+            overall_pap_returns = cumulative_pap_returns.sum(axis=0)
+            average_pap_returns = (overall_pap_returns / hh_totals)*100
+            print("E&W average paper Responded rates")
+            print(average_pap_returns.tolist())
+
+        # if something goes wrong exit with error
+        except ValueError as e:
+            print(e, " in run: ", current_run)
 
 
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
+    produce_default = True
     multiple_processors = False
     freeze_support()
 
@@ -140,10 +135,10 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        #file_name = 'inputs/simple_out.JSON'
-        file_name = 'inputs/testing.JSON'
-        #file_name = 'inputs/single multi district.JSON'
-        #file_name = 'inputs/management areas(small).JSON'
+        # file_name = 'inputs/CCA_all_div10.JSON'
+        file_name = 'inputs/CCA_small.JSON'
+        # file_name = 'inputs/testing.JSON'
+
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
