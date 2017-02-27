@@ -85,7 +85,6 @@ def ret_rec(household, rep):
 class Adviser(object):
     """Call centre adviser"""
 
-    @profile
     def __init__(self, rep, id_num, input_data):
 
         self.rep = rep
@@ -101,7 +100,6 @@ class Adviser(object):
         # start the processes to add and remove from the store...
         self.set_availability()
 
-    @profile
     def set_availability(self):
 
         start_day = math.floor(self.start_sim_time/24)
@@ -123,14 +121,12 @@ class Adviser(object):
                 start_delayed(self.rep.env, self.remove_from_store(), end_time)
 
     # method to transfer the adviser to the store ready to be claimed
-    @profile
     def add_to_store(self):
 
         self.rep.ad_avail.remove(self)
         self.rep.adviser_store.put(self)
         yield self.rep.env.timeout(0)
 
-    @profile
     def remove_from_store(self):
 
         current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
