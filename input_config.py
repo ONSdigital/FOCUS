@@ -103,9 +103,9 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
 
 # set paths to use
-input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-new_districts = os.path.join(os.getcwd(), 'inputs', 'management areas(small).csv')  # csv input file with management areas
-output_path = os.path.join(os.getcwd(), 'inputs', 'management areas(small).JSON')  # output JSON file
+#input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
+#new_districts = os.path.join(os.getcwd(), 'inputs', 'management areas(small).csv')  # csv input file with management areas
+#output_path = os.path.join(os.getcwd(), 'inputs', 'management areas(small).JSON')  # output JSON file
 
 
 ###generate_multiple_districts_runs(input_path, new_districts, output_path, [[1612, 1312, 725, 487, 362]])
@@ -340,14 +340,14 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 #ratios = [1612, 1312, 725, 487, 362]
 ratios = [1200, 1000, 600, 375, 280]
-#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div10.csv')
-#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.csv')
-#create_cca_data(input_csv_path, output_csv_path, ratios)
+input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
+output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
+create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div10.JSON')
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.JSON')
 generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 

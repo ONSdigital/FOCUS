@@ -80,6 +80,7 @@ class Rep(object):
 
     # add advisers to store
     def add_to_store(self):
+        print(len(self.ad_avail))
 
         for adviser in self.ad_avail:
             self.adviser_types[adviser.type]['start_time'] = adviser.start_sim_time

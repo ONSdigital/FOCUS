@@ -135,9 +135,9 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        # file_name = 'inputs/CCA_all_div10.JSON'
+        file_name = 'inputs/CCA_all_div10.JSON'
         #file_name = 'inputs/CCA_small.JSON'
-        file_name = 'inputs/testing.JSON'
+        #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
 
