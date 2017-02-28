@@ -340,9 +340,9 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 #ratios = [1612, 1312, 725, 487, 362]
 ratios = [1200, 1000, 600, 375, 280]
-input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
-output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
-create_cca_data(input_csv_path, output_csv_path, ratios)
+#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
+#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
+#create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use

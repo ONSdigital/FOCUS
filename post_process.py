@@ -8,6 +8,15 @@ import numpy as np
 from collections import defaultdict
 
 
+def user_journey():
+    """a function that allows the user to extract an individual user journey - or summerise all.
+    As an example to produce output that specifies the proportion of households that followed a certain path
+    through te simulation"""
+
+    # for each hh_id extract route taken
+    # store in format of....JSON???
+
+
 def csv_to_pandas(output_path, output_type):
     """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
     and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished

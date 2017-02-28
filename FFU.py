@@ -353,6 +353,7 @@ class CensusOfficer(object):
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         elif not household.responded and not household_returns:
+            # failed but no max visits so do no more
 
             self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
                                                                      household.district.name,

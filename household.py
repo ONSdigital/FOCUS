@@ -62,6 +62,8 @@ class Household(object):
             self.resp_planned = False
 
         self.resp_time = 0
+        self.resp_level = 0
+        self.help_level = 0
         self.responded = False
         self.return_sent = False
         self.return_received = False
@@ -118,8 +120,7 @@ class Household(object):
         self.calls += 1
 
         if (not self.digital and not self.paper_allowed and
-            h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
-            self.paper_on_request):
+            h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and self.paper_on_request):
             # so provide paper if the conditions are met...
 
             self.paper_allowed = True
@@ -182,7 +183,7 @@ class Household(object):
                     in_time = h.make_time_decimal(dt.time(*map(int, v['availability'][current_dow][i].split(':'))))
                     out_time = h.make_time_decimal(dt.time(*map(int, v['availability'][current_dow][i+1].split(':'))))
 
-                    if in_time < self.env.now % 24 <= out_time:
+                    if in_time <= self.env.now % 24 < out_time:
                         return k
 
         return None
@@ -430,7 +431,9 @@ class Household(object):
 
             yield self.env.process(self.household_returns(self.calc_delay()))
         elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
-            # call for help
+            # call for help...needs to be based on appropriate distribution...not a hardcoded uniform function!
+            # also may not do this if intend to respond?
+            yield self.env.timeout(self.rnd.uniform(0, 8))
             yield self.env.process(self.contact())
         elif not self.responded:
             # nowt
