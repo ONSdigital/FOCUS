@@ -34,6 +34,7 @@ def responses_to_date(district, output_format=""):
 
 
 def current_day(obj):
+    # returns number of days gone from start of sim
 
     return obj.rep.start_day + math.floor(obj.env.now / 24) % 7
 

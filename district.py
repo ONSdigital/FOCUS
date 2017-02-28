@@ -1,14 +1,14 @@
 """A district represents any user defined region (such as an LSOA/LA) that contains a set number of HH
 and shares a number of census officers"""
-import householdv2
+import household
 import sys
-import censusv2
+import hq
 import math
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
+import FFU
 
-#hh_count = namedtuple('hh_count', ['district', 'hh_count'])
 hh_record = namedtuple('hh_record', ['district', 'LA', 'LSOA', 'hh_type'])
 response_times = namedtuple('Responded', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
 non_response = namedtuple('Non_response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
@@ -56,7 +56,7 @@ class District(object):
 
         if self.district_co:
             self.first_interaction = min(self.first_visit, self.first_letter)  # time of first interaction
-            start_delayed(self.env, censusv2.start_fu(self.env, self), math.floor(self.first_visit/24)*24)
+            start_delayed(self.env, FFU.start_fu(self.env, self), math.floor(self.first_visit/24)*24)
         else:
             self.first_interaction = 0
 
@@ -143,11 +143,11 @@ class District(object):
                 for i in range(int(co_input_data['number'])):
 
                     id_num += 1
-                    self.district_co.append(censusv2.CensusOfficer(self.rep,
-                                                                   self.env,
-                                                                   self,
-                                                                   co_input_data,
-                                                                   self.rep.total_co))
+                    self.district_co.append(FFU.CensusOfficer(self.rep,
+                                                              self.env,
+                                                              self,
+                                                              co_input_data,
+                                                              self.rep.total_co))
 
                     self.rep.total_co += 1
 
@@ -198,16 +198,16 @@ class District(object):
                                                                                 hh_action.time))
                     else:
                         # create a household instance passing initial state
-                        self.households.append(householdv2.Household(self.rep,
-                                                                     self.env,
-                                                                     self,
-                                                                     self.rep.total_hh,
-                                                                     hh_type,
-                                                                     hh_input_data,
-                                                                     hh_action,
-                                                                     hh_geog.la,
-                                                                     hh_geog.lsoa
-                                                                     ))
+                        self.households.append(household.Household(self.rep,
+                                                                   self.env,
+                                                                   self,
+                                                                   self.rep.total_hh,
+                                                                   hh_type,
+                                                                   hh_input_data,
+                                                                   hh_action,
+                                                                   hh_geog.la,
+                                                                   hh_geog.lsoa
+                                                                   ))
 
                     if self.rep.reps == 1:
                         self.rep.output_data['hh_record'].append(hh_record(self.name,
@@ -226,7 +226,7 @@ class District(object):
 
         for letter in letter_list:
             letter_data = self.input_data['letter_phases'][letter]
-            self.letters.append(censusv2.LetterPhase(self.env,
+            self.letters.append(hq.LetterPhase(self.env,
                                                      self.rep,
                                                      self,
                                                      letter_data,

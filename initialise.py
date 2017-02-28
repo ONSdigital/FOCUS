@@ -1,12 +1,13 @@
 """rep class is the instance that contains all that is required for current rep of simulation"""
 import district
-import censusv2
+import hq
 import helper as h
 import simpy
 import sys
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
+
 
 class Rep(object):
     """contains the methods and data for an individual replication"""
@@ -45,19 +46,22 @@ class Rep(object):
             self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
 
         # create common resources
-        # self.create_advisers(self.input_data['advisers'], "")  # Call centre staff
+        # self.create_advisers(self.input_data['advisers'], "")  # Call centre
+        self.adviser_types = defaultdict(dict)
         if self.total_ad_instances > 0:
             self.create_advisers()
+            self.add_to_store()
+
         self.create_districts()  # initialises districts
 
     def create_advisers(self):
 
         id_num = 0
         list_of_adviser_types = sorted(list(self.input_data['advisers'].keys()))
-        for adviser in list_of_adviser_types:
+        for adviser_type in list_of_adviser_types:
 
             # get data for current type
-            adviser_input_data = self.input_data['advisers'][adviser]
+            adviser_input_data = self.input_data['advisers'][adviser_type]
 
             try:
 
@@ -65,13 +69,24 @@ class Rep(object):
 
                     for i in range(int(adviser_input_data['number'])):
                         id_num += 1
-                        self.ad_avail.append(censusv2.Adviser(self,
-                                                              id_num,
-                                                              adviser_input_data))
+                        self.ad_avail.append(hq.Adviser(self,
+                                                        id_num,
+                                                        adviser_input_data,
+                                                        adviser_type))
 
             except KeyError:
                 print("Error when creating advisers in run: ", self.run, " replication: ", self.reps)
                 sys.exit()
+
+    # add advisers to store
+    def add_to_store(self):
+
+        for adviser in self.ad_avail:
+            self.adviser_types[adviser.type]['start_time'] = adviser.start_sim_time
+            self.adviser_types[adviser.type]['end_time'] = adviser.end_sim_time
+            self.adviser_types[adviser.type]['availability'] = adviser.set_avail_sch
+
+            self.adviser_store.put(adviser)
 
     def create_districts(self):
 

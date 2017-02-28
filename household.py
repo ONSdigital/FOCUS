@@ -1,12 +1,12 @@
 """file used to store the classes and definitions related to the households represented in the simulation """
 
-import datetime
-import censusv2
+import hq
 from simpy.util import start_delayed
 from collections import namedtuple
 import helper as h
 import math
-import district
+import datetime as dt
+
 
 return_sent = namedtuple('Return_sent', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 response_planned = namedtuple('Response_planned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
@@ -26,7 +26,8 @@ received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA'
 wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_request = namedtuple('Visit_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_request = namedtuple('Call_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+call_defer = namedtuple('Call_defer', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 
 
 class Household(object):
@@ -123,13 +124,25 @@ class Household(object):
 
             self.paper_allowed = True
             self.priority += 5  # lower the priority as more likely to reply
-            censusv2.schedule_paper_drop(self, False)
+            hq.schedule_paper_drop(self, False)
 
             yield self.env.timeout(0)
 
-        else:
+        elif isinstance(self.adviser_check(self.env.now), str):
             # otherwise carry on to the call centre to speak to an adviser
+            # unless outside times advisers are available - use check times and if none returned gracefully defer
             yield self.env.process(self.phone_call_connect())
+
+        else:
+            # no one available - gracefully defer - some will call back again
+            self.output_data['Call_defer'].append(call_renege(self.rep.reps,
+                                                              self.district.name,
+                                                              self.la,
+                                                              self.lsoa,
+                                                              self.digital,
+                                                              self.hh_type,
+                                                              self.hh_id,
+                                                              self.env.now))
 
     def default_behaviour(self):
         # depending on circumstances can follow one of two paths
@@ -157,14 +170,41 @@ class Household(object):
         else:
             return ["Do nothing", 0]
 
+    def adviser_check(self, time):
+
+        for k, v in self.rep.adviser_types.items():
+            # between the dates
+            if (v['start_time'] < time <= v['end_time']):
+
+                # then between each set of times
+                current_dow = str((self.rep.start_date + dt.timedelta(days=math.floor(time / 24))).weekday())
+                for i in range(0, len(v['availability'][current_dow]), 2):
+                    in_time = h.make_time_decimal(dt.time(*map(int, v['availability'][current_dow][i].split(':'))))
+                    out_time = h.make_time_decimal(dt.time(*map(int, v['availability'][current_dow][i+1].split(':'))))
+
+                    if in_time < self.env.now % 24 <= out_time:
+                        return k
+
+        return None
+
+        # cycle through adviser types
+        # get adviser type that is between dates
+
+        # for that type is it available
+
     def phone_call_connect(self):
 
         # speak to someone - go from here to a more complex assist/outcome section
         called_at = self.env.now
-        current_ad = yield self.rep.adviser_store.get()
+
+        # at this time/date what type of adviser is available?
+        # is one of these types available?
+        adviser = self.adviser_check(called_at)
+
+        current_ad = yield self.rep.adviser_store.get(lambda item: item.type == adviser)
         wait_time = self.env.now - called_at
 
-        # renege time a fixed value for now. Determine suitable distribution from paradata?
+        # renege time a fixed value for now. Determine suitable distribution from paradata or call centre MI.
         if wait_time >= self.input_data["renege"]:
             # hang up
 
@@ -176,6 +216,7 @@ class Household(object):
                                                                self.hh_type,
                                                                self.hh_id,
                                                                self.env.now))
+
             self.rep.adviser_store.put(current_ad)
 
             # record wait times for stats generation - wait time her eis how long they would of had to wait
@@ -315,9 +356,9 @@ class Household(object):
                                                                self.resp_time))
 
             if self.calc_delay() == 0:  # digital
-                self.env.process(censusv2.ret_rec(self, self.rep))
+                self.env.process(hq.ret_rec(self, self.rep))
             else:  # paper
-                start_delayed(self.env, censusv2.ret_rec(self, self.rep), delay)
+                start_delayed(self.env, hq.ret_rec(self, self.rep), delay)
 
             yield self.env.timeout(0)  # hh does no more (without intervention)
 

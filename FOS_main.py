@@ -4,7 +4,7 @@ import json
 import datetime as dt
 import random
 import simpy
-import initialisev2
+import initialise
 import os
 import shutil
 import post_process
@@ -37,15 +37,15 @@ def start_run(run_input, seeds, out_path):
     env = simpy.Environment()
 
     # initialise replication
-    initialisev2.Rep(env,
-                     run_input,
-                     output_data,
-                     rnd,
-                     sim_hours,
-                     start_date,
-                     census_day,
-                     out_path,
-                     max_output_file_size)
+    initialise.Rep(env,
+                   run_input,
+                   output_data,
+                   rnd,
+                   sim_hours,
+                   start_date,
+                   census_day,
+                   out_path,
+                   max_output_file_size)
 
     # and run it
     env.run(until=sim_hours)
@@ -121,7 +121,7 @@ def produce_default_output(geog='LA'):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     multiple_processors = False
     freeze_support()
 
@@ -136,8 +136,8 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         # file_name = 'inputs/CCA_all_div10.JSON'
-        file_name = 'inputs/CCA_small.JSON'
-        # file_name = 'inputs/testing.JSON'
+        #file_name = 'inputs/CCA_small.JSON'
+        file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
 
