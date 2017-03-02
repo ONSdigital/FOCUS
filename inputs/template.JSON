@@ -95,7 +95,8 @@
         "census officer": {
           "standard": {
             "number": 1,
-            "has_paper": "False",
+            "has_pq": "False",
+            "has_postcard": "True",
             "travel_speed": 5,
             "start_date": "2011, 4, 4",
             "end_date": "2011, 5, 6",

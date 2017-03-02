@@ -5,16 +5,7 @@ import hq
 import helper as h
 from simpy.util import start_delayed
 
-visit = namedtuple('Visit', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'attempt', 'contacts', 'hh_id'])
-visit_contact = namedtuple('Visit_contact', ['rep', 'district', 'LA', 'LSOA',  'digital', 'hh_type', 'time', 'hh_id'])
-visit_out = namedtuple('Visit_out', ['rep', 'district', 'LA', 'LSOA', 'digital','hh_type', 'time', 'hh_id'])
-visit_wasted = namedtuple('Visit_wasted', ['rep', 'district', 'LA', 'LSOA','digital', 'hh_type', 'time', 'hh_id'])
-visit_success = namedtuple('Visit_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'attempt', 'contacts', 'hh_id'])
-visit_failed = namedtuple('Visit_failed', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_convert = namedtuple('Visit_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_unnecessary = namedtuple('Visit_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-visit_assist = namedtuple('Visit_assist', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 
 
 # a helper process that creates an instance of a StartFU class and starts it working
@@ -92,9 +83,10 @@ class CensusOfficer(object):
         self.action_plan = []
         self.start_date = dt.datetime.strptime((self.input_data['start_date']), '%Y, %m, %d').date()
         self.end_date = dt.datetime.strptime((self.input_data['end_date']), '%Y, %m, %d').date()
-        self.has_paper = h.str2bool(self.input_data['has_paper'])
+        self.has_pq = h.str2bool(self.input_data['has_pq'])
+        self.has_postcard = h.str2bool(self.input_data['has_postcard'])
         self.start_sim_time = h.get_entity_time(self)  # self.co_start_time()  # the sim time the co starts work
-        self.end_sim_time = h.get_entity_time(self, "end") #self.co_end_time()  # the sim time the co ends work
+        self.end_sim_time = h.get_entity_time(self, "end")  # self.co_end_time()  # the sim time the co ends work
 
         # start work at correct time
         start_delayed(self.env, self.co_working_test(), self.start_sim_time)
@@ -129,7 +121,7 @@ class CensusOfficer(object):
                 print(household.hh_id)
                 try:
                     self.action_plan.insert(10, household)
-                except:
+                except ReferenceError:
                     print('error')
             else:
                 return household
@@ -162,11 +154,11 @@ class CensusOfficer(object):
             yield self.env.timeout(self.next_available())
             self.env.process(self.co_working_test())
 
-    def household_test(self, household, type):
+    def household_test(self, household, hh_type):
         # tests if hh is in or is converted to a return!
 
         test_value = self.rnd.uniform(0, 100)
-        dict_value = household.input_data[type][str(h.current_day(self))]
+        dict_value = household.input_data[hh_type][str(h.current_day(self))]
 
         if test_value <= dict_value[h.return_time_key(dict_value, self.env.now)]:
             return True
@@ -178,50 +170,47 @@ class CensusOfficer(object):
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
 
-        self.rep.output_data['Visit'].append(visit(self.rep.reps,
-                                                   self.district.name,
-                                                   household.la,
-                                                   household.lsoa,
-                                                   household.digital,
-                                                   household.hh_type,
-                                                   self.rep.env.now,
-                                                   household.visits,
-                                                   household.visits_contacted,
-                                                   household.hh_id))
+        self.rep.output_data['Visit'].append(generic_output(self.rep.reps,
+                                                            self.district.name,
+                                                            household.la,
+                                                            household.lsoa,
+                                                            household.digital,
+                                                            household.hh_type,
+                                                            household.hh_id,
+                                                            self.rep.env.now))
 
         if household.responded:
 
-            self.rep.output_data['Visit_wasted'].append(visit_wasted(self.rep.reps,
-                                                                     self.district.name,
-                                                                     household.la,
-                                                                     household.lsoa,
-                                                                     household.digital,
-                                                                     household.hh_type,
-                                                                     self.rep.env.now,
-                                                                     household.hh_id))
-
-        elif household.resp_planned:
-            self.rep.output_data['Visit_unnecessary'].append(visit_unnecessary(self.rep.reps,
-                                                                               self.district.name,
-                                                                               household.la,
-                                                                               household.lsoa,
-                                                                               household.digital,
-                                                                               household.hh_type,
-                                                                               self.rep.env.now,
-                                                                               household.hh_id))
-
-        household_is_in = self.household_test(household, "contact_rate")
-
-        if household_is_in:
-            #in
-            self.rep.output_data['Visit_contact'].append(visit_contact(self.rep.reps,
+            self.rep.output_data['Visit_wasted'].append(generic_output(self.rep.reps,
                                                                        self.district.name,
                                                                        household.la,
                                                                        household.lsoa,
                                                                        household.digital,
                                                                        household.hh_type,
-                                                                       self.env.now,
-                                                                       household.hh_id))
+                                                                       household.hh_id,
+                                                                       self.rep.env.now))
+
+        elif household.resp_planned:
+            self.rep.output_data['Visit_unnecessary'].append(generic_output(self.rep.reps,
+                                                                            self.district.name,
+                                                                            household.la,
+                                                                            household.lsoa,
+                                                                            household.digital,
+                                                                            household.hh_type,
+                                                                            self.rep.env.now,
+                                                                            household.hh_id))
+
+        household_is_in = self.household_test(household, "contact_rate")
+
+        if household_is_in:
+            self.rep.output_data['Visit_contact'].append(generic_output(self.rep.reps,
+                                                                        self.district.name,
+                                                                        household.la,
+                                                                        household.lsoa,
+                                                                        household.digital,
+                                                                        household.hh_type,
+                                                                        household.hh_id,
+                                                                        self.rep.env.now))
 
             household.visits_contacted += 1
             yield self.rep.env.process(self.fu_visit_assist(household))
@@ -230,23 +219,23 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            hq.schedule_paper_drop(household, self.has_paper)
+            hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
 
             visit_time = self.input_data["visit_times"]["out_paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
         else:
             # out - add drop off of a note
-            self.rep.output_data['Visit_out'].append(visit_out(self.rep.reps,
-                                                               self.district.name,
-                                                               household.la,
-                                                               household.lsoa,
-                                                               household.digital,
-                                                               household.hh_type,
-                                                               self.env.now,
-                                                               household.hh_id))
+            self.rep.output_data['Visit_out'].append(generic_output(self.rep.reps,
+                                                                    self.district.name,
+                                                                    household.la,
+                                                                    household.lsoa,
+                                                                    household.digital,
+                                                                    household.hh_type,
+                                                                    household.hh_id,
+                                                                    self.rep.env.now))
 
-            self.env.process(hq.send_reminder(household, 'postcard'))
+            self.env.process(hq.schedule_paper_drop(household, 'Visit', 'postcard', self.has_postcard))
 
             visit_time = self.input_data["visit_times"]["out"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
@@ -266,14 +255,14 @@ class CensusOfficer(object):
         elif not household.digital and da_test <= da_effectiveness:
             yield self.env.timeout(self.input_data['visit_times']['convert']/60)
 
-            self.rep.output_data['Visit_convert'].append(visit_convert(self.rep.reps,
-                                                                       household.district.name,
-                                                                       household.la,
-                                                                       household.lsoa,
-                                                                       household.digital,
-                                                                       household.hh_type,
-                                                                       self.rep.env.now,
-                                                                       household.hh_id))
+            self.rep.output_data['Visit_convert'].append(generic_output(self.rep.reps,
+                                                                        household.district.name,
+                                                                        household.la,
+                                                                        household.lsoa,
+                                                                        household.digital,
+                                                                        household.hh_type,
+                                                                        self.rep.env.now,
+                                                                        household.hh_id))
 
             household.digital = True
             yield self.rep.env.process(self.fu_visit_outcome(household))
@@ -289,7 +278,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            hq.schedule_paper_drop(household, self.has_paper)
+            hq.schedule_paper_drop(household, 'Visit', 'pq',  self.has_pq)
 
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -297,14 +286,15 @@ class CensusOfficer(object):
         else:
             # or suggest other forms of assistance to be decided...
             # non implemented at present so another visit will be scheduled.
-            self.rep.output_data['Visit_assist'].append(visit_assist(self.rep.reps,
-                                                                     self.district.name,
-                                                                     household.la,
-                                                                     household.lsoa,
-                                                                     household.digital,
-                                                                     household.hh_type,
-                                                                     self.env.now,
-                                                                     household.hh_id))
+            self.rep.output_data['Visit_assist'].append(generic_output(self.rep.reps,
+                                                                       self.district.name,
+                                                                       household.la,
+                                                                       household.lsoa,
+                                                                       household.digital,
+                                                                       household.hh_type,
+                                                                       self.env.now,
+                                                                       household.hh_id))
+
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
 
@@ -315,16 +305,14 @@ class CensusOfficer(object):
         if not household.responded and household_returns:
             # hh have not responded yet and respond there and then either by paper or digital.
 
-            self.rep.output_data['Visit_success'].append(visit_success(self.rep.reps,
-                                                                       household.district.name,
-                                                                       household.la,
-                                                                       household.lsoa,
-                                                                       household.digital,
-                                                                       household.hh_type,
-                                                                       self.env.now,
-                                                                       household.visits,
-                                                                       household.visits_contacted,
-                                                                       household.hh_id))
+            self.rep.output_data['Visit_success'].append(generic_output(self.rep.reps,
+                                                                        self.district.name,
+                                                                        household.la,
+                                                                        household.lsoa,
+                                                                        household.digital,
+                                                                        household.hh_type,
+                                                                        household.hh_id,
+                                                                        self.rep.env.now))
             household.resp_planned = True
             yield self.rep.env.process(household.household_returns(household.calc_delay()))
             visit_time = self.input_data["visit_times"]["success"]
@@ -337,17 +325,17 @@ class CensusOfficer(object):
             # hh have not responded but do not respond as a result of the visit.
             # need extra here for when you fail but not at max visits?
 
-            self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
-                                                                     household.district.name,
-                                                                     household.la,
-                                                                     household.lsoa,
-                                                                     household.digital,
-                                                                     household.hh_type,
-                                                                     self.env.now,
-                                                                     household.hh_id))
+            self.rep.output_data['Visit_failed'].append(generic_output(self.rep.reps,
+                                                                       household.district.name,
+                                                                       household.la,
+                                                                       household.lsoa,
+                                                                       household.digital,
+                                                                       household.hh_type,
+                                                                       self.env.now,
+                                                                       household.hh_id))
             # leave paper in hope they respond?
             household.paper_allowed = True
-            hq.schedule_paper_drop(household, self.has_paper)
+            hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
@@ -355,14 +343,14 @@ class CensusOfficer(object):
         elif not household.responded and not household_returns:
             # failed but no max visits so do no more
 
-            self.rep.output_data['Visit_failed'].append(visit_failed(self.rep.reps,
-                                                                     household.district.name,
-                                                                     household.la,
-                                                                     household.lsoa,
-                                                                     household.digital,
-                                                                     household.hh_type,
-                                                                     self.env.now,
-                                                                     household.hh_id))
+            self.rep.output_data['Visit_failed'].append(generic_output(self.rep.reps,
+                                                                       household.district.name,
+                                                                       household.la,
+                                                                       household.lsoa,
+                                                                       household.digital,
+                                                                       household.hh_type,
+                                                                       self.env.now,
+                                                                       household.hh_id))
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])

@@ -7,27 +7,13 @@ import helper as h
 import math
 import datetime as dt
 
-
-return_sent = namedtuple('Return_sent', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-response_planned = namedtuple('Response_planned', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-do_nothing = namedtuple('Do_nothing', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time','type'])
 reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
 reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
 reminder_received = namedtuple('Reminder_received', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
-call = namedtuple('Call', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_renege = namedtuple('Call_renege', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_contact = namedtuple('Call_contact', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'wait_time'])
-call_convert = namedtuple('Call_convert', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_success = namedtuple('Call_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_failed = namedtuple('Call_failed', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-received_letter = namedtuple('Received_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-wasted_letter = namedtuple('Wasted_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-received_pq = namedtuple('Received_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-wasted_pq = namedtuple('Wasted_pq', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_request = namedtuple('Call_request', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-call_defer = namedtuple('Call_defer', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
+
 
 
 class Household(object):
@@ -89,15 +75,14 @@ class Household(object):
 
         else:
             # nowt
-            self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
-                                                             self.district.name,
-                                                             self.la,
-                                                             self.lsoa,
-                                                             self.digital,
-                                                             self.hh_type,
-                                                             self.hh_id,
-                                                             self.env.now))
-
+            self.output_data['Do_nothing'].append(generic_output(self.rep.reps,
+                                                                 self.district.name,
+                                                                 self.la,
+                                                                 self.lsoa,
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.hh_id,
+                                                                 self.env.now))
         yield self.env.timeout(0)  # do nothing more
 
     def contact(self):
@@ -109,14 +94,14 @@ class Household(object):
 
     def phone_call(self):
 
-        self.output_data['Call'].append(call(self.rep.reps,
-                                             self.district.name,
-                                             self.la,
-                                             self.lsoa,
-                                             self.digital,
-                                             self.hh_type,
-                                             self.hh_id,
-                                             self.env.now))
+        self.output_data['Call'].append(generic_output(self.rep.reps,
+                                                       self.district.name,
+                                                       self.la,
+                                                       self.lsoa,
+                                                       self.digital,
+                                                       self.hh_type,
+                                                       self.hh_id,
+                                                       self.env.now))
         self.calls += 1
 
         if (not self.digital and not self.paper_allowed and
@@ -125,7 +110,7 @@ class Household(object):
 
             self.paper_allowed = True
             self.priority += 5  # lower the priority as more likely to reply
-            hq.schedule_paper_drop(self, False)
+            hq.schedule_paper_drop(self, 'Call', 'pq', False)
 
             yield self.env.timeout(0)
 
@@ -136,7 +121,7 @@ class Household(object):
 
         else:
             # no one available - gracefully defer - some will call back again
-            self.output_data['Call_defer'].append(call_renege(self.rep.reps,
+            self.output_data['Call_defer'].append(generic_output(self.rep.reps,
                                                               self.district.name,
                                                               self.la,
                                                               self.lsoa,
@@ -209,7 +194,7 @@ class Household(object):
         if wait_time >= self.input_data["renege"]:
             # hang up
 
-            self.output_data['Call_renege'].append(call_renege(self.rep.reps,
+            self.output_data['Call_renege'].append(generic_output(self.rep.reps,
                                                                self.district.name,
                                                                self.la,
                                                                self.lsoa,
@@ -236,7 +221,7 @@ class Household(object):
         else:
             # got through
 
-            self.output_data['Call_contact'].append(call_contact(self.rep.reps,
+            self.output_data['Call_contact'].append(generic_output(self.rep.reps,
                                                                  self.district.name,
                                                                  self.la,
                                                                  self.lsoa,
@@ -268,7 +253,7 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
             # record event
-            self.rep.output_data['Call_convert'].append(call_convert(self.rep.reps,
+            self.rep.output_data['Call_convert'].append(generic_output(self.rep.reps,
                                                                      self.district.name,
                                                                      self.la,
                                                                      self.lsoa,
@@ -285,7 +270,7 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            self.rep.output_data['call_request'].append(call_convert(self.rep.reps,
+            self.rep.output_data['call_request'].append(generic_output(self.rep.reps,
                                                                      self.district.name,
                                                                      self.la,
                                                                      self.lsoa,
@@ -311,7 +296,7 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
 
-            self.rep.output_data['Call_success'].append(call_success(self.rep.reps,
+            self.rep.output_data['Call_success'].append(generic_output(self.rep.reps,
                                                                      self.district.name,
                                                                      self.la,
                                                                      self.lsoa,
@@ -327,7 +312,7 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            self.rep.output_data['Call_failed'].append(call_failed(self.rep.reps,
+            self.rep.output_data['Call_failed'].append(generic_output(self.rep.reps,
                                                                    self.district.name,
                                                                    self.la,
                                                                    self.lsoa,
@@ -347,7 +332,7 @@ class Household(object):
             self.resp_time = self.env.now
             # add to hh response event log
 
-            self.output_data['Return_sent'].append(return_sent(self.rep.reps,
+            self.output_data['Return_sent'].append(generic_output(self.rep.reps,
                                                                self.district.name,
                                                                self.la,
                                                                self.lsoa,
@@ -437,7 +422,7 @@ class Household(object):
             yield self.env.process(self.contact())
         elif not self.responded:
             # nowt
-            self.output_data['Do_nothing'].append(do_nothing(self.rep.reps,
+            self.output_data['Do_nothing'].append(generic_output(self.rep.reps,
                                                              self.district.name,
                                                              self.la,
                                                              self.lsoa,

@@ -918,7 +918,8 @@
             },
             "end_date": "2011, 5, 6",
             "travel_speed": 5,
-            "has_paper": "False"
+            "has_pq": "False",
+            "has_postcard": "True"
           }
         },
         "RMT_update": 24,

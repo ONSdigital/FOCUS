@@ -8,26 +8,8 @@ from simpy.util import start_delayed
 import sys
 
 
-response_times = namedtuple('Responded', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
-return_received = namedtuple('Return_received', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-reminder_sent = namedtuple('Reminder_sent', ['rep', 'Time', 'digital',  'hh_type', 'type', 'hh_id'])
-visit_paper = namedtuple('Visit_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
-post_paper = namedtuple('Post_paper', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time'])
-sent_letter = namedtuple('Sent_letter', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'time', 'hh_id'])
+generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
 warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
-
-
-def send_reminder(household, reminder_type):
-
-    household.rep.output_data["Reminder_sent"].append(reminder_sent(household.rep.reps,
-                                                                    household.env.now,
-                                                                    household.digital,
-                                                                    household.hh_type,
-                                                                    reminder_type,
-                                                                    household.hh_id))
-
-    start_delayed(household.env, household.receive_reminder(reminder_type), 24)
-    yield household.env.timeout(0)
 
 
 def ret_rec(household, rep):
@@ -36,20 +18,20 @@ def ret_rec(household, rep):
         print(rep.total_responses)
 
     household.return_received = True
-    rep.output_data['Return_received'].append(return_received(rep.reps,
-                                                              household.district.name,
-                                                              household.la,
-                                                              household.lsoa,
-                                                              household.digital,
-                                                              household.hh_type,
-                                                              household.hh_id,
-                                                              rep.env.now))
+    rep.output_data['Return_received'].append(generic_output(rep.reps,
+                                                             household.district.name,
+                                                             household.la,
+                                                             household.lsoa,
+                                                             household.digital,
+                                                             household.hh_type,
+                                                             household.hh_id,
+                                                             rep.env.now))
     # currently every return gets counted as a response as soon as it is received - this may need to change
     household.responded = True
     rep.total_responses += 1
 
     # check size of output data - if over an amount, size or length write to file?
-    rep.output_data['Responded'].append(response_times(rep.reps,
+    rep.output_data['Responded'].append(generic_output(rep.reps,
                                                        household.district.name,
                                                        household.la,
                                                        household.lsoa,
@@ -69,12 +51,12 @@ def ret_rec(household, rep):
 class Adviser(object):
     """Call centre adviser"""
 
-    def __init__(self, rep, id_num, input_data, type):
+    def __init__(self, rep, id_num, input_data, ad_type):
 
         self.rep = rep
         self.id_num = id_num
         self.input_data = input_data
-        self.type = type
+        self.type = ad_type
 
         # date range in datetime format
         self.start_date = datetime.datetime.strptime(self.input_data['start_date'], '%Y, %m, %d').date()
@@ -86,42 +68,6 @@ class Adviser(object):
 
         # time range - varies by day
         self.set_avail_sch = input_data['availability']
-
-        # start the processes to add and remove from the store...
-        #self.set_availability()
-
-    def set_availability(self):
-
-        start_day = math.floor(self.start_sim_time/24)
-        end_day = math.floor(self.end_sim_time/24)
-
-        for i in range(start_day, end_day):
-
-            availability = self.input_data['availability'][str((self.rep.start_date + dt.timedelta(days=i)).weekday())]
-
-            for j in range(0, len(availability), 2):
-
-                in_time = h.make_time_decimal(dt.time(*map(int, availability[j].split(':'))))
-                out_time = h.make_time_decimal(dt.time(*map(int, availability[j+1].split(':'))))
-
-                start_time = 24*i + in_time
-                end_time = 24*i + out_time
-
-                start_delayed(self.rep.env, self.add_to_store(), start_time)
-                start_delayed(self.rep.env, self.remove_from_store(), end_time)
-
-    # method to transfer the adviser to the store ready to be claimed
-    def add_to_store(self):
-
-        self.rep.ad_avail.remove(self)
-        self.rep.adviser_store.put(self)
-        yield self.rep.env.timeout(0)
-
-    def remove_from_store(self):
-
-        current_ad = yield self.rep.adviser_store.get(lambda item: item.id_num == self.id_num)
-        self.rep.ad_avail.append(current_ad)
-        yield self.rep.env.timeout(0)
 
 
 class LetterPhase(object):
@@ -159,45 +105,30 @@ class LetterPhase(object):
 
     def co_send_letter(self, household, delay):
 
-        self.rep.output_data['Sent_letter'].append(sent_letter(self.rep.reps,
-                                                               household.district.name,
-                                                               household.la,
-                                                               household.lsoa,
-                                                               household.digital,
-                                                               household.hh_type,
-                                                               self.rep.env.now,
-                                                               household.hh_id))
-
-        #print("letter sent to hh ", household.hh_id)
+        self.rep.output_data['Sent_letter'].append(generic_output(self.rep.reps,
+                                                                  household.district.name,
+                                                                  household.la,
+                                                                  household.lsoa,
+                                                                  household.digital,
+                                                                  household.hh_type,
+                                                                  household.hh_id,
+                                                                  self.env.now))
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_reminder(self.letter_type))
 
 
-def schedule_paper_drop(obj, has_paper=False):
+def schedule_paper_drop(obj, contact_type, reminder_type, delay):
+    output_type = contact_type + "_" + reminder_type + "_sent"   # use this as output key
 
-    if has_paper:
+    obj.rep.output_data[output_type].append(generic_output(obj.rep.reps,
+                                                           obj.district.name,
+                                                           obj.la,
+                                                           obj.lsoa,
+                                                           obj.digital,
+                                                           obj.hh_type,
+                                                           obj.hh_id,
+                                                           obj.rep.env.now))
 
-        obj.rep.output_data['Visit_paper'].append(visit_paper(obj.rep.reps,
-                                                              obj.district.name,
-                                                              obj.la,
-                                                              obj.lsoa,
-                                                              obj.digital,
-                                                              obj.hh_type,
-                                                              obj.rep.env.now,
-                                                              obj.hh_id))
-
-        obj.env.process(send_reminder(obj, 'pq'))
-    else:
-
-        obj.output_data['Post_paper'].append(post_paper(obj.rep.reps,
-                                                        obj.district.name,
-                                                        obj.la,
-                                                        obj.lsoa,
-                                                        obj.digital,
-                                                        obj.hh_type,
-                                                        obj.env.now))
-
-        start_delayed(obj.env, send_reminder(obj, 'pq'), h.next_day(obj.env.now))
-
-
+    start_delayed(obj.env, obj.receive_reminder(reminder_type), delay)
+    yield obj.env.timeout(0)
