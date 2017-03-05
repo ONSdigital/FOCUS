@@ -99,27 +99,27 @@ class LetterPhase(object):
                 if self.letter_type == 'pq':
                     household.paper_allowed = True
 
-                self.env.process(self.co_send_letter(household,
-                                                     self.input_data["delay"]))
+                self.env.process(self.co_send_letter(household, self.letter_type, self.input_data["delay"]))
+
         yield self.env.timeout(0)
 
-    def co_send_letter(self, household, delay):
+    def co_send_letter(self, household, letter_type, delay):
 
-        self.rep.output_data['Sent_letter'].append(generic_output(self.rep.reps,
-                                                                  household.district.name,
-                                                                  household.la,
-                                                                  household.lsoa,
-                                                                  household.digital,
-                                                                  household.hh_type,
-                                                                  household.hh_id,
-                                                                  self.env.now))
+        self.rep.output_data[letter_type].append(generic_output(self.rep.reps,
+                                                                            household.district.name,
+                                                                            household.la,
+                                                                            household.lsoa,
+                                                                            household.digital,
+                                                                            household.hh_type,
+                                                                            household.hh_id,
+                                                                            self.env.now))
 
         yield self.env.timeout(delay)
-        self.env.process(household.receive_reminder(self.letter_type))
+        self.env.process(household.receive_reminder(letter_type))
 
 
 def schedule_paper_drop(obj, contact_type, reminder_type, delay):
-    output_type = contact_type + "_" + reminder_type + "_sent"   # use this as output key
+    output_type = contact_type + "_" + reminder_type + "_posted"   # use this as output key
 
     obj.rep.output_data[output_type].append(generic_output(obj.rep.reps,
                                                            obj.district.name,

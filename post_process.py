@@ -22,7 +22,7 @@ def user_journey_single():
         folder_name = folder.split(os.path.sep)[-2]
 
         glob_folder = os.path.join('outputs', folder_name, '*.csv')
-        file_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
+        file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
         try:
             for file in file_list:
@@ -42,6 +42,7 @@ def user_journey_single():
 
         except:
             pass
+
     listsorted = sorted(user_list, key=lambda x: float(x['time']))
 
     for row in listsorted:

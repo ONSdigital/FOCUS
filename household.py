@@ -109,7 +109,7 @@ class Household(object):
 
             self.paper_allowed = True
             self.priority += 5  # lower the priority as more likely to reply
-            # call to ask so may need to up the level of response above default here?
+            # call to ask so may need to up the level of response above default here? Extra optional variable?
             yield self.env.process(hq.schedule_paper_drop(self, 'Call', 'pq', self.district.postal_delay))
 
         elif isinstance(self.adviser_check(self.env.now), str):
@@ -118,7 +118,7 @@ class Household(object):
             yield self.env.process(self.phone_call_connect())
 
         else:
-            # no one available - gracefully defer - some will call back again
+            # no one available - gracefully defer - some will call back again?
             self.output_data['Call_defer'].append(generic_output(self.rep.reps,
                                                                  self.district.name,
                                                                  self.la,
@@ -349,6 +349,8 @@ class Household(object):
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
         # if a pq set paper allowed to true!
+
+
         if reminder_type == 'pq':
             self.paper_allowed = True
 
@@ -365,7 +367,7 @@ class Household(object):
         # recorded if wasted, unnecessary or successful
         if self.responded:
 
-            self.rep.output_data['Reminder_wasted'].append(reminder_wasted(self.rep.reps,
+            self.rep.output_data[reminder_type + '_wasted'].append(reminder_wasted(self.rep.reps,
                                                                            self.district.name,
                                                                            self.la,
                                                                            self.lsoa,
@@ -376,7 +378,7 @@ class Household(object):
                                                                            reminder_type))
         elif self.resp_planned:
 
-            self.rep.output_data['Reminder_unnecessary'].append(reminder_unnecessary(self.rep.reps,
+            self.rep.output_data[reminder_type + '_unnecessary'].append(reminder_unnecessary(self.rep.reps,
                                                                                      self.district.name,
                                                                                      self.la,
                                                                                      self.lsoa,
@@ -387,7 +389,7 @@ class Household(object):
                                                                                      reminder_type))
         else:
             # if get here they have not responded or planned to do so, so a worthwhile reminder.
-            self.rep.output_data['Reminder_received'].append(reminder_success(self.rep.reps,
+            self.rep.output_data[reminder_type + '_received'].append(reminder_success(self.rep.reps,
                                                                               self.district.name,
                                                                               self.la,
                                                                               self.lsoa,
@@ -403,7 +405,7 @@ class Household(object):
 
         if not self.responded and reminder_test <= self.resp_level:
 
-            self.rep.output_data['Reminder_success'].append(reminder_success(self.rep.reps,
+            self.rep.output_data[reminder_type + '_success'].append(reminder_success(self.rep.reps,
                                                                              self.district.name,
                                                                              self.la,
                                                                              self.lsoa,
