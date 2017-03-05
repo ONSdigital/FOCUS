@@ -109,9 +109,8 @@ class Household(object):
 
             self.paper_allowed = True
             self.priority += 5  # lower the priority as more likely to reply
-            hq.schedule_paper_drop(self, 'Call', 'pq', self.district.postal_delay)
-
-            yield self.env.timeout(0)
+            # call to ask so may need to up the level of response above default here?
+            yield self.env.process(hq.schedule_paper_drop(self, 'Call', 'pq', self.district.postal_delay))
 
         elif isinstance(self.adviser_check(self.env.now), str):
             # otherwise carry on to the call centre to speak to an adviser
@@ -194,13 +193,13 @@ class Household(object):
             # hang up
 
             self.output_data['Call_renege'].append(generic_output(self.rep.reps,
-                                                               self.district.name,
-                                                               self.la,
-                                                               self.lsoa,
-                                                               self.digital,
-                                                               self.hh_type,
-                                                               self.hh_id,
-                                                               self.env.now))
+                                                                  self.district.name,
+                                                                  self.la,
+                                                                  self.lsoa,
+                                                                  self.digital,
+                                                                  self.hh_type,
+                                                                  self.hh_id,
+                                                                  self.env.now))
 
             self.rep.adviser_store.put(current_ad)
 
@@ -269,7 +268,7 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            self.rep.output_data['call_request'].append(generic_output(self.rep.reps,
+            self.rep.output_data['Call_request'].append(generic_output(self.rep.reps,
                                                                        self.district.name,
                                                                        self.la,
                                                                        self.lsoa,
@@ -353,14 +352,15 @@ class Household(object):
         if reminder_type == 'pq':
             self.paper_allowed = True
 
-        behaviour = self.default_behaviour()
-        # and get relevant figures
-        response_data = self.input_data["behaviours"][reminder_type][behaviour]
-        self.resp_level = response_data["response"]
-        if self.rep.total_ad_instances > 0:
-            self.help_level = response_data["help"]
-        else:
-            self.help_level = 0
+        if not self.resp_planned:
+            behaviour = self.default_behaviour()
+            # and get relevant figures
+            response_data = self.input_data["behaviours"][reminder_type][behaviour]
+            self.resp_level = response_data["response"]
+            if self.rep.total_ad_instances > 0:
+                self.help_level = response_data["help"]
+            else:
+                self.help_level = 0
 
         # recorded if wasted, unnecessary or successful
         if self.responded:

@@ -128,7 +128,7 @@ def schedule_paper_drop(obj, contact_type, reminder_type, delay):
                                                            obj.digital,
                                                            obj.hh_type,
                                                            obj.hh_id,
-                                                           obj.rep.env.now))
+                                                           obj.env.now))
 
     if delay > 0:
         start_delayed(obj.env, obj.receive_reminder(reminder_type), delay)

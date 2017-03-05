@@ -2,19 +2,50 @@
 import pandas as pd
 import os
 import glob
-import create_maps
-import create_graphs
+import csv
 import numpy as np
 from collections import defaultdict
+from operator import itemgetter
 
 
-def user_journey():
-    """a function that allows the user to extract an individual user journey - or summerise all.
-    As an example to produce output that specifies the proportion of households that followed a certain path
-    through te simulation"""
+def user_journey_single():
+    """a function that allows the user to extract an individual user journey. Simply searches the csv output files that
+     exists and prints a sorted list (by time) of events that household experienced"""
 
-    # for each hh_id extract route taken
-    # store in format of....JSON???
+    user_list = []
+    output_path = "outputs"
+    hh_id = input('Enter hh to extract: ')
+
+    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
+
+    for folder in folder_list:
+        folder_name = folder.split(os.path.sep)[-2]
+
+        glob_folder = os.path.join('outputs', folder_name, '*.csv')
+        file_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
+
+        try:
+            for file in file_list:
+                file_name = file.split(os.path.sep)[-1][0]
+
+                full_path = os.path.join(output_path, folder_name)
+                full_path = full_path + "/" + file_name + ".csv"
+
+                with open(full_path, 'r') as f:
+                    reader = csv.DictReader(f)
+                    rows = [row for row in reader if row['hh_id'] == hh_id]
+
+                for row in rows:
+                    # append folder_name tag
+                    row['event'] = folder_name
+                    user_list.append(row)
+
+        except:
+            pass
+    listsorted = sorted(user_list, key=lambda x: float(x['time']))
+
+    for row in listsorted:
+        print(row)
 
 
 def csv_to_pandas(output_path, output_type):

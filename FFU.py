@@ -177,7 +177,7 @@ class CensusOfficer(object):
                                                             household.digital,
                                                             household.hh_type,
                                                             household.hh_id,
-                                                            self.rep.env.now))
+                                                            self.env.now))
 
         if household.responded:
 
@@ -197,8 +197,8 @@ class CensusOfficer(object):
                                                                             household.lsoa,
                                                                             household.digital,
                                                                             household.hh_type,
-                                                                            self.rep.env.now,
-                                                                            household.hh_id))
+                                                                            household.hh_id,
+                                                                            self.rep.env.now))
 
         household_is_in = self.household_test(household, "contact_rate")
 
@@ -210,7 +210,7 @@ class CensusOfficer(object):
                                                                         household.digital,
                                                                         household.hh_type,
                                                                         household.hh_id,
-                                                                        self.rep.env.now))
+                                                                        self.env.now))
 
             household.visits_contacted += 1
             yield self.rep.env.process(self.fu_visit_assist(household))
@@ -233,7 +233,7 @@ class CensusOfficer(object):
                                                                     household.digital,
                                                                     household.hh_type,
                                                                     household.hh_id,
-                                                                    self.rep.env.now))
+                                                                    self.env.now))
 
             self.env.process(hq.schedule_paper_drop(household, 'Visit', 'postcard', self.has_postcard))
 
@@ -255,16 +255,16 @@ class CensusOfficer(object):
         elif not household.digital and da_test <= da_effectiveness:
             yield self.env.timeout(self.input_data['visit_times']['convert']/60)
 
+            household.digital = True
             self.rep.output_data['Visit_convert'].append(generic_output(self.rep.reps,
                                                                         household.district.name,
                                                                         household.la,
                                                                         household.lsoa,
                                                                         household.digital,
                                                                         household.hh_type,
-                                                                        self.rep.env.now,
-                                                                        household.hh_id))
+                                                                        household.hh_id,
+                                                                        self.env.now))
 
-            household.digital = True
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
         # not digital, do not convince to go online but allowed to use paper so go to outcome
@@ -292,8 +292,8 @@ class CensusOfficer(object):
                                                                        household.lsoa,
                                                                        household.digital,
                                                                        household.hh_type,
-                                                                       self.env.now,
-                                                                       household.hh_id))
+                                                                       household.hh_id,
+                                                                       self.env.now))
 
             visit_time = self.input_data["visit_times"]["paper"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
@@ -331,8 +331,8 @@ class CensusOfficer(object):
                                                                        household.lsoa,
                                                                        household.digital,
                                                                        household.hh_type,
-                                                                       self.env.now,
-                                                                       household.hh_id))
+                                                                       household.hh_id,
+                                                                       self.env.now))
             # leave paper in hope they respond?
             household.paper_allowed = True
             hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
@@ -349,8 +349,8 @@ class CensusOfficer(object):
                                                                        household.lsoa,
                                                                        household.digital,
                                                                        household.hh_type,
-                                                                       self.env.now,
-                                                                       household.hh_id))
+                                                                       household.hh_id,
+                                                                       self.env.now))
 
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])

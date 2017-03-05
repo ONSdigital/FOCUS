@@ -195,7 +195,7 @@ class District(object):
                                                                                 hh_geog.lsoa,
                                                                                 hh_action.digital,
                                                                                 hh_type,
-                                                                                None,
+                                                                                self.rep.total_hh,
                                                                                 hh_action.time))
                     else:
                         # create a household instance passing initial state

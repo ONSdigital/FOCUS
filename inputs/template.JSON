@@ -181,7 +181,7 @@
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "False",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 35,
@@ -320,14 +320,14 @@
             },
             "renege": 0.125,
             "paper_prop": 85,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "False",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 33,
@@ -466,14 +466,14 @@
             },
             "renege": 0.125,
             "paper_prop": 82,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "False",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 31,
@@ -612,14 +612,14 @@
             },
             "renege": 0.125,
             "paper_prop": 78,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "False",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 27,
@@ -758,14 +758,14 @@
             },
             "renege": 0.125,
             "paper_prop": 76,
-            "paper_allowed": "True",
+            "paper_allowed": "False",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "False",
+            "paper_on_request": "True",
             "conversion_rate": {
               "0": {
                 "9": 29,
