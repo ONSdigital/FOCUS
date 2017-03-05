@@ -66,7 +66,7 @@ class Adviser(object):
         self.start_sim_time = h.get_entity_time(self, "start")  # the sim time the adviser starts work
         self.end_sim_time = h.get_entity_time(self, "end")  # the sim time the adviser ends work
 
-        # time range - varies by day
+        # time range - varies by day of week
         self.set_avail_sch = input_data['availability']
 
 

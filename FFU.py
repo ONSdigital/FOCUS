@@ -360,7 +360,8 @@ class CensusOfficer(object):
 
         day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
 
-        if self.start_sim_time <= self.env.now < self.end_sim_time and self.input_data['availability'][str(day_of_week)]:
+        if self.start_sim_time <= self.env.now < self.end_sim_time and \
+                self.input_data['availability'][str(day_of_week)]:
 
             for i in range(0, len(self.input_data['availability'][str(day_of_week)]), 2):
 

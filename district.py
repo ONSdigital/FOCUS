@@ -37,6 +37,7 @@ class District(object):
         # self.return_rate = 0  #
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
+        self.postal_delay = self.input_data['postal_delay']
 
         if self.input_data["census officer"]:
             self.create_co()

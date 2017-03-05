@@ -15,7 +15,6 @@ reminder_received = namedtuple('Reminder_received', ['rep', 'district', 'LA', 'L
 call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'wait_time'])
 
 
-
 class Household(object):
 
     # Create an instance of the class
@@ -110,7 +109,7 @@ class Household(object):
 
             self.paper_allowed = True
             self.priority += 5  # lower the priority as more likely to reply
-            hq.schedule_paper_drop(self, 'Call', 'pq', False)
+            hq.schedule_paper_drop(self, 'Call', 'pq', self.district.postal_delay)
 
             yield self.env.timeout(0)
 
@@ -122,13 +121,13 @@ class Household(object):
         else:
             # no one available - gracefully defer - some will call back again
             self.output_data['Call_defer'].append(generic_output(self.rep.reps,
-                                                              self.district.name,
-                                                              self.la,
-                                                              self.lsoa,
-                                                              self.digital,
-                                                              self.hh_type,
-                                                              self.hh_id,
-                                                              self.env.now))
+                                                                 self.district.name,
+                                                                 self.la,
+                                                                 self.lsoa,
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.hh_id,
+                                                                 self.env.now))
 
     def default_behaviour(self):
         # depending on circumstances can follow one of two paths
@@ -254,13 +253,13 @@ class Household(object):
 
             # record event
             self.rep.output_data['Call_convert'].append(generic_output(self.rep.reps,
-                                                                     self.district.name,
-                                                                     self.la,
-                                                                     self.lsoa,
-                                                                     self.digital,
-                                                                     self.hh_type,
-                                                                     self.hh_id,
-                                                                     self.rep.env.now))
+                                                                       self.district.name,
+                                                                       self.la,
+                                                                       self.lsoa,
+                                                                       self.digital,
+                                                                       self.hh_type,
+                                                                       self.hh_id,
+                                                                       self.rep.env.now))
 
             self.digital = True
             yield self.env.process(self.phone_call_outcome(current_ad))
@@ -271,13 +270,13 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
             self.rep.output_data['call_request'].append(generic_output(self.rep.reps,
-                                                                     self.district.name,
-                                                                     self.la,
-                                                                     self.lsoa,
-                                                                     self.digital,
-                                                                     self.hh_type,
-                                                                     self.hh_id,
-                                                                     self.rep.env.now))
+                                                                       self.district.name,
+                                                                       self.la,
+                                                                       self.lsoa,
+                                                                       self.digital,
+                                                                       self.hh_type,
+                                                                       self.hh_id,
+                                                                       self.rep.env.now))
 
             # up priority and tag so a visit happens at time likely time to be in - or just set it to succeed - or both?
             self.priority -= 10
@@ -297,13 +296,13 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
 
             self.rep.output_data['Call_success'].append(generic_output(self.rep.reps,
-                                                                     self.district.name,
-                                                                     self.la,
-                                                                     self.lsoa,
-                                                                     self.digital,
-                                                                     self.hh_type,
-                                                                     self.hh_id,
-                                                                     self.env.now))
+                                                                       self.district.name,
+                                                                       self.la,
+                                                                       self.lsoa,
+                                                                       self.digital,
+                                                                       self.hh_type,
+                                                                       self.hh_id,
+                                                                       self.env.now))
             self.resp_planned = True
             self.rep.adviser_store.put(current_ad)
             self.rep.env.process(self.household_returns(self.calc_delay()))
@@ -313,13 +312,13 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
             self.rep.output_data['Call_failed'].append(generic_output(self.rep.reps,
-                                                                   self.district.name,
-                                                                   self.la,
-                                                                   self.lsoa,
-                                                                   self.digital,
-                                                                   self.hh_type,
-                                                                   self.hh_id,
-                                                                   self.env.now))
+                                                                      self.district.name,
+                                                                      self.la,
+                                                                      self.lsoa,
+                                                                      self.digital,
+                                                                      self.hh_type,
+                                                                      self.hh_id,
+                                                                      self.env.now))
 
             self.rep.adviser_store.put(current_ad)
 
@@ -333,13 +332,13 @@ class Household(object):
             # add to hh response event log
 
             self.output_data['Return_sent'].append(generic_output(self.rep.reps,
-                                                               self.district.name,
-                                                               self.la,
-                                                               self.lsoa,
-                                                               self.digital,
-                                                               self.hh_type,
-                                                               self.hh_id,
-                                                               self.resp_time))
+                                                                  self.district.name,
+                                                                  self.la,
+                                                                  self.lsoa,
+                                                                  self.digital,
+                                                                  self.hh_type,
+                                                                  self.hh_id,
+                                                                  self.resp_time))
 
             if self.calc_delay() == 0:  # digital
                 self.env.process(hq.ret_rec(self, self.rep))
@@ -423,13 +422,13 @@ class Household(object):
         elif not self.responded:
             # nowt
             self.output_data['Do_nothing'].append(generic_output(self.rep.reps,
-                                                             self.district.name,
-                                                             self.la,
-                                                             self.lsoa,
-                                                             self.digital,
-                                                             self.hh_type,
-                                                             self.hh_id,
-                                                             self.env.now))
+                                                                 self.district.name,
+                                                                 self.la,
+                                                                 self.lsoa,
+                                                                 self.digital,
+                                                                 self.hh_type,
+                                                                 self.hh_id,
+                                                                 self.env.now))
 
         yield self.env.timeout(0)
 

@@ -346,8 +346,8 @@ ratios = [1200, 1000, 600, 375, 280]
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.JSON')
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
 generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 
