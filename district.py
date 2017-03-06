@@ -5,18 +5,9 @@ import sys
 import hq
 import math
 from simpy.util import start_delayed
-from collections import namedtuple
+import output_options as oo
 import helper as h
 import FFU
-
-hh_record = namedtuple('hh_record', ['district', 'LA', 'LSOA', 'hh_type'])
-response_times = namedtuple('Responded', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
-non_response = namedtuple('Non_response', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])  # time Response received
-warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
-
-# name tuples used for purposes other than output
-initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
-hh_geography = namedtuple('hh_geography', ['la', 'lsoa'])
 
 
 class District(object):
@@ -65,10 +56,6 @@ class District(object):
         self.create_households()
         # randomise list -  so ignore priority
         self.rnd.shuffle(self.households)
-        #if self.rep.reps == 1:
-            # record numbers for first replication
-            #self.rep.output_data['hh_count'].append(hh_count(self.name, self.total_households))
-
         try:
             self.hh_area = self.input_data['district_area'] / len(self.households)
             self.initial_hh_sep = 2 * (math.sqrt(self.hh_area / math.pi))
@@ -76,9 +63,10 @@ class District(object):
             warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
                               " for district: ", self.name, ". HH separation set to zero")
             # write out a warning here but don't stop the sim just set the dist to zero
-            self.rep.output_data['Warnings'].append(warnings(self.rep.reps,
-                                                             e,
-                                                             warning_detail))
+            if oo.record_warnings:
+                self.rep.output_data['Warnings'].append(oo.warnings(self.rep.reps,
+                                                                    e,
+                                                                    warning_detail))
 
             self.initial_hh_sep = 0
 
@@ -93,15 +81,15 @@ class District(object):
 
         for household in self.households:
             if not household.return_sent:
-
-                self.rep.output_data['Non_response'].append(response_times(self.rep.reps,
-                                                                           self.name,
-                                                                           household.la,
-                                                                           household.lsoa,
-                                                                           household.digital,
-                                                                           household.hh_type,
-                                                                           household.hh_id,
-                                                                           self.env.now))
+                if oo.record_non_response:
+                    self.rep.output_data['Non_response'].append(oo.response_times(self.rep.reps,
+                                                                                  self.name,
+                                                                                  household.la,
+                                                                                  household.lsoa,
+                                                                                  household.digital,
+                                                                                  household.hh_type,
+                                                                                  household.hh_id,
+                                                                                  self.env.now))
         yield self.env.timeout(0)
 
     def start_hh(self):
@@ -121,9 +109,10 @@ class District(object):
             warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
                               " for district: ", self.name)
             # write out a warning here but don't stop the sim just set the dist to zero
-            self.rep.output_data['Warnings'].append(warnings(self.rep.reps,
-                                                             e,
-                                                             warning_detail))
+            if oo.record_warnings:
+                self.rep.output_data['Warnings'].append(oo.warnings(self.rep.reps,
+                                                                    e,
+                                                                    warning_detail))
 
             self.travel_dist = 0
 
@@ -163,7 +152,7 @@ class District(object):
             for lsoa in input_dict[la]:
                 if int(input_dict[la][lsoa]) > 0:
                     input_dict[la][lsoa] = int(input_dict[la][lsoa]) - 1
-                    return hh_geography(la, lsoa)
+                    return oo.hh_geography(la, lsoa)
 
     def create_households(self):
 
@@ -188,15 +177,15 @@ class District(object):
                         # don't need an instance of a household just directly record a response/return at correct time
 
                         self.rep.total_responses += 1
-
-                        self.rep.output_data['Responded'].append(response_times(self.rep.reps,
-                                                                                self.name,
-                                                                                hh_geog.la,
-                                                                                hh_geog.lsoa,
-                                                                                hh_action.digital,
-                                                                                hh_type,
-                                                                                self.rep.total_hh,
-                                                                                hh_action.time))
+                        if oo.record_response_times:
+                            self.rep.output_data['Responded'].append(oo.response_times(self.rep.reps,
+                                                                                       self.name,
+                                                                                       hh_geog.la,
+                                                                                       hh_geog.lsoa,
+                                                                                       hh_action.digital,
+                                                                                       hh_type,
+                                                                                       self.rep.total_hh,
+                                                                                       hh_action.time))
                     else:
                         # create a household instance passing initial state
                         self.households.append(household.Household(self.rep,
@@ -211,10 +200,10 @@ class District(object):
                                                                    ))
 
                     if self.rep.reps == 1:
-                        self.rep.output_data['hh_record'].append(hh_record(self.name,
-                                                                           hh_geog.la,
-                                                                           hh_geog.lsoa,
-                                                                           hh_type))
+                        self.rep.output_data['hh_record'].append(oo.hh_record(self.name,
+                                                                              hh_geog.la,
+                                                                              hh_geog.lsoa,
+                                                                              hh_type))
                     self.rep.total_hh += 1
 
             except KeyError as e:
@@ -228,10 +217,10 @@ class District(object):
         for letter in letter_list:
             letter_data = self.input_data['letter_phases'][letter]
             self.letters.append(hq.LetterPhase(self.env,
-                                                     self.rep,
-                                                     self,
-                                                     letter_data,
-                                                     letter))
+                                               self.rep,
+                                               self,
+                                               letter_data,
+                                               letter))
 
     def initial_action(self, input_data, first_interaction, hh, hh_geog):
 
@@ -277,17 +266,17 @@ class District(object):
             # add a counter to the district so we know how many hh have responded early
             self.early_responders += 1
 
-            return initial_action('early', digital, response_time + input_data['delay']['digital'])
+            return oo.initial_action('early', digital, response_time + input_data['delay']['digital'])
 
         elif not digital and h.str2bool(input_data['paper_allowed']) \
                 and response_time + input_data['delay']['paper'] <= first_interaction:
 
             self.early_responders += 1
-            return initial_action('early', digital, response_time + input_data['delay']['paper'])
+            return oo.initial_action('early', digital, response_time + input_data['delay']['paper'])
 
         else:
 
-            return initial_action('late', digital, response_time)
+            return oo.initial_action('late', digital, response_time)
 
     def help(self, input_data, digital, first_interaction, hh, hh_geog):
 
@@ -296,11 +285,11 @@ class District(object):
                                                       input_data,
                                                       self.rep.sim_hours)
 
-        return initial_action('help', digital, response_time)
+        return oo.initial_action('help', digital, response_time)
 
     def do_nothing(self, input_data, digital, first_interaction, hh, hh_geog):
 
-        return initial_action('do_nothing', digital, 0)
+        return oo.initial_action('do_nothing', digital, 0)
 
 
 def least_busy_CO(district):

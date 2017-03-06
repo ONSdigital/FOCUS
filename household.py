@@ -2,17 +2,10 @@
 
 import hq
 from simpy.util import start_delayed
-from collections import namedtuple
+import output_options as oo
 import helper as h
 import math
 import datetime as dt
-
-generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time','type'])
-reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
-reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
-reminder_received = namedtuple('Reminder_received', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
-call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time', 'wait_time'])
 
 
 class Household(object):
@@ -74,14 +67,15 @@ class Household(object):
 
         else:
             # nowt
-            self.output_data['Do_nothing'].append(generic_output(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.la,
-                                                                 self.lsoa,
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.hh_id,
-                                                                 self.env.now))
+            if oo.record_do_nothing:
+                self.output_data['Do_nothing'].append(oo.generic_output(self.rep.reps,
+                                                                        self.district.name,
+                                                                        self.la,
+                                                                        self.lsoa,
+                                                                        self.digital,
+                                                                        self.hh_type,
+                                                                        self.hh_id,
+                                                                        self.env.now))
         yield self.env.timeout(0)  # do nothing more
 
     def contact(self):
@@ -93,14 +87,15 @@ class Household(object):
 
     def phone_call(self):
 
-        self.output_data['Call'].append(generic_output(self.rep.reps,
-                                                       self.district.name,
-                                                       self.la,
-                                                       self.lsoa,
-                                                       self.digital,
-                                                       self.hh_type,
-                                                       self.hh_id,
-                                                       self.env.now))
+        if oo.record_call:
+            self.output_data['Call'].append(oo.generic_output(self.rep.reps,
+                                                              self.district.name,
+                                                              self.la,
+                                                              self.lsoa,
+                                                              self.digital,
+                                                              self.hh_type,
+                                                              self.hh_id,
+                                                              self.env.now))
         self.calls += 1
 
         if (not self.digital and not self.paper_allowed and
@@ -119,14 +114,15 @@ class Household(object):
 
         else:
             # no one available - gracefully defer - some will call back again?
-            self.output_data['Call_defer'].append(generic_output(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.la,
-                                                                 self.lsoa,
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.hh_id,
-                                                                 self.env.now))
+            if oo.record_call_defer:
+                self.output_data['Call_defer'].append(oo.generic_output(self.rep.reps,
+                                                                        self.district.name,
+                                                                        self.la,
+                                                                        self.lsoa,
+                                                                        self.digital,
+                                                                        self.hh_type,
+                                                                        self.hh_id,
+                                                                        self.env.now))
 
     def default_behaviour(self):
         # depending on circumstances can follow one of two paths
@@ -135,15 +131,14 @@ class Household(object):
         else:
             return 'alt'
 
-    def action_test(self, type):
-        # tests what a household will do next after an interaction
-        # returns action and time of action.
+    def action_test(self, interaction_type):
+        # tests what a household will do next after an interaction and returns the action and time of action.
 
         test_value = self.rnd.uniform(0, 100)
         # test if default or alt
         behaviour = self.default_behaviour()
 
-        dict_value = self.input_data["behaviours"][type]
+        dict_value = self.input_data["behaviours"][interaction_type]
 
         if test_value <= dict_value["response"]:
             # respond straight away
@@ -155,6 +150,7 @@ class Household(object):
             return ["Do nothing", 0]
 
     def adviser_check(self, time):
+        # returns the adviser type that is available at the current time if any
 
         for k, v in self.rep.adviser_types.items():
             # between the dates
@@ -170,11 +166,6 @@ class Household(object):
                         return k
 
         return None
-
-        # cycle through adviser types
-        # get adviser type that is between dates
-
-        # for that type is it available
 
     def phone_call_connect(self):
 
@@ -192,14 +183,15 @@ class Household(object):
         if wait_time >= self.input_data["renege"]:
             # hang up
 
-            self.output_data['Call_renege'].append(generic_output(self.rep.reps,
-                                                                  self.district.name,
-                                                                  self.la,
-                                                                  self.lsoa,
-                                                                  self.digital,
-                                                                  self.hh_type,
-                                                                  self.hh_id,
-                                                                  self.env.now))
+            if oo.record_call_renege:
+                self.output_data['Call_renege'].append(oo.generic_output(self.rep.reps,
+                                                                         self.district.name,
+                                                                         self.la,
+                                                                         self.lsoa,
+                                                                         self.digital,
+                                                                         self.hh_type,
+                                                                         self.hh_id,
+                                                                         self.env.now))
 
             self.rep.adviser_store.put(current_ad)
 
@@ -218,15 +210,15 @@ class Household(object):
 
         else:
             # got through
-
-            self.output_data['Call_contact'].append(generic_output(self.rep.reps,
-                                                                   self.district.name,
-                                                                   self.la,
-                                                                   self.lsoa,
-                                                                   self.digital,
-                                                                   self.hh_type,
-                                                                   self.hh_id,
-                                                                   self.env.now))
+            if oo.record_call_contact:
+                self.output_data['Call_contact'].append(oo.generic_output(self.rep.reps,
+                                                                          self.district.name,
+                                                                          self.la,
+                                                                          self.lsoa,
+                                                                          self.digital,
+                                                                          self.hh_type,
+                                                                          self.hh_id,
+                                                                          self.env.now))
 
             if wait_time > 0:
                 self.record_wait_time(wait_time, self.input_data["renege"])
@@ -251,14 +243,15 @@ class Household(object):
             yield self.env.timeout(current_ad.input_data['call_times']['convert'] / 60)
 
             # record event
-            self.rep.output_data['Call_convert'].append(generic_output(self.rep.reps,
-                                                                       self.district.name,
-                                                                       self.la,
-                                                                       self.lsoa,
-                                                                       self.digital,
-                                                                       self.hh_type,
-                                                                       self.hh_id,
-                                                                       self.rep.env.now))
+            if oo.record_call_convert:
+                self.rep.output_data['Call_convert'].append(oo.generic_output(self.rep.reps,
+                                                                              self.district.name,
+                                                                              self.la,
+                                                                              self.lsoa,
+                                                                              self.digital,
+                                                                              self.hh_type,
+                                                                              self.hh_id,
+                                                                              self.rep.env.now))
 
             self.digital = True
             yield self.env.process(self.phone_call_outcome(current_ad))
@@ -268,20 +261,21 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            self.rep.output_data['Call_request'].append(generic_output(self.rep.reps,
-                                                                       self.district.name,
-                                                                       self.la,
-                                                                       self.lsoa,
-                                                                       self.digital,
-                                                                       self.hh_type,
-                                                                       self.hh_id,
-                                                                       self.rep.env.now))
+            if oo.record_call_request:
+                self.rep.output_data['Call_request'].append(oo.generic_output(self.rep.reps,
+                                                                              self.district.name,
+                                                                              self.la,
+                                                                              self.lsoa,
+                                                                              self.digital,
+                                                                              self.hh_type,
+                                                                              self.hh_id,
+                                                                              self.env.now))
 
             # up priority and tag so a visit happens at time likely time to be in - or just set it to succeed - or both?
             self.priority -= 10
 
             self.rep.adviser_store.put(current_ad)
-            #self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
+            # self.arranged_visit = True  # basically has requested a visit so go at optimal time and move to front..
             self.arranged_visit = False
 
     def phone_call_outcome(self, current_ad):
@@ -294,14 +288,15 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['success'] / 60)
 
-            self.rep.output_data['Call_success'].append(generic_output(self.rep.reps,
-                                                                       self.district.name,
-                                                                       self.la,
-                                                                       self.lsoa,
-                                                                       self.digital,
-                                                                       self.hh_type,
-                                                                       self.hh_id,
-                                                                       self.env.now))
+            if oo.record_call_success:
+                self.rep.output_data['Call_success'].append(oo.generic_output(self.rep.reps,
+                                                                              self.district.name,
+                                                                              self.la,
+                                                                              self.lsoa,
+                                                                              self.digital,
+                                                                              self.hh_type,
+                                                                              self.hh_id,
+                                                                              self.env.now))
             self.resp_planned = True
             self.rep.adviser_store.put(current_ad)
             self.rep.env.process(self.household_returns(self.calc_delay()))
@@ -310,15 +305,15 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            self.rep.output_data['Call_failed'].append(generic_output(self.rep.reps,
-                                                                      self.district.name,
-                                                                      self.la,
-                                                                      self.lsoa,
-                                                                      self.digital,
-                                                                      self.hh_type,
-                                                                      self.hh_id,
-                                                                      self.env.now))
-
+            if oo.record_call_success:
+                self.rep.output_data['Call_failed'].append(oo.generic_output(self.rep.reps,
+                                                                             self.district.name,
+                                                                             self.la,
+                                                                             self.lsoa,
+                                                                             self.digital,
+                                                                             self.hh_type,
+                                                                             self.hh_id,
+                                                                             self.env.now))
             self.rep.adviser_store.put(current_ad)
 
     def household_returns(self, delay=0):
@@ -329,15 +324,15 @@ class Household(object):
             self.return_sent = True
             self.resp_time = self.env.now
             # add to hh response event log
-
-            self.output_data['Return_sent'].append(generic_output(self.rep.reps,
-                                                                  self.district.name,
-                                                                  self.la,
-                                                                  self.lsoa,
-                                                                  self.digital,
-                                                                  self.hh_type,
-                                                                  self.hh_id,
-                                                                  self.resp_time))
+            if oo.record_return_sent:
+                self.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
+                                                                         self.district.name,
+                                                                         self.la,
+                                                                         self.lsoa,
+                                                                         self.digital,
+                                                                         self.hh_type,
+                                                                         self.hh_id,
+                                                                         self.resp_time))
 
             if self.calc_delay() == 0:  # digital
                 self.env.process(hq.ret_rec(self, self.rep))
@@ -365,53 +360,55 @@ class Household(object):
         # recorded if wasted, unnecessary or successful
         if self.responded:
 
-            self.rep.output_data[reminder_type + '_wasted'].append(reminder_wasted(self.rep.reps,
-                                                                                   self.district.name,
-                                                                                   self.la,
-                                                                                   self.lsoa,
-                                                                                   self.digital,
-                                                                                   self.hh_type,
-                                                                                   self.hh_id,
-                                                                                   self.env.now,
-                                                                                   reminder_type))
+            if oo.record_reminder_wasted:
+                self.rep.output_data[reminder_type + '_wasted'].append(oo.reminder_wasted(self.rep.reps,
+                                                                                          self.district.name,
+                                                                                          self.la,
+                                                                                          self.lsoa,
+                                                                                          self.digital,
+                                                                                          self.hh_type,
+                                                                                          self.hh_id,
+                                                                                          self.env.now,
+                                                                                          reminder_type))
         elif self.resp_planned:
 
-            self.rep.output_data[reminder_type + '_unnecessary'].append(reminder_unnecessary(self.rep.reps,
-                                                                                             self.district.name,
-                                                                                             self.la,
-                                                                                             self.lsoa,
-                                                                                             self.digital,
-                                                                                             self.hh_type,
-                                                                                             self.hh_id,
-                                                                                             self.env.now,
-                                                                                             reminder_type))
+            if oo.record_reminder_unnecessary:
+                self.rep.output_data[reminder_type + '_unnecessary'].append(oo.reminder_unnecessary(self.rep.reps,
+                                                                                                    self.district.name,
+                                                                                                    self.la,
+                                                                                                    self.lsoa,
+                                                                                                    self.digital,
+                                                                                                    self.hh_type,
+                                                                                                    self.hh_id,
+                                                                                                    self.env.now,
+                                                                                                    reminder_type))
         else:
-            # if get here they have not responded or planned to do so, so a worthwhile reminder.
-            self.rep.output_data[reminder_type + '_received'].append(reminder_success(self.rep.reps,
-                                                                                      self.district.name,
-                                                                                      self.la,
-                                                                                      self.lsoa,
-                                                                                      self.digital,
-                                                                                      self.hh_type,
-                                                                                      self.hh_id,
-                                                                                      self.env.now,
-                                                                                      reminder_type))
+            if oo.record_reminder_received:
+                self.rep.output_data[reminder_type + '_received'].append(oo.reminder_received(self.rep.reps,
+                                                                                              self.district.name,
+                                                                                              self.la,
+                                                                                              self.lsoa,
+                                                                                              self.digital,
+                                                                                              self.hh_type,
+                                                                                              self.hh_id,
+                                                                                              self.env.now,
+                                                                                              reminder_type))
 
         # now move on to the relevant action based on extracted values
         # response test
         reminder_test = self.rnd.uniform(0, 100)
 
         if not self.responded and reminder_test <= self.resp_level:
-
-            self.rep.output_data[reminder_type + '_success'].append(reminder_success(self.rep.reps,
-                                                                                     self.district.name,
-                                                                                     self.la,
-                                                                                     self.lsoa,
-                                                                                     self.digital,
-                                                                                     self.hh_type,
-                                                                                     self.hh_id,
-                                                                                     self.env.now,
-                                                                                     reminder_type))
+            if oo.record_reminder_success:
+                self.rep.output_data[reminder_type + '_success'].append(oo.reminder_success(self.rep.reps,
+                                                                                            self.district.name,
+                                                                                            self.la,
+                                                                                            self.lsoa,
+                                                                                            self.digital,
+                                                                                            self.hh_type,
+                                                                                            self.hh_id,
+                                                                                            self.env.now,
+                                                                                            reminder_type))
 
             yield self.env.process(self.household_returns(self.calc_delay()))
         elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
@@ -421,32 +418,33 @@ class Household(object):
             yield self.env.process(self.contact())
         elif not self.responded:
             # nowt
-            self.output_data['Do_nothing'].append(generic_output(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.la,
-                                                                 self.lsoa,
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.hh_id,
-                                                                 self.env.now))
+            if oo.record_do_nothing:
+                self.output_data['Do_nothing'].append(oo.generic_output(self.rep.reps,
+                                                                        self.district.name,
+                                                                        self.la,
+                                                                        self.lsoa,
+                                                                        self.digital,
+                                                                        self.hh_type,
+                                                                        self.hh_id,
+                                                                        self.env.now))
 
         yield self.env.timeout(0)
 
     def record_wait_time(self, wait_time, renege_time):
 
-        self.output_data['Call_wait_times'].append(call_wait_times(self.rep.reps,
-                                                                   self.district.name,
-                                                                   self.la,
-                                                                   self.lsoa,
-                                                                   self.digital,
-                                                                   self.hh_type,
-                                                                   self.hh_id,
-                                                                   self.env.now,
-                                                                   min(wait_time, renege_time)))
+        if oo.record_call_wait_times:
+            self.output_data['Call_wait_times'].append(oo.call_wait_times(self.rep.reps,
+                                                                          self.district.name,
+                                                                          self.la,
+                                                                          self.lsoa,
+                                                                          self.digital,
+                                                                          self.hh_type,
+                                                                          self.hh_id,
+                                                                          self.env.now,
+                                                                          min(wait_time, renege_time)))
 
     def calc_delay(self):
         if self.digital:
             return self.input_data["delay"]["digital"]
         else:
             return self.input_data["delay"]["paper"]
-

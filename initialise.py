@@ -4,9 +4,8 @@ import hq
 import helper as h
 import simpy
 import sys
-from collections import namedtuple, defaultdict
-
-warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
+from collections import defaultdict
+import output_options as oo
 
 
 class Rep(object):
@@ -110,9 +109,10 @@ class Rep(object):
                 co_number += self.input_data['districts'][distr]["census officer"]["standard"]["number"]
             except KeyError as e:
                 warning_detail = "no CO for run, ", self.run, " in create districts"
-                self.output_data['Warnings'].append(warnings(self.reps,
-                                                             e,
-                                                             warning_detail))
+                if oo.record_warnings:
+                    self.output_data['Warnings'].append(oo.warnings(self.reps,
+                                                                    e,
+                                                                    warning_detail))
                 co_number = 0
 
         print("number of CO: ", co_number)

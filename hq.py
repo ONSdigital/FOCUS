@@ -1,15 +1,9 @@
 """Module used to store the classes related to census..."""
-import math
-import datetime as dt
-from collections import namedtuple
+
+import output_options as oo
 import helper as h
 import datetime
 from simpy.util import start_delayed
-import sys
-
-
-generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'LSOA', 'digital', 'hh_type', 'hh_id', 'time'])
-warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 
 
 def ret_rec(household, rep):
@@ -104,15 +98,15 @@ class LetterPhase(object):
         yield self.env.timeout(0)
 
     def co_send_letter(self, household, letter_type, delay):
-
-        self.rep.output_data[letter_type + '_sent'].append(generic_output(self.rep.reps,
-                                                                          household.district.name,
-                                                                          household.la,
-                                                                          household.lsoa,
-                                                                          household.digital,
-                                                                          household.hh_type,
-                                                                          household.hh_id,
-                                                                          self.env.now))
+        if oo.record_letters:
+            self.rep.output_data[letter_type + '_sent'].append(oo.generic_output(self.rep.reps,
+                                                                                 household.district.name,
+                                                                                 household.la,
+                                                                                 household.lsoa,
+                                                                                 household.digital,
+                                                                                 household.hh_type,
+                                                                                 household.hh_id,
+                                                                                 self.env.now))
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_reminder(letter_type))
@@ -121,14 +115,15 @@ class LetterPhase(object):
 def schedule_paper_drop(obj, contact_type, reminder_type, delay):
     output_type = contact_type + "_" + reminder_type + "_posted"   # use this as output key
 
-    obj.rep.output_data[output_type].append(generic_output(obj.rep.reps,
-                                                           obj.district.name,
-                                                           obj.la,
-                                                           obj.lsoa,
-                                                           obj.digital,
-                                                           obj.hh_type,
-                                                           obj.hh_id,
-                                                           obj.env.now))
+    if oo.record_posted:
+        obj.rep.output_data[output_type].append(oo.generic_output(obj.rep.reps,
+                                                                  obj.district.name,
+                                                                  obj.la,
+                                                                  obj.lsoa,
+                                                                  obj.digital,
+                                                                  obj.hh_type,
+                                                                  obj.hh_id,
+                                                                  obj.env.now))
 
     if delay > 0:
         start_delayed(obj.env, obj.receive_reminder(reminder_type), delay)
