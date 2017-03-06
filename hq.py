@@ -105,14 +105,14 @@ class LetterPhase(object):
 
     def co_send_letter(self, household, letter_type, delay):
 
-        self.rep.output_data[letter_type].append(generic_output(self.rep.reps,
-                                                                            household.district.name,
-                                                                            household.la,
-                                                                            household.lsoa,
-                                                                            household.digital,
-                                                                            household.hh_type,
-                                                                            household.hh_id,
-                                                                            self.env.now))
+        self.rep.output_data[letter_type + '_sent'].append(generic_output(self.rep.reps,
+                                                                          household.district.name,
+                                                                          household.la,
+                                                                          household.lsoa,
+                                                                          household.digital,
+                                                                          household.hh_type,
+                                                                          household.hh_id,
+                                                                          self.env.now))
 
         yield self.env.timeout(delay)
         self.env.process(household.receive_reminder(letter_type))

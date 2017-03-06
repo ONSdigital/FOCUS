@@ -158,7 +158,7 @@ class Household(object):
 
         for k, v in self.rep.adviser_types.items():
             # between the dates
-            if (v['start_time'] < time <= v['end_time']):
+            if v['start_time'] < time <= v['end_time']:
 
                 # then between each set of times
                 current_dow = str((self.rep.start_date + dt.timedelta(days=math.floor(time / 24))).weekday())
@@ -220,13 +220,13 @@ class Household(object):
             # got through
 
             self.output_data['Call_contact'].append(generic_output(self.rep.reps,
-                                                                 self.district.name,
-                                                                 self.la,
-                                                                 self.lsoa,
-                                                                 self.digital,
-                                                                 self.hh_type,
-                                                                 self.hh_id,
-                                                                 self.env.now))
+                                                                   self.district.name,
+                                                                   self.la,
+                                                                   self.lsoa,
+                                                                   self.digital,
+                                                                   self.hh_type,
+                                                                   self.hh_id,
+                                                                   self.env.now))
 
             if wait_time > 0:
                 self.record_wait_time(wait_time, self.input_data["renege"])
@@ -348,8 +348,6 @@ class Household(object):
 
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
-        # if a pq set paper allowed to true!
-
 
         if reminder_type == 'pq':
             self.paper_allowed = True
@@ -368,36 +366,36 @@ class Household(object):
         if self.responded:
 
             self.rep.output_data[reminder_type + '_wasted'].append(reminder_wasted(self.rep.reps,
-                                                                           self.district.name,
-                                                                           self.la,
-                                                                           self.lsoa,
-                                                                           self.digital,
-                                                                           self.hh_type,
-                                                                           self.hh_id,
-                                                                           self.env.now,
-                                                                           reminder_type))
+                                                                                   self.district.name,
+                                                                                   self.la,
+                                                                                   self.lsoa,
+                                                                                   self.digital,
+                                                                                   self.hh_type,
+                                                                                   self.hh_id,
+                                                                                   self.env.now,
+                                                                                   reminder_type))
         elif self.resp_planned:
 
             self.rep.output_data[reminder_type + '_unnecessary'].append(reminder_unnecessary(self.rep.reps,
-                                                                                     self.district.name,
-                                                                                     self.la,
-                                                                                     self.lsoa,
-                                                                                     self.digital,
-                                                                                     self.hh_type,
-                                                                                     self.hh_id,
-                                                                                     self.env.now,
-                                                                                     reminder_type))
+                                                                                             self.district.name,
+                                                                                             self.la,
+                                                                                             self.lsoa,
+                                                                                             self.digital,
+                                                                                             self.hh_type,
+                                                                                             self.hh_id,
+                                                                                             self.env.now,
+                                                                                             reminder_type))
         else:
             # if get here they have not responded or planned to do so, so a worthwhile reminder.
             self.rep.output_data[reminder_type + '_received'].append(reminder_success(self.rep.reps,
-                                                                              self.district.name,
-                                                                              self.la,
-                                                                              self.lsoa,
-                                                                              self.digital,
-                                                                              self.hh_type,
-                                                                              self.hh_id,
-                                                                              self.env.now,
-                                                                              reminder_type))
+                                                                                      self.district.name,
+                                                                                      self.la,
+                                                                                      self.lsoa,
+                                                                                      self.digital,
+                                                                                      self.hh_type,
+                                                                                      self.hh_id,
+                                                                                      self.env.now,
+                                                                                      reminder_type))
 
         # now move on to the relevant action based on extracted values
         # response test
@@ -406,14 +404,14 @@ class Household(object):
         if not self.responded and reminder_test <= self.resp_level:
 
             self.rep.output_data[reminder_type + '_success'].append(reminder_success(self.rep.reps,
-                                                                             self.district.name,
-                                                                             self.la,
-                                                                             self.lsoa,
-                                                                             self.digital,
-                                                                             self.hh_type,
-                                                                             self.hh_id,
-                                                                             self.env.now,
-                                                                             reminder_type))
+                                                                                     self.district.name,
+                                                                                     self.la,
+                                                                                     self.lsoa,
+                                                                                     self.digital,
+                                                                                     self.hh_type,
+                                                                                     self.hh_id,
+                                                                                     self.env.now,
+                                                                                     reminder_type))
 
             yield self.env.process(self.household_returns(self.calc_delay()))
         elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):

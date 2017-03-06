@@ -49,6 +49,10 @@ def user_journey_single():
         print(row)
 
 
+def user_journey_all():
+    """a summary of all user journeys?"""
+
+
 def csv_to_pandas(output_path, output_type):
     """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
     and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished

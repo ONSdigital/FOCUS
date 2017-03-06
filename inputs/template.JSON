@@ -181,7 +181,7 @@
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "True",
+            "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 35,
@@ -320,14 +320,14 @@
             },
             "renege": 0.125,
             "paper_prop": 85,
-            "paper_allowed": "False",
+            "paper_allowed": "True",
             "number": 0,
             "FU_start_time": 336,
             "dig_assist_flex": 0,
             "priority": 0,
             "max_visits": 20,
             "paper_after_max_visits": "False",
-            "paper_on_request": "True",
+            "paper_on_request": "False",
             "conversion_rate": {
               "0": {
                 "9": 33,
