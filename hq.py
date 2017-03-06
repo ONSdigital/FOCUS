@@ -12,27 +12,29 @@ def ret_rec(household, rep):
         print(rep.total_responses)
 
     household.return_received = True
-    rep.output_data['Return_received'].append(generic_output(rep.reps,
-                                                             household.district.name,
-                                                             household.la,
-                                                             household.lsoa,
-                                                             household.digital,
-                                                             household.hh_type,
-                                                             household.hh_id,
-                                                             rep.env.now))
+    if oo.record_return_received:
+        rep.output_data['Return_received'].append(oo.generic_output(rep.reps,
+                                                                    household.district.name,
+                                                                    household.la,
+                                                                    household.lsoa,
+                                                                    household.digital,
+                                                                    household.hh_type,
+                                                                    household.hh_id,
+                                                                    rep.env.now))
     # currently every return gets counted as a response as soon as it is received - this may need to change
     household.responded = True
     rep.total_responses += 1
 
     # check size of output data - if over an amount, size or length write to file?
-    rep.output_data['Responded'].append(generic_output(rep.reps,
-                                                       household.district.name,
-                                                       household.la,
-                                                       household.lsoa,
-                                                       household.digital,
-                                                       household.hh_type,
-                                                       household.hh_id,
-                                                       rep.env.now))
+    if oo.record_responded:
+        rep.output_data['Responded'].append(oo.generic_output(rep.reps,
+                                                              household.district.name,
+                                                              household.la,
+                                                              household.lsoa,
+                                                              household.digital,
+                                                              household.hh_type,
+                                                              household.hh_id,
+                                                              rep.env.now))
 
     # checks size of output and writes to file if too large
     if (h.dict_size(rep.output_data)) > 1000000:
