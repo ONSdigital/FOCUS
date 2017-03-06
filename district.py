@@ -178,7 +178,7 @@ class District(object):
 
                         self.rep.total_responses += 1
                         if oo.record_response_times:
-                            self.rep.output_data['Responded'].append(oo.response_times(self.rep.reps,
+                            self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
                                                                                        self.name,
                                                                                        hh_geog.la,
                                                                                        hh_geog.lsoa,
@@ -280,7 +280,7 @@ class District(object):
 
     def help(self, input_data, digital, first_interaction, hh, hh_geog):
 
-        # below uses response time profile - will need to update this to a "call" profile.
+        # below uses response time profile - will need to update this to a "call" profile?
         response_time = h.set_household_response_time(self.rep,
                                                       input_data,
                                                       self.rep.sim_hours)

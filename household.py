@@ -305,7 +305,7 @@ class Household(object):
 
             yield self.env.timeout(current_ad.input_data['call_times']['failed'] / 60)
 
-            if oo.record_call_success:
+            if oo.record_call_failed:
                 self.rep.output_data['Call_failed'].append(oo.generic_output(self.rep.reps,
                                                                              self.district.name,
                                                                              self.la,
@@ -344,7 +344,7 @@ class Household(object):
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
 
-        if reminder_type == 'pq':
+        if not self.resp_planned and reminder_type == 'pq':
             self.paper_allowed = True
 
         if not self.resp_planned:
@@ -395,7 +395,6 @@ class Household(object):
                                                                                               reminder_type))
 
         # now move on to the relevant action based on extracted values
-        # response test
         reminder_test = self.rnd.uniform(0, 100)
 
         if not self.responded and reminder_test <= self.resp_level:
