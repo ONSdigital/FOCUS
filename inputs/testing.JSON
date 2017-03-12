@@ -170,6 +170,7 @@
           }
         },
         "posting_time": 48,
+        "postal_delay": 24,
         "trigger": 90,
         "district_area": 79.4
       }
@@ -189,6 +190,7 @@
       "1": {
         "letter_phases": {},
         "paper_trigger": 80,
+        "postal_delay": 24,
         "census officer": {},
         "RMT_update": 24,
         "households": {
@@ -432,6 +434,7 @@
       "1": {
         "letter_phases": {},
         "paper_trigger": 80,
+        "postal_delay": 24,
         "census officer": {},
         "RMT_update": 24,
         "households": {
@@ -676,6 +679,7 @@
         "letter_phases": {},
         "paper_trigger": 80,
         "census officer": {},
+        "postal_delay": 24,
         "RMT_update": 24,
         "households": {
           "htc1": {
@@ -922,6 +926,7 @@
             "has_postcard": "True"
           }
         },
+        "postal_delay": 24,
         "RMT_update": 24,
         "households": {
           "htc1": {

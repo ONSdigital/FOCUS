@@ -60,6 +60,7 @@ def current_day(obj):
 
 
 def str_to_dec(str_time):
+    # test added
 
     times = str_time.split(":")
 
@@ -67,6 +68,7 @@ def str_to_dec(str_time):
 
 
 def make_time_decimal(time_object):
+    # test added
 
     hours = time_object.hour
     mins = time_object.minute
@@ -87,6 +89,7 @@ def return_time_key(input_dict, time):
 
 
 def str2bool(value):
+    # test added
     return str(value).lower() in ("True", "true", "1")
 
 
@@ -114,15 +117,15 @@ def beta_dist(rep, alpha, beta, sim_days_left):
 #    return max(0, min(x, 255))
 
 
-def next_day(simpy_time):
-    # round up to next nearest day...
-    next = math.ceil(simpy_time/24)*24
-    return next - simpy_time + 9
+#def next_day(simpy_time):
+#    # round up to next nearest day...
+#    next = math.ceil(simpy_time/24)*24
+#    return next - simpy_time + 9
 
 
-def date_range(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + dt.timedelta(n)
+#def date_range(start_date, end_date):
+#    for n in range(int((end_date - start_date).days)):
+#        yield start_date + dt.timedelta(n)
 
 
 #def return_resp_time(obj):
@@ -177,6 +180,7 @@ def write_output(output_data, out_path, run_input_id):
 
 
 def dict_size(a_dict):
+    # returns memory size of dictionary
 
     size = 0
 
