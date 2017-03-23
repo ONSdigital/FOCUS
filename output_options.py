@@ -33,19 +33,18 @@ record_reminder_success = False
 record_call_wait_times = False
 record_warnings = False
 record_non_response = False
-record_response_times = False
 record_letters = False
 record_posted = False
 record_visit = False
 record_visit_wasted = False
 record_visit_unnecessary = False
-record_visit_contact = False
+record_visit_contact = True
 record_visit_out = False
 record_visit_convert = False
 record_visit_assist = False
 record_visit_success = False
 record_visit_failed = False
 record_return_received = False
-record_responded = False
+record_responded = True
 
 
