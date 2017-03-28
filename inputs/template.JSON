@@ -2,9 +2,9 @@
   "1": {
     "replications": 1,
     "replication seeds": {},
-    "start_date": "2011, 3, 7",
-    "end_date": "2011, 5, 6",
-    "census_date": "2011, 3, 13",
+    "start_date": "2011, 3, 8",
+    "end_date": "2011, 5, 23",
+    "census_date": "2011, 3, 28",
     "advisers": {
       "A":{
         "number": 10,
@@ -99,8 +99,8 @@
             "has_pq": 48,
             "has_postcard": 0,
             "travel_speed": 5,
-            "start_date": "2011, 4, 4",
-            "end_date": "2011, 5, 6",
+            "start_date": "2011, 4, 8",
+            "end_date": "2011, 5, 23",
             "availability": {
               "0": ["10:30", "12:30", "13:30", "15:30"],
               "1": ["10:30", "12:30", "13:30", "15:30"],

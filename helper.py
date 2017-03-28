@@ -7,6 +7,7 @@ import csv
 from multiprocessing import Lock
 from sys import getsizeof
 import sys
+import adjust_resp
 
 l = Lock()  # global declaration...can I avoid this
 
@@ -36,7 +37,8 @@ def responses_to_date(district, output_format=""):
 def current_day(obj):
     # returns number of days gone from start of sim
 
-    return obj.rep.start_day + math.floor(obj.env.now / 24) % 7
+    return (obj.rep.start_day + math.floor(obj.env.now / 24) % 7) % 7
+
 
 #def simpy_to_time(simpy_time):
 # """converts simpy time to a datetime time"""
@@ -216,9 +218,10 @@ def set_behaviour(digital, input_data, behaviour, rnd):
 def set_household_response_time(rep, input_data, sim_hours):
 
     # returns a day of response from a beta dist - the final dist that will be used is still to be determined.
-    raw_response_time = (rep.rnd.betavariate(input_data['response_day'][0],
-                                             input_data['response_day'][1]))*sim_hours
-    response_day = math.ceil(raw_response_time/24)
+    #raw_response_time = (rep.rnd.betavariate(input_data['response_day'][0],
+    #                                         input_data['response_day'][1]))*sim_hours
+    #response_day = math.ceil(raw_response_time/24)
+    response_day = adjust_resp.sample_day(rep)
 
     # returns the time of day the response is received - again final number and type of dists to use to be determined.
     if response_day == rep.census_day:

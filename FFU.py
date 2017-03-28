@@ -362,7 +362,7 @@ class CensusOfficer(object):
     def working(self):
         """returns true or false depending on whether or not a CO is available at current date and time"""
 
-        day_of_week = self.rep.start_day + math.floor(self.env.now / 24) % 7
+        day_of_week = h.current_day(self)
 
         if self.start_sim_time <= self.env.now < self.end_sim_time and \
                 self.input_data['availability'][str(day_of_week)]:

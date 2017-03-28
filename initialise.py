@@ -6,6 +6,7 @@ import simpy
 import sys
 from collections import defaultdict
 import output_options as oo
+import adjust_resp
 
 
 class Rep(object):
@@ -47,6 +48,7 @@ class Rep(object):
         # create common resources
         # self.create_advisers(self.input_data['advisers'], "")  # Call centre
         self.adviser_types = defaultdict(dict)
+        self.response_tuple = adjust_resp.response_profiles()  # generates action profiles to be used
         if self.total_ad_instances > 0:
             self.create_advisers()
             self.add_to_store()

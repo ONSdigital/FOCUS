@@ -25,6 +25,7 @@ def start_run(run_input, seeds, out_path):
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
     sim_hours = (end_date - start_date).total_seconds()/3600
+    print(sim_hours)
     census_date = dt.date(*map(int, run_input['census_date'].split(',')))
     census_day = ((census_date - start_date).total_seconds()/86400)
 
@@ -70,7 +71,7 @@ def produce_default_output(geog='LA'):
 
         try:
             # produce cumulative summary of overall returns
-            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1440, 24, geog)
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24, geog)
             hh_count.index = cumulative_returns.index
             returns_summary = cumulative_returns.div(hh_count, axis='index')
             returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
@@ -135,7 +136,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_all_div20.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
