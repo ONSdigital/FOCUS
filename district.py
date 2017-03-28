@@ -177,7 +177,7 @@ class District(object):
                         # don't need an instance of a household just directly record a response/return at correct time
 
                         self.rep.total_responses += 1
-                        if oo.record_response_times:
+                        if oo.record_responded:
                             self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
                                                                                        self.name,
                                                                                        hh_geog.la,

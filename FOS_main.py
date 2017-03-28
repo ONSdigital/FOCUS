@@ -70,7 +70,7 @@ def produce_default_output(geog='LA'):
 
         try:
             # produce cumulative summary of overall returns
-            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][current_run], 0, 1440, 24, geog)
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1440, 24, geog)
             hh_count.index = cumulative_returns.index
             returns_summary = cumulative_returns.div(hh_count, axis='index')
             returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
@@ -121,7 +121,7 @@ def produce_default_output(geog='LA'):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
+    produce_default = True
     multiple_processors = False
     freeze_support()
 
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/testing.JSON'
+        file_name = 'inputs/CCA_all_div20.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
