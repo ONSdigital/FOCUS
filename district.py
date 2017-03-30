@@ -222,7 +222,7 @@ class District(object):
                                                letter_data,
                                                letter))
 
-    def initial_action(self, input_data, first_interaction, hh, hh_geog):
+    def initial_action(self, input_data, first_interaction, hh_type, hh_geog):
 
         digital = h.set_preference(input_data['paper_prop'],
                                    self.rnd)
@@ -245,21 +245,22 @@ class District(object):
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
         if response_test <= hh_resp:
             # respond but test when
-            return self.early_responder(input_data, digital, first_interaction, hh, hh_geog)
+            return self.early_responder(input_data, digital, first_interaction, hh_type, hh_geog)
             # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND if not an early responder
 
         elif hh_resp < response_test <= hh_help:
             # call for help return when
-            return self.help(input_data, digital, first_interaction, hh, hh_geog)
+            return self.help(input_data, digital, first_interaction, hh_type, hh_geog)
         else:
             # do nothing return 0 time
-            return self.do_nothing(input_data, digital, first_interaction, hh, hh_geog)
+            return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_geog)
 
-    def early_responder(self, input_data, digital, first_interaction, hh, hh_geog):
+    def early_responder(self, input_data, digital, first_interaction, hh_type, hh_geog):
 
         response_time = h.set_household_response_time(self.rep,
                                                       input_data,
-                                                      self.rep.sim_hours)
+                                                      self.rep.sim_hours,
+                                                      hh_type)
 
         if digital and response_time + input_data['delay']['digital'] <= first_interaction:
 

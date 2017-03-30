@@ -6,7 +6,7 @@ import simpy
 import sys
 from collections import defaultdict
 import output_options as oo
-import adjust_resp
+import response_profiles as rp
 
 
 class Rep(object):
@@ -45,10 +45,12 @@ class Rep(object):
         if self.total_ad_instances > 0:
             self.adviser_store = simpy.FilterStore(self.env, capacity=self.total_ad_instances)
 
+        # generate profiles to use
+        self.response_df = rp.response_profiles_2011_all(self.census_day)
+
         # create common resources
         # self.create_advisers(self.input_data['advisers'], "")  # Call centre
         self.adviser_types = defaultdict(dict)
-        self.response_tuple = adjust_resp.response_profiles()  # generates action profiles to be used
         if self.total_ad_instances > 0:
             self.create_advisers()
             self.add_to_store()
@@ -81,7 +83,7 @@ class Rep(object):
 
     # add advisers to store
     def add_to_store(self):
-        print(len(self.ad_avail))
+        # print(len(self.ad_avail))
 
         for adviser in self.ad_avail:
             self.adviser_types[adviser.type]['start_time'] = adviser.start_sim_time
@@ -97,8 +99,6 @@ class Rep(object):
         list_of_districts = sorted(list(self.input_data['districts'].keys()))
 
         for distr in list_of_districts:
-
-            print(distr)
 
             # checks size of output file and writes to file if too large
             if (h.dict_size(self.output_data)) >= self.max_output_file_size:
@@ -117,4 +117,4 @@ class Rep(object):
                                                                     warning_detail))
                 co_number = 0
 
-        print("number of CO: ", co_number)
+        # print("number of CO: ", co_number)

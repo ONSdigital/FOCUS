@@ -14,7 +14,6 @@ warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
 hh_geography = namedtuple('hh_geography', ['la', 'lsoa'])
 
-
 record_generic_output = False
 record_do_nothing = False
 record_call = False
