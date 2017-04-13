@@ -82,7 +82,7 @@ class District(object):
         for household in self.households:
             if not household.return_sent:
                 if oo.record_non_response:
-                    self.rep.output_data['Non_response'].append(oo.response_times(self.rep.reps,
+                    self.rep.output_data['Non_response'].append(oo.generic_output(self.rep.reps,
                                                                                   self.name,
                                                                                   household.la,
                                                                                   household.lsoa,
