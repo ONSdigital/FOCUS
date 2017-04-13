@@ -7,6 +7,7 @@ import sys
 from collections import defaultdict
 import output_options as oo
 import response_profiles as rp
+import call_profiles as cp
 
 
 class Rep(object):
@@ -47,6 +48,8 @@ class Rep(object):
 
         # generate profiles to use
         self.response_df = rp.response_profiles_2011_all(self.census_day)
+        self.call_df = cp.call_profiles_2011_all()
+        self.call_day_df = cp.call_profiles_day_2011()
 
         # create common resources
         # self.create_advisers(self.input_data['advisers'], "")  # Call centre

@@ -1,4 +1,4 @@
-"""Module used to store the classes related to census..."""
+"""Module used to store the classes and other code related to any aspect of the census hq operation"""
 
 import output_options as oo
 import helper as h

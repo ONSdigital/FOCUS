@@ -6,6 +6,7 @@ import output_options as oo
 import helper as h
 import math
 import datetime as dt
+import call_profiles as cp
 
 
 class Household(object):
@@ -447,3 +448,4 @@ class Household(object):
             return self.input_data["delay"]["digital"]
         else:
             return self.input_data["delay"]["paper"]
+

@@ -8,6 +8,7 @@ from multiprocessing import Lock
 from sys import getsizeof
 import sys
 import response_profiles
+import call_profiles as cp
 
 l = Lock()  # global declaration...can I avoid this
 
@@ -215,7 +216,7 @@ def set_behaviour(digital, input_data, behaviour, rnd):
         return input_data['behaviours']['alt'][behaviour][min(len_beh - 1)]
 
 
-def set_household_response_time(rep, input_data, sim_hours, hh_type):
+def set_household_response_time(rep, input_data, hh_type):
 
     # returns the day a response is sent based upon specified distribution
     response_day = response_profiles.sample_day_2011_all(rep, hh_type)
@@ -234,6 +235,34 @@ def set_household_response_time(rep, input_data, sim_hours, hh_type):
 
     return final_response_time
 
+
+def set_household_call_time(rep):
+    # returns the day and time a call is made based upon specified distribution
+    call_day = cp.sample_calls_2011_all(rep)
+
+    dow = (rep.start_day + call_day % 7) % 7
+
+    if call_day == rep.census_day:
+
+        day = 'census day'
+
+    elif dow < 6:
+
+        day = 'weekday'
+
+    elif dow == 6:
+
+        day = 'saturday'
+
+    else:
+
+        day = 'sunday'
+
+    day_call_time = cp.sample_calls_day_2011(rep, day)
+
+    final_call_time = ((call_day - 1) * 24) + day_call_time
+
+    return final_call_time
 
 #def check_start_day(rep, input_data, current_date):
 #    # determine if start date has a valid avail sch

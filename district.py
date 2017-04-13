@@ -248,7 +248,7 @@ class District(object):
             return self.early_responder(input_data, digital, first_interaction, hh_type, hh_geog)
             # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND if not an early responder
 
-        elif hh_resp < response_test <= hh_help:
+        elif hh_resp < response_test <= hh_resp + hh_help:
             # call for help return when
             return self.help(input_data, digital, first_interaction, hh_type, hh_geog)
         else:
@@ -259,7 +259,6 @@ class District(object):
 
         response_time = h.set_household_response_time(self.rep,
                                                       input_data,
-                                                      self.rep.sim_hours,
                                                       hh_type)
 
         if digital and response_time + input_data['delay']['digital'] <= first_interaction:
@@ -282,9 +281,12 @@ class District(object):
     def help(self, input_data, digital, first_interaction, hh, hh_geog):
 
         # below uses response time profile - will need to update this to a "call" profile?
-        response_time = h.set_household_response_time(self.rep,
-                                                      input_data,
-                                                      self.rep.sim_hours)
+        response_time = h.set_household_call_time(self.rep)
+
+
+        #response_time = h.set_household_response_time(self.rep,
+        #                                              input_data,
+        #                                              self.rep.sim_hours)
 
         return oo.initial_action('help', digital, response_time)
 
