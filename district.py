@@ -142,7 +142,7 @@ class District(object):
                     self.rep.total_co += 1
 
             except KeyError as e:
-                print("No key called number for CO in district: ", self.name)
+                print("Error when creating CO type", co_type, " in run: ", self.rep.run)
                 sys.exit()
 
     def return_household_geog(self, input_dict):

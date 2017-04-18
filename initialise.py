@@ -81,18 +81,21 @@ class Rep(object):
                                                         adviser_type))
 
             except KeyError:
-                print("Error when creating advisers in run: ", self.run, " replication: ", self.reps)
+                print("Error when creating adviser type", adviser_type, " in run: ", self.run)
                 sys.exit()
 
     # add advisers to store
     def add_to_store(self):
         # print(len(self.ad_avail))
 
+        # add some info about the types of adviser to a dict. Used later to easily determine which types of adviser
+        # are available at passed time
         for adviser in self.ad_avail:
             self.adviser_types[adviser.type]['start_time'] = adviser.start_sim_time
             self.adviser_types[adviser.type]['end_time'] = adviser.end_sim_time
             self.adviser_types[adviser.type]['availability'] = adviser.set_avail_sch
 
+            # add it to the store
             self.adviser_store.put(adviser)
 
     def create_districts(self):
