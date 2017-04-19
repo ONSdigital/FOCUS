@@ -203,7 +203,10 @@ class District(object):
                         self.rep.output_data['hh_record'].append(oo.hh_record(self.name,
                                                                               hh_geog.la,
                                                                               hh_geog.lsoa,
-                                                                              hh_type))
+                                                                              hh_type,
+                                                                              hh_action.type,
+                                                                              hh_action.digital,
+                                                                              hh_action.time))
                     self.rep.total_hh += 1
 
             except KeyError as e:

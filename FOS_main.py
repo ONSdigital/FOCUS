@@ -70,7 +70,8 @@ def produce_default_output(geog='LA'):
 
         try:
             # produce cumulative summary of overall returns
-            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24, geog)
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24,
+                                                             geog)
             hh_count.index = cumulative_returns.index
             returns_summary = cumulative_returns.div(hh_count, axis='index')
             returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
@@ -87,7 +88,8 @@ def produce_default_output(geog='LA'):
         try:
 
             # produce summary of digital returns
-            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24,geog, 'digital')
+            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824,
+                                                                 24, geog, 'digital')
             hh_count.index = cumulative_dig_returns.index
             dig_returns_summary = cumulative_dig_returns.div(hh_count, axis='index')
             dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
@@ -103,7 +105,8 @@ def produce_default_output(geog='LA'):
         try:
 
             # produce summary of paper returns
-            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24, geog, 'paper')
+            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824,
+                                                                 24, geog, 'paper')
             hh_count.index = cumulative_pap_returns.index
             pap_returns_summary = cumulative_pap_returns.div(hh_count, axis='index')
             pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
