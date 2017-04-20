@@ -178,7 +178,7 @@ class District(object):
 
                         self.rep.total_responses += 1
                         if oo.record_responded:
-                            self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
+                            self.rep.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
                                                                                        self.name,
                                                                                        hh_geog.la,
                                                                                        hh_geog.lsoa,
@@ -186,6 +186,7 @@ class District(object):
                                                                                        hh_type,
                                                                                        self.rep.total_hh,
                                                                                        hh_action.time))
+                            # also add to return rec and responded *******
                     else:
                         # create a household instance passing initial state
                         self.households.append(household.Household(self.rep,
@@ -269,13 +270,13 @@ class District(object):
             # add a counter to the district so we know how many hh have responded early
             self.early_responders += 1
 
-            return oo.initial_action('early', digital, response_time + input_data['delay']['digital'])
+            return oo.initial_action('early', digital, response_time)
 
         elif not digital and h.str2bool(input_data['paper_allowed']) \
                 and response_time + input_data['delay']['paper'] <= first_interaction:
 
             self.early_responders += 1
-            return oo.initial_action('early', digital, response_time + input_data['delay']['paper'])
+            return oo.initial_action('early', digital, response_time)
 
         else:
 

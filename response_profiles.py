@@ -4,6 +4,7 @@ profiles to be sampled"""
 import numpy as np
 import pandas as pd
 import os
+import csv
 
 
 def response_profiles_2011_all(census_day):
@@ -25,6 +26,9 @@ def response_profiles_2011_all(census_day):
 
     # convert to a probability distribution
     prob_response = responses_only.divide(responses_only.sum(axis=0), axis=1)
+    prob_response.to_csv('dist_data.csv')
+
+
     # ans now create cumulative probability
     cum_prob_response = prob_response.cumsum(axis=0)
 
@@ -36,7 +40,17 @@ def sample_day_2011_all(rep, hh_type):
 
     rt = rep.response_df[hh_type].as_matrix()
     r = rep.rnd.uniform(0, 1)
-    return np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0] + 1
+    #data = [str(np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0])]
+
+    #with open('sampled_data.csv', 'a') as fp:
+    #    writer = csv.writer(fp)
+    #    writer.writerow(data)
+
+        #fp.write(data)
+
+    #    fp.close()
+
+    return np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0]
 
 
 def day_profiles_2011():

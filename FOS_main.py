@@ -58,7 +58,7 @@ def produce_default_output(geog='LA'):
     # this simply produces some default processed data showing response rates over time
 
     # select data to read into data frame structure
-    pandas_data = post_process.csv_to_pandas(output_path, ['Responded', 'hh_record'])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record'])
 
     # gets list if runs - uses hh_record as will always contain all the runs
     runs = sorted(list(pandas_data['hh_record'].keys()))
@@ -70,7 +70,7 @@ def produce_default_output(geog='LA'):
 
         try:
             # produce cumulative summary of overall returns
-            cumulative_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824, 24,
+            cumulative_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824, 24,
                                                              geog)
             hh_count.index = cumulative_returns.index
             returns_summary = cumulative_returns.div(hh_count, axis='index')
@@ -88,7 +88,7 @@ def produce_default_output(geog='LA'):
         try:
 
             # produce summary of digital returns
-            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824,
+            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824,
                                                                  24, geog, 'digital')
             hh_count.index = cumulative_dig_returns.index
             dig_returns_summary = cumulative_dig_returns.div(hh_count, axis='index')
@@ -105,7 +105,7 @@ def produce_default_output(geog='LA'):
         try:
 
             # produce summary of paper returns
-            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Responded'][str(current_run)], 0, 1824,
+            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824,
                                                                  24, geog, 'paper')
             hh_count.index = cumulative_pap_returns.index
             pap_returns_summary = cumulative_pap_returns.div(hh_count, axis='index')
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_small.JSON'
+        file_name = 'inputs/CCA_smaller.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)

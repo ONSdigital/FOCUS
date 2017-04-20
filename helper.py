@@ -233,6 +233,13 @@ def set_household_response_time(rep, input_data, hh_type):
 
     final_response_time = ((response_day-1)*24) + day_response_time
 
+    with open('sampled_data.csv', 'a') as fp:
+        writer = csv.writer(fp)
+        writer.writerow([final_response_time])
+
+
+        fp.close()
+
     return final_response_time
 
 
