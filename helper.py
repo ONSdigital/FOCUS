@@ -216,10 +216,10 @@ def set_behaviour(digital, input_data, behaviour, rnd):
         return input_data['behaviours']['alt'][behaviour][min(len_beh - 1)]
 
 
-def set_household_response_time(rep, input_data, hh_type):
+def set_household_response_time(rep, input_data, hh_type, digital):
 
     # returns the day a response is sent based upon specified distribution
-    response_day = response_profiles.sample_day_2011_all(rep, hh_type)
+    response_day = response_profiles.sample_day_2011_all(rep, hh_type, digital)
 
     # returns the time of day the response is received - again final number and type of dists to use to be determined.
     if response_day == rep.census_day:
@@ -231,7 +231,7 @@ def set_household_response_time(rep, input_data, hh_type):
         day_response_time = rep.rnd.gauss(input_data['response_time']['other'][0],
                                           input_data['response_time']['other'][1])
 
-    final_response_time = ((response_day-1)*24) + day_response_time
+    final_response_time = (response_day*24) + day_response_time
 
     with open('sampled_data.csv', 'a') as fp:
         writer = csv.writer(fp)

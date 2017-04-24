@@ -36,19 +36,14 @@ def response_profiles_2011_all(census_day):
     return cum_prob_response
 
 
-def sample_day_2011_all(rep, hh_type):
+def sample_day_2011_all(rep, hh_type, digital):
 
     rt = rep.response_df[hh_type].as_matrix()
+    # if paper then shift the return sent to be earlier to account for postage
+    #if not digital:
+    #    rt = rt[2:]
+
     r = rep.rnd.uniform(0, 1)
-    #data = [str(np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0])]
-
-    #with open('sampled_data.csv', 'a') as fp:
-    #    writer = csv.writer(fp)
-    #    writer.writerow(data)
-
-        #fp.write(data)
-
-    #    fp.close()
 
     return np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0]
 
