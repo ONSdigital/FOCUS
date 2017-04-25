@@ -4,7 +4,6 @@ profiles to be sampled"""
 import numpy as np
 import pandas as pd
 import os
-import csv
 
 
 def response_profiles_2011_all(census_day):
@@ -29,31 +28,20 @@ def response_profiles_2011_all(census_day):
     prob_response.to_csv('dist_data.csv')
 
 
-    # ans now create cumulative probability
+    # create cumulative probability
     cum_prob_response = prob_response.cumsum(axis=0)
 
     # return a dataframe of the cumulative probability of response
     return cum_prob_response
 
 
-def sample_day_2011_all(rep, hh_type, digital):
+def sample_day_2011_all(rep, hh_type):
 
     rt = rep.response_df[hh_type].as_matrix()
-    # if paper then shift the return sent to be earlier to account for postage
-    #if not digital:
-    #    rt = rt[2:]
-
     r = rep.rnd.uniform(0, 1)
 
     return np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0]
 
 
-def day_profiles_2011():
-    # create profiles for each day of week and a special case for census day
-    pass
 
-
-def sample_time_2011(rep):
-    # add to allow sampling of a time for each dow and census day
-    pass
 

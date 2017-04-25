@@ -58,7 +58,7 @@
                         "end_date": "2011, 5, 23",
                         "has_postcard": 0,
                         "has_pq": 48,
-                        "number": 16,
+                        "number": 20,
                         "start_date": "2011, 4, 4",
                         "travel_speed": 5,
                         "visit_times": {
@@ -862,10 +862,10 @@
                 },
                 "letter_phases": {
                 },
-                "paper_trigger": 80,
+                "paper_trigger": 90,
                 "postal_delay": 24,
                 "posting_time": 48,
-                "trigger": 90
+                "trigger": 94
             }
         },
         "end_date": "2011, 5, 21",

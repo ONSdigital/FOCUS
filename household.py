@@ -28,13 +28,11 @@ class Household(object):
         self.initial_status = initial_action.type
         self.digital = initial_action.digital
         self.initial_time = initial_action.time
-
         self.priority = self.input_data['priority']
         self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])
         self.paper_on_request = h.str2bool(self.input_data['paper_on_request'])
 
         # flags to keep track of what the hh is doing/has done
-
         if self.initial_time > 0 and (self.initial_status == 'early' or self.initial_status == 'late'):
             self.resp_planned = True
         else:
@@ -410,7 +408,12 @@ class Household(object):
                                                                                             self.env.now,
                                                                                             reminder_type))
 
-            yield self.env.process(self.household_returns(self.calc_delay()))
+            # change to a start delayed at appropriate time depending on day....
+            delay = h.get_time_of_return(self.env.now, self.rep)
+            # yield self.env.process(self.household_returns(self.calc_delay()))
+            start_delayed(self.env, self.household_returns(self.calc_delay()), delay)
+            yield self.env.timeout(0)
+
         elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
             # call for help...needs to be based on appropriate distribution...not a hardcoded uniform function!
             # also may not do this if intend to respond?

@@ -9,6 +9,7 @@ from sys import getsizeof
 import sys
 import response_profiles
 import call_profiles as cp
+import numpy as np
 
 l = Lock()  # global declaration...can I avoid this
 
@@ -219,7 +220,7 @@ def set_behaviour(digital, input_data, behaviour, rnd):
 def set_household_response_time(rep, input_data, hh_type, digital):
 
     # returns the day a response is sent based upon specified distribution
-    response_day = response_profiles.sample_day_2011_all(rep, hh_type, digital)
+    response_day = response_profiles.sample_day_2011_all(rep, hh_type)
 
     # returns the time of day the response is received - again final number and type of dists to use to be determined.
     if response_day == rep.census_day:
@@ -331,4 +332,33 @@ def get_event_time(event):
 
     return date_sim + time
 
+
+def get_time_of_return(input_time, rep):
+    # temp function to used to select a time of day for returns after reminders
+    # assumes delivery at 9
+
+    input_day = math.floor(input_time / 24)
+    dow = (rep.start_day + input_day % 7) % 7
+
+    if input_day == rep.census_day:
+
+        day = 'census day'
+
+    elif dow < 6:
+
+        day = 'weekday'
+
+    elif dow == 6:
+
+        day = 'saturday'
+
+    else:
+
+        day = 'sunday'
+
+    rt = rep.call_day_df[day].as_matrix()
+    rt = rt[18:]
+    r = rep.rnd.uniform(0, 1)
+    time = (np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0])/2 + rep.rnd.uniform(0, 0.5)
+    return time
 

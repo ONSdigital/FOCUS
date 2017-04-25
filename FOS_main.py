@@ -55,7 +55,7 @@ def start_run(run_input, seeds, out_path):
 
 
 def produce_default_output(geog='LA'):
-    # this simply produces some default processed data showing response rates over time
+    # this produces some default processed data showing response rates over time
 
     # select data to read into data frame structure
     pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record'])

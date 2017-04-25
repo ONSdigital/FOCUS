@@ -56,6 +56,8 @@ def sample_calls_2011_all(rep):
 
 
 def sample_calls_day_2011(rep, day_type):
+    # samples call profile. As will always find lower bound add between 0 and 0.5 to get time
+    # assumes calls relieved uniformly over each 30 minute period
 
     rt = rep.call_day_df[day_type].as_matrix()
     r = rep.rnd.uniform(0, 1)

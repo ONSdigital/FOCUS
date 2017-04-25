@@ -261,26 +261,28 @@ class District(object):
 
         # set values to use
         hh_resp = input_data['behaviours'][behaviour]['response']
-        # if call centre not in sim set to zero?
+        # if call centre not in sim set call probability to zero even if input says otherwise
         if self.rep.total_ad_instances > 0:
             hh_help = input_data['behaviours'][behaviour]['help']
         else:
             hh_help = 0
 
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
+
         if response_test <= hh_resp:
             # respond but test when
             return self.early_responder(input_data, digital, first_interaction, hh_type, hh_geog)
-            # NEED TO SET OR PASS THAT THE HH PLANS TO RESPOND if not an early responder
 
         elif hh_resp < response_test <= hh_resp + hh_help:
             # call for help return when
             return self.help(input_data, digital, first_interaction, hh_type, hh_geog)
         else:
             # do nothing return 0 time
-            return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_geog)
+            return oo.initial_action('do_nothing', digital, 0)
+            # return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_geog)
 
     def early_responder(self, input_data, digital, first_interaction, hh_type, hh_geog):
+        # returns if the household will respond before any other interactions. "early" if yes "late" otherwise.
 
         response_time = h.set_household_response_time(self.rep,
                                                       input_data,
@@ -309,16 +311,11 @@ class District(object):
         # below uses response time profile - will need to update this to a "call" profile?
         response_time = h.set_household_call_time(self.rep)
 
-
-        #response_time = h.set_household_response_time(self.rep,
-        #                                              input_data,
-        #                                              self.rep.sim_hours)
-
         return oo.initial_action('help', digital, response_time)
 
-    def do_nothing(self, input_data, digital, first_interaction, hh, hh_geog):
+    #def do_nothing(self, input_data, digital, first_interaction, hh, hh_geog):
 
-        return oo.initial_action('do_nothing', digital, 0)
+        #return oo.initial_action('do_nothing', digital, 0)
 
 
 def least_busy_CO(district):

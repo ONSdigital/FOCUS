@@ -152,11 +152,11 @@ class CensusOfficer(object):
             yield self.env.timeout(self.next_available())
             self.env.process(self.co_working_test())
 
-    def household_test(self, household, hh_type):
+    def household_test(self, household, input_type):
         # tests if hh is in or is converted to a return!
 
         test_value = self.rnd.uniform(0, 100)
-        dict_value = household.input_data[hh_type][str(h.current_day(self))]
+        dict_value = household.input_data[input_type][str(h.current_day(self))]
 
         if test_value <= dict_value[h.return_time_key(dict_value, self.env.now)]:
             return True
@@ -250,7 +250,7 @@ class CensusOfficer(object):
         yield self.env.timeout(self.input_data['visit_times']['query']/60)
 
         # if digital or have already responded skip straight to the outcome of the visit
-        if household.digital or household.responded:
+        if household.digital or household.return_sent:
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
         # if not digital try to persuade them to complete online.
@@ -306,7 +306,7 @@ class CensusOfficer(object):
 
         household_returns = self.household_test(household, "conversion_rate")
 
-        if not household.responded and household_returns:
+        if not household.return_sent and household_returns:
             # hh have not responded yet and respond there and then either by paper or digital.
             if oo.record_visit_success:
                 self.rep.output_data['Visit_success'].append(oo.generic_output(self.rep.reps,
@@ -322,7 +322,7 @@ class CensusOfficer(object):
             visit_time = self.input_data["visit_times"]["success"]
             yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
 
-        elif (not household.responded and not household_returns and
+        elif (not household.return_sent and not household_returns and
               h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
               household.visits == household.input_data['max_visits'] and
               h.str2bool(household.input_data['paper_after_max_visits'])):
@@ -344,7 +344,7 @@ class CensusOfficer(object):
             visit_time = self.input_data["visit_times"]["failed"]
             yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
 
-        elif not household.responded and not household_returns:
+        elif not household.return_sent and not household_returns:
             # failed but no max visits so do no more
             if oo.record_visit_failed:
                 self.rep.output_data['Visit_failed'].append(oo.generic_output(self.rep.reps,
