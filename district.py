@@ -221,7 +221,8 @@ class District(object):
                                                                    hh_geog.la,
                                                                    hh_geog.lsoa))
 
-                    if self.rep.reps == 1:
+                    # if self.rep.reps == 1:
+                    if self.rep.reps > 0:
                         self.rep.output_data['hh_record'].append(oo.hh_record(self.name,
                                                                               hh_geog.la,
                                                                               hh_geog.lsoa,

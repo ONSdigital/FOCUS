@@ -5,7 +5,11 @@ import glob
 import csv
 import numpy as np
 from collections import defaultdict
+import datetime as dt
 from operator import itemgetter
+import matplotlib.pyplot as plt
+
+
 
 
 def user_journey_single():
@@ -161,15 +165,69 @@ def add_hh_count(data_lists):
     return hh_count
 
 
-def bin_data():
+def add_days(input_date, add_days):
 
+    return input_date + dt.timedelta(days=add_days)
+
+
+def bin_hh_record():
+    """function that takes output files and produces binned data ready for plotting"""
+    start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
     output_path = os.path.join(os.getcwd(), 'outputs')
     input_data_dict = csv_to_pandas(output_path, ['hh_record'])
 
+    # select df needed - could use a loop to process multiple runs if needed
+    df = input_data_dict['hh_record']['1']
 
-bin_data()
+    # apply some filters before binning
+    # in this cas filter out the do nothings
+
+    df = df.drop(df[(df.action == 'do_nothing') | (df.action == 'help')].index)
+
+    bins = np.arange(0, 1872, 24).tolist()
+    # set group names to be the dates
+    group_names = []
+    days = len(bins)
+
+    for i in range(0, days-1):
+        group_names.append(add_days(start_date, i))
+
+    df['categories'] = pd.cut(df['action_time'], bins, labels=group_names)
+    counts = pd.value_counts(df['categories'])
+
+    return counts
 
 
+def bin_other():
+    """function that takes output files and produces binned data ready for plotting"""
+    start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
+    output_path = os.path.join(os.getcwd(), 'outputs')
+    input_data_dict = csv_to_pandas(output_path, ['Return_sent'])
+
+    # select df needed - could use a loop to process multiple runs if needed
+    df = input_data_dict['Return_sent']['1']
+    bins = np.arange(0, 1872, 24).tolist()
+    # set group names to be the dates
+    group_names = []
+    days = len(bins)
+
+    for i in range(0, days-1):
+        group_names.append(add_days(start_date, i))
+
+    df['categories'] = pd.cut(df['time'], bins, labels=group_names)
+    counts = pd.value_counts(df['categories'])
+
+    return counts
+
+passive = bin_hh_record()
+actual = bin_other()
+
+combined = pd.concat([passive, actual], axis=1)
+combined.reset_index(level=0, inplace=True)
+combined.columns = ['date', 'passive', 'actual']
+
+combined.plot(title='Title Here')
+combined.show()
 
 
 
