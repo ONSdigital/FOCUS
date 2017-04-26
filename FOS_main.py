@@ -139,6 +139,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         file_name = 'inputs/2017-04-24 14.58.49.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)

@@ -161,7 +161,13 @@ def add_hh_count(data_lists):
     return hh_count
 
 
+def bin_data():
 
+    output_path = os.path.join(os.getcwd(), 'outputs')
+    input_data_dict = csv_to_pandas(output_path, ['hh_record'])
+
+
+bin_data()
 
 
 
