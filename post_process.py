@@ -6,8 +6,8 @@ import csv
 import numpy as np
 from collections import defaultdict
 import datetime as dt
-from operator import itemgetter
 import matplotlib.pyplot as plt
+import math
 
 
 
@@ -169,7 +169,6 @@ def add_days(input_date, add_days):
 
     return input_date + dt.timedelta(days=add_days)
 
-
 def bin_hh_record():
     """function that takes output files and produces binned data ready for plotting"""
     start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
@@ -180,7 +179,7 @@ def bin_hh_record():
     df = input_data_dict['hh_record']['1']
 
     # apply some filters before binning
-    # in this cas filter out the do nothings
+    # in this case filter out the do nothings and help
 
     df = df.drop(df[(df.action == 'do_nothing') | (df.action == 'help')].index)
 
@@ -225,9 +224,46 @@ actual = bin_other()
 combined = pd.concat([passive, actual], axis=1)
 combined.reset_index(level=0, inplace=True)
 combined.columns = ['date', 'passive', 'actual']
+combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')
 
-combined.plot(title='Title Here')
-combined.show()
+
+
+# matplotlib method
+#combined.plot(title='Title Here', x=combined['date'], rot=90)
+#plt.show()
+
+from bokeh.plotting import ColumnDataSource, figure
+from bokeh.io import output_file, show
+from bokeh.models import DatetimeTickFormatter
+from bokeh.models import HoverTool
+
+source = ColumnDataSource(combined)
+
+#source.add(combined['date'].apply(lambda d: d.strftime('%Y-%m-%d')), 'event_date_formatted')
+
+TOOLS = 'box_zoom,box_select,crosshair,resize,reset'
+
+# Add circle glyphs to the figure p
+p = figure(x_axis_label='date', y_axis_label='count', width=1200, height=400, tools=TOOLS)
+p.line(x='date', y='passive', source=source, color='red')
+p.line(x='date', y='actual', source=source, color='green')
+
+hover = HoverTool(tooltips=
+                  [('passive', '@passive'),
+                   ('actual', '@actual'),
+                   ('date', '@date_formatted')
+                   ]
+                  , mode='vline')
+
+p.add_tools(hover)
+p.xaxis.formatter = DatetimeTickFormatter(
+    days=["%d %b %y"]
+)
+p.xaxis.major_label_orientation = math.pi/4
+
+# Specify the name of the output file and show the result
+output_file('sprint.html')
+show(p)
 
 
 
