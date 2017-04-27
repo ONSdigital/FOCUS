@@ -6,12 +6,10 @@ import csv
 import numpy as np
 from collections import defaultdict
 import datetime as dt
-import matplotlib.pyplot as plt
 import math
 from bokeh.plotting import ColumnDataSource, figure
-from bokeh.io import output_file, show
-from bokeh.models import DatetimeTickFormatter
-from bokeh.models import HoverTool
+from bokeh.io import output_file, save
+from bokeh.models import DatetimeTickFormatter, HoverTool
 
 
 def user_journey_single():
@@ -172,19 +170,15 @@ def add_days(input_date, add_days):
     return input_date + dt.timedelta(days=add_days)
 
 
-def bin_hh_record():
+def bin_records(input_df, filter = []):
     """function that takes output files and produces binned data ready for plotting"""
     start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
-    output_path = os.path.join(os.getcwd(), 'outputs')
-    input_data_dict = csv_to_pandas(output_path, ['hh_record'])
-
-    # select df needed - could use a loop to process multiple runs if needed
-    df = input_data_dict['hh_record']['1']
 
     # apply some filters before binning
-    # in this case filter out the do nothings and help
-
-    df = df.drop(df[(df.action == 'do_nothing') | (df.action == 'help')].index)
+    # in this case filter out the do nothings and help as they are not returns
+    if filter:
+        for item in filter:
+            input_df = input_df.drop(input_df[(input_df.action == item)].index)
 
     bins = np.arange(0, 1872, 24).tolist()
     # set group names to be the dates
@@ -194,93 +188,105 @@ def bin_hh_record():
     for i in range(0, days-1):
         group_names.append(add_days(start_date, i))
 
-    df['categories'] = pd.cut(df['action_time'], bins, labels=group_names)
-    counts = pd.value_counts(df['categories'])
-
-    return counts
-
-
-def bin_other():
-    """function that takes output files and produces binned data ready for plotting"""
-    start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
-    output_path = os.path.join(os.getcwd(), 'outputs')
-    input_data_dict = csv_to_pandas(output_path, ['Return_sent'])
-
-    # select df needed - could use a loop to process multiple runs if needed
-    df = input_data_dict['Return_sent']['1']
-    bins = np.arange(0, 1872, 24).tolist()
-    # set group names to be the dates
-    group_names = []
-    days = len(bins)
-
-    for i in range(0, days-1):
-        group_names.append(add_days(start_date, i))
-
-    df['categories'] = pd.cut(df['time'], bins, labels=group_names)
-    counts = pd.value_counts(df['categories'])
+    input_df['categories'] = pd.cut(input_df['time'], bins, labels=group_names)
+    counts = pd.value_counts(input_df['categories'])
 
     return counts
 
 
 def roundup(x):
-    return int(math.ceil(x / 1000.0)) * 1000
-
-passive = bin_hh_record()
-actual = bin_other()
-
-combined = pd.concat([passive, actual], axis=1)
-combined.reset_index(level=0, inplace=True)
-combined.columns = ['date', 'passive', 'actual']
-combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')#
-max_y = roundup(combined['actual'].max())
+    if x < 10:
+        return int(math.ceil(x / 10.0)) * 10
+    elif x < 100:
+        return int(math.ceil(x / 100.0)) * 100
+    elif x < 1000:
+        return int(math.ceil(x / 1000.0)) * 1000
+    else:
+        return int(math.ceil(x / 10000.0)) * 10000
 
 
-FU_start = [['2011-04-04','2011-04-04'], [0, max_y]]
+def combined_chart(input1, input2, filename):
+
+    combined = pd.concat([input1, input2], axis=1)
+    combined.reset_index(level=0, inplace=True)
+    combined.columns = ['date', 'passive', 'actual']
+    combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')
+    max_y = roundup(combined['actual'].max())
+
+    source = ColumnDataSource(combined)
+
+    tools = 'box_zoom,' \
+            'crosshair,' \
+            'resize,' \
+            'reset,' \
+            'pan,' \
+            'wheel_zoom,' \
+            'save'
+
+    # Add circle glyphs to the figure p
+    p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=tools)
+    p.line(x='date', y='passive', source=source, color='green', legend='Passive')
+    p.line(x='date', y='actual', source=source, color='blue', legend='Actual')
+
+    fu_date = dt.datetime.strptime('2011-04-01', '%Y-%m-%d').date()
+    p.line([fu_date, fu_date], [0, max_y], color='red')
+
+    hover = HoverTool(tooltips=
+                      [('Passive', '@passive'),
+                       ('Actual', '@actual'),
+                       ('Date', '@date_formatted')
+                       ])
+
+    p.add_tools(hover)
+
+    # do some formatting
+    p.xaxis.formatter = DatetimeTickFormatter(
+        days=["%d %b %y"]
+    )
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.xaxis.axis_label_text_font_size = '12pt'
+    p.xaxis.major_label_text_font_size = '12pt'
+
+    p.yaxis.axis_label_text_font_size = '12pt'
+    p.yaxis.major_label_text_font_size = '12pt'
+
+    p.legend.label_text_font_size = '12pt'
+    p.title.text = 'Effect of interventions on returns'
+
+    # Specify the name of the output file and show the result
+    output_file(filename)
+    save(p)
 
 
-source = ColumnDataSource(combined)
+# for given level of geog to use
+def produce_return_charts(geog='E&W', input_list=['hh_record', 'Return_sent']):
+    """default is to produce the difference between the passive and the active. ie, the self
+    response and response with interventions"""
 
-TOOLS = 'box_zoom,' \
-        'crosshair,' \
-        'resize,' \
-        'reset,' \
-        'pan,' \
-        'wheel_zoom,' \
-        'save'
+    output_path = os.path.join(os.getcwd(), 'outputs')
+    input_data_dict = csv_to_pandas(output_path, input_list)
 
-# Add circle glyphs to the figure p
-p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=TOOLS)
-p.line(x='date', y='passive', source=source, color='green', legend='Passive')
-p.line(x='date', y='actual', source=source, color='blue', legend='Actual')
+    df1 = input_data_dict[input_list[0]]['1']
+    df2 = input_data_dict[input_list[1]]['1']
 
-FU_date = dt.datetime.strptime('2011-04-01', '%Y-%m-%d').date()
-p.line([FU_date, FU_date], [0, 6000], color='red')
+    if geog == 'E&W':
+        # just use the whole df
 
+        passive = bin_hh_record(df1)
+        actual = bin_other(df2)
+        combined_chart(passive, actual)
 
-hover = HoverTool(tooltips=
-                  [('Passive', '@passive'),
-                   ('Actual', '@actual'),
-                   ('Date', '@date_formatted')
-                   ])
+    else:
+        # produce for each area
 
-p.add_tools(hover)
-p.xaxis.formatter = DatetimeTickFormatter(
-    days=["%d %b %y"]
-)
-p.xaxis.major_label_orientation = math.pi/4
-p.xaxis.axis_label_text_font_size = '12pt'
-p.xaxis.major_label_text_font_size = '12pt'
-
-p.yaxis.axis_label_text_font_size = '12pt'
-p.yaxis.major_label_text_font_size = '12pt'
-
-p.legend.label_text_font_size = '12pt'
-p.title.text = 'Effect of interventions on returns'
+        for district in df1[geog].unique():
+            filename = district + '_returns.html'
+            # extract just the current LA from the df and pass that to the functions
+            df1_temp = df1[df1[geog] == district].copy()
+            df2_temp = df2[df2[geog] == district].copy()
+            passive = bin_records(df1_temp, ['do_nothing', 'help'])
+            actual = bin_records(df2_temp)
+            combined_chart(passive, actual, filename)
 
 
-# Specify the name of the output file and show the result
-output_file('sprint.html')
-show(p)
-
-
-
+produce_return_charts('LA')
