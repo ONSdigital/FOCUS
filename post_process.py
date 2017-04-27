@@ -8,8 +8,10 @@ from collections import defaultdict
 import datetime as dt
 import matplotlib.pyplot as plt
 import math
-
-
+from bokeh.plotting import ColumnDataSource, figure
+from bokeh.io import output_file, show
+from bokeh.models import DatetimeTickFormatter
+from bokeh.models import HoverTool
 
 
 def user_journey_single():
@@ -169,6 +171,7 @@ def add_days(input_date, add_days):
 
     return input_date + dt.timedelta(days=add_days)
 
+
 def bin_hh_record():
     """function that takes output files and produces binned data ready for plotting"""
     start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
@@ -218,48 +221,62 @@ def bin_other():
 
     return counts
 
+
+def roundup(x):
+    return int(math.ceil(x / 1000.0)) * 1000
+
 passive = bin_hh_record()
 actual = bin_other()
 
 combined = pd.concat([passive, actual], axis=1)
 combined.reset_index(level=0, inplace=True)
 combined.columns = ['date', 'passive', 'actual']
-combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')
+combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')#
+max_y = roundup(combined['actual'].max())
 
 
+FU_start = [['2011-04-04','2011-04-04'], [0, max_y]]
 
-# matplotlib method
-#combined.plot(title='Title Here', x=combined['date'], rot=90)
-#plt.show()
-
-from bokeh.plotting import ColumnDataSource, figure
-from bokeh.io import output_file, show
-from bokeh.models import DatetimeTickFormatter
-from bokeh.models import HoverTool
 
 source = ColumnDataSource(combined)
 
-#source.add(combined['date'].apply(lambda d: d.strftime('%Y-%m-%d')), 'event_date_formatted')
-
-TOOLS = 'box_zoom,box_select,crosshair,resize,reset'
+TOOLS = 'box_zoom,' \
+        'crosshair,' \
+        'resize,' \
+        'reset,' \
+        'pan,' \
+        'wheel_zoom,' \
+        'save'
 
 # Add circle glyphs to the figure p
-p = figure(x_axis_label='date', y_axis_label='count', width=1200, height=400, tools=TOOLS)
-p.line(x='date', y='passive', source=source, color='red')
-p.line(x='date', y='actual', source=source, color='green')
+p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=TOOLS)
+p.line(x='date', y='passive', source=source, color='green', legend='Passive')
+p.line(x='date', y='actual', source=source, color='blue', legend='Actual')
+
+FU_date = dt.datetime.strptime('2011-04-01', '%Y-%m-%d').date()
+p.line([FU_date, FU_date], [0, 6000], color='red')
+
 
 hover = HoverTool(tooltips=
-                  [('passive', '@passive'),
-                   ('actual', '@actual'),
-                   ('date', '@date_formatted')
-                   ]
-                  , mode='vline')
+                  [('Passive', '@passive'),
+                   ('Actual', '@actual'),
+                   ('Date', '@date_formatted')
+                   ])
 
 p.add_tools(hover)
 p.xaxis.formatter = DatetimeTickFormatter(
     days=["%d %b %y"]
 )
 p.xaxis.major_label_orientation = math.pi/4
+p.xaxis.axis_label_text_font_size = '12pt'
+p.xaxis.major_label_text_font_size = '12pt'
+
+p.yaxis.axis_label_text_font_size = '12pt'
+p.yaxis.major_label_text_font_size = '12pt'
+
+p.legend.label_text_font_size = '12pt'
+p.title.text = 'Effect of interventions on returns'
+
 
 # Specify the name of the output file and show the result
 output_file('sprint.html')
