@@ -195,14 +195,8 @@ def bin_records(input_df, filter = []):
 
 
 def roundup(x):
-    if x < 10:
-        return int(math.ceil(x / 10.0)) * 10
-    elif x < 100:
-        return int(math.ceil(x / 100.0)) * 100
-    elif x < 1000:
-        return int(math.ceil(x / 1000.0)) * 1000
-    else:
-        return int(math.ceil(x / 10000.0)) * 10000
+
+    return int(math.ceil(x / 100.0)) * 100
 
 
 def combined_chart(input1, input2, filename):
@@ -259,22 +253,22 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(geog='E&W', input_list=['hh_record', 'Return_sent']):
+def produce_return_charts(df1, df2, geog='E&W'):
     """default is to produce the difference between the passive and the active. ie, the self
     response and response with interventions"""
 
-    output_path = os.path.join(os.getcwd(), 'outputs')
-    input_data_dict = csv_to_pandas(output_path, input_list)
+    #output_path = os.path.join(os.getcwd(), 'outputs')
+    #input_data_dict = csv_to_pandas(output_path, input_list)
 
-    df1 = input_data_dict[input_list[0]]['1']
-    df2 = input_data_dict[input_list[1]]['1']
+    #df1 = input_data_dict[input_list[0]]['1']
+    #df2 = input_data_dict[input_list[1]]['1']
 
     if geog == 'E&W':
         # just use the whole df
 
-        passive = bin_hh_record(df1)
-        actual = bin_other(df2)
-        combined_chart(passive, actual)
+        passive = bin_records(df1, ['do_nothing', 'help'])
+        actual = bin_records(df2)
+        combined_chart(passive, actual, 'overall.html')
 
     else:
         # produce for each area
@@ -289,4 +283,7 @@ def produce_return_charts(geog='E&W', input_list=['hh_record', 'Return_sent']):
             combined_chart(passive, actual, filename)
 
 
-produce_return_charts('LA')
+def waterfall_chart():
+    """stub for addition of waterfall chart summerising response rates from LSOAs. Includes comparison of
+    passive and active stances or different strategies"""
+    pass

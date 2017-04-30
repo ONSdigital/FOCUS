@@ -120,6 +120,11 @@ def produce_default_output(geog='LA'):
         except ValueError as e:
             print(e, " in run: ", current_run)
 
+    df1 = pandas_data['hh_record']['1']
+    df2 = pandas_data['Return_sent']['1']
+
+    post_process.produce_return_charts(df1, df2, geog='hh_type')
+
 
 if __name__ == '__main__':
 
@@ -138,8 +143,8 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/2017-04-24 14.58.49.JSON'
-        file_name = 'inputs/CCA_small.JSON'
+        #file_name = 'inputs/2017-04-24 14.58.49.JSON'
+        file_name = 'inputs/CCA_smaller.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
