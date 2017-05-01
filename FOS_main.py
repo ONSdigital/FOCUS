@@ -120,6 +120,7 @@ def produce_default_output(geog='LA'):
         except ValueError as e:
             print(e, " in run: ", current_run)
 
+    # do we always want to select this dataframe???
     df1 = pandas_data['hh_record']['1']
     df2 = pandas_data['Return_sent']['1']
 
@@ -144,7 +145,7 @@ if __name__ == '__main__':
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
         #file_name = 'inputs/2017-04-24 14.58.49.JSON'
-        file_name = 'inputs/CCA_smaller.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
