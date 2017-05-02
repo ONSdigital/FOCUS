@@ -120,11 +120,11 @@ def produce_default_output(geog='LA'):
         except ValueError as e:
             print(e, " in run: ", current_run)
 
-    # do we always want to select this dataframe???
+    # do we always want to select this dataframe - yes for the default output
     df1 = pandas_data['hh_record']['1']
     df2 = pandas_data['Return_sent']['1']
 
-    post_process.produce_return_charts(df1, df2, geog='hh_type')
+    post_process.produce_return_charts(df1, df2)
 
 
 if __name__ == '__main__':

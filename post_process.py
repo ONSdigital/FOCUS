@@ -10,6 +10,7 @@ import math
 from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
+import matplotlib.pyplot as plt
 
 
 def user_journey_single():
@@ -200,6 +201,7 @@ def roundup(x):
 
 
 def combined_chart(input1, input2, filename):
+    # takes two series and combines to produce a html chart with the filename given
 
     combined = pd.concat([input1, input2], axis=1)
     combined.reset_index(level=0, inplace=True)
@@ -217,7 +219,7 @@ def combined_chart(input1, input2, filename):
             'wheel_zoom,' \
             'save'
 
-    # Add circle glyphs to the figure p
+    # Add lines to the figure p
     p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=tools)
     p.line(x='date', y='passive', source=source, color='green', legend='Passive')
     p.line(x='date', y='actual', source=source, color='blue', legend='Actual')
@@ -245,7 +247,8 @@ def combined_chart(input1, input2, filename):
     p.yaxis.major_label_text_font_size = '12pt'
 
     p.legend.label_text_font_size = '12pt'
-    p.title.text = 'Effect of interventions on returns'
+    title_text = 'Effect of interventions on ' + filename[:-5]
+    p.title.text = title_text
 
     # Specify the name of the output file and show the result
     output_file(filename)
@@ -253,37 +256,120 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(df1, df2, geog='E&W'):
+def produce_return_charts(df1, df2, filter='E&W'):
     """default is to produce the difference between the passive and the active. ie, the self
     response and response with interventions"""
 
-    #output_path = os.path.join(os.getcwd(), 'outputs')
-    #input_data_dict = csv_to_pandas(output_path, input_list)
-
-    #df1 = input_data_dict[input_list[0]]['1']
-    #df2 = input_data_dict[input_list[1]]['1']
-
-    if geog == 'E&W':
+    if filter == 'E&W':
         # just use the whole df
 
         passive = bin_records(df1, ['do_nothing', 'help'])
         actual = bin_records(df2)
-        combined_chart(passive, actual, 'overall.html')
+        combined_chart(passive, actual, 'overall returns.html')
 
     else:
         # produce for each area
 
-        for district in df1[geog].unique():
-            filename = district + '_returns.html'
+        for district in df1[filter].unique():
+            filename = district + ' returns.html'
             # extract just the current LA from the df and pass that to the functions
-            df1_temp = df1[df1[geog] == district].copy()
-            df2_temp = df2[df2[geog] == district].copy()
+            df1_temp = df1[df1[filter] == district].copy()
+            df2_temp = df2[df2[filter] == district].copy()
             passive = bin_records(df1_temp, ['do_nothing', 'help'])
             actual = bin_records(df2_temp)
             combined_chart(passive, actual, filename)
 
 
-def waterfall_chart():
-    """stub for addition of waterfall chart summerising response rates from LSOAs. Includes comparison of
-    passive and active stances or different strategies"""
-    pass
+def active_response(filter='LSOA'):
+    # returns a series object that contains a count of the number of results within set limits
+    output_list = []
+
+    output_path = os.path.join(os.getcwd(), 'outputs')
+    pandas_data = csv_to_pandas(output_path, ['Responded', 'hh_record'])
+
+    df1 = pandas_data['hh_record']['1']  # run 1 all reps if present
+    df2 = pandas_data['Responded']['1']
+
+    for item in df1[filter].unique():
+
+        len_df1 = len(df1[df1[filter] == item].copy())
+        len_df2 = len(df2[df2[filter] == item].copy())
+
+        output_list.append((len_df2/len_df1)*100)
+
+    # now bin the data
+    bins = np.arange(70, 102, 2).tolist()
+    # set group names to be the dates
+
+    output_list = pd.cut(output_list, bins)
+    counts = pd.value_counts(output_list)
+
+    return counts
+
+
+def passive_response(filter='LSOA'):
+    # returns a series object that contains a count of the number of results within set limits
+    output_list = []
+
+    output_path = os.path.join(os.getcwd(), 'outputs')
+    pandas_data = csv_to_pandas(output_path, ['Responded', 'hh_record'])
+
+    df1 = pandas_data['hh_record']['1']  # run 1 all reps if present
+    df2 = pandas_data['hh_record']['1'].copy()
+
+    # drop the do nothings and helps
+    drop_list = ['do_nothing', 'help']
+
+    for item in drop_list:
+        df1 = df1.drop(df1[(df1.action == item)].index)
+
+    for item in df1[filter].unique():
+
+        len_df1 = len(df1[df1[filter] == item].copy())
+        len_df2 = len(df2[df2[filter] == item].copy())
+
+        output_list.append((len_df1/len_df2)*100)
+
+    # now bin the data
+    bins = np.arange(70, 102, 2).tolist()
+    # set group names to be the dates
+
+    output_list = pd.cut(output_list, bins)
+    counts = pd.value_counts(output_list)
+
+    return counts
+
+
+def waterfall():
+    """ produces parallel horizontal bar charts that display the distribution of response rates achieve from two
+     strategies"""
+
+    active_list = active_response()
+    passive_list = passive_response()
+
+    combined_list = pd.concat([active_list, passive_list], axis=1)
+    combined_list.reset_index(level=0, inplace=True)
+    combined_list.columns = ['cat', 'active', 'passive']
+    print(combined_list)
+
+    x1 = combined_list['passive'].tolist()
+    x2 = combined_list['active'].tolist()
+    y = np.arange(70, 100, 2)
+
+    fig, axes = plt.subplots(ncols=2, sharey=True)
+    axes[0].barh(y, x1, align='center', color='green', zorder=10)
+    axes[0].set(title='passive')
+    axes[1].barh(y, x2, align='center', color='blue', zorder=10)
+    axes[1].set(title='active')
+
+    axes[0].invert_xaxis()
+    axes[0].set(yticks=y, yticklabels=y)
+    axes[0].yaxis.tick_right()
+
+    for ax in axes.flat:
+        ax.margins(0.03)
+        ax.grid(True)
+
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0.09)
+    plt.show()
