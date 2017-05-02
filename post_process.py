@@ -282,7 +282,7 @@ def produce_return_charts(df1, df2, filter='E&W'):
             combined_chart(passive, actual, filename)
 
 
-def response_rate(df1, df2, filter_type='LSOA', passive=False):
+def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
     """returns a pandas series object of the number of each filter type in each bin"""
 
     output_list = []
@@ -300,11 +300,12 @@ def response_rate(df1, df2, filter_type='LSOA', passive=False):
 
         output_list.append((len_df1 / len_df2) * 100)
 
-    output_list_max = roundup(max(output_list), 5)
-    output_list_min = roundup(min(output_list), 5) - 5
+    # output_list_max = roundup(max(output_list), 5)
+    # output_list_min = roundup(min(output_list), 5) - 5
 
     # now bin the data
-    bins = np.arange(output_list_min, output_list_max+5, 5).tolist()
+    #bins = np.arange(output_list_min, output_list_max+5, 5).tolist()
+    bins = np.arange(bins[0], bins[1], bins[2])
     # set group names to be the dates
 
     output_list = pd.cut(output_list, bins)
@@ -381,14 +382,12 @@ def passive_response(filter='LSOA'):
     return counts
 
 
-def waterfall(df1, df2):
+def waterfall(df1, df2, bins):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieve from two
      strategies.  Currently hardcoded for passive and active but will update to be more generic..."""
 
-    # active_list = active_response()
-    active_list = response_rate(df1, df2)  # effectively returns the above..
-    #passive_list = passive_response()
-    passive_list = response_rate(df2, df2, passive=True)
+    active_list = response_rate(df1, df2, bins)
+    passive_list = response_rate(df2, df2, bins, passive=True)
 
     combined_list = pd.concat([active_list, passive_list], axis=1)
     combined_list.reset_index(level=0, inplace=True)
@@ -397,18 +396,14 @@ def waterfall(df1, df2):
 
     x1 = combined_list['passive'].tolist()
     x2 = combined_list['active'].tolist()
+    y = np.arange(bins[0], bins[1]-bins[2], bins[2])
 
-    output_list_max = roundup(max(x1, x2), 5)
-    output_list_min = roundup(min(x1, x2), 5) - 5
-
-
-    # need to set this range to match the cats in the data above...
-    y = np.arange(70, 100, 2)
+    width = 3
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
-    axes[0].barh(y, x1, align='center', color='green', zorder=10)
+    axes[0].barh(y, x1, width,  align='center', color='green', zorder=10)
     axes[0].set(title='passive')
-    axes[1].barh(y, x2, align='center', color='blue', zorder=10)
+    axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
     axes[1].set(title='active')
 
     axes[0].invert_xaxis()
@@ -424,8 +419,4 @@ def waterfall(df1, df2):
     plt.show()
 
 
-output_path = os.path.join(os.getcwd(), 'outputs')
-pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
-df2 = pandas_data['hh_record']['1']
-df1 = pandas_data['Responded']['1']
-waterfall(df1, df2)
+

@@ -58,7 +58,7 @@ def produce_default_output(geog='LA'):
     # this produces some default processed data showing response rates over time
 
     # select data to read into data frame structure
-    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record'])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
 
     # gets list if runs - uses hh_record as will always contain all the runs
     runs = sorted(list(pandas_data['hh_record'].keys()))
@@ -120,17 +120,15 @@ def produce_default_output(geog='LA'):
         except ValueError as e:
             print(e, " in run: ", current_run)
 
-    # do we always want to select this dataframe - yes for the default output
+    # do we always want to select this data frame - yes for the default output
     df1 = pandas_data['hh_record']['1']
     df2 = pandas_data['Return_sent']['1']
-
     post_process.produce_return_charts(df1, df2)
 
-    df1 = pandas_data['hh_record']['1']
-    df2 = pandas_data['Responded']['1']
-
-    # set which df to use and get from pandas data
-    post_process.waterfall(df1, df2)
+    # set which df to use for waterfall chart
+    df1 = pandas_data['Responded']['1']
+    df2 = pandas_data['hh_record']['1']
+    post_process.waterfall(df1, df2, bins=[65, 105, 5])
 
 
 if __name__ == '__main__':
@@ -150,9 +148,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        #file_name = 'inputs/2017-04-24 14.58.49.JSON'
         file_name = 'inputs/CCA_small.JSON'
-        #file_name = 'inputs/testing.JSON'
 
         input_path = os.path.join(os.getcwd(), file_name)
 
