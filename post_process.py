@@ -195,9 +195,11 @@ def bin_records(input_df, filter = []):
     return counts
 
 
-def roundup(x):
+def roundup(x, y):
+    # roundup x to the nearest y
+    # e.g. if y is 100 it will roundup to the nearest 100...
 
-    return int(math.ceil(x / 100.0)) * 100
+    return int(math.ceil(x / float(y))) * y
 
 
 def combined_chart(input1, input2, filename):
@@ -207,7 +209,7 @@ def combined_chart(input1, input2, filename):
     combined.reset_index(level=0, inplace=True)
     combined.columns = ['date', 'passive', 'actual']
     combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')
-    max_y = roundup(combined['actual'].max())
+    max_y = roundup(combined['actual'].max(), 100)
 
     source = ColumnDataSource(combined)
 
@@ -280,8 +282,47 @@ def produce_return_charts(df1, df2, filter='E&W'):
             combined_chart(passive, actual, filename)
 
 
+def response_rate(df1, df2, filter_type='LSOA', passive=False):
+    """returns a pandas series object of the number of each filter type in each bin"""
+
+    output_list = []
+
+    if passive:
+        # drop the do nothings and helps
+        drop_list = ['do_nothing', 'help']
+
+        for item in drop_list:
+            df1 = df1.drop(df1[(df1.action == item)].index).copy()
+
+    for item in df1[filter_type].unique():
+        len_df1 = len(df1[df1[filter_type] == item].copy())
+        len_df2 = len(df2[df2[filter_type] == item].copy())
+
+        output_list.append((len_df1 / len_df2) * 100)
+
+    output_list_max = roundup(max(output_list), 5)
+    output_list_min = roundup(min(output_list), 5) - 5
+
+    # now bin the data
+    bins = np.arange(output_list_min, output_list_max+5, 5).tolist()
+    # set group names to be the dates
+
+    output_list = pd.cut(output_list, bins)
+    counts = pd.value_counts(output_list)
+
+    return counts
+
+
 def active_response(filter='LSOA'):
     # returns a series object that contains a count of the number of results within set limits
+
+    # to be more generic
+    # pass location of files  - or pass the two dataframes
+    # and data types to extract
+    # specific runs
+    # operate on copies
+    # and add drop list if relevant
+
     output_list = []
 
     output_path = os.path.join(os.getcwd(), 'outputs')
@@ -340,12 +381,14 @@ def passive_response(filter='LSOA'):
     return counts
 
 
-def waterfall():
+def waterfall(df1, df2):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieve from two
-     strategies"""
+     strategies.  Currently hardcoded for passive and active but will update to be more generic..."""
 
-    active_list = active_response()
-    passive_list = passive_response()
+    # active_list = active_response()
+    active_list = response_rate(df1, df2)  # effectively returns the above..
+    #passive_list = passive_response()
+    passive_list = response_rate(df2, df2, passive=True)
 
     combined_list = pd.concat([active_list, passive_list], axis=1)
     combined_list.reset_index(level=0, inplace=True)
@@ -354,6 +397,12 @@ def waterfall():
 
     x1 = combined_list['passive'].tolist()
     x2 = combined_list['active'].tolist()
+
+    output_list_max = roundup(max(x1, x2), 5)
+    output_list_min = roundup(min(x1, x2), 5) - 5
+
+
+    # need to set this range to match the cats in the data above...
     y = np.arange(70, 100, 2)
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
@@ -373,3 +422,10 @@ def waterfall():
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
     plt.show()
+
+
+output_path = os.path.join(os.getcwd(), 'outputs')
+pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
+df2 = pandas_data['hh_record']['1']
+df1 = pandas_data['Responded']['1']
+waterfall(df1, df2)

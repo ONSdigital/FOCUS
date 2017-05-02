@@ -126,6 +126,12 @@ def produce_default_output(geog='LA'):
 
     post_process.produce_return_charts(df1, df2)
 
+    df1 = pandas_data['hh_record']['1']
+    df2 = pandas_data['Responded']['1']
+
+    # set which df to use and get from pandas data
+    post_process.waterfall(df1, df2)
+
 
 if __name__ == '__main__':
 
