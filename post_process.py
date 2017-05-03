@@ -174,11 +174,11 @@ def add_days(input_date, add_days):
 
 def bin_records(input_df, start_date, drop_filter=[]):
     """function that takes output files and produces binned data ready for plotting"""
+
     # start date used for labels - needs to be passed to the function not hardcoded
     # as does sim length???
     # then do this operation for all reps
     # then ake average of results and return as before
-    start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
 
     # apply some filters before binning
     # in this case filter out the do nothings and help as they are not returns
@@ -265,7 +265,7 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(df1, df2, filename, start_date, filter_type='E&W'):
+def produce_return_charts(df1, df2, start_date, filename, filter_type='E&W'):
     """default is to produce the difference between the passive and the active. ie, the self
     response and response with interventions"""
 
@@ -285,8 +285,8 @@ def produce_return_charts(df1, df2, filename, start_date, filter_type='E&W'):
             filename_temp = district + filename
             df1_temp = df1[df1[filter_type] == district].copy()
             df2_temp = df2[df2[filter_type] == district].copy()
-            passive = bin_records(df2_temp, ['do_nothing', 'help'])
-            actual = bin_records(df1_temp)
+            passive = bin_records(df2_temp, start_date, ['do_nothing', 'help'])
+            actual = bin_records(df1_temp, start_date)
             combined_chart(passive, actual, filename_temp)
 
 
@@ -359,7 +359,7 @@ def waterfall(s1, s2, bins):
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
-    filename = s1[2] + ' versus ' + s2[2] + '.jpg'
+    filename = s1[2] + ' versus ' + s2[2] + '.png'
     output_path = os.path.join(os.getcwd(), 'charts', filename)
     plt.savefig(output_path)
 

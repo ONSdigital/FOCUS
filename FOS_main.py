@@ -30,8 +30,7 @@ def start_run(run_input, seeds, out_path):
     census_day = (census_date - start_date).days
 
     # write key dates/info to a csv for later use in post processing
-    temp_list = [{'run': run_input['run id'],
-                  'rep': run_input['rep id'],
+    temp_list = [{'rep': run_input['rep id'],
                   'start_date': start_date,
                   'end_date': end_date,
                   'census_date': census_date,
@@ -75,9 +74,10 @@ def start_run(run_input, seeds, out_path):
 
 def produce_default_output(geog='LA'):
     # this produces some default processed data for run 1 only in some cases...
+    # defaults to LA level to produce outputs that fit into the Data Vis map format
 
     # select data to read into data frame structure
-    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key dates'])
 
     # gets list if runs - uses hh_record as will always contain all the runs
     runs = sorted(list(pandas_data['hh_record'].keys()))
@@ -146,16 +146,19 @@ def produce_default_output(geog='LA'):
             print(e, " in run: ", current_run)
 
     # do we always want to select this data frame - yes for the default output
-    df1 = pandas_data['Return_sent']['1']
-    df2 = pandas_data['hh_record']['1']
-    #post_process.produce_return_charts(df1, df2, ' returns run 1.html', start_date)
+    default_run = '1'
+    df1 = pandas_data['Return_sent'][default_run]
+    df2 = pandas_data['hh_record'][default_run]
+    start_date = pandas_data['key dates'][default_run].start_date[0]
+    start_date = dt.date(*map(int, start_date.split('-')))
+    post_process.produce_return_charts(df1, df2, start_date, ' returns run 1.html')
 
     # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
     # df3 = pandas_data['Return_sent']['2']
     # df4 = pandas_data['hh_record']['2']
     # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
-    #post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+    post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
 
 
 if __name__ == '__main__':
