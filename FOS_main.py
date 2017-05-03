@@ -14,6 +14,7 @@ from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
+import pandas as pd
 
 l = Lock()  # global declaration...can I avoid this?
 
@@ -74,13 +75,15 @@ def produce_default_output(geog='LA'):
                                                              geog)
             hh_count.index = cumulative_returns.index
             returns_summary = cumulative_returns.div(hh_count, axis='index')
-            returns_summary.to_csv(os.path.join(output_path, "Returns summary.csv"))
+            returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Returns summary run " +
+                                                current_run + ".csv"))
 
             # also need an E+W average for each
             overall_returns = cumulative_returns.sum(axis=0)
             average_returns = (overall_returns / hh_totals) * 100
-            print("E&W average response rates")
-            print(average_returns.tolist())
+            average_returns = pd.DataFrame(average_returns).T
+            average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average returns run " +
+                                                current_run + ".csv"))
 
         except ValueError as e:
             print(e, " in run: ", current_run)
@@ -92,12 +95,14 @@ def produce_default_output(geog='LA'):
                                                                  24, geog, 'digital')
             hh_count.index = cumulative_dig_returns.index
             dig_returns_summary = cumulative_dig_returns.div(hh_count, axis='index')
-            dig_returns_summary.to_csv(os.path.join(output_path, "Digital returns summary.csv"))
+            dig_returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Digital returns summary run " +
+                                                    current_run + ".csv"))
 
             overall_dig_returns = cumulative_dig_returns.sum(axis=0)
             average_dig_returns = (overall_dig_returns / hh_totals)*100
-            print("E&W average digital response rates")
-            print(average_dig_returns.tolist())
+            average_dig_returns = pd.DataFrame(average_dig_returns).T
+            average_dig_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average digital returns run " +
+                                                    current_run + ".csv"))
 
         except ValueError as e:
             print(e, " in run: ", current_run)
@@ -109,28 +114,30 @@ def produce_default_output(geog='LA'):
                                                                  24, geog, 'paper')
             hh_count.index = cumulative_pap_returns.index
             pap_returns_summary = cumulative_pap_returns.div(hh_count, axis='index')
-            pap_returns_summary.to_csv(os.path.join(output_path, "Paper returns summary.csv"))
+            pap_returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Paper returns summary run " +
+                                                    current_run + ".csv"))
 
             overall_pap_returns = cumulative_pap_returns.sum(axis=0)
             average_pap_returns = (overall_pap_returns / hh_totals)*100
-            print("E&W average paper Responded rates")
-            print(average_pap_returns.tolist())
+            average_pap_returns = pd.DataFrame(average_pap_returns).T
+            average_pap_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average paper returns run " +
+                                                    current_run + ".csv"))
 
         # if something goes wrong exit with error
         except ValueError as e:
             print(e, " in run: ", current_run)
 
     # do we always want to select this data frame - yes for the default output
-
     df1 = pandas_data['Return_sent']['1']
     df2 = pandas_data['hh_record']['1']
-    post_process.produce_return_charts(df1, df2, ' returns run 1.html', filter_type='LA')
+    post_process.produce_return_charts(df1, df2, ' returns run 1.html')
 
-    df3 = pandas_data['Return_sent']['2']
-    df4 = pandas_data['hh_record']['2']
-    post_process.produce_return_charts(df3, df4, '  returns run 2.html', filter_type='LA')
+    # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
+    # df3 = pandas_data['Return_sent']['2']
+    # df4 = pandas_data['hh_record']['2']
+    # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
-    post_process.waterfall([df3, df4, 'Strat2', False], [df1, df2, 'Strat1', False], bins=[65, 105, 5])
+    post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
 
 
 if __name__ == '__main__':

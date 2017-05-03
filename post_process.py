@@ -11,6 +11,7 @@ from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 
 
 def user_journey_single():
@@ -173,6 +174,10 @@ def add_days(input_date, add_days):
 
 def bin_records(input_df, drop_filter=[]):
     """function that takes output files and produces binned data ready for plotting"""
+    # start date used for labels - needs to be passed to the function not hardcoded
+    # as does sim length???
+    # then do this operation for all reps
+    # then ake average of results and return as before
     start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
 
     # apply some filters before binning
@@ -242,6 +247,7 @@ def combined_chart(input1, input2, filename):
         days=["%d %b %y"]
     )
     p.xaxis.major_label_orientation = math.pi / 4
+    p.xgrid[0].ticker.desired_num_ticks = 11
     p.xaxis.axis_label_text_font_size = '12pt'
     p.xaxis.major_label_text_font_size = '12pt'
 
@@ -253,7 +259,8 @@ def combined_chart(input1, input2, filename):
     p.title.text = title_text
 
     # Specify the name of the output file and show the result
-    output_file(filename)
+    output_path = os.path.join(os.getcwd(), 'charts', filename)
+    output_file(output_path)
     save(p)
 
 
@@ -317,8 +324,8 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
 
 def waterfall(s1, s2, bins):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieved from two
-     strategies. s1, s2 are lists that contain the dataframes to be used for each output(strategy) as well as the
-     name of the strategy and wether it is the special case of the passive option"""
+     strategies. s1, s2 are lists that contain the data frames to be used for each output(strategy) as well as the
+     name of the strategy and whether it is the special case of the passive option"""
 
     input1 = response_rate(s1[0], s1[1], bins, passive=s1[3])
     input2 = response_rate(s2[0], s2[1], bins, passive=s2[3])
@@ -326,7 +333,6 @@ def waterfall(s1, s2, bins):
     combined_list = pd.concat([input1, input2], axis=1)
     combined_list.reset_index(level=0, inplace=True)
     combined_list.columns = ['category', s1[2], s2[2]]
-    print(combined_list)
 
     x1 = combined_list[s1[2]].tolist()
     x2 = combined_list[s2[2]].tolist()
@@ -339,10 +345,13 @@ def waterfall(s1, s2, bins):
     axes[0].set(title=s1[2])
     axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
     axes[1].set(title=s2[2])
+    axes[0].set_xlabel("count")
+    axes[1].set_xlabel("count")
 
     axes[0].invert_xaxis()
     axes[0].set(yticks=y, yticklabels=y)
     axes[0].yaxis.tick_right()
+    axes[0].set_ylabel("Response rate")
 
     for ax in axes.flat:
         ax.margins(0.03)
@@ -350,11 +359,14 @@ def waterfall(s1, s2, bins):
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
-    plt.show()
+    filename = s1[2] + ' versus ' + s2[2] + '.jpg'
+    output_path = os.path.join(os.getcwd(), 'charts', filename)
+    plt.savefig(output_path)
 
+output_path = os.path.join(os.getcwd(), 'outputs')
+pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
+df2 = pandas_data['hh_record']['1']
+df1 = pandas_data['Return_sent']['1']
+produce_return_charts(df1, df2, ' returns.html', filter_type='LA' )
 
-#output_path = os.path.join(os.getcwd(), 'outputs')
-#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
-#df2 = pandas_data['hh_record']['1']
-#df1 = pandas_data['Responded']['1']
 #waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
