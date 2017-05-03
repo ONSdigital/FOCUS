@@ -172,7 +172,7 @@ def add_days(input_date, add_days):
     return input_date + dt.timedelta(days=add_days)
 
 
-def bin_records(input_df, drop_filter=[]):
+def bin_records(input_df, start_date, drop_filter=[]):
     """function that takes output files and produces binned data ready for plotting"""
     # start date used for labels - needs to be passed to the function not hardcoded
     # as does sim length???
@@ -265,15 +265,15 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(df1, df2, filename, filter_type='E&W'):
+def produce_return_charts(df1, df2, filename, start_date, filter_type='E&W'):
     """default is to produce the difference between the passive and the active. ie, the self
     response and response with interventions"""
 
     if filter_type == 'E&W':
         # just use the whole df
 
-        passive = bin_records(df2, ['do_nothing', 'help'])
-        actual = bin_records(df1)
+        passive = bin_records(df2, start_date, ['do_nothing', 'help'])
+        actual = bin_records(df1, start_date)
         filename = filter_type + filename
         combined_chart(passive, actual, filename)
 
@@ -363,10 +363,10 @@ def waterfall(s1, s2, bins):
     output_path = os.path.join(os.getcwd(), 'charts', filename)
     plt.savefig(output_path)
 
-output_path = os.path.join(os.getcwd(), 'outputs')
-pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
-df2 = pandas_data['hh_record']['1']
-df1 = pandas_data['Return_sent']['1']
-produce_return_charts(df1, df2, ' returns.html', filter_type='LA' )
+#output_path = os.path.join(os.getcwd(), 'outputs')
+#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
+#df2 = pandas_data['hh_record']['1']
+#df1 = pandas_data['Return_sent']['1']
+#produce_return_charts(df1, df2, ' returns.html', filter_type='LA' )
 
 #waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])

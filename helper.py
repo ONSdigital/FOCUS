@@ -179,7 +179,6 @@ def write_output(output_data, out_path, run_input_id):
 
     # clear output file
     output_data.clear()
-
     l.release()
 
 

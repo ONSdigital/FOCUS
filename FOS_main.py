@@ -29,6 +29,24 @@ def start_run(run_input, seeds, out_path):
     census_date = dt.date(*map(int, run_input['census_date'].split(',')))
     census_day = (census_date - start_date).days
 
+    # write key dates/info to a csv for later use in post processing
+    temp_list = [{'run': run_input['run id'],
+                  'rep': run_input['rep id'],
+                  'start_date': start_date,
+                  'end_date': end_date,
+                  'census_date': census_date,
+                  'census_day': census_day,
+                  'sim_hours': sim_hours}]
+
+    if not os.path.isdir(os.path.join(out_path, 'key dates')):
+        os.mkdir(os.path.join(out_path, 'key dates'))
+
+    if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv"))
+    else:
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv"), mode='a',
+                                       header=False)
+
     output_data = defaultdict(list)
 
     rnd = random.Random()
@@ -130,14 +148,14 @@ def produce_default_output(geog='LA'):
     # do we always want to select this data frame - yes for the default output
     df1 = pandas_data['Return_sent']['1']
     df2 = pandas_data['hh_record']['1']
-    post_process.produce_return_charts(df1, df2, ' returns run 1.html')
+    #post_process.produce_return_charts(df1, df2, ' returns run 1.html', start_date)
 
     # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
     # df3 = pandas_data['Return_sent']['2']
     # df4 = pandas_data['hh_record']['2']
     # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
-    post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+    #post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
 
 
 if __name__ == '__main__':
