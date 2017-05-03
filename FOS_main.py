@@ -55,7 +55,7 @@ def start_run(run_input, seeds, out_path):
 
 
 def produce_default_output(geog='LA'):
-    # this produces some default processed data showing response rates over time
+    # this produces some default processed data for run 1 only in some cases...
 
     # select data to read into data frame structure
     pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
@@ -121,14 +121,16 @@ def produce_default_output(geog='LA'):
             print(e, " in run: ", current_run)
 
     # do we always want to select this data frame - yes for the default output
-    df1 = pandas_data['hh_record']['1']
-    df2 = pandas_data['Return_sent']['1']
-    post_process.produce_return_charts(df1, df2)
 
-    # set which df to use for waterfall chart
-    df1 = pandas_data['Responded']['1']
+    df1 = pandas_data['Return_sent']['1']
     df2 = pandas_data['hh_record']['1']
-    post_process.waterfall(df1, df2, bins=[65, 105, 5])
+    post_process.produce_return_charts(df1, df2, ' returns run 1.html', filter_type='LA')
+
+    df3 = pandas_data['Return_sent']['2']
+    df4 = pandas_data['hh_record']['2']
+    post_process.produce_return_charts(df3, df4, '  returns run 2.html', filter_type='LA')
+
+    post_process.waterfall([df3, df4, 'Strat2', False], [df1, df2, 'Strat1', False], bins=[65, 105, 5])
 
 
 if __name__ == '__main__':

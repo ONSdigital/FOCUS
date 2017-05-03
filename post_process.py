@@ -171,14 +171,14 @@ def add_days(input_date, add_days):
     return input_date + dt.timedelta(days=add_days)
 
 
-def bin_records(input_df, filter = []):
+def bin_records(input_df, drop_filter=[]):
     """function that takes output files and produces binned data ready for plotting"""
     start_date = dt.date(*map(int, '2011, 3, 6'.split(',')))
 
     # apply some filters before binning
     # in this case filter out the do nothings and help as they are not returns
-    if filter:
-        for item in filter:
+    if drop_filter:
+        for item in drop_filter:
             input_df = input_df.drop(input_df[(input_df.action == item)].index)
 
     bins = np.arange(0, 1872, 24).tolist()
@@ -258,28 +258,29 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(df1, df2, filter='E&W'):
+def produce_return_charts(df1, df2, filename, filter_type='E&W'):
     """default is to produce the difference between the passive and the active. ie, the self
     response and response with interventions"""
 
-    if filter == 'E&W':
+    if filter_type == 'E&W':
         # just use the whole df
 
-        passive = bin_records(df1, ['do_nothing', 'help'])
-        actual = bin_records(df2)
-        combined_chart(passive, actual, 'overall returns.html')
+        passive = bin_records(df2, ['do_nothing', 'help'])
+        actual = bin_records(df1)
+        filename = filter_type + filename
+        combined_chart(passive, actual, filename)
 
     else:
         # produce for each area
 
-        for district in df1[filter].unique():
-            filename = district + ' returns.html'
+        for district in df1[filter_type].unique():
             # extract just the current LA from the df and pass that to the functions
-            df1_temp = df1[df1[filter] == district].copy()
-            df2_temp = df2[df2[filter] == district].copy()
-            passive = bin_records(df1_temp, ['do_nothing', 'help'])
-            actual = bin_records(df2_temp)
-            combined_chart(passive, actual, filename)
+            filename_temp = district + filename
+            df1_temp = df1[df1[filter_type] == district].copy()
+            df2_temp = df2[df2[filter_type] == district].copy()
+            passive = bin_records(df2_temp, ['do_nothing', 'help'])
+            actual = bin_records(df1_temp)
+            combined_chart(passive, actual, filename_temp)
 
 
 def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
@@ -314,97 +315,30 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
     return counts
 
 
-def active_response(filter='LSOA'):
-    # returns a series object that contains a count of the number of results within set limits
+def waterfall(s1, s2, bins):
+    """ produces parallel horizontal bar charts that display the distribution of response rates achieved from two
+     strategies. s1, s2 are lists that contain the dataframes to be used for each output(strategy) as well as the
+     name of the strategy and wether it is the special case of the passive option"""
 
-    # to be more generic
-    # pass location of files  - or pass the two dataframes
-    # and data types to extract
-    # specific runs
-    # operate on copies
-    # and add drop list if relevant
+    input1 = response_rate(s1[0], s1[1], bins, passive=s1[3])
+    input2 = response_rate(s2[0], s2[1], bins, passive=s2[3])
 
-    output_list = []
-
-    output_path = os.path.join(os.getcwd(), 'outputs')
-    pandas_data = csv_to_pandas(output_path, ['Responded', 'hh_record'])
-
-    df1 = pandas_data['hh_record']['1']  # run 1 all reps if present
-    df2 = pandas_data['Responded']['1']
-
-    for item in df1[filter].unique():
-
-        len_df1 = len(df1[df1[filter] == item].copy())
-        len_df2 = len(df2[df2[filter] == item].copy())
-
-        output_list.append((len_df2/len_df1)*100)
-
-    # now bin the data
-    bins = np.arange(70, 102, 2).tolist()
-    # set group names to be the dates
-
-    output_list = pd.cut(output_list, bins)
-    counts = pd.value_counts(output_list)
-
-    return counts
-
-
-def passive_response(filter='LSOA'):
-    # returns a series object that contains a count of the number of results within set limits
-    output_list = []
-
-    output_path = os.path.join(os.getcwd(), 'outputs')
-    pandas_data = csv_to_pandas(output_path, ['Responded', 'hh_record'])
-
-    df1 = pandas_data['hh_record']['1']  # run 1 all reps if present
-    df2 = pandas_data['hh_record']['1'].copy()
-
-    # drop the do nothings and helps
-    drop_list = ['do_nothing', 'help']
-
-    for item in drop_list:
-        df1 = df1.drop(df1[(df1.action == item)].index)
-
-    for item in df1[filter].unique():
-
-        len_df1 = len(df1[df1[filter] == item].copy())
-        len_df2 = len(df2[df2[filter] == item].copy())
-
-        output_list.append((len_df1/len_df2)*100)
-
-    # now bin the data
-    bins = np.arange(70, 102, 2).tolist()
-    # set group names to be the dates
-
-    output_list = pd.cut(output_list, bins)
-    counts = pd.value_counts(output_list)
-
-    return counts
-
-
-def waterfall(df1, df2, bins):
-    """ produces parallel horizontal bar charts that display the distribution of response rates achieve from two
-     strategies.  Currently hardcoded for passive and active but will update to be more generic..."""
-
-    active_list = response_rate(df1, df2, bins)
-    passive_list = response_rate(df2, df2, bins, passive=True)
-
-    combined_list = pd.concat([active_list, passive_list], axis=1)
+    combined_list = pd.concat([input1, input2], axis=1)
     combined_list.reset_index(level=0, inplace=True)
-    combined_list.columns = ['cat', 'active', 'passive']
+    combined_list.columns = ['category', s1[2], s2[2]]
     print(combined_list)
 
-    x1 = combined_list['passive'].tolist()
-    x2 = combined_list['active'].tolist()
+    x1 = combined_list[s1[2]].tolist()
+    x2 = combined_list[s2[2]].tolist()
     y = np.arange(bins[0], bins[1]-bins[2], bins[2])
 
     width = 3
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
     axes[0].barh(y, x1, width,  align='center', color='green', zorder=10)
-    axes[0].set(title='passive')
+    axes[0].set(title=s1[2])
     axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
-    axes[1].set(title='active')
+    axes[1].set(title=s2[2])
 
     axes[0].invert_xaxis()
     axes[0].set(yticks=y, yticklabels=y)
@@ -419,4 +353,8 @@ def waterfall(df1, df2, bins):
     plt.show()
 
 
-
+#output_path = os.path.join(os.getcwd(), 'outputs')
+#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
+#df2 = pandas_data['hh_record']['1']
+#df1 = pandas_data['Responded']['1']
+#waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
