@@ -37,13 +37,13 @@ def start_run(run_input, seeds, out_path):
                   'census_day': census_day,
                   'sim_hours': sim_hours}]
 
-    if not os.path.isdir(os.path.join(out_path, 'key dates')):
-        os.mkdir(os.path.join(out_path, 'key dates'))
+    if not os.path.isdir(os.path.join(out_path, 'key info')):
+        os.mkdir(os.path.join(out_path, 'key info'))
 
     if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv"))
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
     else:
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv"), mode='a',
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
                                        header=False)
 
     output_data = defaultdict(list)
@@ -77,7 +77,7 @@ def produce_default_output(geog='LA'):
     # defaults to LA level to produce outputs that fit into the Data Vis map format
 
     # select data to read into data frame structure
-    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key dates'])
+    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 
     # gets list if runs - uses hh_record as will always contain all the runs
     runs = sorted(list(pandas_data['hh_record'].keys()))
@@ -149,9 +149,9 @@ def produce_default_output(geog='LA'):
     default_run = '1'
     df1 = pandas_data['Return_sent'][default_run]
     df2 = pandas_data['hh_record'][default_run]
-    start_date = pandas_data['key dates'][default_run].start_date[0]
+    start_date = pandas_data['key info'][default_run].start_date[0]
     start_date = dt.date(*map(int, start_date.split('-')))
-    post_process.produce_return_charts(df1, df2, start_date, ' returns run 1.html')
+    post_process.produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns run 1.html')
 
     # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
     # df3 = pandas_data['Return_sent']['2']
@@ -164,7 +164,7 @@ def produce_default_output(geog='LA'):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     multiple_processors = False
     freeze_support()
 

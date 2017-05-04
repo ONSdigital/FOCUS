@@ -173,48 +173,74 @@ def add_days(input_date, add_days):
 
 
 def bin_records(input_df, start_date, drop_filter=[]):
-    """function that takes output files and produces binned data ready for plotting"""
+    """takes files and produces binned data by day. The categories are set from the passed start date"""
 
-    # start date used for labels - needs to be passed to the function not hardcoded
-    # as does sim length???
-    # then do this operation for all reps
-    # then ake average of results and return as before
-
-    # apply some filters before binning
-    # in this case filter out the do nothings and help as they are not returns
+    # drop any rows that are not relevant - only applicable when using "hh record"
     if drop_filter:
         for item in drop_filter:
             input_df = input_df.drop(input_df[(input_df.action == item)].index)
 
-    bins = np.arange(0, 1872, 24).tolist()
-    # set group names to be the dates
+    # get max bin category
+    time_max = roundup(input_df[['time']].max(axis=0), 24)
+    bins = list(np.arange(0, time_max, 24))
+    # set group names to be the dates from the specified start date
     group_names = []
     days = len(bins)
 
-    for i in range(0, days-1):
+    for i in range(0, days - 1):
         group_names.append(add_days(start_date, i))
 
-    input_df['categories'] = pd.cut(input_df['time'], bins, labels=group_names)
-    counts = pd.value_counts(input_df['categories'])
+    # get number of replications
+    reps = input_df['rep'].max()
+    counts_df = pd.DataFrame(index=group_names)
 
-    return counts
+    # for each replication bin the data
+    for i in range(1, reps+1):
+
+        # filter to get each reps data then count
+        temp_df = input_df[(input_df.rep == i)].copy()
+
+        temp_df[str(i)] = pd.cut(temp_df['time'], bins, labels=group_names)
+        counts = pd.value_counts(temp_df[str(i)])
+        counts = pd.DataFrame(counts)
+
+        counts_df = pd.concat([counts_df, counts], axis=1)
+        # now average the rows
+
+    # finally get the average count for the run
+    averages = counts_df.mean(axis=1)
+    return averages
 
 
 def roundup(x, y):
     # roundup x to the nearest y
-    # e.g. if y is 100 it will roundup to the nearest 100...
+    # e.g. if y is 100 it will roundup to the nearest 100
 
     return int(math.ceil(x / float(y))) * y
 
 
-def combined_chart(input1, input2, filename):
-    # takes two series and combines to produce a html chart with the filename given
+def combined_chart(input1, input2, label1, label2, filename):
+    # takes two series objects and combines to produce a html bokeh chart with the labels and filename given
+
+    label1 = label1.lower()
+    label2 = label2.lower()
+
+    label1_str = label1.capitalize()
+    label2_str = label2.capitalize()
+
+    print(input1)
+    print(input2)
 
     combined = pd.concat([input1, input2], axis=1)
     combined.reset_index(level=0, inplace=True)
-    combined.columns = ['date', 'passive', 'actual']
-    combined['date_formatted'] = combined['date'].dt.strftime('%Y-%m-%d')
-    max_y = roundup(combined['actual'].max(), 100)
+    # ensure values are same precision
+
+    combined.columns = ['date', label1, label2]
+    print(combined)
+
+    combined['date_formatted'] = pd.to_datetime(combined['date'], format='%Y-%m-%d')
+    combined['date_formatted'] = combined['date_formatted'].dt.strftime('%Y-%m-%d')
+    max_y = roundup(max(combined[[label1, label2]].max(axis=0)), 100)
 
     source = ColumnDataSource(combined)
 
@@ -227,16 +253,17 @@ def combined_chart(input1, input2, filename):
             'save'
 
     # Add lines to the figure p
-    p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=tools)
-    p.line(x='date', y='passive', source=source, color='green', legend='Passive')
-    p.line(x='date', y='actual', source=source, color='blue', legend='Actual')
+    p = figure(x_axis_label='Date', y_axis_label='Returns', width=1600, height=800, tools=tools, responsive=True)
+    p.line(x='date', y=label1, source=source, color='green', legend=label1_str)
+    p.line(x='date', y=label2, source=source, color='blue', legend=label2_str)
 
+    # take this from key info file....or passed to function...or a list of all the key dates...if we need them
     fu_date = dt.datetime.strptime('2011-04-01', '%Y-%m-%d').date()
     p.line([fu_date, fu_date], [0, max_y], color='red')
 
     hover = HoverTool(tooltips=
-                      [('Passive', '@passive'),
-                       ('Actual', '@actual'),
+                      [(label1_str, '@' + label1 + '{int}'),
+                       (label2_str, '@' + label2 + '{int}'),
                        ('Date', '@date_formatted')
                        ])
 
@@ -265,29 +292,28 @@ def combined_chart(input1, input2, filename):
 
 
 # for given level of geog to use
-def produce_return_charts(df1, df2, start_date, filename, filter_type='E&W'):
-    """default is to produce the difference between the passive and the active. ie, the self
-    response and response with interventions"""
+def produce_return_charts(df1, df2, label1, label2, start_date, filename, filter_type='E&W'):
+    """Produces for a given strategy (run) the difference between the passive and the active. ie, the self
+    response and response with simulated interventions"""
 
     if filter_type == 'E&W':
         # just use the whole df
 
-        passive = bin_records(df2, start_date, ['do_nothing', 'help'])
-        actual = bin_records(df1, start_date)
+        series1 = bin_records(df1, start_date)
+        series2 = bin_records(df2, start_date, ['do_nothing', 'help'])
         filename = filter_type + filename
-        combined_chart(passive, actual, filename)
+        combined_chart(series1, series2, label1, label2, filename)
 
     else:
         # produce for each area
-
         for district in df1[filter_type].unique():
             # extract just the current LA from the df and pass that to the functions
             filename_temp = district + filename
             df1_temp = df1[df1[filter_type] == district].copy()
             df2_temp = df2[df2[filter_type] == district].copy()
-            passive = bin_records(df2_temp, start_date, ['do_nothing', 'help'])
-            actual = bin_records(df1_temp, start_date)
-            combined_chart(passive, actual, filename_temp)
+            series1 = bin_records(df2_temp, start_date, ['do_nothing', 'help'])
+            series2 = bin_records(df1_temp, start_date)
+            combined_chart(series1, series2, label1, label2, filename_temp)
 
 
 def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
@@ -363,10 +389,12 @@ def waterfall(s1, s2, bins):
     output_path = os.path.join(os.getcwd(), 'charts', filename)
     plt.savefig(output_path)
 
-#output_path = os.path.join(os.getcwd(), 'outputs')
-#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded'])
-#df2 = pandas_data['hh_record']['1']
-#df1 = pandas_data['Return_sent']['1']
-#produce_return_charts(df1, df2, ' returns.html', filter_type='LA' )
+output_path = os.path.join(os.getcwd(), 'outputs')
+pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
+df2 = pandas_data['hh_record']['1']
+df1 = pandas_data['Return_sent']['1']
+start_date = pandas_data['key info']['1'].start_date[0]
+start_date = dt.date(*map(int, start_date.split('-')))
+produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
 
 #waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
