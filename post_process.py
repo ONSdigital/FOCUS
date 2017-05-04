@@ -320,6 +320,7 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
     """returns a pandas series object of the number of each filter type in each bin"""
 
     output_list = []
+    bins = np.arange(bins[0], bins[1], bins[2])
 
     if passive:
         # drop the do nothings and helps
@@ -328,24 +329,31 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
         for item in drop_list:
             df1 = df1.drop(df1[(df1.action == item)].index).copy()
 
-    for item in df1[filter_type].unique():
-        len_df1 = len(df1[df1[filter_type] == item].copy())
-        len_df2 = len(df2[df2[filter_type] == item].copy())
+    # do the below for each rep...
+    counts_list = []
+    reps = df1['rep'].max()
 
-        output_list.append((len_df1 / len_df2) * 100)
+    for i in range(1, reps+1):
 
-    # output_list_max = roundup(max(output_list), 5)
-    # output_list_min = roundup(min(output_list), 5) - 5
+        output_list = []
 
-    # now bin the data
-    #bins = np.arange(output_list_min, output_list_max+5, 5).tolist()
-    bins = np.arange(bins[0], bins[1], bins[2])
-    # set group names to be the dates
+        # for each rep and LSOA or other...
+        for item in df1[filter_type].unique():
+            len_df1 = len(df1[(df1[filter_type] == item) & (df1['rep'] == i)].copy())
+            len_df2 = len(df2[(df2[filter_type] == item) & (df2['rep'] == i)].copy())
 
-    output_list = pd.cut(output_list, bins)
-    counts = pd.value_counts(output_list)
+            output_list.append((len_df1 / len_df2) * 100)
 
-    return counts
+        # now bin the data
+        output_list = pd.cut(output_list, bins)
+        # counts is number of LSOA in each category for that rep
+        counts = pd.value_counts(output_list)
+        counts = pd.DataFrame(counts)
+        counts_list.append(counts)
+
+    counts_df = pd.concat(counts_list, axis=1)
+    averages = counts_df.mean(axis=1)
+    return averages
 
 
 def waterfall(s1, s2, bins):
@@ -395,6 +403,6 @@ df2 = pandas_data['hh_record']['1']
 df1 = pandas_data['Return_sent']['1']
 start_date = pandas_data['key info']['1'].start_date[0]
 start_date = dt.date(*map(int, start_date.split('-')))
-produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
+#produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
 
-#waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
