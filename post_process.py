@@ -403,6 +403,6 @@ df2 = pandas_data['hh_record']['1']
 df1 = pandas_data['Return_sent']['1']
 start_date = pandas_data['key info']['1'].start_date[0]
 start_date = dt.date(*map(int, start_date.split('-')))
-#produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
+produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
 
 waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
