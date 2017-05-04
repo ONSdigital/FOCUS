@@ -228,15 +228,11 @@ def combined_chart(input1, input2, label1, label2, filename):
     label1_str = label1.capitalize()
     label2_str = label2.capitalize()
 
-    print(input1)
-    print(input2)
-
     combined = pd.concat([input1, input2], axis=1)
     combined.reset_index(level=0, inplace=True)
     # ensure values are same precision
 
     combined.columns = ['date', label1, label2]
-    print(combined)
 
     combined['date_formatted'] = pd.to_datetime(combined['date'], format='%Y-%m-%d')
     combined['date_formatted'] = combined['date_formatted'].dt.strftime('%Y-%m-%d')
@@ -319,7 +315,6 @@ def produce_return_charts(df1, df2, label1, label2, start_date, filename, filter
 def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
     """returns a pandas series object of the number of each filter type in each bin"""
 
-    output_list = []
     bins = np.arange(bins[0], bins[1], bins[2])
 
     if passive:
@@ -397,12 +392,17 @@ def waterfall(s1, s2, bins):
     output_path = os.path.join(os.getcwd(), 'charts', filename)
     plt.savefig(output_path)
 
-output_path = os.path.join(os.getcwd(), 'outputs')
-pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
-df2 = pandas_data['hh_record']['1']
-df1 = pandas_data['Return_sent']['1']
-start_date = pandas_data['key info']['1'].start_date[0]
-start_date = dt.date(*map(int, start_date.split('-')))
-produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
+#output_path = os.path.join(os.getcwd(), 'outputs')
+#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 
-waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+#df1 = pandas_data['Return_sent']['1']
+#df2 = pandas_data['hh_record']['1']
+
+#start_date = pandas_data['key info']['2'].start_date[0]
+#start_date = dt.date(*map(int, start_date.split('-')))
+#produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
+
+#df3 = pandas_data['Return_sent']['3']
+#df4 = pandas_data['hh_record']['3']
+
+#waterfall([df1, df2, 'S1', False], [df3, df4, 'S2', False], bins=[65, 105, 5])
