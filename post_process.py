@@ -94,10 +94,10 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
 
     # filter df to only have correct entries
     if resp_type == 'digital':
-        df = df[df['digital'] is True].copy()
+        df = df[df['digital'] == True].copy()
 
     elif resp_type == 'paper':
-        df = df[df['digital'] is False].copy()
+        df = df[df['digital'] == False].copy()
 
     # add a new column to passed data frame containing the categories the entry belongs too
     df['categories'] = pd.cut(df['time'], bin_values, labels=group_names)
@@ -105,33 +105,15 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     cat_sum = df.groupby([geog, 'categories', 'rep'])['categories'].size()
     # calculate the cum sum of the totals
     print(cat_sum)
-    cat_sum = cat_sum.groupby(level=[2]).cumsum()
+    cat_sum = cat_sum.groupby(level=[0, 2]).cumsum().reset_index()
+    cat_sum.to_csv('temp.csv')
+    cat_sum.rename(columns={0: 'count'}, inplace=True)
     print(cat_sum)
-    cat_sum = pd.DataFrame(cat_sum).reset_index()
+    cat_sum = cat_sum.groupby(['LA', 'categories'])['count'].mean().reset_index()
     print(cat_sum)
-
-    cat_sum = cat_sum.groupby([geog, 'categories', 'rep']).sum().groupby(level=[0]).cumsum()
-    print(cat_sum)
-    counts_df = pd.DataFrame(index=group_names)
-
-    for i in range(1, 3):
-        temp_df = cat_sum[(cat_sum.rep == i)].copy()
-        temp_df.rename(columns={0: 'count'}, inplace=True)
-        temp_df['cum_sum'] = temp_df['count'].cumsum()
-        counts_df = pd.concat([counts_df, pd.DataFrame(temp_df['cum_sum'], index=temp_df['categories'])], axis=1)
-        # last col is what we want....copy to ...
-
-        # do operation on this??
-
-
-    cat_sum = cat_sum.groupby(level=[0]).cumsum().reset_index(name='cum_sum')
-
-    # convert to df and split for each rep
-    print(cat_sum)
-    # average by rep...
 
     # pivot it so the categories become the columns
-    cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='cum_sum')
+    cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='count')
     # and then add back in any missing categories
     cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1)
     reps = df['rep'].max()
