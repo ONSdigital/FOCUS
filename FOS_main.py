@@ -82,7 +82,7 @@ def produce_default_output(geog='LA'):
     # gets list if runs - uses hh_record as will always contain all the runs
     runs = sorted(list(pandas_data['hh_record'].keys()))
 
-    # transfer to post process module and modify to account for multiple reps...
+    # transfer to post process module and modify to account for multiple reps...;
     for current_run in runs:
 
         # calculate the total number of households in each area and in total
@@ -166,7 +166,7 @@ def produce_default_output(geog='LA'):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     multiple_processors = True
     freeze_support()
 

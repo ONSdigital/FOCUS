@@ -94,17 +94,20 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
 
     # filter df to only have correct entries
     if resp_type == 'digital':
-        df = df[df['digital'] == True].copy()
+        df = df[df['digital'] is True].copy()
 
     elif resp_type == 'paper':
-        df = df[df['digital'] == False].copy()
+        df = df[df['digital'] is False].copy()
 
     # add a new column to passed data frame containing the categories the entry belongs too
     df['categories'] = pd.cut(df['time'], bin_values, labels=group_names)
-    # group by each combination of district and category and count the number of each category
+    # group by each combination of district and category (and rep?) and count the number of each category
     cat_sum = df.groupby([geog, 'categories'])['categories'].size()
     # calculate the cum sum of the totals
     cat_sum = cat_sum.groupby(level=[0]).cumsum().reset_index(name='cum_sum')
+
+    # average by rep...
+
     # pivot it so the categories become the columns
     cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='cum_sum')
     # and then add back in any missing categories
@@ -391,6 +394,38 @@ def waterfall(s1, s2, bins):
     filename = s1[2] + ' versus ' + s2[2] + '.png'
     output_path = os.path.join(os.getcwd(), 'charts', filename)
     plt.savefig(output_path)
+
+
+def returns_summary(hh_record_df, returns_df,  geog ='LA'):
+    """returns at the passed level the overall returns by day including averages for E&W. Used for
+     producing data in the correct format for the data vis team map"""
+
+    # gets list of runs
+    runs = sorted(list(hh_record_df.keys()))
+
+    for current_run in runs:
+
+        # calculate the total number of households in each area and in total -  same for each rep
+        hh_count = hh_record_df[str(current_run)].groupby(geog).size()  # hh per area
+        hh_totals = hh_count.sum()  # total of households
+
+        # for each rep produce
+
+        # produce cumulative summary of overall returns
+        cumulative_returns = cumulative_sum(returns_df[str(current_run)], 0, 1824, 24, geog)
+        hh_count.index = cumulative_returns.index
+        returns_summary = cumulative_returns.div(hh_count, axis='index')
+        returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Returns summary run " +
+                                            current_run + ".csv"))
+
+        # also need an E+W average for each
+        overall_returns = cumulative_returns.sum(axis=0)
+        average_returns = (overall_returns / hh_totals) * 100
+        average_returns = pd.DataFrame(average_returns).T
+        average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average returns run " +
+                                            current_run + ".csv"))
+
+
 
 #output_path = os.path.join(os.getcwd(), 'outputs')
 #pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
