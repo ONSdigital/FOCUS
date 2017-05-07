@@ -90,7 +90,7 @@ def produce_default_output(geog='LA'):
         hh_totals = hh_count.sum()  # total of households
 
         try:
-            # produce cumulative summary of overall returns
+            # produce cumulative summary of overall returns - ### numbers still div by num of reps
             cumulative_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824, 24,
                                                              geog)
             hh_count.index = cumulative_returns.index
