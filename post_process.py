@@ -104,20 +104,14 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     # group by each combination of district and category (and rep?) and count the number of each category
     cat_sum = df.groupby([geog, 'categories', 'rep'])['categories'].size()
     # calculate the cum sum of the totals
-    print(cat_sum)
     cat_sum = cat_sum.groupby(level=[0, 2]).cumsum().reset_index()
-    cat_sum.to_csv('temp.csv')
     cat_sum.rename(columns={0: 'count'}, inplace=True)
-    print(cat_sum)
     cat_sum = cat_sum.groupby(['LA', 'categories'])['count'].mean().reset_index()
-    print(cat_sum)
 
     # pivot it so the categories become the columns
     cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='count')
-    # and then add back in any missing categories
-    cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1)
-    reps = df['rep'].max()
-    cat_sum_flipped = cat_sum_flipped.div(reps, axis=0).replace('Nan', 0, regex=True)
+    # and then add back in any missing categories and fill the gaps
+    cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1).replace('Nan', 0, regex=True)
 
     return cat_sum_flipped
 
@@ -400,7 +394,7 @@ def waterfall(s1, s2, bins):
     plt.savefig(output_path)
 
 
-def returns_summary(hh_record_df, returns_df,  geog ='LA'):
+def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all'):
     """returns at the passed level the overall returns by day including averages for E&W. Used for
      producing data in the correct format for the data vis team map"""
 
@@ -409,24 +403,24 @@ def returns_summary(hh_record_df, returns_df,  geog ='LA'):
 
     for current_run in runs:
 
-        # calculate the total number of households in each area and in total -  same for each rep
-        hh_count = hh_record_df[str(current_run)].groupby(geog).size()  # hh per area
+        # calculate the total number of households in each area and in total -  same for each rep so use rep 1
+        hh_record_df = hh_record_df[str(current_run)]
+        hh_record_df = hh_record_df[hh_record_df['rep'] == 1].copy()
+        hh_count = hh_record_df.groupby(geog).size()  # hh per area
         hh_totals = hh_count.sum()  # total of households
 
-        # for each rep produce
-
         # produce cumulative summary of overall returns
-        cumulative_returns = cumulative_sum(returns_df[str(current_run)], 0, 1824, 24, geog)
+        cumulative_returns = cumulative_sum(returns_df[str(current_run)], 0, 1824, 24, geog, resp_type)
         hh_count.index = cumulative_returns.index
-        returns_summary = cumulative_returns.div(hh_count, axis='index')
-        returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Returns summary run " +
-                                            current_run + ".csv"))
+        cumulative_returns_per = cumulative_returns.div(hh_count, axis='index')
+        cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary run " +
+                                                   current_run + ".csv"))
 
         # also need an E+W average for each
         overall_returns = cumulative_returns.sum(axis=0)
         average_returns = (overall_returns / hh_totals) * 100
         average_returns = pd.DataFrame(average_returns).T
-        average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average returns run " +
+        average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " average returns run " +
                                             current_run + ".csv"))
 
 

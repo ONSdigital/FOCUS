@@ -72,80 +72,17 @@ def start_run(run_input, seeds, out_path):
     hp.write_output(output_data, out_path, run_input['run id'])
 
 
-def produce_default_output(geog='LA'):
+def produce_default_output():
     # this produces some default processed data for run 1 only in some cases...
     # defaults to LA level to produce outputs that fit into the Data Vis map format
 
     # select data to read into data frame structure
     pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 
-    # gets list if runs - uses hh_record as will always contain all the runs
-    runs = sorted(list(pandas_data['hh_record'].keys()))
-
-    # transfer to post process module and modify to account for multiple reps...;
-    for current_run in runs:
-
-        # calculate the total number of households in each area and in total
-        hh_count = pandas_data['hh_record'][str(current_run)].groupby(geog).size()  # hh per area
-        hh_totals = hh_count.sum()  # total of households
-
-        try:
-            # produce cumulative summary of overall returns - ### numbers still div by num of reps
-            cumulative_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824, 24,
-                                                             geog)
-            hh_count.index = cumulative_returns.index
-            returns_summary = cumulative_returns.div(hh_count, axis='index')
-            returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Returns summary run " +
-                                                current_run + ".csv"))
-
-            # also need an E+W average for each
-            overall_returns = cumulative_returns.sum(axis=0)
-            average_returns = (overall_returns / hh_totals) * 100
-            average_returns = pd.DataFrame(average_returns).T
-            average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average returns run " +
-                                                current_run + ".csv"))
-
-        except ValueError as e:
-            print(e, " in run: ", current_run)
-
-        try:
-
-            # produce summary of digital returns
-            cumulative_dig_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824,
-                                                                 24, geog, 'digital')
-            hh_count.index = cumulative_dig_returns.index
-            dig_returns_summary = cumulative_dig_returns.div(hh_count, axis='index')
-            dig_returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Digital returns summary run " +
-                                                    current_run + ".csv"))
-
-            overall_dig_returns = cumulative_dig_returns.sum(axis=0)
-            average_dig_returns = (overall_dig_returns / hh_totals)*100
-            average_dig_returns = pd.DataFrame(average_dig_returns).T
-            average_dig_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average digital returns run " +
-                                                    current_run + ".csv"))
-
-        except ValueError as e:
-            print(e, " in run: ", current_run)
-
-        try:
-
-            # produce summary of paper returns
-            cumulative_pap_returns = post_process.cumulative_sum(pandas_data['Return_sent'][str(current_run)], 0, 1824,
-                                                                 24, geog, 'paper')
-            hh_count.index = cumulative_pap_returns.index
-            pap_returns_summary = cumulative_pap_returns.div(hh_count, axis='index')
-            pap_returns_summary.to_csv(os.path.join(os.getcwd(), 'summary results', "Paper returns summary run " +
-                                                    current_run + ".csv"))
-
-            overall_pap_returns = cumulative_pap_returns.sum(axis=0)
-            average_pap_returns = (overall_pap_returns / hh_totals)*100
-            average_pap_returns = pd.DataFrame(average_pap_returns).T
-            average_pap_returns.to_csv(os.path.join(os.getcwd(), 'summary results', "Average paper returns run " +
-                                                    current_run + ".csv"))
-
-        # if something goes wrong exit with error
-        except ValueError as e:
-            print(e, " in run: ", current_run)
+    # produce summary stats for data vis map - default is by LA
+    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'])
+    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper')
+    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
 
     # do we always want to select this data frame - yes for the default output
     default_run = '1'
@@ -153,6 +90,8 @@ def produce_default_output(geog='LA'):
     df2 = pandas_data['hh_record'][default_run]
     start_date = pandas_data['key info'][default_run].start_date[0]
     start_date = dt.date(*map(int, start_date.split('-')))
+
+    # produce return chart over time
     post_process.produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns run 1.html')
 
     # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
@@ -160,6 +99,7 @@ def produce_default_output(geog='LA'):
     # df4 = pandas_data['hh_record']['2']
     # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
+    # produce comparison of final results
     post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
 
 
