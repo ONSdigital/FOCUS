@@ -15,11 +15,12 @@ from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 import pandas as pd
+import glob
 
 l = Lock()  # global declaration...can I avoid this?
 
 
-def start_run(run_input, seeds, out_path):
+def start_run(run_input, seeds, out_path, out_file):
 
     max_output_file_size = 100000000
     # pull out length of sim for current run
@@ -37,14 +38,18 @@ def start_run(run_input, seeds, out_path):
                   'census_day': census_day,
                   'sim_hours': sim_hours}]
 
+    l.acquire()
+
     if not os.path.isdir(os.path.join(out_path, 'key info')):
         os.mkdir(os.path.join(out_path, 'key info'))
 
-    if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
+    if not os.path.isfile(os.path.join(out_path, 'key dates', out_file + ".csv")):
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', out_file + ".csv"))
     else:
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', out_file + ".csv"), mode='a',
                                        header=False)
+
+    l.release()
 
     output_data = defaultdict(list)
 
@@ -63,13 +68,14 @@ def start_run(run_input, seeds, out_path):
                    start_date,
                    census_day,
                    out_path,
+                   out_file,
                    max_output_file_size)
 
     # and run it
     env.run(until=sim_hours)
 
     # write the output to csv files
-    hp.write_output(output_data, out_path, run_input['run id'])
+    hp.write_output(output_data, out_path, out_file)
 
 
 def produce_default_output():
@@ -85,10 +91,13 @@ def produce_default_output():
     post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
 
     # do we always want to select this data frame - yes for the default output
-    default_run = '1'
-    df1 = pandas_data['Return_sent'][default_run]
-    df2 = pandas_data['hh_record'][default_run]
-    start_date = pandas_data['key info'][default_run].start_date[0]
+    glob_folder = os.path.join('outputs', 'hh_record', '*.csv')
+    file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+
+    default_key = str(file_list[0].split(os.path.sep)[-1])[:-4]
+    df1 = pandas_data['Return_sent'][default_key]
+    df2 = pandas_data['hh_record'][default_key]
+    start_date = pandas_data['key info'][default_key].start_date[0]
     start_date = dt.date(*map(int, start_date.split('-')))
 
     # produce return chart over time
@@ -106,7 +115,7 @@ def produce_default_output():
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     multiple_processors = True
     freeze_support()
 
@@ -120,8 +129,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_smaller.JSON'
-
+        file_name = 'inputs/CCA_all.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -138,6 +146,7 @@ if __name__ == '__main__':
     if len(output_path) < 1:
         outputs = 'outputs'
         output_path = os.path.join(os.getcwd(), outputs)
+        out_filename = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
 
     try:
         if not os.path.isdir(output_path):
@@ -178,15 +187,16 @@ if __name__ == '__main__':
 
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    output_JSON_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     print(st)
 
     # different run methods - use single processor for debugging
     if multiple_processors:
         pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path), repeat(out_filename)))
     else:
         for i in range(len(run_list)):
-            start_run(run_list[i], seed_list[i], output_path)
+            start_run(run_list[i], seed_list[i], output_path, out_filename)
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:
@@ -199,7 +209,6 @@ if __name__ == '__main__':
             del input_data[run]['run id']
             del input_data[run]['rep id']
 
-        output_JSON_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)
 

@@ -157,7 +157,7 @@ def beta_dist(rep, alpha, beta, sim_days_left):
   #  return response_date_time_hours
 
 
-def write_output(output_data, out_path, run_input_id):
+def write_output(output_data, out_path, filename):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
     l.acquire()
@@ -166,12 +166,12 @@ def write_output(output_data, out_path, run_input_id):
         if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
             os.mkdir(out_path + '/{}'.format(row) + '/')
         # test here if file exists, in no create headers if yes don't
-        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv'):
-            with open(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv', 'a', newline='') as f_output:
+        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv'):
+            with open(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv', 'a', newline='') as f_output:
                 csv_output = csv.writer(f_output)
                 csv_output.writerow(list(output_data[row][0]._fields))
 
-        with open(out_path + '/{}'.format(row) + '/' + str(run_input_id) + '.csv', 'a', newline='') as f_output:
+        with open(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv', 'a', newline='') as f_output:
             csv_output = csv.writer(f_output)
             for data_row in output_data[row]:
                 rows = list(data_row)
@@ -233,12 +233,12 @@ def set_household_response_time(rep, input_data, hh_type, digital):
 
     final_response_time = (response_day*24) + day_response_time
 
-    with open('sampled_data.csv', 'a') as fp:
-        writer = csv.writer(fp)
-        writer.writerow([final_response_time])
+    # comment out if do not need to check sampled data is correct
+    # with open('sampled_data.csv', 'a') as fp:
+    #     writer = csv.writer(fp)
+    #     writer.writerow([final_response_time])
 
-
-        fp.close()
+    #    fp.close()
 
     return final_response_time
 

@@ -11,6 +11,71 @@ from geopy.distance import great_circle
 import datetime
 
 
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 10):
+    """config function used to split each enumeration district into separate runs. Takes a JSON file as a
+    template and csv input file with info on the enumeration districts - which have been built on the
+    assumption the workload should be approximately even."""
+
+    # this will hold the new JSON file data
+    output_data = defaultdict(dict)
+
+    # open a JSON file to use as template
+    with open(input_JSON) as data_file:
+        input_data = json.load(data_file)
+
+    # template (a dict) in this case is the level under the top level key
+    run_template = input_data['1']
+    # district level template
+    district_template = run_template['districts']['1']
+    # delete the current district in the template
+    del run_template["districts"]['1']
+
+    # read in the csv cca data
+    with open(input_csv, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)
+
+        cca_data = list(reader)
+
+    # get a unique list of cca's
+    cca_unique = set()
+    for row in cca_data:
+        cca_unique.add(row[0])
+
+    # may be better here to convert to a list of named tuples then can refer to keys by name rather than row[x] etc...
+
+    # then run through each row adding a new run for each unique CCA
+    for row in cca_data:
+
+        # if the cca is not yet in the output data add it
+        if not row[0] in output_data:
+            output_data[row[0]] = copy.deepcopy(run_template)
+            # add a new district
+            output_data[row[0]]['districts'][row[0]] = copy.deepcopy(district_template)
+            # set area to zero
+            output_data[row[0]]['districts'][row[0]]['district_area'] = 0
+
+        # now add the hh for the current row increasing the area as well
+        hh_key = "htc" + row[4]
+        # if cca_makeup not defined add
+        if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
+            # hh type not in cca so add
+            output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
+
+        # then add the actual data
+        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
+        output_data[row[0]]['districts'][row[0]]['district_area'] += float(row[5])
+        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
+
+    # for each of the new districts add some CO...
+    list_of_runs = sorted(list(output_data.keys()), key=str)
+    for run in list_of_runs:
+        output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
+
+    # output a JSON file
+    with open(os.path.join(output_JSON), 'w') as outfile:
+            json.dump(output_data, outfile, indent=4, sort_keys=True)
+
 # generate new runs from a template and source csv
 def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_name, hh_per_co = []):
     # read in JSON file
@@ -201,6 +266,8 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
         input_data[run_counter]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
         input_data[run_counter]['districts'][row[0]]['district_area'] += float(row[5])
 
+
+    # this seems to work out number of CO required according to passed ratio...
     list_of_new_districts = sorted(list(input_data[run_counter]['districts'].keys()), key=str)
 
     for distr in list_of_new_districts:
@@ -220,7 +287,7 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
         # could split between early and late here??
         input_data[run_counter]['districts'][distr]['census officer']['standard']['number'] = co_number
 
-            # output a JSON file
+    # output a JSON file
     with open(os.path.join(output_path), 'w') as outfile:
             json.dump(input_data, outfile, indent=4, sort_keys=True)
 
@@ -339,18 +406,18 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below sets input and output paths for creation of CCA csv summary
 #ratios = [1612, 1312, 725, 487, 362]
-ratios = [1200, 1000, 600, 375, 280]
-input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
-output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
-create_cca_data(input_csv_path, output_csv_path, ratios)
+#ratios = [1200, 1000, 600, 375, 280]
+#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
+#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
+#create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.JSON')
-generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.JSON')
+#generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
-
+generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
 
 

@@ -10,6 +10,7 @@ import math
 from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
+import dask
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
@@ -79,7 +80,7 @@ def csv_to_pandas(output_path, output_type):
 
             # for each file (sim run) add to dictionary for that type of output
             for file in file_list:
-                file_name = file.split(os.path.sep)[-1][0]
+                file_name = file.split(os.path.sep)[-1][:-4]
                 data_dict[folder_name][file_name] = pd.read_csv(file, header=0)  # add each run to dict
     return data_dict
 
@@ -91,6 +92,7 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     # create bins and group names to use
     bin_values = np.arange(start, end + step, step)
     group_names = np.arange(start, end, step)
+    row_names = list(df[geog].unique())
 
     # filter df to only have correct entries
     if resp_type == 'digital':
@@ -106,12 +108,14 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     # calculate the cum sum of the totals
     cat_sum = cat_sum.groupby(level=[0, 2]).cumsum().reset_index()
     cat_sum.rename(columns={0: 'count'}, inplace=True)
-    cat_sum = cat_sum.groupby(['LA', 'categories'])['count'].mean().reset_index()
+    cat_sum = cat_sum.groupby([geog, 'categories'])['count'].mean().reset_index()
 
     # pivot it so the categories become the columns
     cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='count')
+
     # and then add back in any missing categories and fill the gaps
     cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1).replace('Nan', 0, regex=True)
+    cat_sum_flipped = cat_sum_flipped.reindex(index=geog, columns=group_names).ffill(axis=0).replace('Nan', 0, regex=True)
 
     return cat_sum_flipped
 
@@ -325,6 +329,8 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
         for item in drop_list:
             df1 = df1.drop(df1[(df1.action == item)].index).copy()
 
+        print('passive items dropped')
+
     # do the below for each rep...
     counts_list = []
     reps = df1['rep'].max()
@@ -335,8 +341,9 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
 
         # for each rep and LSOA or other...
         for item in df1[filter_type].unique():
-            len_df1 = len(df1[(df1[filter_type] == item) & (df1['rep'] == i)].copy())
-            len_df2 = len(df2[(df2[filter_type] == item) & (df2['rep'] == i)].copy())
+            len_df1 = len(df1[(df1[filter_type] == item) & (df1['rep'] == i)])
+            len_df2 = len(df2[(df2[filter_type] == item) & (df2['rep'] == i)])
+            print(item)
 
             output_list.append((len_df1 / len_df2) * 100)
 
@@ -425,17 +432,30 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all'):
 
 
 
-#output_path = os.path.join(os.getcwd(), 'outputs')
-#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
+output_path = os.path.join(os.getcwd(), 'outputs')
+pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 
-#df1 = pandas_data['Return_sent']['1']
-#df2 = pandas_data['hh_record']['1']
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'])
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper')
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
 
-#start_date = pandas_data['key info']['2'].start_date[0]
-#start_date = dt.date(*map(int, start_date.split('-')))
-#produce_return_charts(df1, df2, 'active', 'passive', start_date, ' returns.html')
+# do we always want to select this data frame - yes for the default output
+glob_folder = os.path.join('outputs', 'hh_record', '*.csv')
+file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
-#df3 = pandas_data['Return_sent']['3']
-#df4 = pandas_data['hh_record']['3']
+default_key = str(file_list[0].split(os.path.sep)[-1])[:-4]
+df1 = pandas_data['Return_sent'][default_key]
+df2 = pandas_data['hh_record'][default_key]
+start_date = pandas_data['key info'][default_key].start_date[0]
+start_date = dt.date(*map(int, start_date.split('-')))
 
-#waterfall([df1, df2, 'S1', False], [df3, df4, 'S2', False], bins=[65, 105, 5])
+# produce return chart over time
+#produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns ' + default_key + '.html')
+
+# example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
+# df3 = pandas_data['Return_sent']['2']
+# df4 = pandas_data['hh_record']['2']
+# post_process.produce_return_charts(df3, df4, '  returns run 2.html')
+
+# produce comparison of final results
+waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])

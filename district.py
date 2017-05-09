@@ -192,23 +192,25 @@ class District(object):
                             else:
                                 time_to_use = hh_action.time + hh_input_data['delay']['paper']
 
-                            self.rep.output_data['Return_received'].append(oo.generic_output(self.rep.reps,
-                                                                                             self.name,
-                                                                                             hh_geog.la,
-                                                                                             hh_geog.lsoa,
-                                                                                             hh_action.digital,
-                                                                                             hh_type,
-                                                                                             self.rep.total_hh,
-                                                                                             time_to_use))
+                            if oo.record_return_received:
+                                self.rep.output_data['Return_received'].append(oo.generic_output(self.rep.reps,
+                                                                                                 self.name,
+                                                                                                 hh_geog.la,
+                                                                                                 hh_geog.lsoa,
+                                                                                                 hh_action.digital,
+                                                                                                 hh_type,
+                                                                                                 self.rep.total_hh,
+                                                                                                 time_to_use))
 
-                            self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
-                                                                                       self.name,
-                                                                                       hh_geog.la,
-                                                                                       hh_geog.lsoa,
-                                                                                       hh_action.digital,
-                                                                                       hh_type,
-                                                                                       self.rep.total_hh,
-                                                                                       time_to_use))
+                            if oo.record_responded:
+                                self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
+                                                                                           self.name,
+                                                                                           hh_geog.la,
+                                                                                           hh_geog.lsoa,
+                                                                                           hh_action.digital,
+                                                                                           hh_type,
+                                                                                           self.rep.total_hh,
+                                                                                           time_to_use))
                     else:
                         # create a household instance passing initial state
                         self.households.append(household.Household(self.rep,
