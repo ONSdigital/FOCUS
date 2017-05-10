@@ -340,7 +340,6 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
         for item in df1[filter_type].unique():
             len_df1 = len(df1[(df1[filter_type] == item) & (df1['rep'] == i)])
             len_df2 = len(df2[(df2[filter_type] == item) & (df2['rep'] == i)])
-            print(item)
 
             output_list.append((len_df1 / len_df2) * 100)
 
@@ -361,14 +360,25 @@ def waterfall(s1, s2, bins):
      strategies. s1, s2 are lists that contain the data frames to be used for each output(strategy) as well as the
      name of the strategy and whether it is the special case of the passive option"""
 
+    # aff counts
     # s1[x] -  are now locations of data...
+    # loop between the files aggregating by LSOA as you go...
+    # produces a count of the number of LSOAs (on average) in each cat
+    # for each loop just add...
 
-    # lopp between the files aggregating by LSOA as you go...
+    s1_all = pd.Series()
+    s2_all = pd.Series()
 
-    input1 = response_rate(s1[0], s1[1], bins, passive=s1[3])
-    input2 = response_rate(s2[0], s2[1], bins, passive=s2[3])
+    list_of_ed = s1[0].keys()
 
-    combined_list = pd.concat([input1, input2], axis=1)
+    for ed in list_of_ed:
+        input1 = response_rate(s1[0][ed], s1[1][ed], bins, passive=s1[3])
+        input2 = response_rate(s2[0][ed], s2[1][ed], bins, passive=s2[3])
+        # add the series together - need to check sum is correct!!!
+        s1_all = s1_all.add(input1, fill_value=0)
+        s2_all = s2_all.add(input2, fill_value=0)
+
+    combined_list = pd.concat([s1_all, s2_all], axis=1)
     combined_list.reset_index(level=0, inplace=True)
     combined_list.columns = ['category', s1[2], s2[2]]
 
@@ -454,6 +464,10 @@ pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded
 df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Responded']
 
+
+df1 = pandas_data['hh_record']['1']
+df2 = pandas_data['Responded']['1']
+
 # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
 # df3 = pandas_data['Return_sent']['2']
 # df4 = pandas_data['hh_record']['2']
@@ -461,26 +475,27 @@ df2_loc = pandas_data['Responded']
 
 # produce comparison of final results
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
-waterfall([df2_loc, df2_loc, 'passive', True], [df1_loc, df2_loc, 'active', False], bins=[65, 105, 5])
+# passive option should have the same data passed for each entry eg...
+waterfall([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
 
 
 # do we always want to select this data frame - yes for the default output
-glob_folder = os.path.join('outputs', '2017-05-10 10.21.56', 'hh_record', '*.csv')
-file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+#glob_folder = os.path.join('outputs', '2017-05-10 10.21.56', 'hh_record', '*.csv')
+#file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
+#df1 = pd.DataFrame()
+#df2 = pd.DataFrame()
 
-for file in file_list:
-    default_key = str(file.split(os.path.sep)[-1])[:-4]
-    temp_df1 = (pandas_data['Return_sent'][default_key])
-    df1 = pd.concat([df1, temp_df1])
-    temp_df2 = pandas_data['hh_record'][default_key]
-    df2 = pd.concat([df2, temp_df2])
+#for file in file_list:
+#    default_key = str(file.split(os.path.sep)[-1])[:-4]
+#    temp_df1 = (pandas_data['Return_sent'][default_key])
+#    df1 = pd.concat([df1, temp_df1])
+#    temp_df2 = pandas_data['hh_record'][default_key]
+#    df2 = pd.concat([df2, temp_df2])
 
 
-start_date = pandas_data['key info'][default_key].start_date[0]
-start_date = dt.date(*map(int, start_date.split('-')))
+#start_date = pandas_data['key info'][default_key].start_date[0]
+#start_date = dt.date(*map(int, start_date.split('-')))
 
 #produce return chart over time  - pass df of data to use....
 #produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns ' + current_scenario + '.html')
