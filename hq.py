@@ -38,7 +38,7 @@ def ret_rec(household, rep):
 
     # checks size of output and writes to file if too large
     if (h.dict_size(rep.output_data)) > 1000000:
-        h.write_output(rep.output_data, rep.output_path, rep.out_filename)
+        h.write_output(rep.output_data, rep.output_path, rep.run)
 
     yield rep.env.timeout(0)
     # so returned and we know it! remove from simulation??

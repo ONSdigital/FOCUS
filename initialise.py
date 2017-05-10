@@ -13,7 +13,7 @@ import call_profiles as cp
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, sim_hours, start_date, census_day, out_path, out_filename,
+    def __init__(self, env, input_data, output_data, rnd, sim_hours, start_date, census_day, out_path,
                  max_output_file_size):
 
         # values passed to the class
@@ -25,7 +25,6 @@ class Rep(object):
         self.start_date = start_date
         self.census_day = census_day
         self.output_path = out_path
-        self.out_filename = out_filename
         self.max_output_file_size = max_output_file_size
 
         # variables created within the class - belonging to it
@@ -109,7 +108,7 @@ class Rep(object):
 
             # checks size of output file and writes to file if too large
             if (h.dict_size(self.output_data)) >= self.max_output_file_size:
-                h.write_output(self.output_data, self.output_path, self.out_filename)
+                h.write_output(self.output_data, self.output_path, self.run)
 
             self.districts.append(district.District(self,
                                                     distr))

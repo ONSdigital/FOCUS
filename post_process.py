@@ -10,7 +10,6 @@ import math
 from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
-import dask
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
@@ -73,7 +72,7 @@ def csv_to_pandas(output_path, output_type):
         folder_name = folder.split(os.path.sep)[-2]
         if folder_name in output_type:
 
-            glob_folder = os.path.join('outputs', folder_name, '*.csv')
+            glob_folder = os.path.join(output_path, folder_name, '*.csv')
             file_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
 
             data_dict[folder_name] = defaultdict(list)
@@ -92,7 +91,6 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     # create bins and group names to use
     bin_values = np.arange(start, end + step, step)
     group_names = np.arange(start, end, step)
-    row_names = list(df[geog].unique())
 
     # filter df to only have correct entries
     if resp_type == 'digital':
@@ -103,19 +101,17 @@ def cumulative_sum(df, start, end, step, geog, resp_type='all'):
 
     # add a new column to passed data frame containing the categories the entry belongs too
     df['categories'] = pd.cut(df['time'], bin_values, labels=group_names)
-    # group by each combination of district and category (and rep?) and count the number of each category
+    # group by each combination of district and category and count the number of each category
     cat_sum = df.groupby([geog, 'categories', 'rep'])['categories'].size()
-    # calculate the cum sum of the totals
+    # calculate the cum sum of the totals for each rep
     cat_sum = cat_sum.groupby(level=[0, 2]).cumsum().reset_index()
     cat_sum.rename(columns={0: 'count'}, inplace=True)
+    # and then take the mean
     cat_sum = cat_sum.groupby([geog, 'categories'])['count'].mean().reset_index()
-
     # pivot it so the categories become the columns
     cat_sum_flipped = cat_sum.pivot(index=geog, columns='categories', values='count')
-
     # and then add back in any missing categories and fill the gaps
     cat_sum_flipped = cat_sum_flipped.reindex(columns=group_names).ffill(axis=1).replace('Nan', 0, regex=True)
-    cat_sum_flipped = cat_sum_flipped.reindex(index=geog, columns=group_names).ffill(axis=0).replace('Nan', 0, regex=True)
 
     return cat_sum_flipped
 
@@ -401,56 +397,70 @@ def waterfall(s1, s2, bins):
     plt.savefig(output_path)
 
 
-def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all'):
+def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scenario='current'):
     """returns at the passed level the overall returns by day including averages for E&W. Used for
      producing data in the correct format for the data vis team map"""
 
     # gets list of runs
     runs = sorted(list(hh_record_df.keys()))
 
+    int_df = pd.DataFrame()
+    int_hh_df = pd.DataFrame()
+
+    # could be runs or enumeration districts
     for current_run in runs:
 
         # calculate the total number of households in each area and in total -  same for each rep so use rep 1
-        hh_record_df = hh_record_df[str(current_run)]
-        hh_record_df = hh_record_df[hh_record_df['rep'] == 1].copy()
-        hh_count = hh_record_df.groupby(geog).size()  # hh per area
+        hh_record_df_temp = hh_record_df[str(current_run)].copy()
+        hh_record_df_temp = hh_record_df_temp[hh_record_df_temp['rep'] == 1].copy()
+        hh_count = hh_record_df_temp.groupby(geog).size()  # hh per area in current ed
         hh_totals = hh_count.sum()  # total of households
 
         # produce cumulative summary of overall returns
         cumulative_returns = cumulative_sum(returns_df[str(current_run)], 0, 1824, 24, geog, resp_type)
-        hh_count.index = cumulative_returns.index
-        cumulative_returns_per = cumulative_returns.div(hh_count, axis='index')
-        cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary run " +
-                                                   current_run + ".csv"))
+        int_df = int_df.add(cumulative_returns, fill_value=0)
 
-        # also need an E+W average for each
-        overall_returns = cumulative_returns.sum(axis=0)
-        average_returns = (overall_returns / hh_totals) * 100
-        average_returns = pd.DataFrame(average_returns).T
-        average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " average returns run " +
-                                            current_run + ".csv"))
+        # but also add up the totals for the household counts
+        int_hh_df = int_hh_df.add(pd.DataFrame(hh_count),  fill_value=0)
+
+    print(int_df)
+    print(int_hh_df)
+    # then after all runs/ed's div by totals...and clac average
+    int_hh_df.index = int_df.index
+    cumulative_returns_per = int_df.div(int_hh_df, axis='index')
+    cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary run " +
+                                               scenario + ".csv"))
+
+    # also need an E+W average for each
+    overall_returns = int_df.sum(axis=0)
+    total_hh = int_hh_df.sum(axis=0)
+    average_returns = (overall_returns / total_hh) * 100
+    average_returns = pd.DataFrame(average_returns).T
+    average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " average returns " +
+                                        scenario + ".csv"))
 
 
-
-output_path = os.path.join(os.getcwd(), 'outputs')
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-10 09.09.01')
+current_scenario = output_path.split('/')[-1]
 pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'])
+
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper')
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
 
 # do we always want to select this data frame - yes for the default output
-glob_folder = os.path.join('outputs', 'hh_record', '*.csv')
-file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+#glob_folder = os.path.join('outputs', 'hh_record', '*.csv')
+#file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
-default_key = str(file_list[0].split(os.path.sep)[-1])[:-4]
-df1 = pandas_data['Return_sent'][default_key]
-df2 = pandas_data['hh_record'][default_key]
-start_date = pandas_data['key info'][default_key].start_date[0]
-start_date = dt.date(*map(int, start_date.split('-')))
+#default_key = str(file_list[0].split(os.path.sep)[-1])[:-4]
+#df1 = pandas_data['Return_sent'][default_key]
+#df2 = pandas_data['hh_record'][default_key]
+#start_date = pandas_data['key info'][default_key].start_date[0]
+#start_date = dt.date(*map(int, start_date.split('-')))
 
 # produce return chart over time
-#produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns ' + default_key + '.html')
+# produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns ' + default_key + '.html')
 
 # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
 # df3 = pandas_data['Return_sent']['2']
@@ -458,4 +468,4 @@ start_date = dt.date(*map(int, start_date.split('-')))
 # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
 # produce comparison of final results
-waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+# waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])

@@ -157,7 +157,7 @@ def beta_dist(rep, alpha, beta, sim_days_left):
   #  return response_date_time_hours
 
 
-def write_output(output_data, out_path, filename):
+def write_output(output_data, out_path, ed_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
     l.acquire()
@@ -166,12 +166,12 @@ def write_output(output_data, out_path, filename):
         if not os.path.isdir(out_path + '/{}'.format(row) + '/'):
             os.mkdir(out_path + '/{}'.format(row) + '/')
         # test here if file exists, in no create headers if yes don't
-        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv'):
-            with open(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv', 'a', newline='') as f_output:
+        if not os.path.isfile(out_path + '/{}'.format(row) + '/' + str(ed_id) + '.csv'):
+            with open(out_path + '/{}'.format(row) + '/' + str(ed_id) + '.csv', 'a', newline='') as f_output:
                 csv_output = csv.writer(f_output)
                 csv_output.writerow(list(output_data[row][0]._fields))
 
-        with open(out_path + '/{}'.format(row) + '/' + str(filename) + '.csv', 'a', newline='') as f_output:
+        with open(out_path + '/{}'.format(row) + '/' + str(ed_id) + '.csv', 'a', newline='') as f_output:
             csv_output = csv.writer(f_output)
             for data_row in output_data[row]:
                 rows = list(data_row)

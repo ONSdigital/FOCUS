@@ -17,10 +17,10 @@ import helper as hp
 import pandas as pd
 import glob
 
-l = Lock()  # global declaration...can I avoid this?
+l = Lock()
 
 
-def start_run(run_input, seeds, out_path, out_file):
+def start_run(run_input, seeds, out_path):
 
     max_output_file_size = 100000000
     # pull out length of sim for current run
@@ -43,10 +43,10 @@ def start_run(run_input, seeds, out_path, out_file):
     if not os.path.isdir(os.path.join(out_path, 'key info')):
         os.mkdir(os.path.join(out_path, 'key info'))
 
-    if not os.path.isfile(os.path.join(out_path, 'key dates', out_file + ".csv")):
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', out_file + ".csv"))
+    if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
     else:
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', out_file + ".csv"), mode='a',
+        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
                                        header=False)
 
     l.release()
@@ -68,14 +68,13 @@ def start_run(run_input, seeds, out_path, out_file):
                    start_date,
                    census_day,
                    out_path,
-                   out_file,
                    max_output_file_size)
 
     # and run it
     env.run(until=sim_hours)
 
     # write the output to csv files
-    hp.write_output(output_data, out_path, out_file)
+    hp.write_output(output_data, out_path, run_input['run id'])
 
 
 def produce_default_output():
@@ -129,7 +128,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_all.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -145,8 +144,8 @@ if __name__ == '__main__':
     output_path = input('Enter output path or press enter to use default: ')
     if len(output_path) < 1:
         outputs = 'outputs'
-        output_path = os.path.join(os.getcwd(), outputs)
-        out_filename = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+        sub_path_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+        output_path = os.path.join(os.getcwd(), outputs, sub_path_name)
 
     try:
         if not os.path.isdir(output_path):
@@ -193,10 +192,10 @@ if __name__ == '__main__':
     # different run methods - use single processor for debugging
     if multiple_processors:
         pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path), repeat(out_filename)))
+        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
     else:
         for i in range(len(run_list)):
-            start_run(run_list[i], seed_list[i], output_path, out_filename)
+            start_run(run_list[i], seed_list[i], output_path)
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:
