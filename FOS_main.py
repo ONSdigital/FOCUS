@@ -31,8 +31,7 @@ def start_run(run_input, seeds, out_path):
     census_day = (census_date - start_date).days
 
     # write key dates/info to a csv for later use in post processing
-    temp_list = [{'rep': run_input['rep id'],
-                  'start_date': start_date,
+    temp_list = [{'start_date': start_date,
                   'end_date': end_date,
                   'census_date': census_date,
                   'census_day': census_day,
@@ -128,7 +127,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_small.JSON'
+        file_name = 'inputs/CCA_all.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

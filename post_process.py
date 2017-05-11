@@ -177,7 +177,6 @@ def bin_records(input_df, start_date, drop_filter=[]):
     """takes files and produces binned data by day. The categories are set from the passed start date"""
 
     # drop any rows that are not relevant - only applicable when using "hh record"
-    input_df.to_csv('test.csv')
     if drop_filter:
         for item in drop_filter:
             input_df = input_df[input_df.action != item]
@@ -204,6 +203,7 @@ def bin_records(input_df, start_date, drop_filter=[]):
 
         temp_df[str(i)] = pd.cut(temp_df['time'], bins, labels=group_names)
         counts = pd.value_counts(temp_df[str(i)])
+        # add back in missing dates??
         counts = pd.DataFrame(counts)
 
         counts_df = pd.concat([counts_df, counts], axis=1)
@@ -289,28 +289,67 @@ def combined_chart(input1, input2, label1, label2, filename):
     save(p)
 
 
-def produce_return_charts(df1, df2, label1, label2, start_date, filename, filter_type='E&W'):
+def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, filter_type='E&W'):
     """Produces for a given strategy (run) the difference between the passive and the active. ie, the self
     response and response with simulated interventions"""
 
+    # if location of dataframes passed rather than df itself
+    # for each run/ed
+
+    int_s1 = pd.Series()
+    int_s2 = pd.Series()
+
+    int_df1 = pd.DataFrame()
+    int_df2 = pd.DataFrame()
+
+    list_of_runs = df1.keys()
+
     if filter_type == 'E&W':
         # just use the whole df
+        for run in list_of_runs:
 
-        series1 = bin_records(df1, start_date)
-        print(len(df2))
-        series2 = bin_records(df2, start_date, ['do_nothing', 'help'])
+            start_date = dt.date(*map(int, start_date_df[run]['start_date'][0].split('-')))
+
+            series1 = bin_records(df1[run], start_date, ['do_nothing', 'help'])
+            series2 = bin_records(df2[run], start_date)
+
+            int_s1 = int_s1.add(series1, fill_value=0)
+            int_s2 = int_s2.add(series2, fill_value=0)
+
+        # returns series objects with the average (of reps) number of returns for each ed
+        # add to master series
         filename = filter_type + filename
-        combined_chart(series1, series2, label1, label2, filename)
+        combined_chart(int_s1, int_s2, label1, label2, filename)
 
     else:
-        # produce for each area
-        for district in df1[filter_type].unique():
-            # extract just the current LA from the df and pass that to the functions
+
+        for run in list_of_runs:
+
+            start_date = dt.date(*map(int, start_date_df[run]['start_date'][0].split('-')))
+            # produce for each area/type etc...
+            for district in df1[run][filter_type].unique():
+
+                df1_temp = df1[run][df1[run][filter_type] == district].copy()
+                df2_temp = df2[run][df2[run][filter_type] == district].copy()
+
+                series1 = bin_records(df1_temp, start_date, ['do_nothing', 'help'])
+                series2 = bin_records(df2_temp, start_date)
+
+                series1.name = district
+                series2.name = district
+
+                # above returns numbers in each cat...change col name to LA?LSOA etc
+                int_df1 = int_df1.add(pd.DataFrame(series1), fill_value=0)
+                int_df2 = int_df2.add(pd.DataFrame(series2), fill_value=0)
+
+        # get col names
+
+        for district in list(int_df1):
+
+            series1 = pd.Series(int_df1[district])
+            series2 = pd.Series(int_df2[district])
+
             filename_temp = 'ed ' + str(district) + " " + filename
-            df1_temp = df1[df1[filter_type] == district].copy()
-            df2_temp = df2[df2[filter_type] == district].copy()
-            series2 = bin_records(df2_temp, start_date, ['do_nothing', 'help'])
-            series1 = bin_records(df1_temp, start_date)
             combined_chart(series1, series2, label1, label2, filename_temp)
 
 
@@ -325,8 +364,6 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
 
         for item in drop_list:
             df1 = df1.drop(df1[(df1.action == item)].index).copy()
-
-        print('passive items dropped')
 
     # do the below for each rep...
     counts_list = []
@@ -359,12 +396,6 @@ def waterfall(s1, s2, bins):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieved from two
      strategies. s1, s2 are lists that contain the data frames to be used for each output(strategy) as well as the
      name of the strategy and whether it is the special case of the passive option"""
-
-    # aff counts
-    # s1[x] -  are now locations of data...
-    # loop between the files aggregating by LSOA as you go...
-    # produces a count of the number of LSOAs (on average) in each cat
-    # for each loop just add...
 
     s1_all = pd.Series()
     s2_all = pd.Series()
@@ -441,7 +472,7 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
     # then after all runs/ed's div by totals...and clac average
     int_hh_s.index = int_df.index
     cumulative_returns_per = int_df.div(int_hh_s, axis='index')
-    cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary run " +
+    cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary scenario " +
                                                scenario + ".csv"))
 
     # also need an E+W average for each
@@ -453,34 +484,30 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
                                         scenario + ".csv"))
 
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-10 10.21.56')
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-11 12.42.59')
 current_scenario = output_path.split('/')[-1]
 pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
+print('data loaded')
 
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], scenario=current_scenario)
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper')
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LSOA', scenario=current_scenario)
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper', scenario=current_scenario)
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital', scenario=current_scenario)
 
-df1_loc = pandas_data['hh_record']
-df2_loc = pandas_data['Responded']
+#print('summary complete')
 
+#df1_loc = pandas_data['hh_record']
+#df2_loc = pandas_data['Responded']
 
-df1 = pandas_data['hh_record']['1']
-df2 = pandas_data['Responded']['1']
-
-# example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
-# df3 = pandas_data['Return_sent']['2']
-# df4 = pandas_data['hh_record']['2']
-# post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
 # produce comparison of final results
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
 # passive option should have the same data passed for each entry eg...
-waterfall([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
+#waterfall([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
 
+#print('waterfall produced')
 
 # do we always want to select this data frame - yes for the default output
-#glob_folder = os.path.join('outputs', '2017-05-10 10.21.56', 'hh_record', '*.csv')
+#glob_folder = os.path.join('outputs', '2017-05-11 09.36.10', 'hh_record', '*.csv')
 #file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
 #df1 = pd.DataFrame()
@@ -490,14 +517,18 @@ waterfall([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', Fals
 #    default_key = str(file.split(os.path.sep)[-1])[:-4]
 #    temp_df1 = (pandas_data['Return_sent'][default_key])
 #    df1 = pd.concat([df1, temp_df1])
-#    temp_df2 = pandas_data['hh_record'][default_key]
-#    df2 = pd.concat([df2, temp_df2])
+ #   temp_df2 = pandas_data['hh_record'][default_key]
+ #   df2 = pd.concat([df2, temp_df2])
 
 
 #start_date = pandas_data['key info'][default_key].start_date[0]
 #start_date = dt.date(*map(int, start_date.split('-')))
 
+#df0_loc = pandas_data['key info']
+#df1_loc = pandas_data['hh_record']
+#df2_loc = pandas_data['Return_sent']
+
 #produce return chart over time  - pass df of data to use....
-#produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns ' + current_scenario + '.html')
+#produce_return_charts(df1_loc, df2_loc, 'Passive', 'Active', df0_loc, ' returns ' + current_scenario + '.html', filter_type='hh_type')
 
-
+#print('return complete')

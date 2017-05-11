@@ -11,7 +11,7 @@ from geopy.distance import great_circle
 import datetime
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 10):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
     """config function used to split each enumeration district into separate runs. Takes a JSON file as a
     template and csv input file with info on the enumeration districts - which have been built on the
     assumption the workload should be approximately even."""
@@ -413,8 +413,8 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
