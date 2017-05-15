@@ -392,7 +392,7 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
     return averages
 
 
-def waterfall(s1, s2, bins):
+def pyramid(s1, s2, bins):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieved from two
      strategies. s1, s2 are lists that contain the data frames to be used for each output(strategy) as well as the
      name of the strategy and whether it is the special case of the passive option"""
@@ -484,12 +484,44 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
                                         scenario + ".csv"))
 
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-11 12.42.59')
-current_scenario = output_path.split('/')[-1]
-pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
-print('data loaded')
+def intervention_summary(data_path, data_types=(), filter_type = 'LA'):
+    """data_loc is the uploaded data location. The types are the folders to include in the summary. For larger
+    data sets each type may have to be loaded and read separately. Dask or MongoDB...or something else"""
+    for data_type in data_types:
+        pandas_data = csv_to_pandas(data_path, [data_type])
 
-returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LSOA', scenario=current_scenario)
+        runs = sorted(list(pandas_data[data_type].keys()))
+
+        for current_run in runs:
+
+            # for each rep add up by the filter type the
+            hh_record_df_temp = hh_record_df_temp[hh_record_df_temp['rep'] == 1].copy()
+            hh_count = hh_record_df_temp.groupby(filter_type).size()  # hh per filter type
+            # then take average of reps
+
+
+
+
+
+
+
+    # Summerise totals
+    # load first type
+    # summerise type for each of the filters and divide by total
+    # column name is data_type
+    # row name is filter...
+
+
+
+
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-15 15.02.46')
+current_scenario = output_path.split('/')[-1]
+intervention_summary(output_path, data_types=('Visits', 'Visits_wasted'))
+
+#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
+#print('data loaded')
+
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LSOA', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital', scenario=current_scenario)
 
@@ -502,9 +534,9 @@ returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LSOA',
 # produce comparison of final results
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
 # passive option should have the same data passed for each entry eg...
-#waterfall([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
+#pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
 
-#print('waterfall produced')
+#print('pyramid produced')
 
 # do we always want to select this data frame - yes for the default output
 #glob_folder = os.path.join('outputs', '2017-05-11 09.36.10', 'hh_record', '*.csv')

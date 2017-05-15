@@ -107,7 +107,7 @@ def produce_default_output():
     # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
 
     # produce comparison of final results
-    post_process.waterfall([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
+    post_process.pyramid([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
 
 
 if __name__ == '__main__':
@@ -127,7 +127,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_all.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
