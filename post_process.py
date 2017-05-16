@@ -484,12 +484,14 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
 
 
 def intervention_summary(data_path, data_types=(), filter_type='LA'):
-    """data_loc is the uploaded data location. The types are the folders to include in the summary. For larger
-    data sets each type may have to be loaded and read separately. Dask or MongoDB...or something else"""
+    """data_path is the output data location. The types are the outputs to include in the summary. The first entry (
+    in the data_types tuple should be the data by which all the other data will be divided"""
 
     summary_df = pd.DataFrame()
 
     for data_type in data_types:
+
+        print(data_type)
         pandas_data = csv_to_pandas(data_path, [data_type])
 
         runs = sorted(list(pandas_data[data_type].keys()))
@@ -497,6 +499,7 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
         event_count_df = pd.DataFrame()
 
         for current_run in runs:
+            print(current_run)
 
             # for each rep add up by the filter type the number of events
             temp_df = pandas_data[data_type][current_run]
@@ -516,32 +519,52 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
 
     print(summary_df)
     # convert to percentages
-    summary_df = summary_df.div(summary_df[data_types[0]], axis='index')*100
+    summary_df = summary_df.div(summary_df[data_types[0]], axis=0)*100
     print(summary_df)
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-16 10.57.00')
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-16 16.10.34')
 current_scenario = output_path.split('/')[-1]
-intervention_summary(output_path, data_types=('Visit', 'Visit_wasted', 'Visit_success', 'Visit_contact'))
-intervention_summary(output_path, data_types=('Visit_postcard_posted', 'postcard_success'))
+
+intervention_summary(output_path, data_types=('pq_sent',
+                                              'pq_wasted',
+                                              'pq_success',
+                                              ), filter_type='LA')
+
+intervention_summary(output_path, data_types=('Visit',
+                                              'Visit_wasted',
+                                              'Visit_success',
+                                              'Visit_contact',
+                                              'Visit_unnecessary',
+                                              'Visit_out',
+                                              'Visit_failed',
+                                              'Visit_postcard_posted'), filter_type='digital')
+
+intervention_summary(output_path, data_types=('Visit_postcard_posted',
+                                              'postcard_success',
+                                              'postcard_wasted',
+                                              'postcard_unnecessary',
+                                              'postcard_received',
+                                              'postcard_failed'))
 
 
-#pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
-#print('data loaded')
 
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LSOA', scenario=current_scenario)
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper', scenario=current_scenario)
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital', scenario=current_scenario)
+pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
+print('data loaded')
+
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='hh_type', scenario=current_scenario)
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper', scenario=current_scenario)
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital', scenario=current_scenario)
 
 #print('summary complete')
 
-#df1_loc = pandas_data['hh_record']
-#df2_loc = pandas_data['Responded']
+df1_loc = pandas_data['hh_record']
+df2_loc = pandas_data['Responded']
 
 
 # produce comparison of final results
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
 # passive option should have the same data passed for each entry eg...
-#pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
+pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
 
 #print('pyramid produced')
 
@@ -563,11 +586,12 @@ intervention_summary(output_path, data_types=('Visit_postcard_posted', 'postcard
 #start_date = pandas_data['key info'][default_key].start_date[0]
 #start_date = dt.date(*map(int, start_date.split('-')))
 
-#df0_loc = pandas_data['key info']
-#df1_loc = pandas_data['hh_record']
-#df2_loc = pandas_data['Return_sent']
+
+df0_loc = pandas_data['key info']
+df1_loc = pandas_data['hh_record']
+df2_loc = pandas_data['Return_sent']
 
 #produce return chart over time  - pass df of data to use....
-#produce_return_charts(df1_loc, df2_loc, 'Passive', 'Active', df0_loc, ' returns ' + current_scenario + '.html', filter_type='hh_type')
+produce_return_charts(df1_loc, df2_loc, 'Passive', 'Active', df0_loc, ' returns ' + current_scenario + '.html', filter_type='hh_type')
 
 #print('return complete')

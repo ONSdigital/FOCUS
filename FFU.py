@@ -249,8 +249,8 @@ class CensusOfficer(object):
 
         yield self.env.timeout(self.input_data['visit_times']['query']/60)
 
-        # if digital or have already responded skip straight to the outcome of the visit
-        if household.digital or household.return_sent:
+        # if digital, have already responded or can use paper skip straight to the outcome of the visit
+        if household.digital or household.return_sent or household.paper_allowed:
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
         # if not digital try to persuade them to complete online.

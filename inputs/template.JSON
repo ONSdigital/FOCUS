@@ -252,7 +252,7 @@
                                 },
                                 "default": {
                                     "help": 4,
-                                    "response": 2
+                                    "response": 78
                                 }
                             },
                             "reminder": {
@@ -822,6 +822,27 @@
                     }
                 },
                 "letter_phases": {
+                    "pq": {
+                        "blanket": 0,
+                        "delay": 48,
+                        "start_date": "2011, 5, 1",
+                        "targets": ["htc1",
+                            "htc2"],
+                        "time": 9
+                    },
+                    "reminder": {
+                        "blanket": 0,
+                        "delay": 48,
+                        "start_date": "2011, 4, 26",
+                        "targets": [
+                            "htc1",
+                            "htc2",
+                            "htc3",
+                            "htc4",
+                            "htc5"
+                        ],
+                        "time": 9
+                    }
                 },
                 "paper_trigger": 90,
                 "postal_delay": 24,

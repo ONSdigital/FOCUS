@@ -343,6 +343,17 @@ class Household(object):
     def receive_reminder(self, reminder_type):
         # a reminder has been received. This determines the outcome fo that reminder and if it was worthwhile.
 
+        if oo.record_reminder_received:
+            self.rep.output_data[reminder_type + '_received'].append(oo.reminder_received(self.rep.reps,
+                                                                                          self.district.name,
+                                                                                          self.la,
+                                                                                          self.lsoa,
+                                                                                          self.digital,
+                                                                                          self.hh_type,
+                                                                                          self.hh_id,
+                                                                                          self.env.now,
+                                                                                          reminder_type))
+
         if not self.resp_planned and reminder_type == 'pq':
             self.paper_allowed = True
 
@@ -381,17 +392,7 @@ class Household(object):
                                                                                                     self.hh_id,
                                                                                                     self.env.now,
                                                                                                     reminder_type))
-        else:
-            if oo.record_reminder_received:
-                self.rep.output_data[reminder_type + '_received'].append(oo.reminder_received(self.rep.reps,
-                                                                                              self.district.name,
-                                                                                              self.la,
-                                                                                              self.lsoa,
-                                                                                              self.digital,
-                                                                                              self.hh_type,
-                                                                                              self.hh_id,
-                                                                                              self.env.now,
-                                                                                              reminder_type))
+
 
         # now move on to the relevant action based on extracted values
         reminder_test = self.rnd.uniform(0, 100)
@@ -422,14 +423,14 @@ class Household(object):
         elif not self.responded:
             # nowt
             if oo.record_do_nothing:
-                self.output_data['Do_nothing'].append(oo.generic_output(self.rep.reps,
-                                                                        self.district.name,
-                                                                        self.la,
-                                                                        self.lsoa,
-                                                                        self.digital,
-                                                                        self.hh_type,
-                                                                        self.hh_id,
-                                                                        self.env.now))
+                self.output_data['postcard_failed'].append(oo.generic_output(self.rep.reps,
+                                                                             self.district.name,
+                                                                             self.la,
+                                                                             self.lsoa,
+                                                                             self.digital,
+                                                                             self.hh_type,
+                                                                             self.hh_id,
+                                                                             self.env.now))
 
         yield self.env.timeout(0)
 
