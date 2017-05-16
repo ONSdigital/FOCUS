@@ -343,7 +343,6 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
                 int_df2 = int_df2.add(pd.DataFrame(series2), fill_value=0)
 
         # get col names
-
         for district in list(int_df1):
 
             series1 = pd.Series(int_df1[district])
@@ -484,39 +483,47 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
                                         scenario + ".csv"))
 
 
-def intervention_summary(data_path, data_types=(), filter_type = 'LA'):
+def intervention_summary(data_path, data_types=(), filter_type='LA'):
     """data_loc is the uploaded data location. The types are the folders to include in the summary. For larger
     data sets each type may have to be loaded and read separately. Dask or MongoDB...or something else"""
+
+    summary_df = pd.DataFrame()
+
     for data_type in data_types:
         pandas_data = csv_to_pandas(data_path, [data_type])
 
         runs = sorted(list(pandas_data[data_type].keys()))
 
+        event_count_df = pd.DataFrame()
+
         for current_run in runs:
 
-            # for each rep add up by the filter type the
-            hh_record_df_temp = hh_record_df_temp[hh_record_df_temp['rep'] == 1].copy()
-            hh_count = hh_record_df_temp.groupby(filter_type).size()  # hh per filter type
-            # then take average of reps
+            # for each rep add up by the filter type the number of events
+            temp_df = pandas_data[data_type][current_run]
+            event_count = temp_df.groupby([filter_type, 'rep']).size().reset_index()  # events in ...
+            event_count.rename(columns={0: 'count'}, inplace=True)
+            # take mean of all reps
+            event_count = event_count.groupby([filter_type])['count'].mean()
+            event_count.name = current_run
+            # and add to dataframe
+            event_count_df = pd.concat([event_count_df, event_count], axis=1)
 
+        # across all areas calc the totals for that data type
+        event_count_totals = event_count_df.sum(axis=1)
+        event_count_totals.name = data_type
+        # add totals to df
+        summary_df = pd.concat([summary_df, event_count_totals], axis=1)
 
+    print(summary_df)
+    # convert to percentages
+    summary_df = summary_df.div(summary_df[data_types[0]], axis='index')*100
+    print(summary_df)
 
-
-
-
-
-    # Summerise totals
-    # load first type
-    # summerise type for each of the filters and divide by total
-    # column name is data_type
-    # row name is filter...
-
-
-
-
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-15 15.02.46')
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-16 10.57.00')
 current_scenario = output_path.split('/')[-1]
-intervention_summary(output_path, data_types=('Visits', 'Visits_wasted'))
+intervention_summary(output_path, data_types=('Visit', 'Visit_wasted', 'Visit_success', 'Visit_contact'))
+intervention_summary(output_path, data_types=('Visit_postcard_posted', 'postcard_success'))
+
 
 #pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
 #print('data loaded')

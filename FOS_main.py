@@ -115,14 +115,16 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = False
     multiple_processors = True
+    delete_old = True
     freeze_support()
 
-    # delete all old output files from default location except generated JSON files.
-    if os.path.isdir('outputs/'):
-        dirs = [x[0] for x in os.walk('outputs/')]
-        for d in dirs:
-            if d != 'outputs/':
-                shutil.rmtree(str(d))
+    # delete all old output files from default location on new run of sim if tag is True.
+    if delete_old:
+        if os.path.isdir('outputs/'):
+            dirs = os.listdir(os.path.join(os.getcwd(), 'outputs'))
+            for d in dirs:
+                if d != 'outputs/':
+                    shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
 
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
