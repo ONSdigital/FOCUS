@@ -322,13 +322,6 @@ class District(object):
         #return oo.initial_action('do_nothing', digital, 0)
 
 
-def least_busy_CO(district):
-
-    min_length = min([len(co.action_plan) for co in district.district_co])
-
-    coord = [co for co in district.district_co if len(co.action_plan) == min_length]
-
-    return coord[0]
 
 
 

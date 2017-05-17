@@ -233,7 +233,7 @@ class Household(object):
         # wait to determine if digital or paper preference
         yield self.env.timeout(current_ad.input_data['call_times']['query'] / 60)
 
-        if self.digital:
+        if self.digital or self.paper_allowed:
             # no need to persuade go straight to the outcome
             yield self.rep.env.process(self.phone_call_outcome(current_ad))
 
@@ -392,8 +392,6 @@ class Household(object):
                                                                                                     self.hh_id,
                                                                                                     self.env.now,
                                                                                                     reminder_type))
-
-
         # now move on to the relevant action based on extracted values
         reminder_test = self.rnd.uniform(0, 100)
 
@@ -408,7 +406,6 @@ class Household(object):
                                                                                             self.hh_id,
                                                                                             self.env.now,
                                                                                             reminder_type))
-
             # change to a start delayed at appropriate time depending on day....
             delay = h.get_time_of_return(self.env.now, self.rep)
             # yield self.env.process(self.household_returns(self.calc_delay()))
@@ -419,18 +416,29 @@ class Household(object):
             # call for help...needs to be based on appropriate distribution...not a hardcoded uniform function!
             # also may not do this if intend to respond?
             yield self.env.timeout(self.rnd.uniform(0, 8))
+
+            if oo.record_do_nothing:
+                self.output_data[reminder_type + '_contact'].append(oo.generic_output(self.rep.reps,
+                                                                                     self.district.name,
+                                                                                     self.la,
+                                                                                     self.lsoa,
+                                                                                     self.digital,
+                                                                                     self.hh_type,
+                                                                                     self.hh_id,
+                                                                                     self.env.now))
+
             yield self.env.process(self.contact())
         elif not self.responded:
             # nowt
             if oo.record_do_nothing:
-                self.output_data['postcard_failed'].append(oo.generic_output(self.rep.reps,
-                                                                             self.district.name,
-                                                                             self.la,
-                                                                             self.lsoa,
-                                                                             self.digital,
-                                                                             self.hh_type,
-                                                                             self.hh_id,
-                                                                             self.env.now))
+                self.output_data[reminder_type + '_failed'].append(oo.generic_output(self.rep.reps,
+                                                                                     self.district.name,
+                                                                                     self.la,
+                                                                                     self.lsoa,
+                                                                                     self.digital,
+                                                                                     self.hh_type,
+                                                                                     self.hh_id,
+                                                                                     self.env.now))
 
         yield self.env.timeout(0)
 

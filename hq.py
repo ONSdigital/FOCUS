@@ -37,7 +37,7 @@ def ret_rec(household, rep):
                                                               rep.env.now))
 
     # checks size of output and writes to file if too large
-    if (h.dict_size(rep.output_data)) > 1000000:
+    if (h.dict_size(rep.output_data)) > 10000000:
         h.write_output(rep.output_data, rep.output_path, rep.run)
 
     yield rep.env.timeout(0)

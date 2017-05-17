@@ -1,6 +1,124 @@
 {
     "1": {
         "advisers": {
+            "A": {
+                "availability": {
+                    "0": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "1": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "2": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "3": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "4": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "5": [
+                        "09:00",
+                        "17:00"
+                    ],
+                    "6": [
+                        "09:00",
+                        "17:00"
+                    ]
+                },
+                "call_times": {
+                    "convert": 5,
+                    "failed": 5,
+                    "out": 3,
+                    "out_paper": 4,
+                    "paper": 5,
+                    "query": 1,
+                    "success": 30,
+                    "wasted": 5
+                },
+                "da_effectiveness": {
+                    "1": 0,
+                    "2": 40,
+                    "3": 35,
+                    "4": 30,
+                    "5": 20
+                },
+                "end_date": "2011, 5, 6",
+                "number": 100,
+                "start_date": "2011, 3, 7"
+            },
+            "B": {
+                "availability": {
+                    "0": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "1": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "2": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "3": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "4": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "5": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ],
+                    "6": [
+                        "10:00",
+                        "13:00",
+                        "14:00",
+                        "18:00"
+                    ]
+                },
+                "call_times": {
+                    "convert": 5,
+                    "failed": 5,
+                    "out": 3,
+                    "out_paper": 4,
+                    "paper": 5,
+                    "query": 1,
+                    "success": 30,
+                    "wasted": 5
+                },
+                "da_effectiveness": {
+                    "1": 50,
+                    "2": 40,
+                    "3": 35,
+                    "4": 30,
+                    "5": 20
+                },
+                "end_date": "2011, 5, 6",
+                "number": 100,
+                "start_date": "2011, 3, 7"
+            }
         },
         "census_date": "2011, 3, 27",
         "districts": {
@@ -49,16 +167,16 @@
                             ]
                         },
                         "da_effectiveness": {
-                            "htc1": 50,
-                            "htc2": 40,
-                            "htc3": 35,
-                            "htc4": 30,
-                            "htc5": 20
+                            "1": 50,
+                            "2": 40,
+                            "3": 35,
+                            "4": 30,
+                            "5": 20
                         },
                         "end_date": "2011, 5, 23",
                         "has_postcard": 0,
                         "has_pq": 48,
-                        "number": 20,
+                        "number": 15,
                         "start_date": "2011, 4, 4",
                         "travel_speed": 5,
                         "visit_times": {
@@ -75,7 +193,7 @@
                 },
                 "district_area": 30.9352459909,
                 "households": {
-                    "htc1": {
+                    "1": {
                         "FU_start_time": 336,
                         "behaviours": {
                             "alt": {
@@ -103,7 +221,7 @@
                                 },
                                 "default": {
                                     "help": 5,
-                                    "response": 84
+                                    "response": 42
                                 }
                             },
                             "reminder": {
@@ -204,7 +322,7 @@
                         "number": 0,
                         "paper_after_max_visits": "False",
                         "paper_allowed": "True",
-                        "paper_on_request": "False",
+                        "paper_on_request": "True",
                         "paper_prop": 86,
                         "priority": 0,
                         "renege": 0.125,
@@ -224,7 +342,7 @@
                         },
                         "send_incomplete": 0
                     },
-                    "htc2": {
+                    "2": {
                         "FU_start_time": 336,
                         "behaviours": {
                             "alt": {
@@ -252,7 +370,7 @@
                                 },
                                 "default": {
                                     "help": 4,
-                                    "response": 78
+                                    "response": 36
                                 }
                             },
                             "reminder": {
@@ -353,7 +471,7 @@
                         "number": 0,
                         "paper_after_max_visits": "False",
                         "paper_allowed": "True",
-                        "paper_on_request": "False",
+                        "paper_on_request": "True",
                         "paper_prop": 85,
                         "priority": 0,
                         "renege": 0.125,
@@ -373,7 +491,7 @@
                         },
                         "send_incomplete": 0
                     },
-                    "htc3": {
+                    "3": {
                         "FU_start_time": 336,
                         "behaviours": {
                             "alt": {
@@ -522,7 +640,7 @@
                         },
                         "send_incomplete": 0
                     },
-                    "htc4": {
+                    "4": {
                         "FU_start_time": 336,
                         "behaviours": {
                             "alt": {
@@ -671,7 +789,7 @@
                         },
                         "send_incomplete": 0
                     },
-                    "htc5": {
+                    "5": {
                         "FU_start_time": 336,
                         "behaviours": {
                             "alt": {
@@ -826,8 +944,8 @@
                         "blanket": 0,
                         "delay": 48,
                         "start_date": "2011, 5, 1",
-                        "targets": ["htc1",
-                            "htc2"],
+                        "targets": ["1",
+                            "2"],
                         "time": 9
                     },
                     "reminder": {
@@ -835,11 +953,11 @@
                         "delay": 48,
                         "start_date": "2011, 4, 26",
                         "targets": [
-                            "htc1",
-                            "htc2",
-                            "htc3",
-                            "htc4",
-                            "htc5"
+                            "1",
+                            "2",
+                            "3",
+                            "4",
+                            "5"
                         ],
                         "time": 9
                     }
@@ -852,7 +970,7 @@
         },
         "end_date": "2011, 5, 21",
         "replication seeds": {},
-        "replications": 2,
+        "replications": 1,
         "start_date": "2011, 3, 6"
     }
 }

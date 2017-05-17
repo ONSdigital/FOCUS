@@ -56,7 +56,8 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
             output_data[row[0]]['districts'][row[0]]['district_area'] = 0
 
         # now add the hh for the current row increasing the area as well
-        hh_key = "htc" + row[4]
+        #hh_key = "htc" + row[4]
+        hh_key = row[4]
         # if cca_makeup not defined add
         if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
             # hh type not in cca so add
@@ -413,8 +414,8 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)

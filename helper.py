@@ -10,6 +10,7 @@ import sys
 import response_profiles
 import call_profiles as cp
 import numpy as np
+import pandas as pd
 
 l = Lock()  # global declaration...can I avoid this
 
@@ -156,7 +157,6 @@ def beta_dist(rep, alpha, beta, sim_days_left):
 
   #  return response_date_time_hours
 
-
 def write_output(output_data, out_path, ed_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
@@ -173,9 +173,12 @@ def write_output(output_data, out_path, ed_id):
 
         with open(out_path + '/{}'.format(row) + '/' + str(ed_id) + '.csv', 'a', newline='') as f_output:
             csv_output = csv.writer(f_output)
+            rows = []
             for data_row in output_data[row]:
-                rows = list(data_row)
-                csv_output.writerow(list(rows))
+                rows.append(data_row)
+                #rows = list(data_row)
+
+            csv_output.writerows(rows)
 
     # clear output file
     output_data.clear()
@@ -195,14 +198,14 @@ def dict_size(a_dict):
 
 
 def set_preference(paper_prop, rnd):
-    """sets whether the hh prefers paper or digital and the associated time to receive responses from both"""
+    """sets whether the hh prefers paper or digital"""
     paper_test = rnd.uniform(0, 100)
 
     if paper_test <= int(paper_prop):
 
-        return False
+        return 0
 
-    return True
+    return 1
 
 
 def set_behaviour(digital, input_data, behaviour, rnd):

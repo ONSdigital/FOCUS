@@ -310,8 +310,8 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
 
             start_date = dt.date(*map(int, start_date_df[run]['start_date'][0].split('-')))
 
-            series1 = bin_records(df1[run], start_date, ['do_nothing', 'help'])
-            series2 = bin_records(df2[run], start_date)
+            series1 = bin_records(df1[run], start_date)
+            series2 = bin_records(df2[run], start_date, ['do_nothing', 'help'])
 
             int_s1 = int_s1.add(series1, fill_value=0)
             int_s2 = int_s2.add(series2, fill_value=0)
@@ -332,8 +332,8 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
                 df1_temp = df1[run][df1[run][filter_type] == district].copy()
                 df2_temp = df2[run][df2[run][filter_type] == district].copy()
 
-                series1 = bin_records(df1_temp, start_date, ['do_nothing', 'help'])
-                series2 = bin_records(df2_temp, start_date)
+                series1 = bin_records(df1_temp, start_date)
+                series2 = bin_records(df2_temp, start_date, ['do_nothing', 'help'])
 
                 series1.name = district
                 series2.name = district
@@ -342,7 +342,7 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
                 int_df1 = int_df1.add(pd.DataFrame(series1), fill_value=0)
                 int_df2 = int_df2.add(pd.DataFrame(series2), fill_value=0)
 
-        # get col names
+        # get col names and produce a chart for each one
         for district in list(int_df1):
 
             series1 = pd.Series(int_df1[district])
@@ -394,7 +394,8 @@ def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
 def pyramid(s1, s2, bins):
     """ produces parallel horizontal bar charts that display the distribution of response rates achieved from two
      strategies. s1, s2 are lists that contain the data frames to be used for each output(strategy) as well as the
-     name of the strategy and whether it is the special case of the passive option"""
+     name of the strategy and whether it is the special case of the passive option. If it is the passive option the
+     passed dataframes should be the same"""
 
     s1_all = pd.Series()
     s2_all = pd.Series()
@@ -416,7 +417,7 @@ def pyramid(s1, s2, bins):
     x2 = combined_list[s2[2]].tolist()
     y = np.arange(bins[0], bins[1]-bins[2], bins[2])
 
-    width = 3
+    width = 1
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
     axes[0].barh(y, x1, width,  align='center', color='green', zorder=10)
@@ -484,25 +485,25 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
 
 
 def intervention_summary(data_path, data_types=(), filter_type='LA'):
-    """data_path is the output data location. The types are the outputs to include in the summary. The first entry (
-    in the data_types tuple should be the data by which all the other data will be divided"""
+    """data_path is the output data location. The types are the outputs to include in the summary. The first entry
+    in the data_types tuple should be the data by which all the other data will be divided. Output is a table
+    showing percentage rates for each type of event """
 
+    # define datatypes with dtype= [] and see if faster??
     summary_df = pd.DataFrame()
 
     for data_type in data_types:
 
-        print(data_type)
-        pandas_data = csv_to_pandas(data_path, [data_type])
+        input_data = csv_to_pandas(data_path, [data_type])
 
-        runs = sorted(list(pandas_data[data_type].keys()))
+        runs = sorted(list(input_data[data_type].keys()))
 
         event_count_df = pd.DataFrame()
 
         for current_run in runs:
-            print(current_run)
 
             # for each rep add up by the filter type the number of events
-            temp_df = pandas_data[data_type][current_run]
+            temp_df = input_data[data_type][current_run]
             event_count = temp_df.groupby([filter_type, 'rep']).size().reset_index()  # events in ...
             event_count.rename(columns={0: 'count'}, inplace=True)
             # take mean of all reps
@@ -517,17 +518,22 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
         # add totals to df
         summary_df = pd.concat([summary_df, event_count_totals], axis=1)
 
-    print(summary_df)
     # convert to percentages
     summary_df = summary_df.div(summary_df[data_types[0]], axis=0)*100
-    print(summary_df)
+    summary_df.to_csv(os.path.join(os.getcwd(), 'summary results', 'summary results for ' + data_types[0] + ".csv"))
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-16 16.10.34')
+
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 14.11.01')
 current_scenario = output_path.split('/')[-1]
+"""
 
 intervention_summary(output_path, data_types=('pq_sent',
                                               'pq_wasted',
                                               'pq_success',
+                                              'pq_contact',
+                                              'pq_unnecessary',
+                                              'pq_received',
+                                              'pq_failed'
                                               ), filter_type='LA')
 
 intervention_summary(output_path, data_types=('Visit',
@@ -537,61 +543,36 @@ intervention_summary(output_path, data_types=('Visit',
                                               'Visit_unnecessary',
                                               'Visit_out',
                                               'Visit_failed',
-                                              'Visit_postcard_posted'), filter_type='digital')
+                                              'Visit_postcard_posted'), filter_type='LA')
 
 intervention_summary(output_path, data_types=('Visit_postcard_posted',
-                                              'postcard_success',
                                               'postcard_wasted',
+                                              'postcard_success',
+                                              'postcard_contact',
                                               'postcard_unnecessary',
                                               'postcard_received',
-                                              'postcard_failed'))
+                                              'postcard_failed'), filter_type='LA')
 
+pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 
-
-pandas_data = csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
-print('data loaded')
-
-returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='hh_type', scenario=current_scenario)
-returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper', scenario=current_scenario)
-returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital', scenario=current_scenario)
-
-#print('summary complete')
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LA', scenario=current_scenario)
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
+#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
 
 df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Responded']
 
-
 # produce comparison of final results
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
 # passive option should have the same data passed for each entry eg...
-pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False], bins=[65, 105, 5])
-
-#print('pyramid produced')
-
-# do we always want to select this data frame - yes for the default output
-#glob_folder = os.path.join('outputs', '2017-05-11 09.36.10', 'hh_record', '*.csv')
-#file_list = glob.glob(glob_folder)  # get a list of all files in the folder
-
-#df1 = pd.DataFrame()
-#df2 = pd.DataFrame()
-
-#for file in file_list:
-#    default_key = str(file.split(os.path.sep)[-1])[:-4]
-#    temp_df1 = (pandas_data['Return_sent'][default_key])
-#    df1 = pd.concat([df1, temp_df1])
- #   temp_df2 = pandas_data['hh_record'][default_key]
- #   df2 = pd.concat([df2, temp_df2])
-
-
-#start_date = pandas_data['key info'][default_key].start_date[0]
-#start_date = dt.date(*map(int, start_date.split('-')))
-
-
+pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False],  bins=[60, 102, 2])
+"""
+pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info', 'Return_sent'])
 df0_loc = pandas_data['key info']
 df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Return_sent']
 
 #produce return chart over time  - pass df of data to use....
-produce_return_charts(df1_loc, df2_loc, 'Passive', 'Active', df0_loc, ' returns ' + current_scenario + '.html', filter_type='hh_type')
+produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html',
+                      filter_type='hh_type')
 
-#print('return complete')
