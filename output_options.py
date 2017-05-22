@@ -43,7 +43,7 @@ record_visit_convert = True
 record_visit_assist = True
 record_visit_success = True
 record_visit_failed = True
-record_return_received = False
+record_return_received = True
 record_responded = True
 
 

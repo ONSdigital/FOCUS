@@ -523,9 +523,28 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
     summary_df.to_csv(os.path.join(os.getcwd(), 'summary results', 'summary results for ' + data_types[0] + ".csv"))
 
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 14.11.01')
-current_scenario = output_path.split('/')[-1]
+def combine_csv(input_path):
+    """used to combine csv files into ta single data frame for later analysis"""
+    temp_df = pd.DataFrame()
+
+    glob_folder = os.path.join(input_path, '*.csv')
+    file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+
+    for file in file_list:
+        temp_df = pd.concat([temp_df, pd.read_csv(file, index_col=0)], axis=0)
+
+    # or rather output to csv or use for more analysis
+    return temp_df
+
+
+summary_path = os.path.join(os.getcwd(), 'charts', 'summary tables')
+returns_df = combine_csv(summary_path)
+
+# cumulative sums...
+
 """
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 16.24.26')
+current_scenario = output_path.split('/')[-1]
 
 intervention_summary(output_path, data_types=('pq_sent',
                                               'pq_wasted',
@@ -543,7 +562,7 @@ intervention_summary(output_path, data_types=('Visit',
                                               'Visit_unnecessary',
                                               'Visit_out',
                                               'Visit_failed',
-                                              'Visit_postcard_posted'), filter_type='LA')
+                                              'Visit_postcard_posted'), filter_type='digital')
 
 intervention_summary(output_path, data_types=('Visit_postcard_posted',
                                               'postcard_wasted',
@@ -551,14 +570,16 @@ intervention_summary(output_path, data_types=('Visit_postcard_posted',
                                               'postcard_contact',
                                               'postcard_unnecessary',
                                               'postcard_received',
-                                              'postcard_failed'), filter_type='LA')
+                                              'postcard_failed'), filter_type='digital')
 
 pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LA', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
-
+"""
+"""
+pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Responded']
 
@@ -566,7 +587,7 @@ df2_loc = pandas_data['Responded']
 # pss location of dataframes - possibly use this method for all analysis - so update "produce return charts" code???
 # passive option should have the same data passed for each entry eg...
 pyramid([df1_loc, df1_loc, 'passive', True], [df2_loc, df1_loc, 'active', False],  bins=[60, 102, 2])
-"""
+
 pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info', 'Return_sent'])
 df0_loc = pandas_data['key info']
 df1_loc = pandas_data['hh_record']
@@ -575,4 +596,4 @@ df2_loc = pandas_data['Return_sent']
 #produce return chart over time  - pass df of data to use....
 produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html',
                       filter_type='hh_type')
-
+"""

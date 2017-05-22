@@ -185,6 +185,16 @@ def write_output(output_data, out_path, ed_id):
     l.release()
 
 
+def write_summary(df, event_time, event_index):
+    """updates the passed df"""
+
+    day = math.floor(event_time / 24)
+
+    if event_index not in df.index:
+        df.loc[event_index] = 0
+
+    df.ix[event_index, day] += 1
+
 def dict_size(a_dict):
     # returns memory size of dictionary
 

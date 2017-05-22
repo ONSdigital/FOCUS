@@ -11,6 +11,10 @@ def ret_rec(household, rep):
     if rep.total_responses % 100000 == 0:
         print(rep.total_responses)
 
+    # add household to summary of responses
+    h.write_summary(rep.summary_data['LA'], rep.env.now, household.la)
+    h.write_summary(rep.summary_data['LSOA'], rep.env.now, household.lsoa)
+
     household.return_received = True
     if oo.record_return_received:
         rep.output_data['Return_received'].append(oo.generic_output(rep.reps,

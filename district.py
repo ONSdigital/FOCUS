@@ -202,6 +202,10 @@ class District(object):
                                                                                                  self.rep.total_hh,
                                                                                                  time_to_use))
 
+                            # add household to summary of responses
+                            h.write_summary(self.rep.summary_data['LA'], time_to_use, hh_geog.la)
+                            h.write_summary(self.rep.summary_data['LSOA'], time_to_use, hh_geog.lsoa)
+
                             if oo.record_responded:
                                 self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
                                                                                            self.name,

@@ -37,6 +37,18 @@ def start_run(run_input, seeds, out_path):
                   'census_day': census_day,
                   'sim_hours': sim_hours}]
 
+    # create dataframe to hold summary data
+    days = int(sim_hours / 24)
+    day_cols = []
+    for i in range(0, days):
+        day_cols.append(i)
+
+
+    # this could be a whole package of summary dataframes...passive, active, la, lsoa etc...
+    summary_data = pd.DataFrame(columns=day_cols)
+    summary_data_dict = {'LA': pd.DataFrame(columns=day_cols),
+                         'LSOA': pd.DataFrame(columns=day_cols)}
+
     l.acquire()
 
     if not os.path.isdir(os.path.join(out_path, 'key info')):
@@ -62,6 +74,7 @@ def start_run(run_input, seeds, out_path):
     initialise.Rep(env,
                    run_input,
                    output_data,
+                   summary_data_dict,
                    rnd,
                    sim_hours,
                    start_date,
@@ -74,6 +87,10 @@ def start_run(run_input, seeds, out_path):
 
     # write the output to csv files
     hp.write_output(output_data, out_path, run_input['run id'])
+    # write summary data to csv to defined folder#
+
+    for k, v in summary_data_dict.items():
+        v.to_csv(os.path.join(os.getcwd(), 'charts', 'summary tables', k + " " + run_input['run id'] + '.csv'))
 
 
 def produce_default_output():
@@ -129,7 +146,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_all.JSON'
+        file_name = 'inputs/CCA_small.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

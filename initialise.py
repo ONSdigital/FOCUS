@@ -13,13 +13,14 @@ import call_profiles as cp
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, rnd, sim_hours, start_date, census_day, out_path,
+    def __init__(self, env, input_data, output_data, summary_data, rnd, sim_hours, start_date, census_day, out_path,
                  max_output_file_size):
 
         # values passed to the class
         self.env = env
         self.input_data = input_data
         self.output_data = output_data
+        self.summary_data = summary_data
         self.rnd = rnd
         self.sim_hours = sim_hours
         self.start_date = start_date
