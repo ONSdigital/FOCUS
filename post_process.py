@@ -524,25 +524,22 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
 
 
 def combine_csv(input_path):
-    """used to combine csv files into ta single data frame for later analysis"""
+    """used to combine csv files into to a single data frame for later analysis"""
     temp_df = pd.DataFrame()
 
     glob_folder = os.path.join(input_path, '*.csv')
     file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
     for file in file_list:
-        temp_df = pd.concat([temp_df, pd.read_csv(file, index_col=0)], axis=0)
+        temp_df = temp_df.add(pd.read_csv(file, index_col=0), fill_value=0)
 
-    # or rather output to csv or use for more analysis
     return temp_df
 
-
-summary_path = os.path.join(os.getcwd(), 'charts', 'summary tables')
-returns_df = combine_csv(summary_path)
-
-# cumulative sums...
-
 """
+active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
+returns_df = combine_csv(active_summary_path)
+print(returns_df)
+
 output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 16.24.26')
 current_scenario = output_path.split('/')[-1]
 

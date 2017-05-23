@@ -4,6 +4,7 @@ import output_options as oo
 import helper as h
 import datetime
 from simpy.util import start_delayed
+import math
 
 
 def ret_rec(household, rep):
@@ -12,13 +13,13 @@ def ret_rec(household, rep):
         print(rep.total_responses)
 
     # add household to summary of responses
-    h.write_summary(rep.summary_data['LA'], rep.env.now, household.la)
-    h.write_summary(rep.summary_data['LSOA'], rep.env.now, household.lsoa)
+    for key, value in rep.active_data_summary.items():
+        value[getattr(household, key)][math.floor(rep.env.now / 24)] += 1
 
     household.return_received = True
     if oo.record_return_received:
         rep.output_data['Return_received'].append(oo.generic_output(rep.reps,
-                                                                    household.district.name,
+                                                                    household.district.district,
                                                                     household.la,
                                                                     household.lsoa,
                                                                     household.digital,
@@ -32,7 +33,7 @@ def ret_rec(household, rep):
     # check size of output data - if over an amount, size or length write to file?
     if oo.record_responded:
         rep.output_data['Responded'].append(oo.generic_output(rep.reps,
-                                                              household.district.name,
+                                                              household.district.district,
                                                               household.la,
                                                               household.lsoa,
                                                               household.digital,
@@ -106,7 +107,7 @@ class LetterPhase(object):
     def co_send_letter(self, household, letter_type, delay):
         if oo.record_letters:
             self.rep.output_data[letter_type + '_sent'].append(oo.generic_output(self.rep.reps,
-                                                                                 household.district.name,
+                                                                                 household.district.district,
                                                                                  household.la,
                                                                                  household.lsoa,
                                                                                  household.digital,
@@ -123,7 +124,7 @@ def schedule_paper_drop(obj, contact_type, reminder_type, delay):
 
     if oo.record_posted:
         obj.rep.output_data[output_type].append(oo.generic_output(obj.rep.reps,
-                                                                  obj.district.name,
+                                                                  obj.district.district,
                                                                   obj.la,
                                                                   obj.lsoa,
                                                                   obj.digital,

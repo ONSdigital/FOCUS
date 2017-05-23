@@ -15,7 +15,7 @@ class District(object):
     def __init__(self, rep, name):
         # values fed into class
         self.rep = rep
-        self.name = name
+        self.district = name
 
         # created by and belong too the class
         self.rnd = self.rep.rnd
@@ -61,7 +61,7 @@ class District(object):
             self.initial_hh_sep = 2 * (math.sqrt(self.hh_area / math.pi))
         except ZeroDivisionError as e:
             warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
-                              " for district: ", self.name, ". HH separation set to zero")
+                              " for district: ", self.district, ". HH separation set to zero")
             # write out a warning here but don't stop the sim just set the dist to zero
             if oo.record_warnings:
                 self.rep.output_data['Warnings'].append(oo.warnings(self.rep.reps,
@@ -83,7 +83,7 @@ class District(object):
             if not household.return_sent:
                 if oo.record_non_response:
                     self.rep.output_data['Non_response'].append(oo.generic_output(self.rep.reps,
-                                                                                  self.name,
+                                                                                  self.district,
                                                                                   household.la,
                                                                                   household.lsoa,
                                                                                   household.digital,
@@ -107,7 +107,7 @@ class District(object):
         except ZeroDivisionError as e:
 
             warning_detail = ("Zero division error in run: ", self.rep.run, ", rep: ", self.rep.reps,
-                              " for district: ", self.name)
+                              " for district: ", self.district)
             # write out a warning here but don't stop the sim just set the dist to zero
             if oo.record_warnings:
                 self.rep.output_data['Warnings'].append(oo.warnings(self.rep.reps,
@@ -145,14 +145,14 @@ class District(object):
                 print("Error when creating CO type", co_type, " in run: ", self.rep.run)
                 sys.exit()
 
-    def return_household_geog(self, input_dict):
+    def return_household_geog(self, input_dict, district, hh_type, hh_digital):
         # returns LA and LSOA codes for hh
 
         for la in input_dict:
             for lsoa in input_dict[la]:
                 if int(input_dict[la][lsoa]) > 0:
                     input_dict[la][lsoa] = int(input_dict[la][lsoa]) - 1
-                    return oo.hh_geography(la, lsoa)
+                    return oo.hh_geography(la, lsoa, district, hh_type, hh_digital)
 
     def create_households(self):
 
@@ -162,86 +162,88 @@ class District(object):
             # get hh data for current type
             hh_input_data = self.input_data['households'][hh_type]
 
-            try:
+            for i in range(hh_input_data['number']):
 
-                for i in range(hh_input_data['number']):
+                # set if digital here?
+                hh_digital = h.set_preference(hh_input_data['paper_prop'], self.rnd)
 
-                    hh_geog = self.return_household_geog(hh_input_data['cca_makeup'])
+                # define where the hh is located
+                hh_geog = self.return_household_geog(hh_input_data['cca_makeup'], self.district, hh_type, hh_digital)
 
-                    self.total_households += 1
+                self.total_households += 1
 
-                    # determine initial HH action
-                    hh_action = self.initial_action(hh_input_data, self.first_interaction, hh_type, hh_geog)
+                # determine initial HH action
+                hh_action = self.initial_action(hh_input_data, self.first_interaction, hh_type, hh_geog, hh_digital)
 
-                    if hh_action.type == 'early':
-                        # don't need an instance of a household just directly record response/return at correct time
+                if hh_action.type == 'early':
+                    # don't need an instance of a household just directly record response/return at correct time
 
-                        self.rep.total_responses += 1
-                        if oo.record_responded:
-                            self.rep.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
-                                                                                         self.name,
+                    self.rep.total_responses += 1
+                    if oo.record_responded:
+                        self.rep.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
+                                                                                     self.district,
+                                                                                     hh_geog.la,
+                                                                                     hh_geog.lsoa,
+                                                                                     hh_action.digital,
+                                                                                     hh_type,
+                                                                                     self.rep.total_hh,
+                                                                                     hh_action.time))
+
+                    if hh_action.digital:
+                        time_to_use = hh_action.time + hh_input_data['delay']['digital']
+                    else:
+                        time_to_use = hh_action.time + hh_input_data['delay']['paper']
+
+                    if oo.record_return_received:
+                        self.rep.output_data['Return_received'].append(oo.generic_output(self.rep.reps,
+                                                                                         self.district,
                                                                                          hh_geog.la,
                                                                                          hh_geog.lsoa,
                                                                                          hh_action.digital,
                                                                                          hh_type,
                                                                                          self.rep.total_hh,
-                                                                                         hh_action.time))
+                                                                                         time_to_use))
 
-                            if hh_action.digital:
-                                time_to_use = hh_action.time + hh_input_data['delay']['digital']
-                            else:
-                                time_to_use = hh_action.time + hh_input_data['delay']['paper']
+                    # add household to summary of responses
+                    for key, value in self.rep.active_data_summary.items():
+                        value[hh_geog.la][math.floor(hh_action.time / 24)] += 1
 
-                            if oo.record_return_received:
-                                self.rep.output_data['Return_received'].append(oo.generic_output(self.rep.reps,
-                                                                                                 self.name,
-                                                                                                 hh_geog.la,
-                                                                                                 hh_geog.lsoa,
-                                                                                                 hh_action.digital,
-                                                                                                 hh_type,
-                                                                                                 self.rep.total_hh,
-                                                                                                 time_to_use))
+                    if oo.record_responded:
+                        self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
+                                                                                   self.district,
+                                                                                   hh_geog.la,
+                                                                                   hh_geog.lsoa,
+                                                                                   hh_action.digital,
+                                                                                   hh_type,
+                                                                                   self.rep.total_hh,
+                                                                                   time_to_use))
+                else:
+                    # create a household instance passing initial state
+                    self.households.append(household.Household(self.rep,
+                                                               self.env,
+                                                               self,
+                                                               self.rep.total_hh,
+                                                               hh_type,
+                                                               hh_input_data,
+                                                               hh_action,
+                                                               hh_geog.la,
+                                                               hh_geog.lsoa))
 
-                            # add household to summary of responses
-                            h.write_summary(self.rep.summary_data['LA'], time_to_use, hh_geog.la)
-                            h.write_summary(self.rep.summary_data['LSOA'], time_to_use, hh_geog.lsoa)
+                # if self.rep.reps == 1:
+                if self.rep.reps > 0:
+                    self.rep.output_data['hh_record'].append(oo.hh_record(self.rep.reps,
+                                                                          self.district,
+                                                                          hh_geog.la,
+                                                                          hh_geog.lsoa,
+                                                                          hh_type,
+                                                                          hh_action.type,
+                                                                          hh_action.digital,
+                                                                          hh_action.time))
+                if hh_action.type not in ['do_nothing', 'help']:
+                    for key, value in self.rep.passive_data_summary.items():
+                        value[hh_geog.la][math.floor(hh_action.time/24)] += 1
 
-                            if oo.record_responded:
-                                self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
-                                                                                           self.name,
-                                                                                           hh_geog.la,
-                                                                                           hh_geog.lsoa,
-                                                                                           hh_action.digital,
-                                                                                           hh_type,
-                                                                                           self.rep.total_hh,
-                                                                                           time_to_use))
-                    else:
-                        # create a household instance passing initial state
-                        self.households.append(household.Household(self.rep,
-                                                                   self.env,
-                                                                   self,
-                                                                   self.rep.total_hh,
-                                                                   hh_type,
-                                                                   hh_input_data,
-                                                                   hh_action,
-                                                                   hh_geog.la,
-                                                                   hh_geog.lsoa))
-
-                    # if self.rep.reps == 1:
-                    if self.rep.reps > 0:
-                        self.rep.output_data['hh_record'].append(oo.hh_record(self.rep.reps,
-                                                                              self.name,
-                                                                              hh_geog.la,
-                                                                              hh_geog.lsoa,
-                                                                              hh_type,
-                                                                              hh_action.type,
-                                                                              hh_action.digital,
-                                                                              hh_action.time))
-                    self.rep.total_hh += 1
-
-            except KeyError as e:
-                print("No key ", e, " for ", hh_type, " in district: ", self.name, " when creating hh")
-                sys.exit()
+                self.rep.total_hh += 1
 
     def create_letterphases(self):
 
@@ -255,12 +257,9 @@ class District(object):
                                                letter_data,
                                                letter))
 
-    def initial_action(self, input_data, first_interaction, hh_type, hh_geog):
+    def initial_action(self, input_data, first_interaction, hh_type, hh_geog, hh_digital):
 
-        digital = h.set_preference(input_data['paper_prop'],
-                                   self.rnd)
-
-        if digital or h.str2bool(input_data['paper_allowed']):
+        if hh_digital or h.str2bool(input_data['paper_allowed']):
             # use default
             behaviour = 'default'
         else:
@@ -279,14 +278,14 @@ class District(object):
 
         if response_test <= hh_resp:
             # respond but test when
-            return self.early_responder(input_data, digital, first_interaction, hh_type, hh_geog)
+            return self.early_responder(input_data, hh_digital, first_interaction, hh_type, hh_geog)
 
         elif hh_resp < response_test <= hh_resp + hh_help:
             # call for help return when
-            return self.help(input_data, digital, first_interaction, hh_type, hh_geog)
+            return self.help(input_data, hh_digital, first_interaction, hh_type, hh_geog)
         else:
             # do nothing return 0 time
-            return oo.initial_action('do_nothing', digital, 0)
+            return oo.initial_action('do_nothing', hh_digital, 0)
             # return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_geog)
 
     def early_responder(self, input_data, digital, first_interaction, hh_type, hh_geog):

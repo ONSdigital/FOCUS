@@ -69,7 +69,7 @@ class Household(object):
             # nowt
             if oo.record_do_nothing:
                 self.output_data['Do_nothing'].append(oo.generic_output(self.rep.reps,
-                                                                        self.district.name,
+                                                                        self.district.district,
                                                                         self.la,
                                                                         self.lsoa,
                                                                         self.digital,
@@ -89,7 +89,7 @@ class Household(object):
 
         if oo.record_call:
             self.output_data['Call'].append(oo.generic_output(self.rep.reps,
-                                                              self.district.name,
+                                                              self.district.district,
                                                               self.la,
                                                               self.lsoa,
                                                               self.digital,
@@ -116,7 +116,7 @@ class Household(object):
             # no one available - gracefully defer - some will call back again?
             if oo.record_call_defer:
                 self.output_data['Call_defer'].append(oo.generic_output(self.rep.reps,
-                                                                        self.district.name,
+                                                                        self.district.district,
                                                                         self.la,
                                                                         self.lsoa,
                                                                         self.digital,
@@ -185,7 +185,7 @@ class Household(object):
 
             if oo.record_call_renege:
                 self.output_data['Call_renege'].append(oo.generic_output(self.rep.reps,
-                                                                         self.district.name,
+                                                                         self.district.district,
                                                                          self.la,
                                                                          self.lsoa,
                                                                          self.digital,
@@ -212,7 +212,7 @@ class Household(object):
             # got through
             if oo.record_call_contact:
                 self.output_data['Call_contact'].append(oo.generic_output(self.rep.reps,
-                                                                          self.district.name,
+                                                                          self.district.district,
                                                                           self.la,
                                                                           self.lsoa,
                                                                           self.digital,
@@ -245,7 +245,7 @@ class Household(object):
             # record event
             if oo.record_call_convert:
                 self.rep.output_data['Call_convert'].append(oo.generic_output(self.rep.reps,
-                                                                              self.district.name,
+                                                                              self.district.district,
                                                                               self.la,
                                                                               self.lsoa,
                                                                               self.digital,
@@ -263,7 +263,7 @@ class Household(object):
 
             if oo.record_call_request:
                 self.rep.output_data['Call_request'].append(oo.generic_output(self.rep.reps,
-                                                                              self.district.name,
+                                                                              self.district.district,
                                                                               self.la,
                                                                               self.lsoa,
                                                                               self.digital,
@@ -290,7 +290,7 @@ class Household(object):
 
             if oo.record_call_success:
                 self.rep.output_data['Call_success'].append(oo.generic_output(self.rep.reps,
-                                                                              self.district.name,
+                                                                              self.district.district,
                                                                               self.la,
                                                                               self.lsoa,
                                                                               self.digital,
@@ -307,7 +307,7 @@ class Household(object):
 
             if oo.record_call_failed:
                 self.rep.output_data['Call_failed'].append(oo.generic_output(self.rep.reps,
-                                                                             self.district.name,
+                                                                             self.district.district,
                                                                              self.la,
                                                                              self.lsoa,
                                                                              self.digital,
@@ -326,7 +326,7 @@ class Household(object):
             # add to hh response event log
             if oo.record_return_sent:
                 self.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
-                                                                         self.district.name,
+                                                                         self.district.district,
                                                                          self.la,
                                                                          self.lsoa,
                                                                          self.digital,
@@ -346,7 +346,7 @@ class Household(object):
 
         if oo.record_reminder_received:
             self.rep.output_data[reminder_type + '_received'].append(oo.reminder_received(self.rep.reps,
-                                                                                          self.district.name,
+                                                                                          self.district.district,
                                                                                           self.la,
                                                                                           self.lsoa,
                                                                                           self.digital,
@@ -373,7 +373,7 @@ class Household(object):
 
             if oo.record_reminder_wasted:
                 self.rep.output_data[reminder_type + '_wasted'].append(oo.reminder_wasted(self.rep.reps,
-                                                                                          self.district.name,
+                                                                                          self.district.district,
                                                                                           self.la,
                                                                                           self.lsoa,
                                                                                           self.digital,
@@ -385,7 +385,7 @@ class Household(object):
 
             if oo.record_reminder_unnecessary:
                 self.rep.output_data[reminder_type + '_unnecessary'].append(oo.reminder_unnecessary(self.rep.reps,
-                                                                                                    self.district.name,
+                                                                                                    self.district.district,
                                                                                                     self.la,
                                                                                                     self.lsoa,
                                                                                                     self.digital,
@@ -399,7 +399,7 @@ class Household(object):
         if not self.responded and reminder_test <= self.resp_level:
             if oo.record_reminder_success:
                 self.rep.output_data[reminder_type + '_success'].append(oo.reminder_success(self.rep.reps,
-                                                                                            self.district.name,
+                                                                                            self.district.district,
                                                                                             self.la,
                                                                                             self.lsoa,
                                                                                             self.digital,
@@ -420,7 +420,7 @@ class Household(object):
 
             if oo.record_do_nothing:
                 self.output_data[reminder_type + '_contact'].append(oo.generic_output(self.rep.reps,
-                                                                                     self.district.name,
+                                                                                     self.district.district,
                                                                                      self.la,
                                                                                      self.lsoa,
                                                                                      self.digital,
@@ -433,7 +433,7 @@ class Household(object):
             # nowt
             if oo.record_do_nothing:
                 self.output_data[reminder_type + '_failed'].append(oo.generic_output(self.rep.reps,
-                                                                                     self.district.name,
+                                                                                     self.district.district,
                                                                                      self.la,
                                                                                      self.lsoa,
                                                                                      self.digital,

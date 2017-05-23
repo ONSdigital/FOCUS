@@ -15,14 +15,6 @@ import pandas as pd
 l = Lock()  # global declaration...can I avoid this
 
 
-#def roundup_nearest_ten(x):
-#    return int(math.ceil(x / 10.0)) * 10
-
-
-#def rounddown_nearest_ten(x):
-#    return int(math.floor(x / 10.0)) * 10
-
-
 def responses_to_date(district, output_format=""):
     # need to add on those households who returned before the first interaction - and were therefore never added
     # to the sim
@@ -41,27 +33,6 @@ def current_day(obj):
     # return the day of the week based upon days elasped from start of sim
 
     return (obj.rep.start_day + math.floor(obj.env.now / 24) % 7) % 7
-
-
-#def simpy_to_time(simpy_time):
-# """converts simpy time to a datetime time"""
-
- #   days = int(simpy_time/24)
- #   hours = int(simpy_time - days*24)
-  #  mins = ((simpy_time - days*24) - hours)*60
-  #  secs = int((mins - int(mins))*60)
-
-  #  time = str(hours) + "," + str(int(mins)) + "," + str(secs)
-
-  #  return dt.time(*map(int, time.split(',')))
-
-
-#def make_time(hours = 0, mins = 0, secs = 0):
-# """take string and make a datetime time"""
-
- #   time = str(hours) + "," + str(mins) + "," + str(secs)
-
- #   return dt.time(*map(int, time.split(',')))
 
 
 def str_to_dec(str_time):
@@ -103,60 +74,6 @@ def beta_dist(rep, alpha, beta, sim_days_left):
     return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
 
 
-#def gauss_dist(rnd, alpha, beta):
-
-#    output = rnd.gauss(alpha, beta)
-
-#    if output < 0:
-#        output = 0
-
-#    return output
-
-
-#def path_leaf(path):
-#    head, tail = ntpath.split(path)
-#    return tail or ntpath.basename(head)
-
-
-#def clamp(x):
-#    return max(0, min(x, 255))
-
-
-#def next_day(simpy_time):
-#    # round up to next nearest day...
-#    next = math.ceil(simpy_time/24)*24
-#    return next - simpy_time + 9
-
-
-#def date_range(start_date, end_date):
-#    for n in range(int((end_date - start_date).days)):
-#        yield start_date + dt.timedelta(n)
-
-
-#def return_resp_time(obj):
-    # determine date and time of response -  look to speed this up...
-  #  current_date_time = obj.rep.start_date + dt.timedelta(hours=obj.rep.env.now)
-  #  sim_days_left = (obj.rep.end_date.date() - current_date_time.date()).days
-
-   # days_until_response = beta_dist(obj.rep,
-   #                                 obj.input_data['response_day'][0],
-   #                                 obj.input_data['response_day'][1],
-    #                                sim_days_left)
-
-   # response_date = current_date_time.date() + dt.timedelta(days=days_until_response)
-
-   # response_day = response_date.weekday()
-   # response_time = gauss_dist(obj.rnd,
-   #                            obj.input_data['response_time']['other'][0],
-   #                            obj.input_data['response_time']['other'][1])
-
-  #  response_date_time = dt.datetime.combine(response_date, dt.datetime.min.time()) \
-   #                      + dt.timedelta(hours=response_time)
-    # issue here with response time - gauss dist can create -ve time if action is run during day not at start
-  #  response_date_time_hours = max((response_date_time - current_date_time).total_seconds() / 3600, 0)
-
-  #  return response_date_time_hours
-
 def write_output(output_data, out_path, ed_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
@@ -193,7 +110,9 @@ def write_summary(df, event_time, event_index):
     if event_index not in df.index:
         df.loc[event_index] = 0
 
-    df.ix[event_index, day] += 1
+    # the below is quite slow - but fastest for df. Would a numpy array be quicker if possible.
+    df.at[event_index, day] += 1
+
 
 def dict_size(a_dict):
     # returns memory size of dictionary
@@ -284,19 +203,6 @@ def set_household_call_time(rep):
 
     return final_call_time
 
-#def check_start_day(rep, input_data, current_date):
-#    # determine if start date has a valid avail sch
-#    day_delta = (current_date - dt.date(*map(int, input_data['start_date'].split(',')))).days
-
-  #  if day_delta > 7:
-   #     print("no co availability set for any day of week")
-  #      sys.exit()
-
-  #  current_dow = current_date.weekday()
-  #  if not input_data['availability'][str(current_dow)]:
-  #      return check_start_day(rep, input_data, current_date + dt.timedelta(days=1))
-
-  #  return current_date
 
 def get_entity_time(entity, type="start"):
 

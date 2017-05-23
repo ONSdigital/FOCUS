@@ -170,7 +170,7 @@ class CensusOfficer(object):
 
         if oo.record_visit:
             self.rep.output_data['Visit'].append(oo.generic_output(self.rep.reps,
-                                                                   self.district.name,
+                                                                   self.district.district,
                                                                    household.la,
                                                                    household.lsoa,
                                                                    household.digital,
@@ -181,7 +181,7 @@ class CensusOfficer(object):
         if household.responded:
             if oo.record_visit_wasted:
                 self.rep.output_data['Visit_wasted'].append(oo.generic_output(self.rep.reps,
-                                                                              self.district.name,
+                                                                              self.district.district,
                                                                               household.la,
                                                                               household.lsoa,
                                                                               household.digital,
@@ -192,7 +192,7 @@ class CensusOfficer(object):
         elif household.resp_planned:
             if oo.record_visit_unnecessary:
                 self.rep.output_data['Visit_unnecessary'].append(oo.generic_output(self.rep.reps,
-                                                                                   self.district.name,
+                                                                                   self.district.district,
                                                                                    household.la,
                                                                                    household.lsoa,
                                                                                    household.digital,
@@ -205,7 +205,7 @@ class CensusOfficer(object):
         if household_is_in:
             if oo.record_visit_contact:
                 self.rep.output_data['Visit_contact'].append(oo.generic_output(self.rep.reps,
-                                                                               self.district.name,
+                                                                               self.district.district,
                                                                                household.la,
                                                                                household.lsoa,
                                                                                household.digital,
@@ -229,7 +229,7 @@ class CensusOfficer(object):
             # out - add drop off of a note
             if oo.record_visit_out:
                 self.rep.output_data['Visit_out'].append(oo.generic_output(self.rep.reps,
-                                                                           self.district.name,
+                                                                           self.district.district,
                                                                            household.la,
                                                                            household.lsoa,
                                                                            household.digital,
@@ -260,7 +260,7 @@ class CensusOfficer(object):
             household.digital = True
             if oo.record_visit_convert:
                 self.rep.output_data['Visit_convert'].append(oo.generic_output(self.rep.reps,
-                                                                               household.district.name,
+                                                                               household.district.district,
                                                                                household.la,
                                                                                household.lsoa,
                                                                                household.digital,
@@ -291,7 +291,7 @@ class CensusOfficer(object):
             # non implemented at present so another visit will be scheduled.
             if oo.record_visit_assist:
                 self.rep.output_data['Visit_assist'].append(oo.generic_output(self.rep.reps,
-                                                                              self.district.name,
+                                                                              self.district.district,
                                                                               household.la,
                                                                               household.lsoa,
                                                                               household.digital,
@@ -310,7 +310,7 @@ class CensusOfficer(object):
             # hh have not responded yet and respond there and then either by paper or digital.
             if oo.record_visit_success:
                 self.rep.output_data['Visit_success'].append(oo.generic_output(self.rep.reps,
-                                                                               self.district.name,
+                                                                               self.district.district,
                                                                                household.la,
                                                                                household.lsoa,
                                                                                household.digital,
@@ -330,7 +330,7 @@ class CensusOfficer(object):
             # need extra here for when you fail but not at max visits?
             if oo.record_visit_failed:
                 self.rep.output_data['Visit_failed'].append(oo.generic_output(self.rep.reps,
-                                                                              household.district.name,
+                                                                              household.district.district,
                                                                               household.la,
                                                                               household.lsoa,
                                                                               household.digital,
@@ -348,7 +348,7 @@ class CensusOfficer(object):
             # failed but no max visits so do no more
             if oo.record_visit_failed:
                 self.rep.output_data['Visit_failed'].append(oo.generic_output(self.rep.reps,
-                                                                              household.district.name,
+                                                                              household.district.district,
                                                                               household.la,
                                                                               household.lsoa,
                                                                               household.digital,

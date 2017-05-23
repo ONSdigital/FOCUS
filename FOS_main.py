@@ -16,6 +16,7 @@ from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 import pandas as pd
 import glob
+import csv
 
 l = Lock()
 
@@ -38,16 +39,22 @@ def start_run(run_input, seeds, out_path):
                   'sim_hours': sim_hours}]
 
     # create dataframe to hold summary data
-    days = int(sim_hours / 24)
+    days = int(sim_hours / 24)+1
     day_cols = []
     for i in range(0, days):
         day_cols.append(i)
 
+    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'lookup.csv')
+    with open(temp_file_path, 'r') as f:
+        reader = csv.reader(f)
+        la_list = list(reader)
+        la_list = [row[2] for row in la_list]
 
-    # this could be a whole package of summary dataframes...passive, active, la, lsoa etc...
-    summary_data = pd.DataFrame(columns=day_cols)
-    summary_data_dict = {'LA': pd.DataFrame(columns=day_cols),
-                         'LSOA': pd.DataFrame(columns=day_cols)}
+    # a dataframe used to store passive stats
+    passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
+
+    # a dict that contains dataframes used to store the active summary stats as runs progress
+    active_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
 
     l.acquire()
 
@@ -74,7 +81,8 @@ def start_run(run_input, seeds, out_path):
     initialise.Rep(env,
                    run_input,
                    output_data,
-                   summary_data_dict,
+                   passive_data_summary,
+                   active_data_summary,
                    rnd,
                    sim_hours,
                    start_date,
@@ -87,10 +95,19 @@ def start_run(run_input, seeds, out_path):
 
     # write the output to csv files
     hp.write_output(output_data, out_path, run_input['run id'])
-    # write summary data to csv to defined folder#
 
-    for k, v in summary_data_dict.items():
-        v.to_csv(os.path.join(os.getcwd(), 'charts', 'summary tables', k + " " + run_input['run id'] + '.csv'))
+    # write summary data to csv to defined folders
+
+    # check if folder exists - if not create and output to csv
+    for k, v in passive_data_summary.items():
+
+        # create a folder if one doesn't already exist
+        temp_output_path = os.path.join(os.getcwd(), 'charts', 'passive summary', k)
+        if not os.path.isdir(temp_output_path):
+            os.makedirs(temp_output_path)
+
+        pd.DataFrame.from_dict(v, orient='columns', dtype=None).T.\
+            to_csv(os.path.join(os.getcwd(), 'charts', 'passive summary', k, run_input['run id'] + '.csv'))
 
 
 def produce_default_output():
@@ -131,7 +148,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = False
-    multiple_processors = True
+    multiple_processors = False
     delete_old = True
     freeze_support()
 
