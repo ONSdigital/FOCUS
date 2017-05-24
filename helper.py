@@ -14,19 +14,24 @@ import pandas as pd
 
 l = Lock()  # global declaration...can I avoid this
 
-
 def responses_to_date(district, output_format=""):
     # need to add on those households who returned before the first interaction - and were therefore never added
     # to the sim
 
-    count = len([household.hh_id for household in district.households if household.responded])
+
+    # alt here is to look up self.rep.active_totals dict and get value...check!!!
+    count = district.rep.active_totals['district_name'][district.district]
+
+   # count = len([household.hh_id for household in district.households if household.responded])
 
     if output_format == "%":
 
-        return (count + district.early_responders)/(len(district.households) + district.early_responders)
+       # return (count + district.early_responders)/(len(district.households) + district.early_responders)
+        return count / (len(district.households) + district.early_responders)
 
     else:
-        return ((count + district.early_responders)/(len(district.households) + district.early_responders))*100
+        #return ((count + district.early_responders)/(len(district.households) + district.early_responders))*100
+        return (count / (len(district.households) + district.early_responders)) * 100
 
 
 def current_day(obj):

@@ -12,8 +12,42 @@ call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'LSOA'
 hh_record = namedtuple('hh_record', ['rep', 'district', 'LA', 'LSOA', 'hh_type', 'action', 'digital', 'time'])
 warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
-hh_geography = namedtuple('hh_geography', ['la', 'lsoa', 'district', 'hh_type', 'digital'])
-
+hh_geography = namedtuple('hh_geography', ['la', 'lsoa', 'district_name', 'hh_type', 'digital'])
+"""
+record_generic_output = True
+record_do_nothing = True
+record_call = True
+record_call_defer = True
+record_call_renege = True
+record_call_contact = True
+record_call_convert = True
+record_call_request = True
+record_call_success = True
+record_call_failed = True
+record_return_sent = True
+record_reminder_wasted = True
+record_reminder_unnecessary = True
+record_reminder_received = True
+record_reminder_success = True
+record_call_wait_times = True
+record_warnings = True
+record_non_response = True
+record_letters = True
+record_posted = True
+record_visit = True
+record_visit_wasted = True
+record_visit_unnecessary = True
+record_visit_contact = True
+record_visit_out = True
+record_visit_convert = True
+record_visit_assist = True
+record_visit_success = True
+record_visit_failed = True
+record_return_received = True
+record_responded = True
+record_hh_record = True
+record_key_info = True
+"""
 record_generic_output = False
 record_do_nothing = False
 record_call = False
@@ -45,5 +79,6 @@ record_visit_success = False
 record_visit_failed = False
 record_return_received = False
 record_responded = False
-
+record_hh_record = False
+record_key_info = False
 

@@ -28,6 +28,7 @@ class Household(object):
         self.initial_status = initial_action.type
         self.digital = initial_action.digital
         self.initial_time = initial_action.time
+        self.district_name = district.district
 
         self.priority = self.input_data['priority']
         self.paper_allowed = h.str2bool(self.input_data['paper_allowed'])

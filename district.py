@@ -16,6 +16,8 @@ class District(object):
         # values fed into class
         self.rep = rep
         self.district = name
+        self.passive = rep.passive_data_summary
+        self.active = rep.active_data_summary
 
         # created by and belong too the class
         self.rnd = self.rep.rnd
@@ -145,14 +147,14 @@ class District(object):
                 print("Error when creating CO type", co_type, " in run: ", self.rep.run)
                 sys.exit()
 
-    def return_household_geog(self, input_dict, district, hh_type, hh_digital):
+    def return_household_geog(self, input_dict, district_name, hh_type, hh_digital):
         # returns LA and LSOA codes for hh
 
         for la in input_dict:
             for lsoa in input_dict[la]:
                 if int(input_dict[la][lsoa]) > 0:
                     input_dict[la][lsoa] = int(input_dict[la][lsoa]) - 1
-                    return oo.hh_geography(la, lsoa, district, hh_type, hh_digital)
+                    return oo.hh_geography(la, lsoa, district_name, hh_type, hh_digital)
 
     def create_households(self):
 
@@ -205,8 +207,11 @@ class District(object):
                                                                                          time_to_use))
 
                     # add household to summary of responses
-                    for key, value in self.rep.active_data_summary.items():
-                        value[hh_geog.la][math.floor(hh_action.time / 24)] += 1
+                    for key, value in self.active.items():
+                        value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
+
+                    for key, value in self.rep.active_totals.items():
+                        value[str(getattr(hh_geog, key))] += 1
 
                     if oo.record_responded:
                         self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
@@ -230,7 +235,7 @@ class District(object):
                                                                hh_geog.lsoa))
 
                 # if self.rep.reps == 1:
-                if self.rep.reps > 0:
+                if self.rep.reps > 0 and oo.record_hh_record:
                     self.rep.output_data['hh_record'].append(oo.hh_record(self.rep.reps,
                                                                           self.district,
                                                                           hh_geog.la,
@@ -240,8 +245,11 @@ class District(object):
                                                                           hh_action.digital,
                                                                           hh_action.time))
                 if hh_action.type not in ['do_nothing', 'help']:
-                    for key, value in self.rep.passive_data_summary.items():
-                        value[hh_geog.la][math.floor(hh_action.time/24)] += 1
+                    for key, value in self.passive.items():
+                        value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
+
+                for key, value in self.rep.passive_totals.items():
+                    value[str(getattr(hh_geog, key))] += 1
 
                 self.rep.total_hh += 1
 

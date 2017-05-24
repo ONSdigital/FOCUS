@@ -17,9 +17,9 @@ import helper as hp
 import pandas as pd
 import glob
 import csv
+import output_options as oo
 
 l = Lock()
-
 
 def start_run(run_input, seeds, out_path):
 
@@ -44,28 +44,67 @@ def start_run(run_input, seeds, out_path):
     for i in range(0, days):
         day_cols.append(i)
 
-    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'lookup.csv')
+    # generate list of codes from aw inputs
+    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv')
     with open(temp_file_path, 'r') as f:
         reader = csv.reader(f)
         la_list = list(reader)
         la_list = [row[2] for row in la_list]
 
+    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv')
+    with open(temp_file_path, 'r') as f:
+        reader = csv.reader(f)
+        lsoa_list = list(reader)
+        lsoa_list = [row[4] for row in lsoa_list]
+
+    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv')
+    with open(temp_file_path, 'r') as f:
+        reader = csv.reader(f)
+        district_list = list(reader)
+        district_list = [row[0] for row in district_list]
+
+        district_list = list({district for district in district_list})
+
+    dig_list = ['0', '1']
+    hh_type_list = ['1', '2', '3', '4', '5']
+
     # a dataframe used to store passive stats
-    passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
+    passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                            'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
+                            'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
+                            'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+
+    #passive_data_summary = {}
 
     # a dict that contains dataframes used to store the active summary stats as runs progress
-    active_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
+    active_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                           'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
+                           'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list))),
+                           'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+
+    #active_data_summary = {}
+
+    active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                     'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
+                     'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
+
+    #active_totals = {}
+
+    passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                      'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+
+    #passive_totals = {}
 
     l.acquire()
+    if oo.record_key_info:
+        if not os.path.isdir(os.path.join(out_path, 'key info')):
+            os.mkdir(os.path.join(out_path, 'key info'))
 
-    if not os.path.isdir(os.path.join(out_path, 'key info')):
-        os.mkdir(os.path.join(out_path, 'key info'))
-
-    if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
-    else:
-        pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
-                                       header=False)
+        if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
+            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
+        else:
+            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
+                                           header=False)
 
     l.release()
 
@@ -83,6 +122,8 @@ def start_run(run_input, seeds, out_path):
                    output_data,
                    passive_data_summary,
                    active_data_summary,
+                   active_totals,
+                   passive_totals,
                    rnd,
                    sim_hours,
                    start_date,
@@ -108,6 +149,36 @@ def start_run(run_input, seeds, out_path):
 
         pd.DataFrame.from_dict(v, orient='columns', dtype=None).T.\
             to_csv(os.path.join(os.getcwd(), 'charts', 'passive summary', k, run_input['run id'] + '.csv'))
+
+    for k, v in passive_totals.items():
+
+        # create a folder if one doesn't already exist
+        temp_output_path = os.path.join(os.getcwd(), 'charts', 'passive summary totals', k)
+        if not os.path.isdir(temp_output_path):
+            os.makedirs(temp_output_path)
+
+        pd.DataFrame.from_dict(v, orient='index', dtype=None). \
+            to_csv(os.path.join(os.getcwd(), 'charts', 'passive summary totals', k, run_input['run id'] + '.csv'), header=False)
+
+    for k, v in active_data_summary.items():
+
+        # create a folder if one doesn't already exist
+        temp_output_path = os.path.join(os.getcwd(), 'charts', 'active summary', k)
+        if not os.path.isdir(temp_output_path):
+            os.makedirs(temp_output_path)
+
+        pd.DataFrame.from_dict(v, orient='columns', dtype=None).T. \
+            to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', k, run_input['run id'] + '.csv'))
+
+    for k, v in active_totals.items():
+
+        # create a folder if one doesn't already exist
+        temp_output_path = os.path.join(os.getcwd(), 'charts', 'active summary totals', k)
+        if not os.path.isdir(temp_output_path):
+            os.makedirs(temp_output_path)
+
+        pd.DataFrame.from_dict(v, orient='index', dtype=None). \
+            to_csv(os.path.join(os.getcwd(), 'charts', 'active summary totals', k, run_input['run id'] + '.csv'))
 
 
 def produce_default_output():
@@ -148,7 +219,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = False
-    multiple_processors = False
+    multiple_processors = True
     delete_old = True
     freeze_support()
 
@@ -163,7 +234,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_small.JSON'
+        file_name = 'inputs/CCA_all.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

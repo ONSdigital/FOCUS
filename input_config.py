@@ -414,8 +414,8 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all.JSON')
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)

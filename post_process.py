@@ -535,10 +535,12 @@ def combine_csv(input_path):
 
     return temp_df
 
+
+#active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
+#returns_df = combine_csv(active_summary_path)
+#print(returns_df)
+
 """
-active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
-returns_df = combine_csv(active_summary_path)
-print(returns_df)
 
 output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 16.24.26')
 current_scenario = output_path.split('/')[-1]
@@ -574,8 +576,7 @@ pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LA', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
 #returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
-"""
-"""
+
 pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Responded']
