@@ -21,9 +21,10 @@ import output_options as oo
 
 l = Lock()
 
+
 def start_run(run_input, seeds, out_path):
 
-    max_output_file_size = 100000000
+    max_output_file_size = 1000000000
     # pull out length of sim for current run
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
@@ -66,6 +67,8 @@ def start_run(run_input, seeds, out_path):
         district_list = list({district for district in district_list})
 
     dig_list = ['0', '1']
+
+    # this list needs to come from a raw data source when we know which hh to include
     hh_type_list = ['1', '2', '3', '4', '5']
 
     # a dataframe used to store passive stats
@@ -74,7 +77,7 @@ def start_run(run_input, seeds, out_path):
                             'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
                             'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
 
-    #passive_data_summary = {}
+   #passive_data_summary = {}
 
     # a dict that contains dataframes used to store the active summary stats as runs progress
     active_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
@@ -84,14 +87,17 @@ def start_run(run_input, seeds, out_path):
 
     #active_data_summary = {}
 
+    # used to count the responses to date in ....
     active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
                      'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
                      'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
 
-    #active_totals = {}
 
+
+    # a count of the households in each ...
     passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                      'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+                      'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
+                      'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
 
     #passive_totals = {}
 
@@ -138,7 +144,6 @@ def start_run(run_input, seeds, out_path):
     hp.write_output(output_data, out_path, run_input['run id'])
 
     # write summary data to csv to defined folders
-
     # check if folder exists - if not create and output to csv
     for k, v in passive_data_summary.items():
 

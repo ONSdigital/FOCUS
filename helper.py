@@ -1,6 +1,5 @@
 """module containing functions used across modules"""
 import datetime as dt
-import ntpath
 import math
 import os
 import csv
@@ -10,27 +9,17 @@ import sys
 import response_profiles
 import call_profiles as cp
 import numpy as np
-import pandas as pd
 
 l = Lock()  # global declaration...can I avoid this
 
+
 def responses_to_date(district, output_format=""):
-    # need to add on those households who returned before the first interaction - and were therefore never added
-    # to the sim
 
-
-    # alt here is to look up self.rep.active_totals dict and get value...check!!!
     count = district.rep.active_totals['district_name'][district.district]
 
-   # count = len([household.hh_id for household in district.households if household.responded])
-
     if output_format == "%":
-
-       # return (count + district.early_responders)/(len(district.households) + district.early_responders)
         return count / (len(district.households) + district.early_responders)
-
     else:
-        #return ((count + district.early_responders)/(len(district.households) + district.early_responders))*100
         return (count / (len(district.households) + district.early_responders)) * 100
 
 
@@ -78,7 +67,6 @@ def beta_dist(rep, alpha, beta, sim_days_left):
     # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
     return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
 
-
 def write_output(output_data, out_path, ed_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
@@ -95,11 +83,7 @@ def write_output(output_data, out_path, ed_id):
 
         with open(out_path + '/{}'.format(row) + '/' + str(ed_id) + '.csv', 'a', newline='') as f_output:
             csv_output = csv.writer(f_output)
-            rows = []
-            for data_row in output_data[row]:
-                rows.append(data_row)
-                #rows = list(data_row)
-
+            rows = [data_row for data_row in output_data[row]]
             csv_output.writerows(rows)
 
     # clear output file

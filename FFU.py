@@ -19,7 +19,6 @@ class StartFU(object):
 
         self.env = env
         self.district = district
-        self.households = self.district.households
         self.update = self.district.input_data['RMT_update']
 
         self.visit_list = []
@@ -33,12 +32,10 @@ class StartFU(object):
 
             self.visit_list = []
 
-            # determine who needs to be followed up
-            for household in self.households:
-                if (household.responded is False and household.visits < household.input_data['max_visits'] and
-                        household.input_data['FU_start_time'] <= self.env.now):
-
-                    self.visit_list.append(household)
+            self.visit_list = [household for household in self.district.households
+                               if not household.responded
+                               and household.visits < household.input_data['max_visits']
+                               and household.input_data['FU_start_time'] <= self.env.now]
 
             # order by priority
             self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)

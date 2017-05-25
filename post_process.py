@@ -536,9 +536,9 @@ def combine_csv(input_path):
     return temp_df
 
 
-#active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
-#returns_df = combine_csv(active_summary_path)
-#print(returns_df)
+# active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
+# returns_df = combine_csv(active_summary_path)
+# returns_df.to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', 'la', 'active la' + '.csv'))
 
 """
 

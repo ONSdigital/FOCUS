@@ -1,10 +1,9 @@
 """module that creates daily return profiles based a simple csv input file as well as allowing for these
 profiles to be sampled"""
 
-import numpy as np
+
 import pandas as pd
 import os
-import helper as hp
 
 
 def response_profiles_2011_all(census_day):
@@ -28,7 +27,6 @@ def response_profiles_2011_all(census_day):
     prob_response = responses_only.divide(responses_only.sum(axis=0), axis=1)
     prob_response.to_csv('dist_data.csv')
 
-
     # create cumulative probability
     cum_prob_response = prob_response.cumsum(axis=0)
 
@@ -38,26 +36,6 @@ def response_profiles_2011_all(census_day):
 
 def sample_day_2011_all(rep, hh_type):
 
-    #rt = rep.response_df[hh_type].as_matrix()
-    #r = rep.rnd.uniform(0, 1)
-
-    #return np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0]
-
-    #rt = np.array(rep.response_df[hh_type])
-    #r = rep.rnd.uniform(0, 1)
-
-    #return np.min(np.where(rt>r))
-
-    #rt = list(rep.response_df[hh_type])
-    #r = rep.rnd.uniform(0, 1)
-
-    #return min([index for index, value in enumerate(rt) if value > r])
-
-    #rt = rep.response_df[hh_type]
-    #r = rep.rnd.uniform(0, 1)
-
-    #return np.min(np.where(rt > r))
-##########
     rt = rep.response_df[hh_type]
     r = rep.rnd.uniform(0, 1)
 
