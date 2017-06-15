@@ -9,7 +9,95 @@ import math
 from collections import defaultdict
 from geopy.distance import great_circle
 import datetime
+import pandas as pd
 
+
+def generate_nomis_cca():
+    """takes nomis data and some other sources with lsoa area and lats and longs and produce a float csv file that
+    details the makeup of E&W at household level"""
+
+    base_dir = os.getcwd()
+    nomis_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'NOMIS_lsoa_lower.csv'))
+
+    # parse first col into two
+    nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
+    nomis_df['lsoa11nm'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[1]
+    # remove any whitespaces
+    nomis_df['lsoa11cd'] = nomis_df['lsoa11cd'].str.strip()
+    nomis_df['lsoa11nm'] = nomis_df['lsoa11nm'].str.strip()
+    # drop the original column
+    nomis_df.drop(['2011 super output area - lower layer'], axis=1, inplace=True)
+
+    # rename cols
+    codes = [str(i) for i in range(1, 16)] + ['lsoa11cd', 'lsoa11nm']
+    nomis_df.columns = codes
+
+    # flatten and sort df
+    nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
+    nomis_flat_df.sort_values(['lsoa11cd'], axis=0, inplace=True)
+
+
+    # map on other values
+    # area
+    area_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
+
+    # create required dicts
+    area_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.AREAKM
+                               ))
+
+    lacd_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.LAD11CD
+                               ))
+
+    lanm_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.LAD11NM
+                               ))
+
+    nomis_flat_df['area'] = nomis_flat_df['lsoa11cd'].map(area_input_dict)
+    nomis_flat_df['lad11cd'] = nomis_flat_df['lsoa11cd'].map(lacd_input_dict)
+    nomis_flat_df['lad11nm'] = nomis_flat_df['lsoa11cd'].map(lanm_input_dict)
+
+    ll_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
+
+    # create required dicts
+    lat_input_dict = dict(zip(ll_df.LSOA11CD,
+                              ll_df.LATITUDE
+                               ))
+
+    long_input_dict = dict(zip(ll_df.LSOA11CD,
+                               ll_df.LONGITUDE
+                               ))
+
+
+    nomis_flat_df['lat'] = nomis_flat_df['lsoa11cd'].map(lat_input_dict)
+    nomis_flat_df['long'] = nomis_flat_df['lsoa11cd'].map(long_input_dict)
+
+
+    hh_series = nomis_flat_df.groupby(['lsoa11cd'])['value'].sum()
+    hh_dict = hh_series.to_dict()
+    nomis_flat_df['hh totals'] = nomis_flat_df['lsoa11cd'].map(hh_dict)
+
+    nomis_flat_df['area'] = nomis_flat_df['area']*(nomis_flat_df['value']/nomis_flat_df['hh totals'])
+    print(nomis_flat_df)
+    nomis_flat_df = nomis_flat_df[['lad11cd', 'lad11nm', 'long', 'lat', 'lsoa11cd', 'lsoa11nm', 'value', 'variable', 'area']]
+
+    nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
+
+
+
+
+
+
+
+
+    # function that takes nomis file and creates a flat structure detailing number of different types of
+    # households in each lsoa
+
+    # first step read nomis data
+    # drop columns that are not required
+    # rename columns so hh types match definitions to be used -  so map to LFS defs?
+    # and flatten
 
 def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
     """config function used to split each enumeration district into separate runs. Takes a JSON file as a
@@ -406,21 +494,21 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 
 # below sets input and output paths for creation of CCA csv summary
-#ratios = [1612, 1312, 725, 487, 362]
-#ratios = [1200, 1000, 600, 375, 280]
-#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'LSOA_hhs_div20.csv')
-#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'CCA_all_div20.csv')
-#create_cca_data(input_csv_path, output_csv_path, ratios)
+
+ratios = [1000]*15
+input_csv_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
+create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
-input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
+#input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
+#simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
-generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
+#generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
-
+#generate_nomis_cca()
 
 
 

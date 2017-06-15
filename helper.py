@@ -67,6 +67,7 @@ def beta_dist(rep, alpha, beta, sim_days_left):
     # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
     return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
 
+
 def write_output(output_data, out_path, ed_id):
     # write the output to csv files
     list_of_output = sorted(list(output_data.keys()))
@@ -269,3 +270,10 @@ def get_time_of_return(input_time, rep):
     time = (np.argwhere(rt == min(rt[(rt - r) > 0]))[0][0])/2 + rep.rnd.uniform(0, 0.5)
     return time
 
+
+def generate_list(input_file_path, col_num):
+    with open(input_file_path, 'r') as f:
+        reader = csv.reader(f)
+        temp_list = list(reader)
+        temp_list = [row[col_num] for row in temp_list]
+        return temp_list

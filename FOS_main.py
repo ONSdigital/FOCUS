@@ -46,25 +46,9 @@ def start_run(run_input, seeds, out_path):
         day_cols.append(i)
 
     # generate list of codes from aw inputs
-    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv')
-    with open(temp_file_path, 'r') as f:
-        reader = csv.reader(f)
-        la_list = list(reader)
-        la_list = [row[2] for row in la_list]
-
-    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv')
-    with open(temp_file_path, 'r') as f:
-        reader = csv.reader(f)
-        lsoa_list = list(reader)
-        lsoa_list = [row[4] for row in lsoa_list]
-
-    temp_file_path = os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv')
-    with open(temp_file_path, 'r') as f:
-        reader = csv.reader(f)
-        district_list = list(reader)
-        district_list = [row[0] for row in district_list]
-
-        district_list = list({district for district in district_list})
+    la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 2)
+    lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 4)
+    district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
 
     dig_list = ['0', '1']
 
