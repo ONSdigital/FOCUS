@@ -45,15 +45,16 @@ def start_run(run_input, seeds, out_path):
     for i in range(0, days):
         day_cols.append(i)
 
-    # generate list of codes from aw inputs
-    la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 2)
-    lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 4)
-    district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
+    # generate list of codes from raw inputs
+    la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
+    lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
+    #district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
+    district_list = [str(i) for i in range(1, 1949)]
 
     dig_list = ['0', '1']
 
     # this list needs to come from a raw data source when we know which hh to include
-    hh_type_list = ['1', '2', '3', '4', '5']
+    hh_type_list = [str(i) for i in range(1, 16)]
 
     # a dataframe used to store passive stats
     passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
@@ -223,7 +224,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/CCA_all.JSON'
+        file_name = 'inputs/cca_nomis.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

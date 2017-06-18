@@ -48,13 +48,13 @@ def make_time_decimal(time_object):
 
 
 def return_time_key(input_dict, time):
-
+    """returns..."""
     time %= 24
 
     key_list = sorted(list(input_dict.keys()), key=int)
 
     for key in key_list:
-        if int(key) >= time:
+        if int(key) > time:
             return key
 
 

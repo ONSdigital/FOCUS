@@ -10,7 +10,25 @@ from collections import defaultdict
 from geopy.distance import great_circle
 import datetime
 import pandas as pd
+from math import sin, cos, sqrt, atan2, radians
 
+
+def calc_dist(inlat1, inlat2, inlong1, inlong2):
+    # approximate radius of earth in km
+    R = 6373.0
+
+    lat1 = radians(inlat1)
+    lon1 = radians(inlong1)
+    lat2 = radians(inlat2)
+    lon2 = radians(inlong2)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
 
 def generate_nomis_cca():
     """takes nomis data and some other sources with lsoa area and lats and longs and produce a float csv file that
@@ -264,20 +282,25 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
 
 ###generate_multiple_districts_runs(input_path, new_districts, output_path, [[1612, 1312, 725, 487, 362]])
 
-
 def next_nearest_LSOA(input_lsoa, input_long, input_lat, input_list):
     # looks down the list and selects next nearest LSOA that hasn't been picked already
 
     temp_dict = {}
-
+    i = 0
     for row in input_list:
-        #if not row[4] in read_list:
-            # calc dist
-            current_lsoa = (input_lat, input_long)
-            next_lsoa = (row[3], row[2])
 
-            dist = great_circle(current_lsoa, next_lsoa).kilometers
+        current_lsoa = (input_lat, input_long)
+        next_lsoa = (row[3], row[2])
+
+        if i > 25000:
+            break
+        elif input_lsoa == row[5]:
+            temp_dict[row[5]] = 0
+            break
+        else:
+            dist = calc_dist(current_lsoa[0], float(next_lsoa[0]), current_lsoa[1], float(next_lsoa[1]))
             temp_dict[row[5]] = dist
+            i+=1
 
     if temp_dict:
         temp_lsoa = min(temp_dict, key=temp_dict.get)
@@ -380,7 +403,6 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
     with open(os.path.join(output_path), 'w') as outfile:
             json.dump(input_data, outfile, indent=4, sort_keys=True)
 
-
 def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, input_ratio, current_co=0):
 
     current_co += hh_remaining / input_ratio[htc-1]
@@ -405,7 +427,6 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
         area_to_carry_over = area - area_to_add
 
         return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area_to_carry_over, input_ratio, current_co)
-
 
 def create_cca_data(input_path, output_path, input_ratios=[]):
 
@@ -495,18 +516,18 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below sets input and output paths for creation of CCA csv summary
 
-ratios = [1000]*15
-input_csv_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
-create_cca_data(input_csv_path, output_csv_path, ratios)
+#ratios = [1000]*15  # this is the number of households per CO - same for now but likely to be different
+#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_flat.csv')
+#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
+#create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
-#input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template.JSON')  # JSON template to use
-#simple_input_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.csv')
-#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'CCA_small.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
+simple_input_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
-#generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
+generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
 #generate_nomis_cca()
 
