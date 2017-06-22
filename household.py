@@ -283,7 +283,7 @@ class Household(object):
 
         # digital by this point so just can you convince them to reply?
         outcome_test = self.rnd.uniform(0, 100)
-        conversion_dict = self.input_data['conversion_rate'][str(h.current_day(self))]
+        conversion_dict = self.input_data['success_rate'][str(h.current_day(self))]
 
         if outcome_test <= conversion_dict[h.return_time_key(conversion_dict, self.env.now)]:
 

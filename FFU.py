@@ -301,7 +301,7 @@ class CensusOfficer(object):
 
     def fu_visit_outcome(self, household):
 
-        household_returns = self.household_test(household, "conversion_rate")
+        household_returns = self.household_test(household, "success_rate")
 
         if not household.return_sent and household_returns:
             # hh have not responded yet and respond there and then either by paper or digital.

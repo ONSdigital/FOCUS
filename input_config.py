@@ -31,7 +31,7 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
     return R * c
 
 def generate_nomis_cca():
-    """takes nomis data and some other sources with lsoa area and lats and longs and produce a float csv file that
+    """takes nomis data and some other sources with lsoa area and lats and longs and produce a flat csv file that
     details the makeup of E&W at household level"""
 
     base_dir = os.getcwd()
@@ -516,14 +516,14 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 # below sets input and output paths for creation of CCA csv summary
 
-#ratios = [1000]*15  # this is the number of households per CO - same for now but likely to be different
-#input_csv_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_flat.csv')
-#output_csv_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
-#create_cca_data(input_csv_path, output_csv_path, ratios)
+ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
+create_cca_data(input_csv_path, output_csv_path, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.csv')
+simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
 output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
