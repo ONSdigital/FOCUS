@@ -30,6 +30,7 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
 
     return R * c
 
+
 def generate_nomis_cca():
     """takes nomis data and some other sources with lsoa area and lats and longs and produce a flat csv file that
     details the makeup of E&W at household level"""
@@ -102,13 +103,6 @@ def generate_nomis_cca():
 
     nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
 
-
-
-
-
-
-
-
     # function that takes nomis file and creates a flat structure detailing number of different types of
     # households in each lsoa
 
@@ -116,6 +110,7 @@ def generate_nomis_cca():
     # drop columns that are not required
     # rename columns so hh types match definitions to be used -  so map to LFS defs?
     # and flatten
+
 
 def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
     """config function used to split each enumeration district into separate runs. Takes a JSON file as a
@@ -182,6 +177,7 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
     # output a JSON file
     with open(os.path.join(output_JSON), 'w') as outfile:
             json.dump(output_data, outfile, indent=4, sort_keys=True)
+
 
 # generate new runs from a template and source csv
 def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_name, hh_per_co = []):
@@ -314,6 +310,37 @@ def next_nearest_LSOA(input_lsoa, input_long, input_lat, input_list):
             return i
 
 
+def next_nearest_LSOA_alt(input_lsoa, lookup_table, drop_list):
+    """ finds next nearest lsoa not including self"""
+
+    # drop from lookup lsoa that has already been cca'd but check it hasn't already been dropped from a previous calc
+    # as may look for next nearest to orig a a number of times
+
+    # load row of data needed......need a drop list so as to drop all processed lsoas so far....
+    drop_list.append(input_lsoa)
+    lookup_table = pd.read_csv(lookup_table, usecols=['lsoa11cd', input_lsoa]).set_index('lsoa11cd')
+    lookup_table = lookup_table[lookup_table['lsoa11cd'] not in drop_list]
+
+    #try:
+    #    lookup_table.drop([input_lsoa], axis=1, inplace=True)
+    #except ValueError as e:
+    #    pass
+
+    current_row = lookup_table.loc[input_lsoa]
+    next_lsoa = (current_row[current_row == min(current_row)]).index.format()[0]
+
+    drop_list.append(next_lsoa)
+    lookup_table = lookup_table[lookup_table['lsoa11cd'] not in drop_list]
+
+    #try:
+    #    lookup_table.drop([next_lsoa], axis=1, inplace=True)
+    #except ValueError as e:
+    #    pass
+
+    # and return the index of the column where the min value is found in the input lsoa row
+    return next_lsoa
+
+
 def sum_dict(input_dict):
 
     sum = 0
@@ -403,6 +430,7 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
     with open(os.path.join(output_path), 'w') as outfile:
             json.dump(input_data, outfile, indent=4, sort_keys=True)
 
+
 def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, input_ratio, current_co=0):
 
     current_co += hh_remaining / input_ratio[htc-1]
@@ -428,19 +456,19 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
 
         return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area_to_carry_over, input_ratio, current_co)
 
+
 def create_cca_data(input_path, output_path, input_ratios=[]):
+    """creates from a household level summary by area (e.g. LSOA) input file a list of Census Collection Areas
+     ready for conversion to JSON format"""
 
-    # creates from the raw data - eventually the address register - a summary breakdown of CCAs ready for conversion
-    # to JSON format
-
-    # simple ratio - number of hh per CO
+    # start at collection area 1
     cca = 1
     cca_output = []
     cca_output_check = []
     current_lsoa = ""
 
     # load file
-    # read in the csv cca data
+    # read in the csv data
     with open(input_path, 'r') as f:
         reader = csv.reader(f)
         next(reader)
@@ -450,7 +478,6 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
     current_co = 0
 
     # get first row LSOA and jump to that point
-
     # start on row 0
     next_lsoa = 0
     iterations = len(raw_data)
@@ -514,20 +541,85 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
         writer.writerows(cca_output)
 
 
+def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
+    """creates from an area based household level summary a list of Census Collection Areas
+    ready for conversion to JSON format"""
+
+    # start at collection area id's at 1
+    cca = 1
+    cca_output = []
+    drop_list = []
+
+    # load the lookup table and raw data
+    #lookup_table = pd.read_csv(lookup_table).set_index('lsoa11cd')
+    raw_data = pd.read_csv(input_path)
+
+    # start with zero census officers
+    current_co = 0
+    entries = list(raw_data['lsoa11cd'].unique())  # a list of all the geogs
+    next_lsoa = entries[0]
+    orig_lsoa_code = next_lsoa  # start here
+
+    # go through the list but not in order (as order is by distance from current reference geog)
+    # hence go through a number of times equal to length
+    for i in range(0, len(entries)):
+
+        # create a small subset  of the starting lsoa data...
+        subset_list = raw_data[raw_data['lsoa11cd'] == next_lsoa]
+        raw_data = raw_data[raw_data['lsoa11cd'] != next_lsoa]
+        # and for that subset define CO and CCAs required
+        temp_cca = cca
+        print(next_lsoa)
+
+        for index, row in subset_list.iterrows():
+
+            la_code = row[0]
+            lsoa_code = row[4]
+            hh = int(row[6])
+            htc = int(row[7])
+            area = float(row[8])
+
+            hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, input_ratios, current_co)
+            cca_output.append(hh_to_add[0])
+            current_co = hh_to_add[1]
+            cca = hh_to_add[0][0]
+
+        # check if next cca detected and if there are cols left in lookup ie lsoas left to include
+        # if next cca find next nearest lsoa based on current
+        if hh_to_add[0][0] > temp_cca and len(list(lookup_table)) > 0:
+            next_lsoa = next_nearest_LSOA_alt(lsoa_code, lookup_table, drop_list)
+            orig_lsoa_code = next_lsoa
+        # else find next based on original
+        elif len(list(lookup_table)) > 0:
+            # same cca so use current lsoa to measure dist
+            next_lsoa = next_nearest_LSOA_alt(orig_lsoa_code, lookup_table, drop_list)
+
+    with open(output_path, "w") as f:
+        # add a header
+        writer = csv.writer(f)
+        writer.writerow(["CCA", "LA", "LSOA", "number", "htc", "area"])
+        writer.writerows(cca_output)
+
+
+
+
+
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'small_nomis_flat.csv')
 output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
-create_cca_data(input_csv_path, output_csv_path, ratios)
+#create_cca_data(input_csv_path, output_csv_path, ratios)
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'copy of final_matrix.csv')
+create_cca_data_alt(input_csv_path, output_csv_path, lookup_csv, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
-input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
+#input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
+#simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
 #generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
-generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
+#generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
 #generate_nomis_cca()
 
