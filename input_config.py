@@ -311,33 +311,33 @@ def next_nearest_LSOA(input_lsoa, input_long, input_lat, input_list):
 
 
 def next_nearest_LSOA_alt(input_lsoa, lookup_table, drop_list):
-    """ finds next nearest lsoa not including self"""
+    """ finds next nearest lsoa not including itself. Requires:
 
-    # drop from lookup lsoa that has already been cca'd but check it hasn't already been dropped from a previous calc
-    # as may look for next nearest to orig a a number of times
+    input_lsoa - an lsoa code
+    lookup table - matrix containing straight line distances between codes
+    drop_list - a list of lsoa codes that have been inputted already
+    """
 
-    # load row of data needed......need a drop list so as to drop all processed lsoas so far....
-    drop_list.append(input_lsoa)
-    lookup_table = pd.read_csv(lookup_table, usecols=['lsoa11cd', input_lsoa]).set_index('lsoa11cd')
-    lookup_table = lookup_table[lookup_table['lsoa11cd'] not in drop_list]
+    # add current lsoa to drop list
+    if input_lsoa not in drop_list:
+        drop_list.append(input_lsoa)
+    # filter lookup table to subset needed
+    fields = ['lsoa11cd', input_lsoa]
+    lookup_table_subset = pd.read_csv(lookup_table, usecols=fields)
 
-    #try:
-    #    lookup_table.drop([input_lsoa], axis=1, inplace=True)
-    #except ValueError as e:
-    #    pass
+    #lookup_table_subset = lookup_table[['lsoa11cd', input_lsoa]]
+    # remove any that have been used
+    lookup_table_subset = lookup_table_subset[~lookup_table_subset['lsoa11cd'].isin(drop_list)].set_index('lsoa11cd')
 
-    current_row = lookup_table.loc[input_lsoa]
-    next_lsoa = (current_row[current_row == min(current_row)]).index.format()[0]
+    # find the min value in the column returning the row number and then index
+    lookup_table_subset = lookup_table_subset[lookup_table_subset[input_lsoa] == lookup_table_subset[input_lsoa].min()]
 
-    drop_list.append(next_lsoa)
-    lookup_table = lookup_table[lookup_table['lsoa11cd'] not in drop_list]
+    next_lsoa = lookup_table_subset.index.format()[0]
 
-    #try:
-    #    lookup_table.drop([next_lsoa], axis=1, inplace=True)
-    #except ValueError as e:
-    #    pass
+    # add next lsoa to drop list
+    if next_lsoa not in drop_list:
+        drop_list.append(next_lsoa)
 
-    # and return the index of the column where the min value is found in the input lsoa row
     return next_lsoa
 
 
@@ -432,16 +432,26 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
 
 
 def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, input_ratio, current_co=0):
+    """calculates dependant on a given ration of households to census officers the number of CO required.
+
+    cca_output -  a list containing the number of households to add to the next CCA
+    cca - the cca id
+    la_code -
+    lsoa_code -
+    hh_remaining - the number of households
+    htc - the type id
+    area - area hte household cover in km2
+    input_ratio - the number of households per CO
+    current_co - the number of co currently required to cover the households in the area
+    """
 
     current_co += hh_remaining / input_ratio[htc-1]
 
     if current_co < 12:
-        # pass return what to put in cca
+        # return what to put in cca
         return [[cca, la_code, lsoa_code, hh_remaining, htc, area], current_co]
     else:
-
-        # when adding a proportion of an hh also return proportion of area?
-
+        # add proportion to current cca and the rest to the next
         proportion_over = current_co - 12
         hh_over = math.floor(proportion_over * input_ratio[htc-1])
         hh_to_add = hh_remaining - hh_over
@@ -542,35 +552,42 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 
 def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
-    """creates from an area based household level summary a list of Census Collection Areas
-    ready for conversion to JSON format"""
+    """creates a cca household level summary ready for conversion to JSON format. The file must include the
+    information below:
 
-    # start at collection area id's at 1
-    cca = 1
+    lad11cd - required to link households to la for later aggregation
+    lsoa11cd - required to link households to lsoa for later aggregation
+    number - the number of households
+    hh_type - of a given type
+    area - the area the households cover (an average)
+    """
+
+    # load the raw data
+    raw_data = pd.read_csv(input_path)  # may be best to read in fields as specified by user - will make row refs neater!
+    print('raw data loaded at time: ', datetime.datetime.now())
+    #lookup_table = pd.read_csv(lookup_table)
+    #print('lookup_table loaded',  datetime.datetime.now())
+
+    # initialise variables
+    cca = 1  # census collection area
     cca_output = []
     drop_list = []
-
-    # load the lookup table and raw data
-    #lookup_table = pd.read_csv(lookup_table).set_index('lsoa11cd')
-    raw_data = pd.read_csv(input_path)
-
-    # start with zero census officers
     current_co = 0
-    entries = list(raw_data['lsoa11cd'].unique())  # a list of all the geogs
-    next_lsoa = entries[0]
-    orig_lsoa_code = next_lsoa  # start here
+    entries = list(raw_data['lsoa11cd'].unique())  # a list of all the inputted lsoa
+    next_lsoa = entries[0]  # start with the first entry
+    orig_lsoa_code = next_lsoa
 
-    # go through the list but not in order (as order is by distance from current reference geog)
-    # hence go through a number of times equal to length
+    # for each lsoa
     for i in range(0, len(entries)):
 
-        # create a small subset  of the starting lsoa data...
+        # subset the input data to only include the current lsoa and remove from the raw data
         subset_list = raw_data[raw_data['lsoa11cd'] == next_lsoa]
         raw_data = raw_data[raw_data['lsoa11cd'] != next_lsoa]
-        # and for that subset define CO and CCAs required
+
         temp_cca = cca
         print(next_lsoa)
 
+        # for each row of that subset (lsoa) calculated CO required
         for index, row in subset_list.iterrows():
 
             la_code = row[0]
@@ -579,21 +596,25 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
             htc = int(row[7])
             area = float(row[8])
 
+            # adding new cca as required until lsos households fully allocated
             hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, input_ratios, current_co)
             cca_output.append(hh_to_add[0])
             current_co = hh_to_add[1]
             cca = hh_to_add[0][0]
 
-        # check if next cca detected and if there are cols left in lookup ie lsoas left to include
-        # if next cca find next nearest lsoa based on current
-        if hh_to_add[0][0] > temp_cca and len(list(lookup_table)) > 0:
+        # load in only portion of lookp needed here? col
+        #lookup_table = lookup_table[~lookup_table['lsoa11cd'].isin(drop_list)]
+
+        # if moved on to new cca find next nearest lsoa based on lsoa spilt
+        if hh_to_add[0][0] > temp_cca and len(raw_data) >0:
             next_lsoa = next_nearest_LSOA_alt(lsoa_code, lookup_table, drop_list)
             orig_lsoa_code = next_lsoa
         # else find next based on original
-        elif len(list(lookup_table)) > 0:
+        elif len(raw_data) > 0:
             # same cca so use current lsoa to measure dist
             next_lsoa = next_nearest_LSOA_alt(orig_lsoa_code, lookup_table, drop_list)
 
+    # write output to csv
     with open(output_path, "w") as f:
         # add a header
         writer = csv.writer(f)
@@ -601,16 +622,13 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
         writer.writerows(cca_output)
 
 
-
-
-
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'small_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
 #create_cca_data(input_csv_path, output_csv_path, ratios)
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'copy of final_matrix.csv')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_lookup_matrix.csv')
 create_cca_data_alt(input_csv_path, output_csv_path, lookup_csv, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
