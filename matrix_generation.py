@@ -76,7 +76,7 @@ def produce_distance_matrix(input_data, geog, lat, long):
             dist = calc_dist(current_lat, temp_lat, current_long,  temp_long)
             # investigate if putting zero distances to NaN makes finding min easier...
 
-            # create lists of distances
+            # create lists of names and associated distances
             temp_out.append([temp_name, dist])
 
         # report on progress based on current records processed

@@ -13,6 +13,7 @@ from math import sin, cos, sqrt, atan2, radians
 
 
 def calc_dist(inlat1, inlat2, inlong1, inlong2):
+    """calculates distance bewtween two latitudes and longitudes taking earths curvature into account"""
     # approximate radius of earth in km
     R = 6373.0
 
@@ -31,11 +32,28 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
 
 
 def generate_nomis_cca():
-    """takes nomis data and some other sources with lsoa area and lats and longs and produce a flat csv file that
-    details the makeup of E&W at household level"""
+    """takes raw nomis data of form:
 
-    base_dir = os.getcwd()
-    nomis_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'NOMIS_lsoa_lower.csv'))
+    LSOA11CD    hh_type1 hh_type2 ...
+    E01011949     120	    333
+    E01011950     122	    296
+
+    area data of form:
+
+    LSOA11CD	AREAKM	LAD11CD	    LAD11NM
+    E01011949	0.5189	E06000001	Hartlepool
+    E01011950	0.1325	E06000001	Hartlepool
+
+    and Latitude and longitudes in the form:
+
+    lsoa11cd	long	        lat
+    E01012007	-1.242212348	54.5460388
+    E01012085	-1.201874496	54.55081431
+
+    and produces a flat csv file that details the makeup of E&W at household level
+    """
+
+    nomis_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'NOMIS_lsoa_lower.csv'))
 
     # parse first col into two
     nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
@@ -54,12 +72,10 @@ def generate_nomis_cca():
     nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
     nomis_flat_df.sort_values(['lsoa11cd'], axis=0, inplace=True)
 
-
     # map on other values
-    # area
-    area_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
+    #areas
+    area_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
 
-    # create required dicts
     area_input_dict = dict(zip(area_df.LSOA11CD,
                                area_df.AREAKM
                                ))
@@ -76,9 +92,9 @@ def generate_nomis_cca():
     nomis_flat_df['lad11cd'] = nomis_flat_df['lsoa11cd'].map(lacd_input_dict)
     nomis_flat_df['lad11nm'] = nomis_flat_df['lsoa11cd'].map(lanm_input_dict)
 
-    ll_df = pd.read_csv(os.path.join(base_dir, 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
+    # and lat and longs
+    ll_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
 
-    # create required dicts
     lat_input_dict = dict(zip(ll_df.LSOA11CD,
                               ll_df.LATITUDE
                                ))
@@ -87,34 +103,26 @@ def generate_nomis_cca():
                                ll_df.LONGITUDE
                                ))
 
-
     nomis_flat_df['lat'] = nomis_flat_df['lsoa11cd'].map(lat_input_dict)
     nomis_flat_df['long'] = nomis_flat_df['lsoa11cd'].map(long_input_dict)
-
 
     hh_series = nomis_flat_df.groupby(['lsoa11cd'])['value'].sum()
     hh_dict = hh_series.to_dict()
     nomis_flat_df['hh totals'] = nomis_flat_df['lsoa11cd'].map(hh_dict)
 
     nomis_flat_df['area'] = nomis_flat_df['area']*(nomis_flat_df['value']/nomis_flat_df['hh totals'])
-    print(nomis_flat_df)
     nomis_flat_df = nomis_flat_df[['lad11cd', 'lad11nm', 'long', 'lat', 'lsoa11cd', 'lsoa11nm', 'value', 'variable', 'area']]
 
     nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
 
-    # function that takes nomis file and creates a flat structure detailing number of different types of
-    # households in each lsoa
-
-    # first step read nomis data
-    # drop columns that are not required
-    # rename columns so hh types match definitions to be used -  so map to LFS defs?
-    # and flatten
-
 
 def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
     """config function used to split each enumeration district into separate runs. Takes a JSON file as a
-    template and csv input file with info on the enumeration districts - which have been built on the
-    assumption the workload should be approximately even."""
+    template and csv input file (of format below) with info on the enumeration districts - which have been built on the
+    assumption the workload should be approximately even.
+
+
+    """
 
     # this will hold the new JSON file data
     output_data = defaultdict(dict)
@@ -156,7 +164,6 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
             output_data[row[0]]['districts'][row[0]]['district_area'] = 0
 
         # now add the hh for the current row increasing the area as well
-        #hh_key = "htc" + row[4]
         hh_key = row[4]
         # if cca_makeup not defined add
         if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
@@ -269,47 +276,8 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
     with open(os.path.join(output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
 
-# set paths to use
-#input_path = os.path.join(os.getcwd(), 'inputs', 'single multi district.JSON')  # JSON template to use
-#new_districts = os.path.join(os.getcwd(), 'inputs', 'management areas(small).csv')  # csv input file with management areas
-#output_path = os.path.join(os.getcwd(), 'inputs', 'management areas(small).JSON')  # output JSON file
 
-
-###generate_multiple_districts_runs(input_path, new_districts, output_path, [[1612, 1312, 725, 487, 362]])
-
-def next_nearest_LSOA(input_lsoa, input_long, input_lat, input_list):
-    # looks down the list and selects next nearest LSOA that hasn't been picked already
-
-    temp_dict = {}
-    i = 0
-    for row in input_list:
-
-        current_lsoa = (input_lat, input_long)
-        next_lsoa = (row[3], row[2])
-
-        if i > 25000:
-            break
-        elif input_lsoa == row[5]:
-            temp_dict[row[5]] = 0
-            break
-        else:
-            dist = calc_dist(current_lsoa[0], float(next_lsoa[0]), current_lsoa[1], float(next_lsoa[1]))
-            temp_dict[row[5]] = dist
-            i+=1
-
-    if temp_dict:
-        temp_lsoa = min(temp_dict, key=temp_dict.get)
-        print("current ", input_lsoa, "next ", temp_lsoa, temp_dict[temp_lsoa], " time ", datetime.datetime.now().time())
-
-    else:
-        return 0
-
-    for i, row in enumerate(input_list):
-        if row[5] == temp_lsoa:
-            return i
-
-
-def next_nearest_LSOA_alt(input_lsoa, lookup_table, drop_list):
+def next_nearest_lsoa(input_lsoa, lookup_table, drop_list):
     """ finds next nearest lsoa not including itself. Requires:
 
     input_lsoa - an lsoa code
@@ -339,17 +307,17 @@ def next_nearest_LSOA_alt(input_lsoa, lookup_table, drop_list):
 
 
 def sum_dict(input_dict):
+    """returns the sum of households across La and LSOA in a passed dict"""
 
-    sum = 0
-
+    hh_sum = 0
     for LA in input_dict:
         for LSOA in input_dict[LA]:
-            sum += int(input_dict[LA][LSOA])
+            hh_sum += int(input_dict[LA][LSOA])
 
-    return sum
+    return hh_sum
 
 
-def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
+def generate_cca_json(input_JSON, input_path, output_path,  hh_per_co=[]):
     # used to create a JSON file showing numbers of each type of hh in each CCA in each LA/LSOA
 
     # open JSON template file
@@ -402,8 +370,6 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
         input_data[run_counter]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
         input_data[run_counter]['districts'][row[0]]['district_area'] += float(row[5])
 
-
-    # this seems to work out number of CO required according to passed ratio...
     list_of_new_districts = sorted(list(input_data[run_counter]['districts'].keys()), key=str)
 
     for distr in list_of_new_districts:
@@ -429,7 +395,8 @@ def generate_cca_JSON(input_JSON, input_path, output_path,  hh_per_co=[]):
 
 
 def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area, input_ratio, current_co=0):
-    """calculates dependant on a given ration of households to census officers the number of CO required.
+    """calculates dependant on a given ratio of households to census officers the number of CO required and the
+    number of households left over if over the set limit of CO.
 
     cca_output -  a list containing the number of households to add to the next CCA
     cca - the cca id
@@ -464,91 +431,7 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
         return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area_to_carry_over, input_ratio, current_co)
 
 
-def create_cca_data(input_path, output_path, input_ratios=[]):
-    """creates from a household level summary by area (e.g. LSOA) input file a list of Census Collection Areas
-     ready for conversion to JSON format"""
-
-    # start at collection area 1
-    cca = 1
-    cca_output = []
-    cca_output_check = []
-    current_lsoa = ""
-
-    # load file
-    # read in the csv data
-    with open(input_path, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)
-
-        raw_data = list(reader)
-
-    current_co = 0
-
-    # get first row LSOA and jump to that point
-    # start on row 0
-    next_lsoa = 0
-    iterations = len(raw_data)
-
-    for i in range(0, iterations):
-
-        #if not raw_data[next_lsoa][4] in cca_output_check:
-            row = raw_data[next_lsoa]
-
-    #for row in raw_data:
-        #if not row[4] in cca_output_check:
-        # for new row need to test if next LSOA is near enough???
-        # get next nearest to start
-        # then add a limit and if over this start again...
-
-            la_code = row[0]
-            la_name = row[1]
-            longitude = float(row[2])
-            latitude = float(row[3])
-            lsoa_code = row[4]
-            lsoa_name = row[5]
-            hh = int(row[6])
-            htc = int(row[7])
-            area = float(row[8])
-
-
-            # delete current here as have required values?
-            # delete lsoa already added
-            for j, row in enumerate(raw_data):
-                if row[5] == lsoa_name:
-                    del raw_data[j]
-                    break
-
-
-            #cca_output_check.append(lsoa_code)
-
-            hh_to_add = remainder_over(cca_output, cca, la_code, lsoa_code, hh, htc, area, input_ratios, current_co)
-            cca_output.append(hh_to_add[0])
-            current_co = hh_to_add[1]  # this is number of CO carried over so if this is > 0 need to find next nearest LSOA...
-            cca = hh_to_add[0][0]
-
-            # returns the name of the next nearest lsoa
-            next_lsoa = (next_nearest_LSOA(lsoa_name, longitude, latitude, raw_data))
-
-
-            # then search for the index of the next lsoa
-            #for z, row in enumerate(raw_data):
-            #    if row[5] == next_lsoa:
-            #        next_lsoa = z
-            #        break
-
-                    # record the order they are added and visualise?
-
-
-
-
-    with open(output_path, "w") as f:
-        # add a header
-        writer = csv.writer(f)
-        writer.writerow(["CCA", "LA", "LSOA", "number", "htc", "area"])
-        writer.writerows(cca_output)
-
-
-def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
+def create_cca_data(input_path, output_path, lookup_table, input_ratios=[]):
     """creates a cca household level summary ready for conversion to JSON format. The input file must include the
     information below:
 
@@ -584,7 +467,6 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
         raw_data = raw_data[raw_data['lsoa11cd'] != next_lsoa]
 
         temp_cca = cca
-        print(next_lsoa)
 
         # for each row of that subset (lsoa) calculated CO required
         for index, row in subset_list.iterrows():
@@ -603,12 +485,12 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
 
         # if moved on to new cca find next nearest lsoa based on lsoa spilt
         if hh_to_add[0][0] > temp_cca and len(raw_data) > 0:
-            next_lsoa = next_nearest_LSOA_alt(lsoa_code, lookup_table, drop_list)
+            next_lsoa = next_nearest_lsoa(lsoa_code, lookup_table, drop_list)
             orig_lsoa_code = next_lsoa
         # else find next based on original
         elif len(raw_data) > 0:
             # same cca so use current lsoa to measure dist
-            next_lsoa = next_nearest_LSOA_alt(orig_lsoa_code, lookup_table, drop_list)
+            next_lsoa = next_nearest_lsoa(orig_lsoa_code, lookup_table, drop_list)
 
         if i > 0 and i % 1000 == 0:
             time_now = dt.datetime.now()
@@ -627,17 +509,16 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'short_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'short_cca_nomis.csv')
-#create_cca_data(input_csv_path, output_csv_path, ratios)
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
 lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
-create_cca_data_alt(input_csv_path, output_csv_path, lookup_csv, ratios)
+create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
 #input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
 #simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
 #output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
-#generate_cca_JSON(input_JSON_template, simple_input_path, output_JSON_path, ratios)
+#generate_cca_json(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
 #generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
