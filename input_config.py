@@ -7,8 +7,7 @@ import os
 import csv
 import math
 from collections import defaultdict
-from geopy.distance import great_circle
-import datetime
+import datetime as dt
 import pandas as pd
 from math import sin, cos, sqrt, atan2, radians
 
@@ -322,17 +321,15 @@ def next_nearest_LSOA_alt(input_lsoa, lookup_table, drop_list):
     if input_lsoa not in drop_list:
         drop_list.append(input_lsoa)
     # filter lookup table to subset needed
-    fields = ['lsoa11cd', input_lsoa]
-    lookup_table_subset = pd.read_csv(lookup_table, usecols=fields)
+    lookup_table = os.path.join(lookup_table, input_lsoa + '.csv')
+    lookup_table_current = pd.read_csv(lookup_table)
 
-    #lookup_table_subset = lookup_table[['lsoa11cd', input_lsoa]]
-    # remove any that have been used
-    lookup_table_subset = lookup_table_subset[~lookup_table_subset['lsoa11cd'].isin(drop_list)].set_index('lsoa11cd')
+    lookup_table_current = lookup_table_current[~lookup_table_current['lsoa11cd'].isin(drop_list)].set_index('lsoa11cd')
 
     # find the min value in the column returning the row number and then index
-    lookup_table_subset = lookup_table_subset[lookup_table_subset[input_lsoa] == lookup_table_subset[input_lsoa].min()]
+    lookup_table_current = lookup_table_current[lookup_table_current[input_lsoa] == lookup_table_current[input_lsoa].min()]
 
-    next_lsoa = lookup_table_subset.index.format()[0]
+    next_lsoa = lookup_table_current.index.format()[0]
 
     # add next lsoa to drop list
     if next_lsoa not in drop_list:
@@ -552,7 +549,7 @@ def create_cca_data(input_path, output_path, input_ratios=[]):
 
 
 def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
-    """creates a cca household level summary ready for conversion to JSON format. The file must include the
+    """creates a cca household level summary ready for conversion to JSON format. The input file must include the
     information below:
 
     lad11cd - required to link households to la for later aggregation
@@ -560,13 +557,15 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
     number - the number of households
     hh_type - of a given type
     area - the area the households cover (an average)
+
+    the lookup table is the path to the folder where lookups are stored
     """
+
+    start_time = dt.datetime.now()
+    print('Started at: ', start_time)
 
     # load the raw data
     raw_data = pd.read_csv(input_path)  # may be best to read in fields as specified by user - will make row refs neater!
-    print('raw data loaded at time: ', datetime.datetime.now())
-    #lookup_table = pd.read_csv(lookup_table)
-    #print('lookup_table loaded',  datetime.datetime.now())
 
     # initialise variables
     cca = 1  # census collection area
@@ -602,17 +601,20 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
             current_co = hh_to_add[1]
             cca = hh_to_add[0][0]
 
-        # load in only portion of lookp needed here? col
-        #lookup_table = lookup_table[~lookup_table['lsoa11cd'].isin(drop_list)]
-
         # if moved on to new cca find next nearest lsoa based on lsoa spilt
-        if hh_to_add[0][0] > temp_cca and len(raw_data) >0:
+        if hh_to_add[0][0] > temp_cca and len(raw_data) > 0:
             next_lsoa = next_nearest_LSOA_alt(lsoa_code, lookup_table, drop_list)
             orig_lsoa_code = next_lsoa
         # else find next based on original
         elif len(raw_data) > 0:
             # same cca so use current lsoa to measure dist
             next_lsoa = next_nearest_LSOA_alt(orig_lsoa_code, lookup_table, drop_list)
+
+        if i > 0 and i % 1000 == 0:
+            time_now = dt.datetime.now()
+            time_left = ((time_now - start_time).seconds / (i / len(entries))) - (time_now - start_time).seconds
+            finish_time = time_now + dt.timedelta(seconds=time_left)
+            print('Entry ', i, 'reached. Projected finish time is: ', finish_time)
 
     # write output to csv
     with open(output_path, "w") as f:
@@ -625,10 +627,10 @@ def create_cca_data_alt(input_path, output_path, lookup_table, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'short_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'short_cca_nomis.csv')
 #create_cca_data(input_csv_path, output_csv_path, ratios)
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_lookup_matrix.csv')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
 create_cca_data_alt(input_csv_path, output_csv_path, lookup_csv, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary

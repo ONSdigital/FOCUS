@@ -27,20 +27,20 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
     return R * c
 
 
-def produce_distance_matrix(input_data, output_name, geog, lat, long):
-    """ produces a matrix of distance bwtween lat and logs for given level of geography. e.g:
+def produce_distance_matrix(input_data, geog, lat, long):
+    """ produces a matrix of distance between lat and logs for given level of geography. Produces separate files
+    due to potential for a very large matrix for lower levels of geography. If joined would take the form:
 
        A B C
      A 0 2 4
      B 2 0 5
      C 4 5 0
 
-     Where A, B and C represent the codes of the geographies.
+    Where A, B and C represent the codes of the geographies.
 
     Requires:
 
     input_data - csv file of lat and longs of each item (e.g. lsoa, la, postcode etc)
-    output_name - output filename
     geog - the name of the column with the codes
     lat - name of the latitude column
     long - name of the longitude column
@@ -49,19 +49,14 @@ def produce_distance_matrix(input_data, output_name, geog, lat, long):
     start_time = dt.datetime.now()
     print('Started at: ', start_time)
 
-    # load data
+    # load lat and long data
     fields = [geog, lat, long]
     info_df = pd.read_csv(input_data, usecols=fields)
 
-    # create lists from dataframe - faster to index
+    # create lists from dataframe - faster to access than dataframes
     name_list = list(info_df[geog])
     lat_list = list(info_df[lat])
     long_list = list(info_df[long])
-
-    # create output csv with headers as names
-    with open(output_name, 'w') as myfile:
-        wr = csv.writer(myfile)
-        wr.writerow([geog] + name_list)
 
     # for each record in the input
     for i in range(0, len(info_df)):
@@ -70,10 +65,11 @@ def produce_distance_matrix(input_data, output_name, geog, lat, long):
         current_lat = lat_list[i]
         current_long = long_list[i]
 
-        temp_dist = []  # list to store  distance results
+        temp_out = []  # list to store  distance results
 
         # calculate distances to all other records in input
         for j in range(0, len(info_df)):
+            temp_name = name_list[j]
             temp_lat = lat_list[j]
             temp_long = long_list[j]
 
@@ -81,7 +77,7 @@ def produce_distance_matrix(input_data, output_name, geog, lat, long):
             # investigate if putting zero distances to NaN makes finding min easier...
 
             # create lists of distances
-            temp_dist.append(dist)
+            temp_out.append([temp_name, dist])
 
         # report on progress based on current records processed
         if i > 0 and i % 1000 == 0:
@@ -91,12 +87,14 @@ def produce_distance_matrix(input_data, output_name, geog, lat, long):
 
             print('Row ', i, 'reached. Projected finish time is: ', finish_time)
 
-        temp_dist = [current] + temp_dist
+        temp_out = [['lsoa11cd', current]] + temp_out
 
-        # write to output file - append
-        with open(output_name, 'a') as myfile:
+        out_file = os.path.join(os.getcwd(), 'lsoa distances', current + ".csv")
+        # write to output file
+        with open(out_file, 'w') as myfile:
+            for row in temp_out:
                 wr = csv.writer(myfile)
-                wr.writerow(temp_dist)
+                wr.writerow(row)
 
 
 # location of input data
