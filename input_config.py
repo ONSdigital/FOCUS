@@ -116,11 +116,16 @@ def generate_nomis_cca():
     nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
-    """config function used to split each enumeration district into separate runs. Takes a JSON file as a
-    template and csv input file (of format below) with info on the enumeration districts - which have been built on the
-    assumption the workload should be approximately even.
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 12):
+    """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
+    file as a template and csv input file (of format below) with info on the enumeration districts - which have been
+    built on the assumption the workload should be approximately even.
 
+    CCA 	LA	       LSOA	   number	hh_type 	area
+     1	E09000001	E01000001	120	     1	    0.0177808219
+     1	E09000001	E01000001	60	     5	    0.008890411
+
+    In the below code cca_makeup details the mixture of households that are present in the cca by LA, LSOA and type.
 
     """
 
@@ -145,12 +150,14 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
 
         cca_data = list(reader)
 
-    # get a unique list of cca's
+    # get a unique list of cca's in the input data
     cca_unique = set()
     for row in cca_data:
         cca_unique.add(row[0])
 
     # may be better here to convert to a list of named tuples then can refer to keys by name rather than row[x] etc...
+    # could also add a shortcut to shorten some of the code below as " output_data[row[0]]['districts'][row[0]]" is used
+    # repeatably
 
     # then run through each row adding a new run for each unique CCA
     for row in cca_data:
@@ -175,7 +182,7 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 15):
         output_data[row[0]]['districts'][row[0]]['district_area'] += float(row[5])
         output_data[row[0]]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
 
-    # for each of the new districts add some CO...
+    # for each of the new districts add some CO...currently a fixed number but could vary by area if needed
     list_of_runs = sorted(list(output_data.keys()), key=str)
     for run in list_of_runs:
         output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
@@ -320,7 +327,7 @@ def sum_dict(input_dict):
 def generate_cca_json(input_JSON, input_path, output_path,  hh_per_co=[]):
     # used to create a JSON file showing numbers of each type of hh in each CCA in each LA/LSOA
 
-    # open JSON template file
+    # open a JSON template file
     with open(input_JSON) as data_file:
         input_data = json.load(data_file)
 
@@ -357,6 +364,7 @@ def generate_cca_json(input_JSON, input_path, output_path,  hh_per_co=[]):
     # then run through each row adding hh to CCA makeup entry
     for row in cca_data:
 
+        #
         if not row[0] in input_data[run_counter]['districts']:
             # cca not in list so add and zero area
             input_data[run_counter]['districts'][row[0]] = copy.deepcopy(district_template)
@@ -509,18 +517,18 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
-create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios)
+#input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+#output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
+#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
+#create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios)
 
 # below set input and output paths for creation of JSON file from CSV summary
-#input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
-#simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'cca_nomis.csv')
-#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'cca_nomis.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
+simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis.JSON')
 #generate_cca_json(input_JSON_template, simple_input_path, output_JSON_path, ratios)
 
-#generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
+generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
 
 #generate_nomis_cca()
 

@@ -16,7 +16,6 @@ from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 import pandas as pd
 import glob
-import csv
 import output_options as oo
 
 l = Lock()
@@ -224,7 +223,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/cca_nomis.JSON'
+        file_name = 'inputs/lsoa_nomis.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
