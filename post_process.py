@@ -353,7 +353,8 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
 
 
 def response_rate(df1, df2, bins, filter_type='LSOA', passive=False):
-    """returns a pandas series object of the number of each filter type in each bin"""
+    """returns a pandas series object of the number of each filter type in each bin. For example: will by default, if
+    the data contains the right columns, returns the average number of lsoas within a certain range"""
 
     bins = np.arange(bins[0], bins[1], bins[2])
 
@@ -400,11 +401,11 @@ def pyramid(s1, s2, bins):
     s1_all = pd.Series()
     s2_all = pd.Series()
 
-    list_of_ed = s1[0].keys()
+    list_of_cca = s1[0].keys()
 
-    for ed in list_of_ed:
-        input1 = response_rate(s1[0][ed], s1[1][ed], bins, passive=s1[3])
-        input2 = response_rate(s2[0][ed], s2[1][ed], bins, passive=s2[3])
+    for cca in list_of_cca:
+        input1 = response_rate(s1[0][cca], s1[1][cca], bins, passive=s1[3])
+        input2 = response_rate(s2[0][cca], s2[1][cca], bins, passive=s2[3])
         # add the series together - need to check sum is correct!!!
         s1_all = s1_all.add(input1, fill_value=0)
         s2_all = s2_all.add(input2, fill_value=0)

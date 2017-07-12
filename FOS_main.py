@@ -21,7 +21,7 @@ import output_options as oo
 l = Lock()
 
 
-def start_run(run_input, seeds, out_path):
+def start_run(run_input, seeds, max_runs, out_path):
 
     max_output_file_size = 1000000000
     # pull out length of sim for current run
@@ -48,8 +48,7 @@ def start_run(run_input, seeds, out_path):
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
     #district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
-    district_list = [str(i) for i in range(1, 1949)]
-
+    district_list = [str(i) for i in range(1, max_runs)]  # this is the max number of cca or biggest run number in inputs
     dig_list = ['0', '1']
 
     # this list needs to come from a raw data source when we know which hh to include
@@ -169,6 +168,15 @@ def start_run(run_input, seeds, out_path):
         pd.DataFrame.from_dict(v, orient='index', dtype=None). \
             to_csv(os.path.join(os.getcwd(), 'charts', 'active summary totals', k, run_input['run id'] + '.csv'))
 
+    with open('counter.csv', 'r') as fle:
+        counter = int(fle.readline()) + 1
+
+    if counter%100 == 0:
+        print(counter, " cca out of ", max_runs, " complete")
+
+    with open('counter.csv', 'w') as fle:
+        fle.write(str(counter))
+
 
 def produce_default_output():
     # this produces some default processed data for run 1 only in some cases...
@@ -206,11 +214,18 @@ def produce_default_output():
 
 if __name__ == '__main__':
 
+    testing = True
     create_new_config = False
     produce_default = False
-    multiple_processors = True
+    if testing:
+        multiple_processors = False
+    else:
+        multiple_processors = True
     delete_old = True
     freeze_support()
+
+    with open('counter.csv', 'w') as fle:
+        fle.write(str(0))
 
     # delete all old output files from default location on new run of sim if tag is True.
     if delete_old:
@@ -284,13 +299,15 @@ if __name__ == '__main__':
     output_JSON_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     print(st)
 
+    max_runs = max([int(run) for run in list_of_runs]) + 1
+
     # different run methods - use single processor for debugging
     if multiple_processors:
         pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-        Pool().starmap(start_run, zip(run_list, seed_list, repeat(output_path)))
+        Pool().starmap(start_run, zip(run_list, seed_list, repeat(max_runs), repeat(output_path)))
     else:
         for i in range(len(run_list)):
-            start_run(run_list[i], seed_list[i], output_path)
+            start_run(run_list[i], seed_list[i], max_runs, output_path)
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:

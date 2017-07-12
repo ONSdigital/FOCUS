@@ -10,6 +10,9 @@ from collections import defaultdict
 import datetime as dt
 import pandas as pd
 from math import sin, cos, sqrt, atan2, radians
+import glob
+import ntpath
+
 
 
 def calc_dist(inlat1, inlat2, inlong1, inlong2):
@@ -439,7 +442,7 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
         return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area_to_carry_over, input_ratio, current_co)
 
 
-def create_cca_data(input_path, output_path, lookup_table, input_ratios=[]):
+def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test=False, test_filter =()):
     """creates a cca household level summary ready for conversion to JSON format. The input file must include the
     information below:
 
@@ -450,7 +453,34 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=[]):
     area - the area the households cover (an average)
 
     the lookup table is the path to the folder where lookups are stored
+
+    if test is true and filter passed create new set of distance files for included lsoas
     """
+
+    if test:
+        # get file llist from lookups folder
+        # then for each in filter load to df
+        # fitler to include only those in filter
+        # and save to test folder
+        # then update lookup path tot this new folder
+        glob_folder = os.path.join(lookup_table, '*.csv')
+        file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+
+        filter_list = list(pd.read_csv(test_filter, header=-1)[0])
+
+        dist_output_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_distances')
+
+        for file_path in file_list:
+            file_name = ntpath.basename(file_path)[:-4]
+            if file_name in filter_list:
+                df = pd.read_csv(file_path)
+                df.columns = ('lsoa11cd', file_name)
+                df = df[df['lsoa11cd'].isin(filter_list)].set_index('lsoa11cd')
+                temp_output_path = os.path.join(dist_output_path, file_name + '.csv')
+                df.to_csv(temp_output_path)
+
+        lookup_table = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_distances')
+
 
     start_time = dt.datetime.now()
     print('Started at: ', start_time)
@@ -517,10 +547,11 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=[]):
 # below sets input and output paths for creation of CCA csv summary
 
 ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-#input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
-#output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
-#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
-#create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios)
+input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_lsoa_nomis_flat.csv')
+output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_lsoa_cca_nomis.csv')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+test_filter = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_filter.csv')
+create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios, test=True, test_filter=test_filter)
 
 # below set input and output paths for creation of JSON file from CSV summary
 input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
