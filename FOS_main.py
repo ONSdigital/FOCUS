@@ -44,7 +44,7 @@ def start_run(run_input, seeds, max_runs, out_path):
     for i in range(0, days):
         day_cols.append(i)
 
-    # generate list of codes from raw inputs
+    # generate list of codes for reference from raw inputs
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
     #district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
@@ -89,10 +89,10 @@ def start_run(run_input, seeds, max_runs, out_path):
         if not os.path.isdir(os.path.join(out_path, 'key info')):
             os.mkdir(os.path.join(out_path, 'key info'))
 
-        if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run id'] + ".csv")):
-            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"))
+        if not os.path.isfile(os.path.join(out_path, 'key dates', run_input['run_id'] + ".csv")):
+            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run_id'] + ".csv"))
         else:
-            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run id'] + ".csv"), mode='a',
+            pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run_id'] + ".csv"), mode='a',
                                            header=False)
 
     l.release()
@@ -124,49 +124,65 @@ def start_run(run_input, seeds, max_runs, out_path):
     env.run(until=sim_hours)
 
     # write the output to csv files
-    hp.write_output(output_data, out_path, run_input['run id'])
+    hp.write_output(output_data, out_path, run_input['run_id'])
 
     # write summary data to csv to defined folders
     # check if folder exists - if not create and output to csv
-    for k, v in passive_data_summary.items():
 
+    charts_out_path = os.path.join(out_path, 'charts')
+
+    for k, v in passive_data_summary.items():
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(os.getcwd(), 'charts', 'passive summary', k)
+        temp_output_path = os.path.join(charts_out_path, 'passive summary', k)
+
         if not os.path.isdir(temp_output_path):
+            # if not
             os.makedirs(temp_output_path)
 
-        pd.DataFrame.from_dict(v, orient='columns', dtype=None).T.\
-            to_csv(os.path.join(os.getcwd(), 'charts', 'passive summary', k, run_input['run id'] + '.csv'))
+        # then check if specific file exists
+        temp_file_path = os.path.join(temp_output_path, str(run_input['rep_id']) + '.csv')
+        if os.path.isfile(temp_file_path):
 
+            # if yes read in as df and add
+            df = pd.read_csv(temp_file_path).T
+            df_to_add = pd.DataFrame.from_dict(v, orient='columns', dtype=None).T
+            df = df.add(df_to_add)
+        else:
+            df = pd.DataFrame.from_dict(v, orient='columns', dtype=None)
+        # if not just create one -  or create regardless...
+
+        df.to_csv(os.path.join(charts_out_path, 'passive summary', k, str(run_input['rep_id']) + '.csv'))
+
+"""
     for k, v in passive_totals.items():
 
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(os.getcwd(), 'charts', 'passive summary totals', k)
+        temp_output_path = os.path.join(charts_out_path, 'passive summary totals', k)
         if not os.path.isdir(temp_output_path):
             os.makedirs(temp_output_path)
 
         pd.DataFrame.from_dict(v, orient='index', dtype=None). \
-            to_csv(os.path.join(os.getcwd(), 'charts', 'passive summary totals', k, run_input['run id'] + '.csv'), header=False)
+            to_csv(os.path.join(charts_out_path, 'passive summary totals', k, run_input['run_id'] + '.csv'), header=False)
 
     for k, v in active_data_summary.items():
 
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(os.getcwd(), 'charts', 'active summary', k)
+        temp_output_path = os.path.join(charts_out_path, 'active summary', k)
         if not os.path.isdir(temp_output_path):
             os.makedirs(temp_output_path)
 
         pd.DataFrame.from_dict(v, orient='columns', dtype=None).T. \
-            to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', k, run_input['run id'] + '.csv'))
+            to_csv(os.path.join(charts_out_path, 'active summary', k, run_input['run_id'] + '.csv'))
 
     for k, v in active_totals.items():
 
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(os.getcwd(), 'charts', 'active summary totals', k)
+        temp_output_path = os.path.join(charts_out_path, 'active summary totals', k)
         if not os.path.isdir(temp_output_path):
             os.makedirs(temp_output_path)
 
         pd.DataFrame.from_dict(v, orient='index', dtype=None). \
-            to_csv(os.path.join(os.getcwd(), 'charts', 'active summary totals', k, run_input['run id'] + '.csv'))
+            to_csv(os.path.join(charts_out_path, 'active summary totals', k, run_input['run_id'] + '.csv'))
 
     with open('counter.csv', 'r') as fle:
         counter = int(fle.readline()) + 1
@@ -176,6 +192,7 @@ def start_run(run_input, seeds, max_runs, out_path):
 
     with open('counter.csv', 'w') as fle:
         fle.write(str(counter))
+"""
 
 
 def produce_default_output():
@@ -232,12 +249,6 @@ if __name__ == '__main__':
                 if d != 'outputs/':
                     shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
 
-    if os.path.isdir('charts/'):
-        dirs = os.listdir(os.path.join(os.getcwd(), 'charts'))
-        for d in dirs:
-            if d != 'charts/':
-                shutil.rmtree(os.path.join(os.getcwd(), 'charts', d))
-
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
@@ -278,7 +289,7 @@ if __name__ == '__main__':
 
     # place, with random seeds, a copy of the run/rep into the run list
     for run in list_of_runs:
-        input_data[run]['run id'] = run
+        input_data[run]['run_id'] = run
         seed_dict[str(run)] = {}
         for rep in range(1, input_data[run]['replications'] + 1):
 
@@ -286,7 +297,7 @@ if __name__ == '__main__':
                 now = dt.datetime.now()
                 seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                 seed = abs(now - seed_date).total_seconds() + int(run) + rep
-                seed_dict[str(input_data[run]['run id'])][str(rep)] = seed
+                seed_dict[str(input_data[run]['run_id'])][str(rep)] = seed
                 create_new_config = True
 
             else:
@@ -294,7 +305,7 @@ if __name__ == '__main__':
 
             seed_list.append(seed)
 
-            input_data[run]['rep id'] = rep
+            input_data[run]['rep_id'] = rep
             run_list.append(copy.deepcopy(input_data[run]))
 
     ts = time.time()
@@ -320,8 +331,8 @@ if __name__ == '__main__':
         for run in list_of_seed_runs:
             input_data[run]['replication seeds'] = seed_dict[run]
             # delete ids
-            del input_data[run]['run id']
-            del input_data[run]['rep id']
+            del input_data[run]['run_id']
+            del input_data[run]['rep_id']
 
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)

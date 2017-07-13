@@ -32,8 +32,8 @@ class Rep(object):
         self.max_output_file_size = max_output_file_size
 
         # variables created within the class - belonging to it
-        self.run = self.input_data['run id']
-        self.reps = self.input_data['rep id']
+        self.run = self.input_data['run_id']
+        self.reps = self.input_data['rep_id']
         self.start_day = start_date.weekday()
 
         self.districts = []  # list containing each instance of the district class

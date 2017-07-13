@@ -541,7 +541,13 @@ def combine_csv(input_path):
 # returns_df = combine_csv(active_summary_path)
 # returns_df.to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', 'la', 'active la' + '.csv'))
 
+"""
+###############
 
+below code runs functions that use raw output to generate charts. Not needed in some cases and due to be replaced.
+
+
+##############
 
 output_path = os.path.join(os.getcwd(), 'outputs', '2017-07-13 08.29.44')
 current_scenario = output_path.split('/')[-1]
@@ -595,4 +601,4 @@ df2_loc = pandas_data['Return_sent']
 
 #produce return chart over time  - pass df of data to use....
 produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html', filter_type='LA')
-
+"""
