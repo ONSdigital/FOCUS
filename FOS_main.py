@@ -214,20 +214,17 @@ def produce_default_output():
 
 if __name__ == '__main__':
 
-    testing = True
     create_new_config = False
     produce_default = False
-    if testing:
-        multiple_processors = False
-    else:
-        multiple_processors = True
+    multiple_processors = False  # set to false to debug
     delete_old = True
     freeze_support()
 
+    # counter to track progression of run
     with open('counter.csv', 'w') as fle:
         fle.write(str(0))
 
-    # delete all old output files from default location on new run of sim if tag is True.
+    # delete all old output files but not the directories.
     if delete_old:
         if os.path.isdir('outputs/'):
             dirs = os.listdir(os.path.join(os.getcwd(), 'outputs'))
@@ -235,10 +232,16 @@ if __name__ == '__main__':
                 if d != 'outputs/':
                     shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
 
+    if os.path.isdir('charts/'):
+        dirs = os.listdir(os.path.join(os.getcwd(), 'charts'))
+        for d in dirs:
+            if d != 'charts/':
+                shutil.rmtree(os.path.join(os.getcwd(), 'charts', d))
+
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/lsoa_nomis.JSON'
+        file_name = 'inputs/subset_lsoa_nomis.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:

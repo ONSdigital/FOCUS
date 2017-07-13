@@ -348,7 +348,7 @@ def produce_return_charts(df1, df2, label1, label2, start_date_df, filename, fil
             series1 = pd.Series(int_df1[district])
             series2 = pd.Series(int_df2[district])
 
-            filename_temp = 'ed ' + str(district) + " " + filename
+            filename_temp = filter_type + str(district) + " " + filename
             combined_chart(series1, series2, label1, label2, filename_temp)
 
 
@@ -473,7 +473,7 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
     # then after all runs/ed's div by totals...and clac average
     int_hh_s.index = int_df.index
     cumulative_returns_per = int_df.div(int_hh_s, axis='index')
-    cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " returns summary scenario " +
+    cumulative_returns_per.to_csv(os.path.join(os.getcwd(), 'charts', resp_type + " returns summary scenario " +
                                                scenario + ".csv"))
 
     # also need an E+W average for each
@@ -481,7 +481,7 @@ def returns_summary(hh_record_df, returns_df,  geog='LA', resp_type='all', scena
     total_hh = int_hh_s.sum(axis=0)
     average_returns = (overall_returns / total_hh) * 100
     average_returns = pd.DataFrame(average_returns).T
-    average_returns.to_csv(os.path.join(os.getcwd(), 'summary results', resp_type + " average returns " +
+    average_returns.to_csv(os.path.join(os.getcwd(), 'charts', resp_type + " average returns " +
                                         scenario + ".csv"))
 
 
@@ -521,7 +521,7 @@ def intervention_summary(data_path, data_types=(), filter_type='LA'):
 
     # convert to percentages
     summary_df = summary_df.div(summary_df[data_types[0]], axis=0)*100
-    summary_df.to_csv(os.path.join(os.getcwd(), 'summary results', 'summary results for ' + data_types[0] + ".csv"))
+    summary_df.to_csv(os.path.join(os.getcwd(), 'charts', 'summary results for ' + data_types[0] + ".csv"))
 
 
 def combine_csv(input_path):
@@ -541,11 +541,12 @@ def combine_csv(input_path):
 # returns_df = combine_csv(active_summary_path)
 # returns_df.to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', 'la', 'active la' + '.csv'))
 
-"""
 
-output_path = os.path.join(os.getcwd(), 'outputs', '2017-05-17 16.24.26')
+
+output_path = os.path.join(os.getcwd(), 'outputs', '2017-07-13 08.29.44')
 current_scenario = output_path.split('/')[-1]
 
+# produce output tables
 intervention_summary(output_path, data_types=('pq_sent',
                                               'pq_wasted',
                                               'pq_success',
@@ -574,9 +575,9 @@ intervention_summary(output_path, data_types=('Visit_postcard_posted',
 
 pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LA', scenario=current_scenario)
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
-#returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], geog='LA', scenario=current_scenario)
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
+returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='LA', scenario=current_scenario)
 
 pandas_data = csv_to_pandas(output_path, ['hh_record', 'Responded', 'key info'])
 df1_loc = pandas_data['hh_record']
@@ -593,6 +594,5 @@ df1_loc = pandas_data['hh_record']
 df2_loc = pandas_data['Return_sent']
 
 #produce return chart over time  - pass df of data to use....
-produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html',
-                      filter_type='hh_type')
-"""
+produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html', filter_type='LA')
+

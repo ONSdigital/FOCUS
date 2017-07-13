@@ -34,165 +34,6 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
     return R * c
 
 
-def generate_nomis_cca():
-    """takes raw nomis data of form:
-
-    LSOA11CD    hh_type1 hh_type2 ...
-    E01011949     120	    333
-    E01011950     122	    296
-
-    area data of form:
-
-    LSOA11CD	AREAKM	LAD11CD	    LAD11NM
-    E01011949	0.5189	E06000001	Hartlepool
-    E01011950	0.1325	E06000001	Hartlepool
-
-    and Latitude and longitudes in the form:
-
-    lsoa11cd	long	        lat
-    E01012007	-1.242212348	54.5460388
-    E01012085	-1.201874496	54.55081431
-
-    and produces a flat csv file that details the makeup of E&W at household level
-    """
-
-    nomis_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'NOMIS_lsoa_lower.csv'))
-
-    # parse first col into two
-    nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
-    nomis_df['lsoa11nm'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[1]
-    # remove any whitespaces
-    nomis_df['lsoa11cd'] = nomis_df['lsoa11cd'].str.strip()
-    nomis_df['lsoa11nm'] = nomis_df['lsoa11nm'].str.strip()
-    # drop the original column
-    nomis_df.drop(['2011 super output area - lower layer'], axis=1, inplace=True)
-
-    # rename cols
-    codes = [str(i) for i in range(1, 16)] + ['lsoa11cd', 'lsoa11nm']
-    nomis_df.columns = codes
-
-    # flatten and sort df
-    nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
-    nomis_flat_df.sort_values(['lsoa11cd'], axis=0, inplace=True)
-
-    # map on other values
-    #areas
-    area_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
-
-    area_input_dict = dict(zip(area_df.LSOA11CD,
-                               area_df.AREAKM
-                               ))
-
-    lacd_input_dict = dict(zip(area_df.LSOA11CD,
-                               area_df.LAD11CD
-                               ))
-
-    lanm_input_dict = dict(zip(area_df.LSOA11CD,
-                               area_df.LAD11NM
-                               ))
-
-    nomis_flat_df['area'] = nomis_flat_df['lsoa11cd'].map(area_input_dict)
-    nomis_flat_df['lad11cd'] = nomis_flat_df['lsoa11cd'].map(lacd_input_dict)
-    nomis_flat_df['lad11nm'] = nomis_flat_df['lsoa11cd'].map(lanm_input_dict)
-
-    # and lat and longs
-    ll_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
-
-    lat_input_dict = dict(zip(ll_df.LSOA11CD,
-                              ll_df.LATITUDE
-                               ))
-
-    long_input_dict = dict(zip(ll_df.LSOA11CD,
-                               ll_df.LONGITUDE
-                               ))
-
-    nomis_flat_df['lat'] = nomis_flat_df['lsoa11cd'].map(lat_input_dict)
-    nomis_flat_df['long'] = nomis_flat_df['lsoa11cd'].map(long_input_dict)
-
-    hh_series = nomis_flat_df.groupby(['lsoa11cd'])['value'].sum()
-    hh_dict = hh_series.to_dict()
-    nomis_flat_df['hh totals'] = nomis_flat_df['lsoa11cd'].map(hh_dict)
-
-    nomis_flat_df['area'] = nomis_flat_df['area']*(nomis_flat_df['value']/nomis_flat_df['hh totals'])
-    nomis_flat_df = nomis_flat_df[['lad11cd', 'lad11nm', 'long', 'lat', 'lsoa11cd', 'lsoa11nm', 'value', 'variable', 'area']]
-
-    nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
-
-
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num = 12):
-    """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
-    file as a template and csv input file (of format below) with info on the enumeration districts - which have been
-    built on the assumption the workload should be approximately even.
-
-    CCA 	LA	       LSOA	   number	hh_type 	area
-     1	E09000001	E01000001	120	     1	    0.0177808219
-     1	E09000001	E01000001	60	     5	    0.008890411
-
-    In the below code cca_makeup details the mixture of households that are present in the cca by LA, LSOA and type.
-
-    """
-
-    # this will hold the new JSON file data
-    output_data = defaultdict(dict)
-
-    # open a JSON file to use as template
-    with open(input_JSON) as data_file:
-        input_data = json.load(data_file)
-
-    # template (a dict) in this case is the level under the top level key
-    run_template = input_data['1']
-    # district level template
-    district_template = run_template['districts']['1']
-    # delete the current district in the template
-    del run_template["districts"]['1']
-
-    # read in the csv cca data
-    with open(input_csv, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)
-
-        cca_data = list(reader)
-
-    # get a unique list of cca's in the input data
-    cca_unique = set()
-    for row in cca_data:
-        cca_unique.add(row[0])
-
-    # may be better here to convert to a list of named tuples then can refer to keys by name rather than row[x] etc...
-    # could also add a shortcut to shorten some of the code below as " output_data[row[0]]['districts'][row[0]]" is used
-    # repeatably
-
-    # then run through each row adding a new run for each unique CCA
-    for row in cca_data:
-
-        # if the cca is not yet in the output data add it
-        if not row[0] in output_data:
-            output_data[row[0]] = copy.deepcopy(run_template)
-            # add a new district
-            output_data[row[0]]['districts'][row[0]] = copy.deepcopy(district_template)
-            # set area to zero
-            output_data[row[0]]['districts'][row[0]]['district_area'] = 0
-
-        # now add the hh for the current row increasing the area as well
-        hh_key = row[4]
-        # if cca_makeup not defined add
-        if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
-            # hh type not in cca so add
-            output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
-
-        # then add the actual data
-        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
-        output_data[row[0]]['districts'][row[0]]['district_area'] += float(row[5])
-        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
-
-    # for each of the new districts add some CO...currently a fixed number but could vary by area if needed
-    list_of_runs = sorted(list(output_data.keys()), key=str)
-    for run in list_of_runs:
-        output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
-
-    # output a JSON file
-    with open(os.path.join(output_JSON), 'w') as outfile:
-            json.dump(output_data, outfile, indent=4, sort_keys=True)
 
 
 # generate new runs from a template and source csv
@@ -285,35 +126,6 @@ def generate_multiple_districts_runs(input_JSON, new_district_list, output_JSON_
         # dump as new json file
     with open(os.path.join(output_JSON_name), 'w') as outfile:
         json.dump(input_data, outfile,  indent=4, sort_keys=True)
-
-
-def next_nearest_lsoa(input_lsoa, lookup_table, drop_list):
-    """ finds next nearest lsoa not including itself. Requires:
-
-    input_lsoa - an lsoa code
-    lookup table - matrix containing straight line distances between codes
-    drop_list - a list of lsoa codes that have been inputted already
-    """
-
-    # add current lsoa to drop list
-    if input_lsoa not in drop_list:
-        drop_list.append(input_lsoa)
-    # filter lookup table to subset needed
-    lookup_table = os.path.join(lookup_table, input_lsoa + '.csv')
-    lookup_table_current = pd.read_csv(lookup_table)
-
-    lookup_table_current = lookup_table_current[~lookup_table_current['lsoa11cd'].isin(drop_list)].set_index('lsoa11cd')
-
-    # find the min value in the column returning the row number and then index
-    lookup_table_current = lookup_table_current[lookup_table_current[input_lsoa] == lookup_table_current[input_lsoa].min()]
-
-    next_lsoa = lookup_table_current.index.format()[0]
-
-    # add next lsoa to drop list
-    if next_lsoa not in drop_list:
-        drop_list.append(next_lsoa)
-
-    return next_lsoa
 
 
 def sum_dict(input_dict):
@@ -442,9 +254,124 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
         return remainder_over(cca_output, cca, la_code, lsoa_code, hh_over, htc, area_to_carry_over, input_ratio, current_co)
 
 
-def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test=False, test_filter =()):
-    """creates a cca household level summary ready for conversion to JSON format. The input file must include the
-    information below:
+#################################
+def generate_nomis_cca():
+    """takes raw nomis data of form:
+
+    LSOA11CD    hh_type1 hh_type2 ... ... ...
+    E01011949     120	    333
+    E01011950     122	    296
+
+    area data of form:
+
+    LSOA11CD	AREAKM	LAD11CD	    LAD11NM
+    E01011949	0.5189	E06000001	Hartlepool
+    E01011950	0.1325	E06000001	Hartlepool
+
+    and Latitude and longitudes in the form:
+
+    lsoa11cd	long	        lat
+    E01012007	-1.242212348	54.5460388
+    E01012085	-1.201874496	54.55081431
+
+    and produces a flat csv file that details the makeup of E&W at household level
+    """
+
+    nomis_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'NOMIS_lsoa_lower.csv'))
+
+    # parse first col into two
+    nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
+    nomis_df['lsoa11nm'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[1]
+    # remove any whitespaces
+    nomis_df['lsoa11cd'] = nomis_df['lsoa11cd'].str.strip()
+    nomis_df['lsoa11nm'] = nomis_df['lsoa11nm'].str.strip()
+    # drop the original column
+    nomis_df.drop(['2011 super output area - lower layer'], axis=1, inplace=True)
+
+    # rename cols
+    codes = [str(i) for i in range(1, 16)] + ['lsoa11cd', 'lsoa11nm']
+    nomis_df.columns = codes
+
+    # flatten and sort df
+    nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
+    nomis_flat_df.sort_values(['lsoa11cd'], axis=0, inplace=True)
+
+    # map on other values
+    #areas
+    area_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
+
+    area_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.AREAKM
+                               ))
+
+    lacd_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.LAD11CD
+                               ))
+
+    lanm_input_dict = dict(zip(area_df.LSOA11CD,
+                               area_df.LAD11NM
+                               ))
+
+    nomis_flat_df['area'] = nomis_flat_df['lsoa11cd'].map(area_input_dict)
+    nomis_flat_df['lad11cd'] = nomis_flat_df['lsoa11cd'].map(lacd_input_dict)
+    nomis_flat_df['lad11nm'] = nomis_flat_df['lsoa11cd'].map(lanm_input_dict)
+
+    # and lat and longs
+    ll_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
+
+    lat_input_dict = dict(zip(ll_df.LSOA11CD,
+                              ll_df.LATITUDE
+                               ))
+
+    long_input_dict = dict(zip(ll_df.LSOA11CD,
+                               ll_df.LONGITUDE
+                               ))
+
+    nomis_flat_df['lat'] = nomis_flat_df['lsoa11cd'].map(lat_input_dict)
+    nomis_flat_df['long'] = nomis_flat_df['lsoa11cd'].map(long_input_dict)
+
+    hh_series = nomis_flat_df.groupby(['lsoa11cd'])['value'].sum()
+    hh_dict = hh_series.to_dict()
+    nomis_flat_df['hh totals'] = nomis_flat_df['lsoa11cd'].map(hh_dict)
+
+    nomis_flat_df['area'] = nomis_flat_df['area']*(nomis_flat_df['value']/nomis_flat_df['hh totals'])
+    nomis_flat_df = nomis_flat_df[['lad11cd', 'lad11nm', 'long', 'lat', 'lsoa11cd', 'lsoa11nm', 'value', 'variable', 'area']]
+
+    nomis_flat_df.to_csv('lsoa_nomis_flat.csv')
+
+
+def next_nearest_lsoa(input_lsoa, lookup_table, drop_list):
+    """ finds next nearest lsoa not including itself. Requires:
+
+    input_lsoa - an lsoa code
+    lookup table - matrix containing straight line distances between codes
+    drop_list - a list of lsoa codes that have been inputted already
+    """
+
+    # add current lsoa to drop list
+    if input_lsoa not in drop_list:
+        drop_list.append(input_lsoa)
+    # filter lookup table to subset needed
+    lookup_table = os.path.join(lookup_table, input_lsoa + '.csv')
+    lookup_table_current = pd.read_csv(lookup_table)
+
+    lookup_table_current = lookup_table_current[~lookup_table_current['lsoa11cd'].isin(drop_list)].set_index('lsoa11cd')
+
+    # find the min value in the column returning the row number and then index
+    lookup_table_current = lookup_table_current[lookup_table_current[input_lsoa] == lookup_table_current[input_lsoa].min()]
+
+    next_lsoa = lookup_table_current.index.format()[0]
+
+    # add next lsoa to drop list
+    if next_lsoa not in drop_list:
+        drop_list.append(next_lsoa)
+
+    return next_lsoa
+
+
+def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subset=False, subset_filter =()):
+    """assigns a cca to the flat cca household level summary before conversion to JSON format. The input file must
+    include the information below:
 
     lad11cd - required to link households to la for later aggregation
     lsoa11cd - required to link households to lsoa for later aggregation
@@ -452,23 +379,39 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test
     hh_type - of a given type
     area - the area the households cover (an average)
 
-    the lookup table is the path to the folder where lookups are stored
+    the lookup table is the path to the folder where lookups for distance calculations are stored
 
-    if test is true and filter passed create new set of distance files for included lsoas
+    if subset is true and filter is passed it will create new set of files, including distance files, for specified
+    subset of lsoas.
+
+    output is of the format:
+
+    CCA	    LA	       LSOA	   number	hh_type	      area
+     1	E09000001	E01000001	120	     1	       0.0177808219
+     1	E09000001	E01000001	60     	 5	       0.008890411
+
     """
 
-    if test:
-        # get file llist from lookups folder
-        # then for each in filter load to df
-        # fitler to include only those in filter
-        # and save to test folder
-        # then update lookup path tot this new folder
+    start_time = dt.datetime.now()
+    print('Started at: ', start_time)
+
+    # read the flat nomis data
+    raw_data = pd.read_csv(input_path)
+
+    # if a subset is required
+    if subset:
+
+        # read in the filter to apply
+        filter_list = list(pd.read_csv(subset_filter, header=-1)[0])
+
+        # subset nomis data to only include the lsoa in the filter
+        raw_data = raw_data[raw_data['lsoa11cd'].isin(filter_list)]
+
+        # filter and subset the distance files
         glob_folder = os.path.join(lookup_table, '*.csv')
         file_list = glob.glob(glob_folder)  # get a list of all files in the folder
 
-        filter_list = list(pd.read_csv(test_filter, header=-1)[0])
-
-        dist_output_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_distances')
+        dist_output_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'distances')
 
         for file_path in file_list:
             file_name = ntpath.basename(file_path)[:-4]
@@ -479,14 +422,8 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test
                 temp_output_path = os.path.join(dist_output_path, file_name + '.csv')
                 df.to_csv(temp_output_path)
 
-        lookup_table = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_distances')
-
-
-    start_time = dt.datetime.now()
-    print('Started at: ', start_time)
-
-    # load the raw data
-    raw_data = pd.read_csv(input_path)  # may be best to read in fields as specified by user - will make row refs neater!
+        # set path to use to new folder
+        lookup_table = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'distances')
 
     # initialise variables
     cca = 1  # census collection area
@@ -497,10 +434,10 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test
     next_lsoa = entries[0]  # start with the first entry
     orig_lsoa_code = next_lsoa
 
-    # for each lsoa
+    # for the number of lsoas present in the data
     for i in range(0, len(entries)):
 
-        # subset the input data to only include the current lsoa and remove from the raw data
+        # subset the input data to only include the current lsoa and remove that lsoa from the raw data
         subset_list = raw_data[raw_data['lsoa11cd'] == next_lsoa]
         raw_data = raw_data[raw_data['lsoa11cd'] != next_lsoa]
 
@@ -544,24 +481,92 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), test
         writer.writerows(cca_output)
 
 
-# below sets input and output paths for creation of CCA csv summary
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
+    """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
+    file as a template and csv input file (of format below) with info on the enumeration districts - which have been
+    built on the assumption the workload should be approximately even.
 
-ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
-input_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_lsoa_nomis_flat.csv')
-output_csv_path = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_lsoa_cca_nomis.csv')
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
-test_filter = os.path.join(os.getcwd(), 'raw_inputs', 'test_data', 'test_filter.csv')
-create_cca_data(input_csv_path, output_csv_path, lookup_csv, ratios, test=True, test_filter=test_filter)
+    CCA 	LA	       LSOA	   number	hh_type 	area
+     1	E09000001	E01000001	120	     1	    0.0177808219
+     1	E09000001	E01000001	60	     5	    0.008890411
 
-# below set input and output paths for creation of JSON file from CSV summary
-input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
-simple_input_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis.JSON')
-#generate_cca_json(input_JSON_template, simple_input_path, output_JSON_path, ratios)
+    In the below code cca_makeup details the mixture of households that are present in the cca by LA, LSOA and type.
 
-generate_multirun(input_JSON_template, simple_input_path, output_JSON_path)
+    """
 
-#generate_nomis_cca()
+    # this will hold the new JSON file data
+    output_data = defaultdict(dict)
+
+    # open a JSON file to use as template
+    with open(input_JSON) as data_file:
+        input_data = json.load(data_file)
+
+    # template (a dict) in this case is the level under the top level key
+    run_template = input_data['1']
+    # district level template
+    district_template = run_template['districts']['1']
+    # delete the current district in the template
+    del run_template["districts"]['1']
+
+    # read in the csv cca data - update to use dataframe and therefore named columns
+    with open(input_csv, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)
+
+        cca_data = list(reader)
+
+    # get a unique list of cca's in the input data
+    cca_unique = set()
+    for row in cca_data:
+        cca_unique.add(row[0])
+
+    # then run through each row adding a new run for each unique CCA
+    for row in cca_data:
+
+        # if the cca is not yet in the output data add it
+        if not row[0] in output_data:
+            output_data[row[0]] = copy.deepcopy(run_template)
+            # add a new district
+            output_data[row[0]]['districts'][row[0]] = copy.deepcopy(district_template)
+            # set area to zero
+            output_data[row[0]]['districts'][row[0]]['district_area'] = 0
+
+        # now add the hh for the current row increasing the area as well
+        hh_key = row[4]
+        # if cca_makeup not defined add
+        if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
+            # hh type not in cca so add
+            output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
+
+        # then add the actual data
+        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
+        output_data[row[0]]['districts'][row[0]]['district_area'] += float(row[5])
+        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
+
+    # for each of the new districts add some CO...currently a fixed number but could vary by area if needed
+    list_of_runs = sorted(list(output_data.keys()), key=str)
+    for run in list_of_runs:
+        output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
+
+    # output a JSON file
+    with open(os.path.join(output_JSON), 'w') as outfile:
+        json.dump(output_data, outfile, indent=4, sort_keys=True)
+
+
+# generate_nomis_cca()
+
+#ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
+#input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
+#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
+#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+#subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
+#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
+#input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'subset_lsoa_nomis.JSON')
+
+#generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
+
+
 
 
 
