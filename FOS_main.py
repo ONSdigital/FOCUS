@@ -48,19 +48,18 @@ def start_run(run_input, seeds, max_runs, out_path):
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
     #district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
-    district_list = [str(i) for i in range(1, max_runs)]  # this is the max number of cca or biggest run number in inputs
+    district_list = [str(i) for i in range(1, max_runs)]  # this is the max number of cca (or biggest run number)
     dig_list = ['0', '1']
 
     # this list needs to come from a raw data source when we know which hh to include
     hh_type_list = [str(i) for i in range(1, 16)]
 
     # a dataframe used to store passive stats
-    #passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
-    #                        'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
-    #                        'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
-     #                       'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+    passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                            'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
+                            'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
+                            'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
 
-    passive_data_summary = {'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list)))}
 
    #passive_data_summary = {}
 
@@ -128,9 +127,7 @@ def start_run(run_input, seeds, max_runs, out_path):
     # write the output to csv files
     hp.write_output(output_data, out_path, run_input['run_id'])
 
-    # write summary data to csv to defined folders
-    # check if folder exists - if not create and output to csv
-
+    # write summary data to csv to defined folder in main outputs
     charts_out_path = os.path.join(out_path, 'charts')
 
     for k, v in passive_data_summary.items():
@@ -147,15 +144,18 @@ def start_run(run_input, seeds, max_runs, out_path):
 
             # if yes read in as df and add
             df = pd.read_csv(temp_file_path, index_col=0)
+            df.rename(index=str, inplace=True)
+
             df_to_add = pd.DataFrame.from_dict(v, orient='index')
             df_to_add.rename(columns=str, inplace=True)
+
             df = df.add(df_to_add)
-            print(df)
+
         else:
             df = pd.DataFrame.from_dict(v, orient='index')
 
         df.to_csv(os.path.join(charts_out_path, 'passive_summary', k, str(run_input['rep_id']) + '.csv'))
-"""
+
     for k, v in passive_totals.items():
 
         # create a folder if one doesn't already exist
@@ -169,8 +169,12 @@ def start_run(run_input, seeds, max_runs, out_path):
         if os.path.isfile(temp_file_path):
 
             # if yes read in as df and add
-            df = pd.read_csv(temp_file_path).set_index(k)
-            df_to_add = pd.DataFrame.from_dict(v, orient='index', dtype=None)
+            df = pd.read_csv(temp_file_path, index_col=0)
+            df.rename(index=str, inplace=True)
+
+            df_to_add = pd.DataFrame.from_dict(v, orient='index')
+            df_to_add.rename(columns=str, inplace=True)
+
             df = df.add(df_to_add)
 
         else:
@@ -192,8 +196,12 @@ def start_run(run_input, seeds, max_runs, out_path):
         if os.path.isfile(temp_file_path):
 
             # if yes read in as df and add
-            df = pd.read_csv(temp_file_path).T
-            df_to_add = pd.DataFrame.from_dict(v, orient='columns', dtype=None).T
+            df = pd.read_csv(temp_file_path, index_col=0)
+            df.rename(index=str, inplace=True)
+
+            df_to_add = pd.DataFrame.from_dict(v, orient='index')
+            df_to_add.rename(columns=str, inplace=True)
+
             df = df.add(df_to_add)
         else:
             df = pd.DataFrame.from_dict(v, orient='columns', dtype=None)
@@ -213,8 +221,12 @@ def start_run(run_input, seeds, max_runs, out_path):
         if os.path.isfile(temp_file_path):
 
             # if yes read in as df and add
-            df = pd.read_csv(temp_file_path)
-            df_to_add = pd.DataFrame.from_dict(v, orient='index', dtype=None)
+            df = pd.read_csv(temp_file_path, index_col=0)
+            df.rename(index=str, inplace=True)
+
+            df_to_add = pd.DataFrame.from_dict(v, orient='index')
+            df_to_add.rename(columns=str, inplace=True)
+
             df = df.add(df_to_add)
         else:
             df = pd.DataFrame.from_dict(v, orient='index', dtype=None)
@@ -230,7 +242,7 @@ def start_run(run_input, seeds, max_runs, out_path):
 
     with open('counter.csv', 'w') as fle:
         fle.write(str(counter))
-"""
+
 
 def produce_default_output():
     # this produces some default processed data for run 1 only in some cases...
@@ -270,7 +282,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = False
-    multiple_processors = False  # set to false to debug
+    multiple_processors = True  # set to false to debug
     delete_old = True
     freeze_support()
 
