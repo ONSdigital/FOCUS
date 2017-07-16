@@ -128,11 +128,11 @@ def start_run(run_input, seeds, max_runs, out_path):
     hp.write_output(output_data, out_path, run_input['run_id'])
 
     # write summary data to csv to defined folder in main outputs
-    charts_out_path = os.path.join(out_path, 'charts')
+    summary_out_path = os.path.join(out_path, 'summary')
 
     for k, v in passive_data_summary.items():
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(charts_out_path, 'passive_summary', k)
+        temp_output_path = os.path.join(summary_out_path, 'passive_summary', k)
 
         if not os.path.isdir(temp_output_path):
             # if not
@@ -154,12 +154,12 @@ def start_run(run_input, seeds, max_runs, out_path):
         else:
             df = pd.DataFrame.from_dict(v, orient='index')
 
-        df.to_csv(os.path.join(charts_out_path, 'passive_summary', k, str(run_input['rep_id']) + '.csv'))
+        df.to_csv(os.path.join(summary_out_path, 'passive_summary', k, str(run_input['rep_id']) + '.csv'))
 
     for k, v in passive_totals.items():
 
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(charts_out_path, 'passive_totals', k)
+        temp_output_path = os.path.join(summary_out_path, 'passive_totals', k)
 
         if not os.path.isdir(temp_output_path):
             os.makedirs(temp_output_path)
@@ -181,11 +181,11 @@ def start_run(run_input, seeds, max_runs, out_path):
             df = pd.DataFrame.from_dict(v, orient='index', dtype=None)
             df.index.name = k
 
-        df.to_csv(os.path.join(charts_out_path, 'passive_totals', k, str(run_input['rep_id']) + '.csv'))
+        df.to_csv(os.path.join(summary_out_path, 'passive_totals', k, str(run_input['rep_id']) + '.csv'))
 
     for k, v in active_data_summary.items():
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(charts_out_path, 'active_summary', k)
+        temp_output_path = os.path.join(summary_out_path, 'active_summary', k)
 
         if not os.path.isdir(temp_output_path):
             # if not
@@ -206,12 +206,12 @@ def start_run(run_input, seeds, max_runs, out_path):
         else:
             df = pd.DataFrame.from_dict(v, orient='columns', dtype=None)
 
-        df.to_csv(os.path.join(charts_out_path, 'active_summary', k, str(run_input['rep_id']) + '.csv'))
+        df.to_csv(os.path.join(summary_out_path, 'active_summary', k, str(run_input['rep_id']) + '.csv'))
 
     for k, v in active_totals.items():
 
         # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(charts_out_path, 'active_summary_totals', k)
+        temp_output_path = os.path.join(summary_out_path, 'active_summary_totals', k)
 
         if not os.path.isdir(temp_output_path):
             os.makedirs(temp_output_path)
@@ -232,7 +232,7 @@ def start_run(run_input, seeds, max_runs, out_path):
             df = pd.DataFrame.from_dict(v, orient='index', dtype=None)
             # if not just create one -  or create regardless...
 
-        df.to_csv(os.path.join(charts_out_path, 'active_summary_totals', k, str(run_input['rep_id']) + '.csv'))
+        df.to_csv(os.path.join(summary_out_path, 'active_summary_totals', k, str(run_input['rep_id']) + '.csv'))
 
     with open('counter.csv', 'r') as fle:
         counter = int(fle.readline()) + 1
