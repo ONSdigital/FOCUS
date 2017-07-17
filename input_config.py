@@ -563,7 +563,7 @@ lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
 #subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
-input_JSON_template = os.path.join(os.getcwd(), 'inputs', 'template_new.JSON')  # JSON template to use
+input_JSON_template = os.path.join(os.getcwd(), 'templates', 'template_new.JSON')  # JSON template to use
 output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis.JSON')
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)

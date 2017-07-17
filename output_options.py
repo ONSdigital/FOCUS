@@ -14,7 +14,7 @@ warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
 initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
 hh_geography = namedtuple('hh_geography', ['la', 'lsoa', 'district_name', 'hh_type', 'digital'])
 
-
+"""
 record_generic_output = True
 record_do_nothing = True
 record_call = True
@@ -82,4 +82,3 @@ record_return_received = False
 record_responded = False
 record_hh_record = False
 record_key_info = False
-"""

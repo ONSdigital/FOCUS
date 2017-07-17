@@ -18,13 +18,15 @@ import pandas as pd
 import glob
 import output_options as oo
 
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+
 l = Lock()
 
 
 def start_run(run_input, seeds, max_runs, out_path):
 
     max_output_file_size = 1000000000
-    # pull out length of sim for current run
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
     sim_hours = (end_date - start_date).total_seconds()/3600
@@ -41,49 +43,33 @@ def start_run(run_input, seeds, max_runs, out_path):
     # create dataframe to hold summary data
     days = int(sim_hours / 24)+1
     day_cols = []
-    for i in range(0, days):
-        day_cols.append(i)
+    for day in range(0, days):
+        day_cols.append(day)
 
     # generate list of codes for reference from raw inputs
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
-    #district_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'CCA_all.csv'), 0)
-    district_list = [str(i) for i in range(1, max_runs)]  # this is the max number of cca (or biggest run number)
+    district_list = [str(district) for district in range(1, max_runs)]
     dig_list = ['0', '1']
+    hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
 
-    # this list needs to come from a raw data source when we know which hh to include
-    hh_type_list = [str(i) for i in range(1, 16)]
+    passive_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                       'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
+                       'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
+                       'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
 
-    # a dataframe used to store passive stats
-    passive_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
-                            'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
-                            'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
-                            'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+    active_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                      'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
+                      'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list))),
+                      'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
 
-
-   #passive_data_summary = {}
-
-    # a dict that contains dataframes used to store the active summary stats as runs progress
-    active_data_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
-                           'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
-                           'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list))),
-                           'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
-
-    #active_data_summary = {}
-
-    # used to count the responses to date in ....
     active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
                      'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
                      'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
 
-
-
-    # a count of the households in each ...
     passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
                       'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
                       'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
-
-    #passive_totals = {}
 
     l.acquire()
     if oo.record_key_info:
@@ -110,8 +96,8 @@ def start_run(run_input, seeds, max_runs, out_path):
     initialise.Rep(env,
                    run_input,
                    output_data,
-                   passive_data_summary,
-                   active_data_summary,
+                   passive_summary,
+                   active_summary,
                    active_totals,
                    passive_totals,
                    rnd,
@@ -128,123 +114,145 @@ def start_run(run_input, seeds, max_runs, out_path):
     hp.write_output(output_data, out_path, run_input['run_id'])
 
     # write summary data to csv to defined folder in main outputs
-    summary_out_path = os.path.join(out_path, 'summary')
+    summary_path = os.path.join(out_path, 'summary')
 
-    for k, v in passive_data_summary.items():
-        # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(summary_out_path, 'passive_summary', k)
-
-        if not os.path.isdir(temp_output_path):
-            # if not
-            os.makedirs(temp_output_path)
-
-        # then check if specific file exists
-        temp_file_path = os.path.join(temp_output_path, str(run_input['rep_id']) + '.csv')
-        if os.path.isfile(temp_file_path):
-
-            # if yes read in as df and add
-            df = pd.read_csv(temp_file_path, index_col=0)
-            df.rename(index=str, inplace=True)
-
-            df_to_add = pd.DataFrame.from_dict(v, orient='index')
-            df_to_add.rename(columns=str, inplace=True)
-
-            df = df.add(df_to_add)
-
-        else:
-            df = pd.DataFrame.from_dict(v, orient='index')
-
-        df.to_csv(os.path.join(summary_out_path, 'passive_summary', k, str(run_input['rep_id']) + '.csv'))
-
-    for k, v in passive_totals.items():
-
-        # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(summary_out_path, 'passive_totals', k)
-
-        if not os.path.isdir(temp_output_path):
-            os.makedirs(temp_output_path)
-
-        # then check if specific file exists
-        temp_file_path = os.path.join(temp_output_path, str(run_input['rep_id']) + '.csv')
-        if os.path.isfile(temp_file_path):
-
-            # if yes read in as df and add
-            df = pd.read_csv(temp_file_path, index_col=0)
-            df.rename(index=str, inplace=True)
-
-            df_to_add = pd.DataFrame.from_dict(v, orient='index')
-            df_to_add.rename(columns=str, inplace=True)
-
-            df = df.add(df_to_add)
-
-        else:
-            df = pd.DataFrame.from_dict(v, orient='index', dtype=None)
-            df.index.name = k
-
-        df.to_csv(os.path.join(summary_out_path, 'passive_totals', k, str(run_input['rep_id']) + '.csv'))
-
-    for k, v in active_data_summary.items():
-        # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(summary_out_path, 'active_summary', k)
-
-        if not os.path.isdir(temp_output_path):
-            # if not
-            os.makedirs(temp_output_path)
-
-        # then check if specific file exists
-        temp_file_path = os.path.join(temp_output_path, str(run_input['rep_id']) + '.csv')
-        if os.path.isfile(temp_file_path):
-
-            # if yes read in as df and add
-            df = pd.read_csv(temp_file_path, index_col=0)
-            df.rename(index=str, inplace=True)
-
-            df_to_add = pd.DataFrame.from_dict(v, orient='index')
-            df_to_add.rename(columns=str, inplace=True)
-
-            df = df.add(df_to_add)
-        else:
-            df = pd.DataFrame.from_dict(v, orient='columns', dtype=None)
-
-        df.to_csv(os.path.join(summary_out_path, 'active_summary', k, str(run_input['rep_id']) + '.csv'))
-
-    for k, v in active_totals.items():
-
-        # create a folder if one doesn't already exist
-        temp_output_path = os.path.join(summary_out_path, 'active_summary_totals', k)
-
-        if not os.path.isdir(temp_output_path):
-            os.makedirs(temp_output_path)
-
-        # then check if specific file exists
-        temp_file_path = os.path.join(temp_output_path, str(run_input['rep_id']) + '.csv')
-        if os.path.isfile(temp_file_path):
-
-            # if yes read in as df and add
-            df = pd.read_csv(temp_file_path, index_col=0)
-            df.rename(index=str, inplace=True)
-
-            df_to_add = pd.DataFrame.from_dict(v, orient='index')
-            df_to_add.rename(columns=str, inplace=True)
-
-            df = df.add(df_to_add)
-        else:
-            df = pd.DataFrame.from_dict(v, orient='index', dtype=None)
-            # if not just create one -  or create regardless...
-
-        df.to_csv(os.path.join(summary_out_path, 'active_summary_totals', k, str(run_input['rep_id']) + '.csv'))
-
+    c_run = run_input['run_id']
+    c_rep = run_input['rep_id']
+    l.acquire()
+    hp.output_summary(summary_path, passive_summary, 'passive_summary', c_run, c_rep)
+    hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
+    hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
+    hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
+    l.release()
     with open('counter.csv', 'r') as fle:
         counter = int(fle.readline()) + 1
 
-    if counter%100 == 0:
+    if counter % 100 == 0:
         print(counter, " cca out of ", max_runs, " complete")
 
     with open('counter.csv', 'w') as fle:
         fle.write(str(counter))
 
 
-def produce_default_output():
+def combine_districts(current_path):
+
+    folders = list(os.walk(current_path))
+    for folder in folders:
+        os.chdir(folder[0])
+
+        if glob.glob('*.csv'):
+            file_list = glob.glob('*.csv')
+            dirname = os.path.basename(folder[0])
+
+            df = pd.DataFrame()
+            for file in file_list:
+                df_temp = pd.read_csv(file, index_col=0)
+                os.remove(file)
+                df = df.add(df_temp, fill_value=0)
+
+            pd.DataFrame.to_csv(df, dirname + "_average.csv")
+
+
+def collaspe_reps(current_path):
+    """function that looks through the summary data and collapses the reps into an average result."""
+
+    current_path = os.path.join(current_path, 'summary')
+
+    folders = list(os.walk(current_path))
+    for folder in folders:
+        os.chdir(folder[0])
+
+        if glob.glob('*.csv'):
+            file_list = glob.glob('*.csv')
+            total_reps = len(file_list)
+            dirname = os.path.basename(folder[0])
+
+            df = pd.DataFrame()
+            for file in file_list:
+                df_temp = pd.read_csv(file, index_col=0)
+                os.remove(file)
+                df = df.add(df_temp, fill_value=0)
+
+            df /= total_reps
+            os.chdir("..")
+            pd.DataFrame.to_csv(df, dirname + ".csv")
+            os.rmdir(folder[0])
+
+    combine_districts(current_path)
+
+
+def produce_multi_results(current_path, both= True):
+    """combines summary stats giving results  for all districts for each per rep and for all reps combined. these
+    can then be plotted separately (distribution), combined or both"""
+
+    # go through the folders equal times for number of reps run
+    # for each folder that is at district level pick out relevant rep
+    current_path = os.path.join(current_path, 'summary')
+
+    folders = list(os.walk(current_path))
+    for folder in folders:
+        os.chdir(folder[0])
+
+        if glob.glob('*.csv'):
+            file_list = glob.glob('*.csv')
+            total_reps = len(file_list)
+            os.chdir("..")  # when csv files found step up a level
+            districts = len([direc for direc in os.listdir(os.getcwd()) if os.path.isdir(direc)])
+            # then for number of reps pull out relavent files and combine
+            df_totals = pd.DataFrame()
+            for rep in range(1, total_reps+1):
+                df = pd.DataFrame()
+                for district in range(1, districts+1):
+                    df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
+                    os.remove(os.path.join(str(district), str(rep) + ".csv"))
+                    df = df.add(df_to_add, fill_value=0)
+
+                df_totals = df_totals.add(df, fill_value = 0)
+                if not os.path.isdir('reps_combined'):
+                    os.makedirs('reps_combined')
+                df.to_csv(os.path.join('reps_combined', 'rep_' + str(rep) + ".csv"))
+
+            df_totals /= total_reps
+            df_totals.to_csv('average.csv')
+
+
+def combine_summary(summary_path, reps=True, average=True):
+    """creates a plot using the summary data to show response over time. default is to show the average only.
+    if rep is True then it will also plot the individual reps results (faded)"""
+
+    list_to_plot = []
+
+    if average:
+        df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
+        df = df.sum(axis=0)
+        df.rename = 'average'
+        df.plot.line(color='red')
+
+    if reps:
+        # for each rep
+        file_list = glob.glob(os.path.join(summary_path, 'reps_combined', '*.csv'))
+        for file in file_list:
+            df = pd.read_csv(file, index_col=0)
+            df = df.sum(axis=0)
+            df.rename = 'reps'
+            df.plot.line(alpha=0.1, color='blue')
+
+    plt.show()
+
+
+    # add rows and divide by total households to get % cum.
+
+
+def produce_default_output(current_path):
+    """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
+
+    produce_multi_results(current_path)
+    default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
+    combine_summary(default_path)
+
+    #collaspe_reps(current_path)
+
+"""
     # this produces some default processed data for run 1 only in some cases...
     # defaults to LA level to produce outputs that fit into the Data Vis map format
 
@@ -276,12 +284,12 @@ def produce_default_output():
 
     # produce comparison of final results
     post_process.pyramid([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
-
+"""
 
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
+    produce_default = True
     multiple_processors = True  # set to false to debug
     delete_old = True
     freeze_support()
@@ -387,7 +395,7 @@ if __name__ == '__main__':
             json.dump(input_data, outfile)
 
     if produce_default:
-        produce_default_output()
+        produce_default_output(output_path)
 
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')

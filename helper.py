@@ -9,6 +9,7 @@ import sys
 import response_profiles
 import call_profiles as cp
 import numpy as np
+import pandas as pd
 
 l = Lock()  # global declaration...can I avoid this
 
@@ -277,3 +278,21 @@ def generate_list(input_file_path, col_num):
         temp_list = list(reader)
         temp_list = [row[col_num] for row in temp_list]
         return temp_list
+
+
+def output_summary(summary_out_path, input_dict, dict_name, run_id, rep_id):
+
+    for k, v in input_dict.items():
+        # create a folder if one doesn't already exist - new folder per rep
+        temp_output_path = os.path.join(summary_out_path, dict_name, k, run_id)
+
+        if not os.path.isdir(temp_output_path):
+            # if not
+            os.makedirs(temp_output_path)
+
+        # then check if specific file exists
+        temp_file_path = os.path.join(temp_output_path, str(rep_id) + '.csv')
+        df = pd.DataFrame.from_dict(v, orient='index')
+
+        df.to_csv(temp_file_path)
+
