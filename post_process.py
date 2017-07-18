@@ -671,28 +671,37 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True):
 
 def sum_pyramid(hh_record, input_data_left, input_data_right):
 
-    bins = range(0, 105, 5)
+    bins = range(0, 105, 5)  # user defined or auto?
 
     # use hh_record to get lsoa totals
     n = len(hh_record)
     sr = pd.Series()
     for i in range(1, n+1):
         hh_count = hh_record[str(i)]
+        # for count use only rep 1 figures
 
+        hh_count = hh_count[hh_count['rep'] == 1]
         hh_count = hh_count.groupby('lsoa11cd').size()
         sr = sr.add(hh_count, fill_value=0)
 
+    # divide returns by number of HH for each area
     input_data_left = input_data_left.div(sr, axis='index')*100
     input_data_right = input_data_right.div(sr, axis='index')*100
 
+    # bin the data
     input_data_left = pd.cut(input_data_left[input_data_left.columns[0]], bins)
     x1 = pd.value_counts(input_data_left)
+    x1 = x1.reindex(input_data_left.cat.categories)  # sort the cats
 
     input_data_right = pd.cut(input_data_right[input_data_right.columns[0]], bins)
     x2 = pd.value_counts(input_data_right)
+    x2 = x2.reindex(input_data_right.cat.categories)  # sort the cats
+
+    # y limits need to be the same
 
     y = np.arange(0, 100, 5)
 
+    # and plot
     width = 1
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
@@ -714,14 +723,12 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
-    filename = 'test' + '.png'
-    print(os.getcwd())
+    filename = 'test' + '.png'  # add default title or user defined
     output_path = os.path.join(os.getcwd(), filename)
     plt.savefig(output_path)
+    plt.show()
 
 
-
-    pass
 
 
 
