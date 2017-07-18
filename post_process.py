@@ -669,7 +669,9 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True):
     plt.show()
 
 
-def sum_pyramid(hh_record):
+def sum_pyramid(hh_record, input_data_left, input_data_right):
+
+    bins = range(0, 105, 5)
 
     # use hh_record to get lsoa totals
     n = len(hh_record)
@@ -679,9 +681,14 @@ def sum_pyramid(hh_record):
 
         hh_count = hh_count.groupby('lsoa11cd').size()
         sr = sr.add(hh_count, fill_value=0)
-        print(hh_count)
 
-    print(sr)
+    input_data_left = input_data_left.div(sr, axis='index')*100
+    input_data_right = input_data_right.div(sr, axis='index')*100
+
+    input_data_left = pd.cut(input_data_left[input_data_left.columns[0]], bins)
+    counts = pd.value_counts(input_data_left)
+    print(counts)
+
 
     # for each summary total divide by counts
     # add bins to result
