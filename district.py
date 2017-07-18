@@ -248,8 +248,8 @@ class District(object):
                     for key, value in self.passive.items():
                         value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
 
-                for key, value in self.rep.passive_totals.items():
-                    value[str(getattr(hh_geog, key))] += 1
+                    for key, value in self.rep.passive_totals.items():
+                        value[str(getattr(hh_geog, key))] += 1
 
                 self.rep.total_hh += 1
 

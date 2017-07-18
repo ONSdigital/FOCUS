@@ -7,7 +7,7 @@ import simpy
 import initialise
 import os
 import shutil
-import post_process
+import post_process as pp
 import time
 import copy
 from collections import defaultdict
@@ -15,7 +15,6 @@ from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 import pandas as pd
-import glob
 import output_options as oo
 
 import matplotlib.pyplot as plt
@@ -134,163 +133,24 @@ def start_run(run_input, seeds, max_runs, out_path):
         fle.write(str(counter))
 
 
-def combine_districts(current_path):
-
-    folders = list(os.walk(current_path))
-    for folder in folders:
-        os.chdir(folder[0])
-
-        if glob.glob('*.csv'):
-            file_list = glob.glob('*.csv')
-            dirname = os.path.basename(folder[0])
-
-            df = pd.DataFrame()
-            for file in file_list:
-                df_temp = pd.read_csv(file, index_col=0)
-                os.remove(file)
-                df = df.add(df_temp, fill_value=0)
-
-            pd.DataFrame.to_csv(df, dirname + "_average.csv")
-
-
-def collaspe_reps(current_path):
-    """function that looks through the summary data and collapses the reps into an average result."""
-
-    current_path = os.path.join(current_path, 'summary')
-
-    folders = list(os.walk(current_path))
-    for folder in folders:
-        os.chdir(folder[0])
-
-        if glob.glob('*.csv'):
-            file_list = glob.glob('*.csv')
-            total_reps = len(file_list)
-            dirname = os.path.basename(folder[0])
-
-            df = pd.DataFrame()
-            for file in file_list:
-                df_temp = pd.read_csv(file, index_col=0)
-                os.remove(file)
-                df = df.add(df_temp, fill_value=0)
-
-            df /= total_reps
-            os.chdir("..")
-            pd.DataFrame.to_csv(df, dirname + ".csv")
-            os.rmdir(folder[0])
-
-    combine_districts(current_path)
-
-
-def produce_multi_results(current_path, both= True):
-    """combines summary stats giving results  for all districts for each per rep and for all reps combined. these
-    can then be plotted separately (distribution), combined or both"""
-
-    # go through the folders equal times for number of reps run
-    # for each folder that is at district level pick out relevant rep
-    current_path = os.path.join(current_path, 'summary')
-
-    folders = list(os.walk(current_path))
-    for folder in folders:
-        os.chdir(folder[0])
-
-        if glob.glob('*.csv'):
-            file_list = glob.glob('*.csv')
-            total_reps = len(file_list)
-            os.chdir("..")  # when csv files found step up a level
-            districts = len([direc for direc in os.listdir(os.getcwd()) if os.path.isdir(direc)])
-            # then for number of reps pull out relavent files and combine
-            df_totals = pd.DataFrame()
-            for rep in range(1, total_reps+1):
-                df = pd.DataFrame()
-                for district in range(1, districts+1):
-                    df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
-                    os.remove(os.path.join(str(district), str(rep) + ".csv"))
-                    df = df.add(df_to_add, fill_value=0)
-
-                df_totals = df_totals.add(df, fill_value = 0)
-                if not os.path.isdir('reps_combined'):
-                    os.makedirs('reps_combined')
-                df.to_csv(os.path.join('reps_combined', 'rep_' + str(rep) + ".csv"))
-
-            df_totals /= total_reps
-            df_totals.to_csv('average.csv')
-
-
-def combine_summary(summary_path, reps=True, average=True):
-    """creates a plot using the summary data to show response over time. default is to show the average only.
-    if rep is True then it will also plot the individual reps results (faded)"""
-
-    list_to_plot = []
-
-    if average:
-        df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
-        df = df.sum(axis=0)
-        df.rename = 'average'
-        df.plot.line(color='red')
-
-    if reps:
-        # for each rep
-        file_list = glob.glob(os.path.join(summary_path, 'reps_combined', '*.csv'))
-        for file in file_list:
-            df = pd.read_csv(file, index_col=0)
-            df = df.sum(axis=0)
-            df.rename = 'reps'
-            df.plot.line(alpha=0.1, color='blue')
-
-    plt.show()
-
-
-    # add rows and divide by total households to get % cum.
-
-
 def produce_default_output(current_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
-    produce_multi_results(current_path)
+    # line chart of overall responses over time
+    pp.produce_rep_results(current_path)
     default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
-    combine_summary(default_path)
+    #pp.plot_summary(default_path, reps=True)
 
-    #collaspe_reps(current_path)
+    # pyramid chart showing comparison of two strategies on LSOA return rates
+    pandas_data = pp.csv_to_pandas(output_path, ['hh_record'])
+    pp.sum_pyramid(pandas_data['hh_record'])  #
 
-"""
-    # this produces some default processed data for run 1 only in some cases...
-    # defaults to LA level to produce outputs that fit into the Data Vis map format
-
-    # select data to read into data frame structure
-    pandas_data = post_process.csv_to_pandas(output_path, ['Return_sent', 'hh_record', 'Responded', 'key info'])
-
-    # produce summary stats for data vis map - default is by LA
-    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'])
-    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='paper')
-    post_process.returns_summary(pandas_data['hh_record'], pandas_data['Responded'], resp_type='digital')
-
-    # do we always want to select this data frame - yes for the default output
-    glob_folder = os.path.join('outputs', 'hh_record', '*.csv')
-    file_list = glob.glob(glob_folder)  # get a list of all files in the folder
-
-    default_key = str(file_list[0].split(os.path.sep)[-1])[:-4]
-    df1 = pandas_data['Return_sent'][default_key]
-    df2 = pandas_data['hh_record'][default_key]
-    start_date = pandas_data['key info'][default_key].start_date[0]
-    start_date = dt.date(*map(int, start_date.split('-')))
-
-    # produce return chart over time
-    post_process.produce_return_charts(df1, df2, 'Active', 'Passive', start_date, ' returns run 1.html')
-
-    # example of how to produce a second chart based on next run - can also be used as second strategy in waterfall
-    # df3 = pandas_data['Return_sent']['2']
-    # df4 = pandas_data['hh_record']['2']
-    # post_process.produce_return_charts(df3, df4, '  returns run 2.html')
-
-    # produce comparison of final results
-    post_process.pyramid([df2, df2, 'passive', True], [df1, df2, 'active', False], bins=[65, 105, 5])
-"""
 
 if __name__ == '__main__':
 
     create_new_config = False
     produce_default = True
-    multiple_processors = True  # set to false to debug
+    multiple_processors = False  # set to false to debug
     delete_old = True
     freeze_support()
 

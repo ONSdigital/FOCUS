@@ -11,77 +11,11 @@ from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
 import matplotlib.pyplot as plt
+from matplotlib import animation
 plt.style.use('ggplot')
 
 
-def user_journey_single():
-    """a function that allows the user to extract an individual user journey. Simply searches the csv output files that
-     exists and prints a sorted list (by time) of events that household experienced"""
 
-    user_list = []
-    output_path = "outputs"
-    hh_id = input('Enter hh to extract: ')
-
-    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
-
-    for folder in folder_list:
-        folder_name = folder.split(os.path.sep)[-2]
-
-        glob_folder = os.path.join('outputs', folder_name, '*.csv')
-        file_list = glob.glob(glob_folder)  # get a list of all files in the folder
-
-        try:
-            for file in file_list:
-                file_name = file.split(os.path.sep)[-1][0]
-
-                full_path = os.path.join(output_path, folder_name)
-                full_path = full_path + "/" + file_name + ".csv"
-
-                with open(full_path, 'r') as f:
-                    reader = csv.DictReader(f)
-                    rows = [row for row in reader if row['hh_id'] == hh_id]
-
-                for row in rows:
-                    # append folder_name tag
-                    row['event'] = folder_name
-                    user_list.append(row)
-
-        except:
-            pass
-
-    listsorted = sorted(user_list, key=lambda x: float(x['time']))
-
-    for row in listsorted:
-        print(row)
-
-
-def user_journey_all():
-    """a summary of all user journeys?"""
-
-
-def csv_to_pandas(output_path, output_type):
-    """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
-    and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished
-    data_dict use: data_dict['type of output']['run']. Data frame will be every replication of that output type for
-    that run"""
-
-    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
-    data_dict = defaultdict(list)  # create a dict ready for the data frames
-
-    for folder in folder_list:
-        folder_name = folder.split(os.path.sep)[-2]
-        if folder_name in output_type:
-
-            glob_folder = os.path.join(output_path, folder_name, '*.csv')
-            file_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
-
-            data_dict[folder_name] = defaultdict(list)
-
-            # for each file (sim run) add to dictionary for that type of output
-            for file in file_list:
-                file_name = file.split(os.path.sep)[-1][:-4]
-                data_dict[folder_name][file_name] = pd.read_csv(file, header=0)  # add each run to dict
-    return data_dict
 
 
 def cumulative_sum(df, start, end, step, geog, resp_type='all'):
@@ -602,3 +536,158 @@ df2_loc = pandas_data['Return_sent']
 #produce return chart over time  - pass df of data to use....
 produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns ' + current_scenario + '.html', filter_type='LA')
 """
+
+
+######################
+def user_journey_single():
+    """a function that allows the user to extract an individual user journey. Simply searches the csv output files that
+     exists and prints a sorted list (by time) of events that household experienced. Primarily used for debugging."""
+
+    user_list = []
+    output_path = "outputs"
+    hh_id = input('Enter hh to extract: ')
+
+    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
+
+    for folder in folder_list:
+        folder_name = folder.split(os.path.sep)[-2]
+
+        glob_folder = os.path.join('outputs', folder_name, '*.csv')
+        file_list = glob.glob(glob_folder)  # get a list of all files in the folder
+
+        try:
+            for file in file_list:
+                file_name = file.split(os.path.sep)[-1][0]
+
+                full_path = os.path.join(output_path, folder_name)
+                full_path = full_path + "/" + file_name + ".csv"
+
+                with open(full_path, 'r') as f:
+                    reader = csv.DictReader(f)
+                    rows = [row for row in reader if row['hh_id'] == hh_id]
+
+                for row in rows:
+                    # append folder_name tag
+                    row['event'] = folder_name
+                    user_list.append(row)
+
+        except:
+            pass
+
+    listsorted = sorted(user_list, key=lambda x: float(x['time']))
+
+    for row in listsorted:
+        print(row)
+
+
+def csv_to_pandas(output_path, output_type):
+    """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
+    and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished
+    data_dict use: data_dict['type of output']['run']. Data frame will be every replication of that output type for
+    that run"""
+
+    folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
+    data_dict = defaultdict(list)  # create a dict ready for the data frames
+
+    for folder in folder_list:
+        folder_name = folder.split(os.path.sep)[-2]
+        if folder_name in output_type:
+
+            glob_folder = os.path.join(output_path, folder_name, '*.csv')
+            file_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
+
+            data_dict[folder_name] = defaultdict(list)
+
+            # for each file (sim run) add to dictionary for that type of output
+            for file in file_list:
+                file_name = file.split(os.path.sep)[-1][:-4]
+                data_dict[folder_name][file_name] = pd.read_csv(file, header=0)  # add each run to dict
+    return data_dict
+
+
+def produce_rep_results(current_path):
+    """combines the summary files producing csv files of the results for all districts for each rep and the average
+    when all reps are combined. these can then be plotted separately (distribution), combined or both"""
+
+    # go through the folders equal times for number of reps run
+    # for each folder that is at district level pick out relevant rep
+    current_path = os.path.join(current_path, 'summary')
+
+    folders = list(os.walk(current_path))  # a list of all the folders in the summary results
+    for folder in folders:
+        os.chdir(folder[0])
+
+        if glob.glob('*.csv'):  # search each folder for csv files
+            file_list = glob.glob('*.csv')
+            total_reps = len(file_list)
+            os.chdir("..")  # when csv files found step up a level
+            districts = len([direc for direc in os.listdir(os.getcwd()) if os.path.isdir(direc)])
+            # then for number of reps pull out relavent rep for each district and add together
+            df_totals = pd.DataFrame()
+            for rep in range(1, total_reps+1):
+                df = pd.DataFrame()
+                for district in range(1, districts+1):
+                    df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
+                    os.remove(os.path.join(str(district), str(rep) + ".csv"))
+                    df = df.add(df_to_add, fill_value=0)
+
+                df_totals = df_totals.add(df, fill_value=0)  # add to overall record (all districts combined)
+                if not os.path.isdir('reps_combined'):
+                    os.makedirs('reps_combined')
+                df.to_csv(os.path.join('reps_combined', 'rep_' + str(rep) + ".csv"))
+
+            df_totals /= total_reps
+            df_totals.to_csv('average.csv')
+
+
+def plot_summary(summary_path, reps=False, average=True, cumulative=True):
+    """creates a plot using the summary data to show response over time. default is to show the average of all areas.
+    If rep is True then it will also plot the individual rep results (faded). If cumulative is false it will
+    show daily return rates."""
+
+    if average:
+        df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
+        if cumulative:
+            df = df.sum(axis=0).cumsum(axis=0)
+        else:
+            df = df.sum(axis=0)
+        df.rename = 'average'
+        df.plot.line(color='red')
+
+    if reps:
+        # for each rep
+        file_list = glob.glob(os.path.join(summary_path, 'reps_combined', '*.csv'))
+        for file in file_list:
+            df = pd.read_csv(file, index_col=0)
+            if cumulative:
+                df = df.sum(axis=0).cumsum(axis=0)
+            else:
+                df = df.sum(axis=0)
+            df.rename = 'reps'
+            df.plot.line(alpha=0.1, color='blue')
+
+    plt.show()
+
+
+def sum_pyramid(hh_record):
+
+    # use hh_record to get lsoa totals
+    n = len(hh_record)
+    sr = pd.Series()
+    for i in range(1, n+1):
+        hh_count = hh_record[str(i)]
+
+        hh_count = hh_count.groupby('lsoa11cd').size()
+        sr = sr.add(hh_count, fill_value=0)
+        print(hh_count)
+
+    print(sr)
+
+    # for each summary total divide by counts
+    # add bins to result
+    # plot...
+
+    pass
+
+
+
