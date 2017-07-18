@@ -686,13 +686,40 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
     input_data_right = input_data_right.div(sr, axis='index')*100
 
     input_data_left = pd.cut(input_data_left[input_data_left.columns[0]], bins)
-    counts = pd.value_counts(input_data_left)
-    print(counts)
+    x1 = pd.value_counts(input_data_left)
+
+    input_data_right = pd.cut(input_data_right[input_data_right.columns[0]], bins)
+    x2 = pd.value_counts(input_data_right)
+
+    y = np.arange(0, 100, 5)
+
+    width = 1
+
+    fig, axes = plt.subplots(ncols=2, sharey=True)
+    axes[0].barh(y, x1, width, align='center', color='green', zorder=10)
+    axes[0].set(title='left')
+    axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
+    axes[1].set(title='right')
+    axes[0].set_xlabel("count")
+    axes[1].set_xlabel("count")
+
+    axes[0].invert_xaxis()
+    axes[0].set(yticks=y, yticklabels=y)
+    axes[0].yaxis.tick_right()
+    axes[0].set_ylabel("Response rate")
+
+    for ax in axes.flat:
+        ax.margins(0.03)
+        ax.grid(True)
+
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0.09)
+    filename = 'test' + '.png'
+    print(os.getcwd())
+    output_path = os.path.join(os.getcwd(), filename)
+    plt.savefig(output_path)
 
 
-    # for each summary total divide by counts
-    # add bins to result
-    # plot...
 
     pass
 
