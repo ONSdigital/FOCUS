@@ -138,8 +138,8 @@ def produce_default_output(current_path):
 
     # line chart of overall responses over time
     pp.produce_rep_results(current_path)
-    # default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
-    # pp.plot_summary(default_path, reps=True)
+    default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
+    pp.plot_summary(default_path, reps=True, cumulative=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
     pandas_data = pp.csv_to_pandas(output_path, ['hh_record'])
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
-    delete_old = True
+    delete_old = False
     freeze_support()
 
     # counter to track progression of run
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/lsoa_nomis.JSON'
+        file_name = 'inputs/subset_lsoa_nomis.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -256,6 +256,8 @@ if __name__ == '__main__':
 
         with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
             json.dump(input_data, outfile)
+
+    print('Simulation complete at time: ', dt.datetime.now())
 
     if produce_default:
         produce_default_output(output_path)

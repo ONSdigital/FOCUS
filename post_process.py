@@ -154,6 +154,12 @@ def roundup(x, y):
 
     return int(math.ceil(x / float(y))) * y
 
+def rounddown(x, y):
+    # rounddown x to the nearest y
+    # e.g. if y is 100 it will rounddown to the nearest 100
+
+    return int(math.floor(x / float(y))) * y
+
 
 def combined_chart(input1, input2, label1, label2, filename):
     # takes two series objects and combines to produce a html bokeh chart with the labels and filename given
@@ -473,7 +479,7 @@ def combine_csv(input_path):
 
 # active_summary_path = os.path.join(os.getcwd(), 'charts', 'active summary', 'la')
 # returns_df = combine_csv(active_summary_path)
-# returns_df.to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', 'la', 'active la' + '.csv'))
+# returns_df.to_csv(os.path.join(os.getcwd(), 'charts', 'active summary', 'la', 'active la' + '.csv'))s
 
 """
 ###############
@@ -669,14 +675,14 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True):
     plt.show()
 
 
-def sum_pyramid(hh_record, input_data_left, input_data_right):
+def sum_pyramid(hh_record, input_data_left, input_data_right, bin_size=5):
 
-    bins = range(0, 105, 5)  # user defined or auto?
+    bins = range(0, 100 + bin_size, bin_size)  # user defined or auto?
 
     # use hh_record to get lsoa totals
     n = len(hh_record)
     sr = pd.Series()
-    for i in range(1, n+1):
+    for i in range(1, n + 1):
         hh_count = hh_record[str(i)]
         # for count use only rep 1 figures
 
@@ -685,8 +691,8 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
         sr = sr.add(hh_count, fill_value=0)
 
     # divide returns by number of HH for each area
-    input_data_left = input_data_left.div(sr, axis='index')*100
-    input_data_right = input_data_right.div(sr, axis='index')*100
+    input_data_left = input_data_left.div(sr, axis='index') * 100
+    input_data_right = input_data_right.div(sr, axis='index') * 100
 
     # bin the data
     input_data_left = pd.cut(input_data_left[input_data_left.columns[0]], bins)
@@ -697,9 +703,18 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
     x2 = pd.value_counts(input_data_right)
     x2 = x2.reindex(input_data_right.cat.categories)  # sort the cats
 
-    # y limits need to be the same
+    x_max = max(x1.max(), x2.max())
+    y_min = min(int(x1[x1 > 0].index[0][1:3]), int(x2[x2 > 0].index[0][1:3]))
 
-    y = np.arange(0, 100, 5)
+    if x1[x1 > 0].index[0][1:3] < x2[x2 > 0].index[0][1:3]:
+        x_pos_from = x1[x1 > 0].index[0]
+    else:
+        x_pos_from = x2[x2 > 0].index[0]
+
+    x1 = x1[x_pos_from:]
+    x2 = x2[x_pos_from:]
+
+    y = np.arange(y_min, 100, bin_size)
 
     # and plot
     width = 1
@@ -707,8 +722,10 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
     fig, axes = plt.subplots(ncols=2, sharey=True)
     axes[0].barh(y, x1, width, align='center', color='green', zorder=10)
     axes[0].set(title='left')
+    axes[0].set_xlim([0, x_max])
     axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
     axes[1].set(title='right')
+    axes[1].set_xlim([0, x_max])
     axes[0].set_xlabel("count")
     axes[1].set_xlabel("count")
 
@@ -728,7 +745,14 @@ def sum_pyramid(hh_record, input_data_left, input_data_right):
     plt.savefig(output_path)
     plt.show()
 
+#current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-20 09.00.49')
+
+#default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
+#plot_summary(default_path, reps=True, cumulative=False)
+
+#pandas_data = csv_to_pandas(current_path, ['hh_record'])
+#input_left = pd.read_csv(os.path.join(current_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
+#input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
 
 
-
-
+#sum_pyramid(pandas_data['hh_record'], input_left, input_right, bin_size=2)

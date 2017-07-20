@@ -43,8 +43,8 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', '2017-07-18 07.43.49', 'summary', 'active_summary', 'la')
-data_list = plot_summary_animated(default_path, cumulative=True)
+default_path = os.path.join('outputs', '2017-07-20 12.44.53', 'summary', 'active_summary', 'la')
+data_list = plot_summary_animated(default_path, cumulative=False)
 
 fig = plt.figure()
 fig.suptitle('Overall return rates over time', fontsize=20)
@@ -57,11 +57,11 @@ data_list[0].plot.line(color='red', )
 
 
 def animate(i):
-    plotlist(i).plot.line(alpha=0.2, color='blue')
+    plotlist(i).plot.line(alpha=0.1, color='blue')
 
 
 anim = animation.FuncAnimation(plt.gcf(), animate, repeat=False, blit=False, frames=n,
-                               interval=2000)
+                               interval=500)
 
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
