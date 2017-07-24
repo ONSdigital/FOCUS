@@ -5,6 +5,7 @@ from matplotlib import animation
 import os
 import glob
 import pandas as pd
+import post_process as pp
 
 
 def plot_summary_animated(summary_path, reps=True, average=True, cumulative=True):
@@ -43,7 +44,7 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', '2017-07-20 12.44.53', 'summary', 'active_summary', 'la')
+default_path = os.path.join('outputs', '2017-07-24 10.51.12', 'summary', 'active_summary', 'la')
 data_list = plot_summary_animated(default_path, cumulative=False)
 
 fig = plt.figure()
@@ -51,18 +52,24 @@ fig.suptitle('Overall return rates over time', fontsize=20)
 plt.xlabel('Day', fontsize=16)
 plt.ylabel('returns', fontsize=16)
 
-n = len(data_list) # Number of frames
+n = len(data_list)  # Number of frames
+ymax = pp.roundup(max([max(lst) for lst in data_list]), 200)
 
-data_list[0].plot.line(color='red', )
 
+def init():
+    plt.gcf().clear()
+    plt.gca().set_ylim(top=ymax)
+    data_list[0].plot.line(color='red')
 
 def animate(i):
+    plt.gca().set_ylim(top=ymax)
     plotlist(i).plot.line(alpha=0.1, color='blue')
 
 
-anim = animation.FuncAnimation(plt.gcf(), animate, repeat=False, blit=False, frames=n,
+anim = animation.FuncAnimation(plt.gcf(), animate, init_func=init,  repeat=True, blit=False, frames=n,
                                interval=500)
 
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
+
 plt.show()

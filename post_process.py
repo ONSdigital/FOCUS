@@ -11,7 +11,6 @@ from bokeh.plotting import ColumnDataSource, figure
 from bokeh.io import output_file, save
 from bokeh.models import DatetimeTickFormatter, HoverTool
 import matplotlib.pyplot as plt
-from matplotlib import animation
 plt.style.use('ggplot')
 
 
@@ -546,8 +545,9 @@ produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns 
 
 ######################
 def user_journey_single():
-    """a function that allows the user to extract an individual user journey. Simply searches the csv output files that
-     exists and prints a sorted list (by time) of events that household experienced. Primarily used for debugging."""
+    """a function that allows the user to extract an individual user journey from the raw outputs only. Simply searches
+     the csv output files that exists and prints a sorted list (by time) of events that household experienced. Primarily
+      used for debugging."""
 
     user_list = []
     output_path = "outputs"
@@ -587,10 +587,10 @@ def user_journey_single():
 
 
 def csv_to_pandas(output_path, output_type):
-    """converts selected csv output files to a dictionary of dictionaries of Pandas data frames for each output type
-    and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the finished
-    data_dict use: data_dict['type of output']['run']. Data frame will be every replication of that output type for
-    that run"""
+    """converts selected (raw) csv output files to a dictionary of dictionaries of Pandas data frames for each output
+    type and run. Output_type is a list of the types of output to include (e.g. responses, visits). To refer to the
+    finished data_dict use: data_dict['type of output']['run']. Data frame will be every replication of that output
+    type for that run"""
 
     folder_list = glob.glob(output_path + '/*/')  # create list of folders at output path
     data_dict = defaultdict(list)  # create a dict ready for the data frames
@@ -645,11 +645,20 @@ def produce_rep_results(current_path):
             df_totals /= total_reps
             df_totals.to_csv('average.csv')
 
+    # clean up empty folders?
+    for dirpath, dirnames, files in os.walk(current_path):
+        if not dirnames and not files:
+            os.rmdir(dirpath)
 
-def plot_summary(summary_path, reps=False, average=True, cumulative=True):
+    # and change the working directory back to the start directory
+    os.chdir(current_path)
+
+
+def plot_summary(summary_path, reps=False, average=True, cumulative=True, individual=True):
     """creates a plot using the summary data to show response over time. default is to show the average of all areas.
-    If rep is True then it will also plot the individual rep results (faded). If cumulative is false it will
-    show daily return rates."""
+    If rep is True then it will also plot the individual rep results (faded). If individual is True it will plot the
+    average response over time for each group in the dataset rather than the whole. If cumulative is false it will
+    show daily return rates rather than cumulative."""
 
     if average:
         df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
@@ -658,7 +667,7 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True):
         else:
             df = df.sum(axis=0)
         df.rename = 'average'
-        df.plot.line(color='red')
+        df.plot.line(label='total')
 
     if reps:
         # for each rep
@@ -672,27 +681,45 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True):
             df.rename = 'reps'
             df.plot.line(alpha=0.1, color='blue')
 
+    if individual:
+        df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
+        df.sort_index(axis=0, ascending=True, inplace=True)
+        if cumulative:
+            df = df.cumsum(axis=1)
+
+        # plot each row in succession
+        for index, row in df.iterrows():
+            row.plot.line(label=index)
+
+    filename = 'test_responses' + '.png'
+    output_path = os.path.join(os.getcwd(), filename)
+    plt.legend(loc='best')
+    plt.xlabel('days')
+    plt.ylabel('Count')
+    plt.savefig(output_path, dpi=450)
     plt.show()
 
 
-def sum_pyramid(hh_record, input_data_left, input_data_right, bin_size=5):
+def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_right, bin_size=5):
+    """takes lsoa response totals for two strategies and produces a pyramid chart showing the number of lsoas within
+    user defined bins."""
 
-    bins = range(0, 100 + bin_size, bin_size)  # user defined or auto?
+    bins = range(0, 100 + bin_size, bin_size)
 
-    # use hh_record to get lsoa totals
-    n = len(hh_record)
-    sr = pd.Series()
+    # use hh_record to get total hh in each lsoa
+    n = len(hh_record)  # number of districts
+    num_hh_lsoa = pd.Series()  # lsoa counts
     for i in range(1, n + 1):
         hh_count = hh_record[str(i)]
         # for count use only rep 1 figures
 
         hh_count = hh_count[hh_count['rep'] == 1]
         hh_count = hh_count.groupby('lsoa11cd').size()
-        sr = sr.add(hh_count, fill_value=0)
+        num_hh_lsoa = num_hh_lsoa.add(hh_count, fill_value=0)
 
-    # divide returns by number of HH for each area
-    input_data_left = input_data_left.div(sr, axis='index') * 100
-    input_data_right = input_data_right.div(sr, axis='index') * 100
+    # divide returns by number of HH for each area and convert to percentage
+    input_data_left = input_data_left.div(num_hh_lsoa, axis='index') * 100
+    input_data_right = input_data_right.div(num_hh_lsoa, axis='index') * 100
 
     # bin the data
     input_data_left = pd.cut(input_data_left[input_data_left.columns[0]], bins)
@@ -703,6 +730,7 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, bin_size=5):
     x2 = pd.value_counts(input_data_right)
     x2 = x2.reindex(input_data_right.cat.categories)  # sort the cats
 
+    # determine x and y limits to use in plots
     x_max = max(x1.max(), x2.max())
     y_min = min(int(x1[x1 > 0].index[0][1:3]), int(x2[x2 > 0].index[0][1:3]))
 
@@ -721,10 +749,10 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, bin_size=5):
 
     fig, axes = plt.subplots(ncols=2, sharey=True)
     axes[0].barh(y, x1, width, align='center', color='green', zorder=10)
-    axes[0].set(title='left')
+    axes[0].set(title=name_left)
     axes[0].set_xlim([0, x_max])
     axes[1].barh(y, x2, width, align='center', color='blue', zorder=10)
-    axes[1].set(title='right')
+    axes[1].set(title=name_right)
     axes[1].set_xlim([0, x_max])
     axes[0].set_xlabel("count")
     axes[1].set_xlabel("count")
@@ -740,19 +768,19 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, bin_size=5):
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
-    filename = 'test' + '.png'  # add default title or user defined
+    filename = name_left + ' vs ' + name_right + '.png'  # add default title or user defined
     output_path = os.path.join(os.getcwd(), filename)
-    plt.savefig(output_path)
-    plt.show()
+    plt.savefig(output_path, dpi=450)
 
-#current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-20 09.00.49')
+#left_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-24 09.44.13')
+#right_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-24 09.58.25')
 
 #default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
 #plot_summary(default_path, reps=True, cumulative=False)
 
-#pandas_data = csv_to_pandas(current_path, ['hh_record'])
-#input_left = pd.read_csv(os.path.join(current_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
-#input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-
-
-#sum_pyramid(pandas_data['hh_record'], input_left, input_right, bin_size=2)
+#pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
+#input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_left = '12'
+#input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_right = '15'
+#sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=2)

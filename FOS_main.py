@@ -138,15 +138,17 @@ def produce_default_output(current_path):
 
     # line chart of overall responses over time
     pp.produce_rep_results(current_path)
-    default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
-    pp.plot_summary(default_path, reps=True, cumulative=False)
+    default_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
+    pp.plot_summary(default_path, reps=False, cumulative=True, individual=True)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
     pandas_data = pp.csv_to_pandas(output_path, ['hh_record'])
     input_left = pd.read_csv(os.path.join(current_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
+    name_left = 'Passive'
     input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+    name_right = 'Active'
 
-    pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right)
+    pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right)
 
 
 if __name__ == '__main__':
