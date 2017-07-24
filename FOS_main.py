@@ -218,10 +218,21 @@ if __name__ == '__main__':
     """currently all run/rep combos loaded into a list - which can be very large. Change to load into memory only
     those reps that can be run by the available cores immediately.
 
-    1) Load json
-    2) Determine number of cores available (e.g. 8)
-    3) Determine how many reps of current run to add to run list
-    4) if equal to or more than number of cores
+    1) Load first json file
+        2) load a 'chunk' of data appropriate to cores available into run list
+        3) repeat until all run
+        4) unload - JSON file - if required...or overwrite with next one...
+    4) next json file
+
+
+
+    # for each file in folder
+        # load file
+            # for each run in list of runs
+                        #  go through each key until 'x' number loaded...
+                        #  run
+                        #  repeat
+
 
     """
 
