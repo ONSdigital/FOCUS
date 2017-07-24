@@ -23,7 +23,7 @@ plt.style.use('ggplot')
 l = Lock()
 
 
-def start_run(run_input, seeds, max_runs, out_path):
+def start_run(run_input, seeds, max_runs, start_time, out_path):
 
     max_output_file_size = 1000000000
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
@@ -126,8 +126,14 @@ def start_run(run_input, seeds, max_runs, out_path):
     with open('counter.csv', 'r') as fle:
         counter = int(fle.readline()) + 1
 
-    if counter % 100 == 0:
-        print(counter, " cca out of ", max_runs, " complete")
+    # work out the divisor to get updates every 5% of progress.
+    counter_divisor = pp.rounddown(max_runs/5, 1)
+
+    if counter % counter_divisor == 0:
+        time_now = dt.datetime.now()
+        time_left = ((time_now - start_time).seconds / (counter / max_runs)) - (time_now - start_time).seconds
+        finish_time = time_now + dt.timedelta(seconds=time_left)
+        print(counter, " reps out of ", max_runs, " complete. Projected time to complete is: ", finish_time)
 
     with open('counter.csv', 'w') as fle:
         fle.write(str(counter))
@@ -155,7 +161,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = True
-    multiple_processors = True  # set to false to debug
+    multiple_processors = False  # set to false to debug
     delete_old = False
     freeze_support()
 
@@ -230,20 +236,19 @@ if __name__ == '__main__':
             input_data[run]['rep_id'] = rep
             run_list.append(copy.deepcopy(input_data[run]))
 
-    ts = time.time()
-    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-    output_JSON_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+    st = dt.datetime.now()
+    output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
     print(st)
 
-    max_runs = max([int(run) for run in list_of_runs]) + 1
+    max_runs = len(run_list)
 
     # different run methods - use single processor for debugging
     if multiple_processors:
         pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-        Pool().starmap(start_run, zip(run_list, seed_list, repeat(max_runs), repeat(output_path)))
+        Pool().starmap(start_run, zip(run_list, seed_list, repeat(max_runs), repeat(st), repeat(output_path)))
     else:
         for i in range(len(run_list)):
-            start_run(run_list[i], seed_list[i], max_runs, output_path)
+            start_run(run_list[i], seed_list[i], max_runs, st, output_path)
 
     # at the end add the seed list and print out the JSON?
     if create_new_config:
@@ -264,6 +269,6 @@ if __name__ == '__main__':
     if produce_default:
         produce_default_output(output_path)
 
-    ts = time.time()
-    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-    print(st)
+    # end time
+    et = dt.datetime.now()
+    print('All complete at time: ', et)

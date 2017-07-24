@@ -14,9 +14,6 @@ import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
 
-
-
-
 def cumulative_sum(df, start, end, step, geog, resp_type='all'):
     """takes a data frame and returns average cumulative totals for specified geography in correct format for data
      vis teams map template"""
@@ -697,7 +694,7 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True, indivi
     plt.xlabel('days')
     plt.ylabel('Count')
     plt.savefig(output_path, dpi=450)
-    plt.show()
+
 
 
 def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_right, bin_size=5):
