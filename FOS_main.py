@@ -215,6 +215,16 @@ if __name__ == '__main__':
     seed_dict = {}
     seed_list = []
 
+    """currently all run/rep combos loaded into a list - which can be very large. Change to load into memory only
+    those reps that can be run by the available cores immediately.
+
+    1) Load json
+    2) Determine number of cores available (e.g. 8)
+    3) Determine how many reps of current run to add to run list
+    4) if equal to or more than number of cores
+
+    """
+
     # place, with random seeds, a copy of the run/rep into the run list
     for run in list_of_runs:
         input_data[run]['run_id'] = run
