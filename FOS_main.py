@@ -160,9 +160,8 @@ def produce_default_output(current_path):
 if __name__ == '__main__':
 
     create_new_config = False
-    save_seeds = True
     produce_default = True
-    multiple_processors = False  # set to false to debug
+    multiple_processors = True  # set to false to debug
     delete_old = False
     freeze_support()
 
@@ -178,15 +177,13 @@ if __name__ == '__main__':
                 if d != 'outputs/':
                     shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
 
-
-
     # get input folder location and
     # get list of json files to run here...and add first loop
 
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
     if len(input_path) < 1:
-        file_name = 'inputs/subset_lsoa_nomis.JSON'
+        file_name = 'inputs/lsoa_nomis.JSON'
         input_path = os.path.join(os.getcwd(), file_name)
 
     try:
@@ -220,9 +217,9 @@ if __name__ == '__main__':
 
     # define a list to be used to map all run/replication combinations to available processors
     run_list = []
-    seed_dict = Counter({})
+    seed_dict = {}
     seed_list = []
-    master_seed_dict = Counter({})
+    master_seed_dict = {}
 
     st = dt.datetime.now()
     output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
@@ -252,7 +249,7 @@ if __name__ == '__main__':
             run_list.append(copy.deepcopy(input_data[run]))
 
             # if run list len is chunk size run them...
-            if len(run_list) == cpu_count()*4 or (run == str(runs) and rep == reps):
+            if len(run_list) == cpu_count() or (run == str(runs) and rep == reps):
 
                 # different run methods - use single processor for debugging
                 if multiple_processors:
@@ -263,16 +260,10 @@ if __name__ == '__main__':
                     for i in range(len(run_list)):
                         start_run(run_list[i], seed_list[i], max_runs, st, output_path)
 
-                if save_seeds:
-                    # add seed dict to master seed dict...and could add to orig input file and copy to save a record if needed...
-                    master_seed_dict = master_seed_dict + seed_dict
-
                 run_list = []
-                seed_dict = Counter({})
+                seed_dict[str(run)] = {}
                 seed_list = []
 
-    with open(os.path.join(output_path, 'test_seed_dict'), 'w') as outfile:
-        json.dump(master_seed_dict, outfile)
 
     # at the end add the seed list and print out the JSON?
     #if create_new_config:
