@@ -219,7 +219,6 @@ if __name__ == '__main__':
     run_list = []
     seed_dict = {}
     seed_list = []
-    master_seed_dict = {}
 
     st = dt.datetime.now()
     output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
