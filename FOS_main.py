@@ -10,7 +10,7 @@ import shutil
 import post_process as pp
 import time
 import copy
-from collections import defaultdict
+from collections import defaultdict, Counter
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
@@ -160,6 +160,7 @@ def produce_default_output(current_path):
 if __name__ == '__main__':
 
     create_new_config = False
+    save_seeds = True
     produce_default = True
     multiple_processors = False  # set to false to debug
     delete_old = False
@@ -169,13 +170,18 @@ if __name__ == '__main__':
     with open('counter.csv', 'w') as fle:
         fle.write(str(0))
 
-    # delete all old output files but not the directories.
+    # delete all old output files but not the main directory.
     if delete_old:
         if os.path.isdir('outputs/'):
             dirs = os.listdir(os.path.join(os.getcwd(), 'outputs'))
             for d in dirs:
                 if d != 'outputs/':
                     shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
+
+
+
+    # get input folder location and
+    # get list of json files to run here...and add first loop
 
     # read in input configuration file using a default if nothing is selected
     input_path = input('Enter input file path or press enter to use defaults: ')
@@ -208,33 +214,21 @@ if __name__ == '__main__':
         print(e)
         sys.exit()
 
-    # create a list of runs from configuration file
     list_of_runs = sorted(list(input_data.keys()), key=int)
+    runs = max([int(run) for run in list_of_runs])
+    reps = input_data['1']['replications']
+
     # define a list to be used to map all run/replication combinations to available processors
     run_list = []
-    seed_dict = {}
+    seed_dict = Counter({})
     seed_list = []
+    master_seed_dict = Counter({})
 
-    """currently all run/rep combos loaded into a list - which can be very large. Change to load into memory only
-    those reps that can be run by the available cores immediately.
+    st = dt.datetime.now()
+    output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+    print(st)
 
-    1) Load first json file
-        2) load a 'chunk' of data appropriate to cores available into run list
-        3) repeat until all run
-        4) unload - JSON file - if required...or overwrite with next one...
-    4) next json file
-
-
-
-    # for each file in folder
-        # load file
-            # for each run in list of runs
-                        #  go through each key until 'x' number loaded...
-                        #  run
-                        #  repeat
-
-
-    """
+    max_runs = reps*runs
 
     # place, with random seeds, a copy of the run/rep into the run list
     for run in list_of_runs:
@@ -257,33 +251,42 @@ if __name__ == '__main__':
             input_data[run]['rep_id'] = rep
             run_list.append(copy.deepcopy(input_data[run]))
 
-    st = dt.datetime.now()
-    output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
-    print(st)
+            # if run list len is chunk size run them...
+            if len(run_list) == cpu_count()*4 or (run == str(runs) and rep == reps):
 
-    max_runs = len(run_list)
+                # different run methods - use single processor for debugging
+                if multiple_processors:
+                    pool = Pool(cpu_count())  # use the next two lines to use multiple processors
+                    Pool().starmap(start_run,
+                                   zip(run_list, seed_list, repeat(max_runs), repeat(st), repeat(output_path)))
+                else:
+                    for i in range(len(run_list)):
+                        start_run(run_list[i], seed_list[i], max_runs, st, output_path)
 
-    # different run methods - use single processor for debugging
-    if multiple_processors:
-        pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-        Pool().starmap(start_run, zip(run_list, seed_list, repeat(max_runs), repeat(st), repeat(output_path)))
-    else:
-        for i in range(len(run_list)):
-            start_run(run_list[i], seed_list[i], max_runs, st, output_path)
+                if save_seeds:
+                    # add seed dict to master seed dict...and could add to orig input file and copy to save a record if needed...
+                    master_seed_dict = master_seed_dict + seed_dict
+
+                run_list = []
+                seed_dict = Counter({})
+                seed_list = []
+
+    with open(os.path.join(output_path, 'test_seed_dict'), 'w') as outfile:
+        json.dump(master_seed_dict, outfile)
 
     # at the end add the seed list and print out the JSON?
-    if create_new_config:
+    #if create_new_config:
 
-        list_of_seed_runs = sorted(list(seed_dict.keys()), key=int)
-        # first assign the seeds...
-        for run in list_of_seed_runs:
-            input_data[run]['replication seeds'] = seed_dict[run]
-            # delete ids
-            del input_data[run]['run_id']
-            del input_data[run]['rep_id']
+    #    list_of_seed_runs = sorted(list(seed_dict.keys()), key=int)
+    #    # first assign the seeds...
+    #    for run in list_of_seed_runs:
+    #        input_data[run]['replication seeds'] = seed_dict[run]
+    #        # delete ids
+    #        del input_data[run]['run_id']
+    #        del input_data[run]['rep_id']
 
-        with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
-            json.dump(input_data, outfile)
+    #    with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
+    #        json.dump(input_data, outfile)
 
     print('Simulation complete at time: ', dt.datetime.now())
 
