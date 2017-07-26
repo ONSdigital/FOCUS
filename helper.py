@@ -289,10 +289,10 @@ def output_summary(summary_out_path, input_dict, dict_name, run_id, rep_id):
         if not os.path.isdir(temp_output_path):
             # if not
             os.makedirs(temp_output_path)
-
+        #l.acquire()
         # then check if specific file exists
         temp_file_path = os.path.join(temp_output_path, str(rep_id) + '.csv')
         df = pd.DataFrame.from_dict(v, orient='index')
-
         df.to_csv(temp_file_path)
+       # l.release()
 

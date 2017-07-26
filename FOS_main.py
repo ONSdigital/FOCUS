@@ -1,5 +1,4 @@
 """Main control file"""
-import sys
 import json
 import datetime as dt
 import random
@@ -8,14 +7,14 @@ import initialise
 import os
 import shutil
 import post_process as pp
-import time
 import copy
-from collections import defaultdict, Counter
+from collections import defaultdict
 from itertools import repeat
 from multiprocessing import cpu_count, Pool, freeze_support, Lock
 import helper as hp
 import pandas as pd
 import output_options as oo
+import glob
 
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
@@ -23,9 +22,9 @@ plt.style.use('ggplot')
 l = Lock()
 
 
-def start_run(run_input, seeds, max_runs, start_time, out_path):
+def start_run(run_input, seeds, max_districts, out_path):
 
-    max_output_file_size = 1000000000
+    max_output_file_size = 100000000
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
     end_date = dt.date(*map(int, run_input['end_date'].split(',')))
     sim_hours = (end_date - start_date).total_seconds()/3600
@@ -48,7 +47,7 @@ def start_run(run_input, seeds, max_runs, start_time, out_path):
     # generate list of codes for reference from raw inputs
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
-    district_list = [str(district) for district in range(1, max_runs)]
+    district_list = [str(district) for district in range(1, max_districts+1)]
     dig_list = ['0', '1']
     hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
 
@@ -80,7 +79,6 @@ def start_run(run_input, seeds, max_runs, start_time, out_path):
         else:
             pd.DataFrame(temp_list).to_csv(os.path.join(out_path, 'key info', run_input['run_id'] + ".csv"), mode='a',
                                            header=False)
-
     l.release()
 
     output_data = defaultdict(list)
@@ -117,26 +115,11 @@ def start_run(run_input, seeds, max_runs, start_time, out_path):
 
     c_run = run_input['run_id']
     c_rep = run_input['rep_id']
-    l.acquire()
+
     hp.output_summary(summary_path, passive_summary, 'passive_summary', c_run, c_rep)
     hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
     hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
     hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
-    l.release()
-    with open('counter.csv', 'r') as fle:
-        counter = int(fle.readline()) + 1
-
-    # work out the divisor to get updates every 5% of progress.
-    counter_divisor = pp.rounddown(max_runs/5, 1)
-
-    if counter % counter_divisor == 0:
-        time_now = dt.datetime.now()
-        time_left = ((time_now - start_time).seconds / (counter / max_runs)) - (time_now - start_time).seconds
-        finish_time = time_now + dt.timedelta(seconds=time_left)
-        print(counter, " reps out of ", max_runs, " complete. Projected time to complete is: ", finish_time)
-
-    with open('counter.csv', 'w') as fle:
-        fle.write(str(counter))
 
 
 def produce_default_output(current_path):
@@ -148,7 +131,7 @@ def produce_default_output(current_path):
     pp.plot_summary(default_path, reps=False, cumulative=True, individual=True)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
-    pandas_data = pp.csv_to_pandas(output_path, ['hh_record'])
+    pandas_data = pp.csv_to_pandas(current_path, ['hh_record'])
     input_left = pd.read_csv(os.path.join(current_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
     name_left = 'Passive'
     input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
@@ -159,15 +142,10 @@ def produce_default_output(current_path):
 
 if __name__ == '__main__':
 
-    create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
     delete_old = False
     freeze_support()
-
-    # counter to track progression of run
-    with open('counter.csv', 'w') as fle:
-        fle.write(str(0))
 
     # delete all old output files but not the main directory.
     if delete_old:
@@ -177,112 +155,101 @@ if __name__ == '__main__':
                 if d != 'outputs/':
                     shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
 
-    # get input folder location and
-    # get list of json files to run here...and add first loop
+    first_cwd = os.getcwd()
+    input_path = os.path.join(os.getcwd(), 'inputs')
+    # get list of files to run here rather than loading them in
+    glob_folder = os.path.join(input_path, '*.JSON')
+    simulation_list = glob.glob(glob_folder)  # get a list of all files(sim runs) in the folder
 
-    # read in input configuration file using a default if nothing is selected
-    input_path = input('Enter input file path or press enter to use defaults: ')
-    if len(input_path) < 1:
-        file_name = 'inputs/lsoa_nomis.JSON'
-        input_path = os.path.join(os.getcwd(), file_name)
+    outputs = 'outputs'
+    output_path = os.path.join(os.getcwd(), outputs)
 
-    try:
-        with open(input_path) as data_file:
+    sims = len(simulation_list)
+    sim_counter = 1
+    # for each sim file...
+    for sim in simulation_list:
+
+        os.chdir(first_cwd)  # reset to overall working directory
+        sub_path_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+        current_output_path = os.path.join(output_path, sub_path_name)
+        if not os.path.isdir(current_output_path):
+            os.makedirs(current_output_path)
+        # make output path for current sim
+
+        with open(sim) as data_file:
             input_data = json.load(data_file)
 
-    # if something goes wrong exit with error
-    except IOError as e:
-        print(e)
-        sys.exit()
+        list_of_districts = sorted(list(input_data.keys()), key=int)
+        districts = max([int(district) for district in list_of_districts])
+        reps = input_data['1']['replications']
+        max_runs = reps * districts
 
-    # ask for output destination or use a default if none specified
-    output_path = input('Enter output path or press enter to use default: ')
-    if len(output_path) < 1:
-        outputs = 'outputs'
-        sub_path_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
-        output_path = os.path.join(os.getcwd(), outputs, sub_path_name)
+        # define a list to be used to map all run/replication combinations to available processors
+        run_list = []
+        seed_dict = {}
+        seed_list = []
 
-    try:
-        if not os.path.isdir(output_path):
-            os.makedirs(output_path)
+        st = dt.datetime.now()
+        print('Simulations start at: ', st)
+        counter = 0
 
-    # if something goes wrong exit with error
-    except IOError as e:
-        print(e)
-        sys.exit()
+        # place, with random seeds, a copy of the run/rep into the run list
+        for district in list_of_districts:
+            input_data[district]['run_id'] = district
+            seed_dict[str(district)] = {}
+            for rep in range(1, input_data[district]['replications'] + 1):
 
-    list_of_runs = sorted(list(input_data.keys()), key=int)
-    runs = max([int(run) for run in list_of_runs])
-    reps = input_data['1']['replications']
+                if str(rep) not in input_data[district]['replication seeds']:
+                    now = dt.datetime.now()
+                    seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
+                    seed = abs(now - seed_date).total_seconds() + int(district) + rep
+                    seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
+                    create_new_config = True
 
-    # define a list to be used to map all run/replication combinations to available processors
-    run_list = []
-    seed_dict = {}
-    seed_list = []
-
-    st = dt.datetime.now()
-    output_JSON_name = str(st.strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
-    print(st)
-
-    max_runs = reps*runs
-
-    # place, with random seeds, a copy of the run/rep into the run list
-    for run in list_of_runs:
-        input_data[run]['run_id'] = run
-        seed_dict[str(run)] = {}
-        for rep in range(1, input_data[run]['replications'] + 1):
-
-            if str(rep) not in input_data[run]['replication seeds']:
-                now = dt.datetime.now()
-                seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
-                seed = abs(now - seed_date).total_seconds() + int(run) + rep
-                seed_dict[str(input_data[run]['run_id'])][str(rep)] = seed
-                create_new_config = True
-
-            else:
-                seed = input_data[run]['replication seeds'][str(rep)]
-
-            seed_list.append(seed)
-
-            input_data[run]['rep_id'] = rep
-            run_list.append(copy.deepcopy(input_data[run]))
-
-            # if run list len is chunk size run them...
-            if len(run_list) == cpu_count() or (run == str(runs) and rep == reps):
-
-                # different run methods - use single processor for debugging
-                if multiple_processors:
-                    pool = Pool(cpu_count())  # use the next two lines to use multiple processors
-                    Pool().starmap(start_run,
-                                   zip(run_list, seed_list, repeat(max_runs), repeat(st), repeat(output_path)))
                 else:
-                    for i in range(len(run_list)):
-                        start_run(run_list[i], seed_list[i], max_runs, st, output_path)
+                    seed = input_data[district]['replication seeds'][str(rep)]
 
-                run_list = []
-                seed_dict[str(run)] = {}
-                seed_list = []
+                seed_list.append(seed)
 
+                input_data[district]['rep_id'] = rep
+                run_list.append(copy.deepcopy(input_data[district]))
+                counter += 1
 
-    # at the end add the seed list and print out the JSON?
-    #if create_new_config:
+                # if run list len is chunk size run them...
+                if len(run_list) == cpu_count()*100 or (district == str(districts) and rep == reps):
 
-    #    list_of_seed_runs = sorted(list(seed_dict.keys()), key=int)
-    #    # first assign the seeds...
-    #    for run in list_of_seed_runs:
-    #        input_data[run]['replication seeds'] = seed_dict[run]
-    #        # delete ids
-    #        del input_data[run]['run_id']
-    #        del input_data[run]['rep_id']
+                    # different run methods - use single processor for debugging
+                    if multiple_processors:
+                        pool = Pool(cpu_count())  # use the next two lines to use multiple processors
+                        pool.starmap(start_run,
+                                     zip(run_list, seed_list, repeat(districts), repeat(current_output_path)))
+                        pool.close()
+                        pool.join()
+                    else:
+                        for i in range(len(run_list)):
+                            start_run(run_list[i], seed_list[i], districts, current_output_path)
 
-    #    with open(os.path.join(output_path, output_JSON_name), 'w') as outfile:
-    #        json.dump(input_data, outfile)
+                    time_now = dt.datetime.now()
+                    time_left = ((time_now - st).seconds / (counter / districts)) - (time_now - st).seconds
+                    finish_time = time_now + dt.timedelta(seconds=time_left)
 
-    print('Simulation complete at time: ', dt.datetime.now())
+                    print(pp.roundup((counter / max_runs) * 100, 1), "percent of current simulation complete. "
+                                                                     "Projected finish time is:", finish_time)
+                    run_list = []
+                    seed_dict[str(district)] = {}
+                    seed_list = []
 
-    if produce_default:
-        produce_default_output(output_path)
+        # add back in the ability to output a record, with seeds, as to what has been run...
 
-    # end time
+        print('Simulation complete at time: ', dt.datetime.now())
+
+        if produce_default:
+            produce_default_output(current_output_path)
+
+        cet = dt.datetime.now()
+        print(sim_counter, 'of', sims, 'complete at time', cet)
+        sim_counter += 1
+
+    # overall end time
     et = dt.datetime.now()
     print('All complete at time: ', et)

@@ -150,6 +150,7 @@ def roundup(x, y):
 
     return int(math.ceil(x / float(y))) * y
 
+
 def rounddown(x, y):
     # rounddown x to the nearest y
     # e.g. if y is 100 it will rounddown to the nearest 100
@@ -642,7 +643,7 @@ def produce_rep_results(current_path):
             df_totals /= total_reps
             df_totals.to_csv('average.csv')
 
-    # clean up empty folders?
+    # clean up empty folders
     for dirpath, dirnames, files in os.walk(current_path):
         if not dirnames and not files:
             os.rmdir(dirpath)
