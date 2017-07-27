@@ -44,7 +44,7 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', '2017-07-24 10.51.12', 'summary', 'active_summary', 'la')
+default_path = os.path.join('outputs', '2017-07-27 07.55.03', 'summary', 'active_summary', 'la')
 data_list = plot_summary_animated(default_path, cumulative=False)
 
 fig = plt.figure()

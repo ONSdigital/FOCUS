@@ -629,6 +629,7 @@ def produce_rep_results(current_path):
             # then for number of reps pull out relavent rep for each district and add together
             df_totals = pd.DataFrame()
             for rep in range(1, total_reps+1):
+                # could have a dict with number of dataframes equal to reps and go through only once...
                 df = pd.DataFrame()
                 for district in range(1, districts+1):
                     df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
@@ -691,11 +692,11 @@ def plot_summary(summary_path, reps=False, average=True, cumulative=True, indivi
 
     filename = 'test_responses' + '.png'
     output_path = os.path.join(os.getcwd(), filename)
-    plt.legend(loc='best')
+    if not reps:
+        plt.legend(loc='best')
     plt.xlabel('days')
     plt.ylabel('Count')
     plt.savefig(output_path, dpi=450)
-
 
 
 def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_right, bin_size=5):
@@ -770,15 +771,15 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_ri
     output_path = os.path.join(os.getcwd(), filename)
     plt.savefig(output_path, dpi=450)
 
-#left_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-24 09.44.13')
-#right_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-24 09.58.25')
+#right_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-26 16.44.46')
+#left_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-26 18.02.50')
 
 #default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
 #plot_summary(default_path, reps=True, cumulative=False)
 
 #pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
 #input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_left = '12'
+#name_left = '10'
 #input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
 #name_right = '15'
-#sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=2)
+#sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=1)

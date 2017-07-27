@@ -15,6 +15,7 @@ import helper as hp
 import pandas as pd
 import output_options as oo
 import glob
+import gzip
 
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
@@ -68,6 +69,8 @@ def start_run(run_input, seeds, max_districts, out_path):
     passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
                       'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
                       'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
+
+    # possible extra summary outputs are visits over time...
 
     l.acquire()
     if oo.record_key_info:
@@ -128,7 +131,7 @@ def produce_default_output(current_path):
     # line chart of overall responses over time
     pp.produce_rep_results(current_path)
     default_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
-    pp.plot_summary(default_path, reps=False, cumulative=True, individual=True)
+    pp.plot_summary(default_path, reps=False, cumulative=True, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
     pandas_data = pp.csv_to_pandas(current_path, ['hh_record'])
@@ -142,6 +145,7 @@ def produce_default_output(current_path):
 
 if __name__ == '__main__':
 
+    create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
     delete_old = False
@@ -166,31 +170,34 @@ if __name__ == '__main__':
 
     sims = len(simulation_list)
     sim_counter = 1
-    # for each sim file...
+    # for each sim file in the input folder
     for sim in simulation_list:
 
-        os.chdir(first_cwd)  # reset to overall working directory
-        sub_path_name = str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+        os.chdir(first_cwd)  # reset to overall working directory each time
+        sim_name = os.path.basename(sim)[:-5]  # get filename without the .JSON extension
+        sub_path_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+        output_JSON_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
         current_output_path = os.path.join(output_path, sub_path_name)
         if not os.path.isdir(current_output_path):
             os.makedirs(current_output_path)
-        # make output path for current sim
 
         with open(sim) as data_file:
             input_data = json.load(data_file)
 
+        # get list of all districts in simulation
         list_of_districts = sorted(list(input_data.keys()), key=int)
         districts = max([int(district) for district in list_of_districts])
-        reps = input_data['1']['replications']
+        reps = input_data['1']['replications']  # extract replications
         max_runs = reps * districts
 
         # define a list to be used to map all run/replication combinations to available processors
         run_list = []
         seed_dict = {}
         seed_list = []
+        dict_all = defaultdict()
 
         st = dt.datetime.now()
-        print('Simulations start at: ', st)
+        print('Simulations started at: ', st)
         counter = 0
 
         # place, with random seeds, a copy of the run/rep into the run list
@@ -204,6 +211,9 @@ if __name__ == '__main__':
                     seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                     seed = abs(now - seed_date).total_seconds() + int(district) + rep
                     seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
+                    if not str(input_data[district]['run_id']) in dict_all:
+                        dict_all[str(input_data[district]['run_id'])] = {}
+                    dict_all[str(input_data[district]['run_id'])][str(rep)] = seed
                     create_new_config = True
 
                 else:
@@ -216,11 +226,11 @@ if __name__ == '__main__':
                 counter += 1
 
                 # if run list len is chunk size run them...
-                if len(run_list) == cpu_count()*100 or (district == str(districts) and rep == reps):
+                if len(run_list) == cpu_count()*20 or (district == str(districts) and rep == reps):
 
                     # different run methods - use single processor for debugging
                     if multiple_processors:
-                        pool = Pool(cpu_count())  # use the next two lines to use multiple processors
+                        pool = Pool(cpu_count())
                         pool.starmap(start_run,
                                      zip(run_list, seed_list, repeat(districts), repeat(current_output_path)))
                         pool.close()
@@ -229,8 +239,9 @@ if __name__ == '__main__':
                         for i in range(len(run_list)):
                             start_run(run_list[i], seed_list[i], districts, current_output_path)
 
+                    # calculate finish time for current simulation and print progress
                     time_now = dt.datetime.now()
-                    time_left = ((time_now - st).seconds / (counter / districts)) - (time_now - st).seconds
+                    time_left = ((time_now - st).seconds / (counter / max_runs)) - (time_now - st).seconds
                     finish_time = time_now + dt.timedelta(seconds=time_left)
 
                     print(pp.roundup((counter / max_runs) * 100, 1), "percent of current simulation complete. "
@@ -240,10 +251,39 @@ if __name__ == '__main__':
                     seed_list = []
 
         # add back in the ability to output a record, with seeds, as to what has been run...
+        # dict all contains the required seeds
+
+        if create_new_config:
+
+            json_file_path = os.path.join(output_path, output_JSON_name)
+
+            list_of_seed_runs = sorted(list(dict_all.keys()), key=int)
+            # first assign the seeds...
+            for run in list_of_seed_runs:
+                input_data[run]['replication seeds'] = dict_all[run]
+                # delete ids
+                del input_data[run]['run_id']
+                del input_data[run]['rep_id']
+
+            with open(json_file_path, 'w') as outfile:
+                json.dump(input_data, outfile)
+
+            with open(json_file_path, 'rb') as f_in:
+                with gzip.open(json_file_path + '.gz', 'w') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+
+            # delete orig JSON file
+            os.remove(json_file_path)
+
+            """to read a gzip file
+            with gzip.open('file.txt.gz', 'rb') as f:
+                file_content = f.read()
+            """
 
         print('Simulation complete at time: ', dt.datetime.now())
 
         if produce_default:
+            print("Starting post processing.")
             produce_default_output(current_output_path)
 
         cet = dt.datetime.now()
@@ -252,4 +292,4 @@ if __name__ == '__main__':
 
     # overall end time
     et = dt.datetime.now()
-    print('All complete at time: ', et)
+    print('All simulations complete at time: ', et)
