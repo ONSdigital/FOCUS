@@ -140,7 +140,7 @@ def produce_default_output(current_path):
     input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
     name_right = 'Active'
 
-    pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right)
+    pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=2)
 
 
 if __name__ == '__main__':

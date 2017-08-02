@@ -286,10 +286,11 @@ def output_summary(summary_out_path, input_dict, dict_name, run_id, rep_id):
         # create a folder if one doesn't already exist - new folder per rep
         temp_output_path = os.path.join(summary_out_path, dict_name, k, run_id)
 
+        l.acquire()  # seems this is needed for multiple reps
         if not os.path.isdir(temp_output_path):
             # if not
             os.makedirs(temp_output_path)
-        l.acquire()  # seems this is needed for multiple reps
+
         # then check if specific file exists
         temp_file_path = os.path.join(temp_output_path, str(rep_id) + '.csv')
         df = pd.DataFrame.from_dict(v, orient='index')

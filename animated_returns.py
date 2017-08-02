@@ -44,8 +44,8 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', '2017-07-27 07.55.03', 'summary', 'active_summary', 'la')
-data_list = plot_summary_animated(default_path, cumulative=False)
+default_path = os.path.join('outputs', 'large_subset_lsoa_nomis 2017-08-02 15.46.47', 'summary', 'active_summary', 'la')
+data_list = plot_summary_animated(default_path, cumulative=False, reps=True)
 
 fig = plt.figure()
 fig.suptitle('Overall return rates over time', fontsize=20)
@@ -60,6 +60,7 @@ def init():
     plt.gcf().clear()
     plt.gca().set_ylim(top=ymax)
     data_list[0].plot.line(color='red')
+
 
 def animate(i):
     plt.gca().set_ylim(top=ymax)
