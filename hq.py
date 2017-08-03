@@ -13,7 +13,7 @@ def ret_rec(household, rep):
         print(rep.total_responses)
 
     # add household to summary of responses
-    for key, value in rep.active_data_summary.items():
+    for key, value in rep.active_summary.items():
         value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
 
     for key, value in rep.active_totals.items():
@@ -22,7 +22,7 @@ def ret_rec(household, rep):
     household.return_received = True
     if oo.record_return_received:
         rep.output_data['Return_received'].append(oo.generic_output(rep.reps,
-                                                                    household.district_name,
+                                                                    household.district.district,
                                                                     household.la,
                                                                     household.lsoa,
                                                                     household.digital,

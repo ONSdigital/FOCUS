@@ -52,25 +52,39 @@ def start_run(run_input, seeds, max_districts, out_path):
     dig_list = ['0', '1']
     hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
 
+    """
+    passive_summary records a daily summary of returns that occur without any intervention
+    active_summary records all returns including those due to the interventions
+    passive_totals records a simple total of returns without intervention
+    active_totals records a simple total of all returns
+
+    visit_summary records all visits over time by the level in the key
+    visit_totals records simple sum of total visits by level in key
+
+    the summaries and totals are at the levels in the keys.
+    """
+
     passive_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
                        'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
-                       'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list))),
-                       'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+                       'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list)))
+                       }
 
     active_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
                       'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
-                      'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list))),
-                      'district_name': dict((district_list[i], [0]*days) for i in range(0, len(district_list)))}
+                      'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))
+                      }
 
     active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                     'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
-                     'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
+                     'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                     }
 
     passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                      'la': dict((la_list[i], 0) for i in range(0, len(la_list))),
-                      'district_name': dict((district_list[i], 0) for i in range(0, len(district_list)))}
+                      'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                      }
 
-    # possible extra summary outputs are visits over time...
+    visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+
+    visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
 
     l.acquire()
     if oo.record_key_info:
@@ -100,6 +114,8 @@ def start_run(run_input, seeds, max_districts, out_path):
                    active_summary,
                    active_totals,
                    passive_totals,
+                   visit_totals,
+                   visit_summary,
                    rnd,
                    sim_hours,
                    start_date,
@@ -123,6 +139,8 @@ def start_run(run_input, seeds, max_districts, out_path):
     hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
     hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
     hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
+    hp.output_summary(summary_path, visit_summary, 'visit_summary', c_run, c_rep)
+    hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
 
 
 def produce_default_output(current_path):
@@ -130,8 +148,11 @@ def produce_default_output(current_path):
 
     # line chart of overall responses over time
     pp.produce_rep_results(current_path)
-    default_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
-    pp.plot_summary(default_path, reps=False, cumulative=True, individual=False)
+    active_response_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
+    pp.plot_summary(active_response_path, 'responses', reps=False, cumulative=True, individual=False)
+
+    visits_path = os.path.join(current_path, 'summary', 'visit_summary', 'la')
+    pp.plot_summary(visits_path, 'visits', reps=False, cumulative=False, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
     pandas_data = pp.csv_to_pandas(current_path, ['hh_record'])
@@ -148,16 +169,20 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
-    delete_old = False
+    delete_old = True
     freeze_support()
 
     # delete all old output files but not the main directory.
     if delete_old:
+
         if os.path.isdir('outputs/'):
             dirs = os.listdir(os.path.join(os.getcwd(), 'outputs'))
-            for d in dirs:
-                if d != 'outputs/':
-                    shutil.rmtree(os.path.join(os.getcwd(), 'outputs', d))
+            for direc in dirs:
+                delete_path = os.path.join(os.getcwd(), 'outputs', direc)
+                if os.path.isfile(delete_path):
+                    os.unlink(delete_path)
+                else:
+                    shutil.rmtree(delete_path)
 
     first_cwd = os.getcwd()
     input_path = os.path.join(os.getcwd(), 'inputs')

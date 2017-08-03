@@ -16,7 +16,7 @@ l = Lock()  # global declaration...can I avoid this
 
 def responses_to_date(district, output_format=""):
 
-    count = district.rep.active_totals['district_name'][district.district]
+    count = district.rep.total_responses
 
     if output_format == "%":
         return count / (len(district.households) + district.early_responders)

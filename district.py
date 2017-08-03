@@ -16,8 +16,6 @@ class District(object):
         # values fed into class
         self.rep = rep
         self.district = name
-        self.passive = rep.passive_data_summary
-        self.active = rep.active_data_summary
 
         # created by and belong too the class
         self.rnd = self.rep.rnd
@@ -207,7 +205,7 @@ class District(object):
                                                                                          time_to_use))
 
                     # add household to summary of responses
-                    for key, value in self.active.items():
+                    for key, value in self.rep.active_summary.items():
                         value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
 
                     for key, value in self.rep.active_totals.items():
@@ -245,7 +243,7 @@ class District(object):
                                                                           hh_action.digital,
                                                                           hh_action.time))
                 if hh_action.type not in ['do_nothing', 'help']:
-                    for key, value in self.passive.items():
+                    for key, value in self.rep.passive_summary.items():
                         value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
 
                     for key, value in self.rep.passive_totals.items():

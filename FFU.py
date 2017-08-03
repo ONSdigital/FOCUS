@@ -83,6 +83,7 @@ class CensusOfficer(object):
         self.start_sim_time = h.get_entity_time(self)  # self.co_start_time()  # the sim time the co starts work
         self.end_sim_time = h.get_entity_time(self, "end")  # self.co_end_time()  # the sim time the co ends work
 
+        self.active_time = []  # as above but for active time
         # start work at correct time
         start_delayed(self.env, self.co_working_test(), self.start_sim_time)
 
@@ -164,6 +165,12 @@ class CensusOfficer(object):
 
         household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
+
+        for key, value in self.rep.visit_summary.items():
+            value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += 1
+
+        for key, value in self.rep.visit_totals.items():
+            value[str(getattr(household, key))] += 1
 
         if oo.record_visit:
             self.rep.output_data['Visit'].append(oo.generic_output(self.rep.reps,
