@@ -616,9 +616,7 @@ def produce_rep_results(current_path):
     # go through the folders equal times for number of reps run
     # for each folder that is at district level pick out relevant rep
 
-    #### process each folder using different processors #####
-
-    current_path = os.path.join(current_path, 'summary')
+    #current_path = os.path.join(current_path, 'summary')
 
     folders = list(os.walk(current_path))  # a list of all the folders in the summary results
     for folder in folders:
@@ -657,12 +655,11 @@ def produce_rep_results(current_path):
     os.chdir(current_path)
 
 
-def plot_summary(summary_path, output_name, reps=False, average=True, cumulative=True, individual=True):
+def plot_summary(summary_path, summary_outpath, output_name, reps=False, average=True, cumulative=True, individual=True):
     """creates a plot using the summary data to show response over time. default is to show the average of all areas.
     If rep is True then it will also plot the individual rep results (faded). If individual is True it will plot the
     average response over time for each group in the dataset rather than the whole. If cumulative is false it will
     show daily return rates rather than cumulative."""
-
 
     if average:
         df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
@@ -696,7 +693,7 @@ def plot_summary(summary_path, output_name, reps=False, average=True, cumulative
             row.plot.line(label=index)
 
     filename = output_name + '.png'
-    output_path = os.path.join(os.getcwd(), filename)
+    output_path = os.path.join(summary_outpath, filename)
     if not reps:
         plt.legend(loc='best')
     plt.xlabel('days')
@@ -705,7 +702,7 @@ def plot_summary(summary_path, output_name, reps=False, average=True, cumulative
     plt.close()
 
 
-def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_right, bin_size=5):
+def sum_pyramid(hh_record, summary_outpath, input_data_left, input_data_right, name_left, name_right, bin_size=5):
     """takes lsoa response totals for two strategies and produces a pyramid chart showing the number of lsoas within
     user defined bins."""
 
@@ -777,7 +774,7 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_ri
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.09)
     filename = name_left + ' vs ' + name_right + '.png'  # add default title or user defined
-    output_path = os.path.join(os.getcwd(), filename)
+    output_path = os.path.join(summary_outpath, filename)
     plt.savefig(output_path, dpi=450)
 
 #right_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-26 16.44.46')

@@ -151,31 +151,42 @@ def start_run(run_input, seeds, max_districts, out_path):
     hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
 
 
-def produce_default_output(current_path):
+def produce_default_output(input_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
     # line chart of overall responses over time
-    pp.produce_rep_results(current_path)  # pass a list of paths to process here to pool
-    active_response_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
-    pp.plot_summary(active_response_path, 'responses', reps=False, cumulative=True, individual=False)
 
-    visits_path = os.path.join(current_path, 'summary', 'visit_summary', 'la')
-    pp.plot_summary(visits_path, 'visits', reps=False, cumulative=True, individual=False)
+    current_path = os.path.join(input_path, 'summary')
+    folders = next(os.walk(current_path))[1]
+    folders = [os.path.join(current_path, folder) for folder in folders]
 
-    visits_path = os.path.join(current_path, 'summary', 'time_summary', 'la')
-    pp.plot_summary(visits_path, 'time', reps=False, cumulative=True, individual=False)
+    pp_pool = Pool(cpu_count())
+    pp_pool.starmap(pp.produce_rep_results, zip(folders))
+    pp_pool.close()
+    pp_pool.join()
+
+
+
+#   pp.produce_rep_results(current_path)  # pass a list of paths to process here to pool
+    summary_outpath = os.path.join(input_path, 'summary')
+
+    active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital')
+    pp.plot_summary(active_response_path, summary_outpath, 'responses', reps=False, cumulative=True, individual=False)
+
+    visits_path = os.path.join(input_path, 'summary', 'visit_summary', 'la')
+    pp.plot_summary(visits_path, summary_outpath, 'visits', reps=False, cumulative=True, individual=False)
+
+    visits_path = os.path.join(input_path, 'summary', 'time_summary', 'la')
+    pp.plot_summary(visits_path, summary_outpath, 'time', reps=False, cumulative=True, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
-    pandas_data = pp.csv_to_pandas(current_path, ['hh_record'])
-    input_left = pd.read_csv(os.path.join(current_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
+    pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
+    input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
     name_left = 'Passive'
-    input_right = pd.read_csv(os.path.join(current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+    input_right = pd.read_csv(os.path.join(input_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
     name_right = 'Active'
 
-    pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=2)
-
-
-
+    pp.sum_pyramid(pandas_data['hh_record'], summary_outpath, input_left, input_right, name_left, name_right, bin_size=2)
 
 if __name__ == '__main__':
 
