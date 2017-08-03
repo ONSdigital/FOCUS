@@ -48,7 +48,7 @@ class Household(object):
         self.return_received = False
         self.status = ''
         self.visits = 0
-        self.visits_contacted = 0
+        self.time_spent_visits = 0
         self.calls = 0
         self.arranged_visit = False
         self.letter_count = 0

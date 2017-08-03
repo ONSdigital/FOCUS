@@ -14,7 +14,7 @@ class Rep(object):
     """contains the methods and data for an individual replication"""
 
     def __init__(self, env, input_data, output_data, passive_summary, active_summary, active_totals,
-                 passive_totals, visit_totals, visit_summary,
+                 passive_totals, visit_totals, visit_summary, time_totals, time_summary,
                  rnd, sim_hours, start_date, census_day, out_path, max_output_file_size):
 
         # values passed to the class
@@ -27,6 +27,8 @@ class Rep(object):
         self.active_totals = active_totals
         self.visit_totals = visit_totals
         self.visit_summary = visit_summary
+        self.time_totals = time_totals
+        self.time_summary = time_summary
         self.rnd = rnd
         self.sim_hours = sim_hours
         self.start_date = start_date

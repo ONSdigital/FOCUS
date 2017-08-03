@@ -163,8 +163,8 @@ class CensusOfficer(object):
 
     def fu_visit_contact(self, household):
 
-        household.visits += 1
         household.priority += 1  # automatically lower the priority of this hh after a visit
+        household.visits += 1
 
         for key, value in self.rep.visit_summary.items():
             value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += 1
@@ -217,7 +217,7 @@ class CensusOfficer(object):
                                                                                household.hh_id,
                                                                                self.env.now))
 
-            household.visits_contacted += 1
+            # household.visits_contacted += 1
             yield self.rep.env.process(self.fu_visit_assist(household))
 
         elif (not household_is_in and household.visits == household.input_data['max_visits'] and
@@ -226,8 +226,16 @@ class CensusOfficer(object):
             household.paper_allowed = True
             hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
 
-            visit_time = self.input_data["visit_times"]["out_paper"]
-            yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
+            time_worked = self.input_data["visit_times"]["out_paper"] / 60 +\
+                          self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
         else:
             # out - add drop off of a note
@@ -243,15 +251,30 @@ class CensusOfficer(object):
 
             self.env.process(hq.schedule_paper_drop(household, 'Visit', 'postcard', self.has_postcard))
 
-            visit_time = self.input_data["visit_times"]["out"]
-            yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
+            time_worked = self.input_data["visit_times"]["out"]/60 + self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
     def fu_visit_assist(self, household):
 
         da_test = self.rnd.uniform(0, 100)
         da_effectiveness = self.input_data['da_effectiveness'][household.hh_type]
 
-        yield self.env.timeout(self.input_data['visit_times']['query']/60)
+        time_worked = self.input_data['visit_times']['query']/60
+
+        for key, value in self.rep.time_summary.items():
+            value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+        for key, value in self.rep.time_totals.items():
+            value[str(getattr(household, key))] += time_worked
+
+        yield self.rep.env.timeout(time_worked)
 
         # if digital, have already responded or can use paper skip straight to the outcome of the visit
         if household.digital or household.return_sent or household.paper_allowed:
@@ -259,7 +282,16 @@ class CensusOfficer(object):
 
         # if not digital try to persuade them to complete online.
         elif not household.digital and da_test <= da_effectiveness:
-            yield self.env.timeout(self.input_data['visit_times']['convert']/60)
+
+            time_worked = self.input_data['visit_times']['convert']/60
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
             household.digital = True
             if oo.record_visit_convert:
@@ -287,8 +319,16 @@ class CensusOfficer(object):
             household.paper_allowed = True
             hq.schedule_paper_drop(household, 'Visit', 'pq',  self.has_pq)
 
-            visit_time = self.input_data["visit_times"]["paper"]
-            yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
+            time_worked = self.input_data['visit_times']['paper'] / 60 +\
+                          self.district.travel_dist/self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
         else:
             # or suggest other forms of assistance to be decided...
@@ -303,8 +343,16 @@ class CensusOfficer(object):
                                                                               household.hh_id,
                                                                               self.env.now))
 
-            visit_time = self.input_data["visit_times"]["paper"]
-            yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist / self.input_data["travel_speed"])
+            time_worked = self.input_data['visit_times']['paper'] / 60 + \
+                          self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
     def fu_visit_outcome(self, household):
 
@@ -323,8 +371,17 @@ class CensusOfficer(object):
                                                                                self.env.now))
             household.resp_planned = True
             yield self.rep.env.process(household.household_returns(household.calc_delay()))
-            visit_time = self.input_data["visit_times"]["success"]
-            yield self.rep.env.timeout((visit_time/60) + self.district.travel_dist/self.input_data["travel_speed"])
+
+            time_worked = self.input_data['visit_times']['success'] / 60 + \
+                          self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
         elif (not household.return_sent and not household_returns and
               h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
@@ -345,8 +402,16 @@ class CensusOfficer(object):
             household.paper_allowed = True
             hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
 
-            visit_time = self.input_data["visit_times"]["failed"]
-            yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
+            time_worked = self.input_data['visit_times']['failed'] / 60 + \
+                          self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
         elif not household.return_sent and not household_returns:
             # failed but no max visits so do no more
@@ -360,8 +425,16 @@ class CensusOfficer(object):
                                                                               household.hh_id,
                                                                               self.env.now))
 
-            visit_time = self.input_data["visit_times"]["failed"]
-            yield self.rep.env.timeout((visit_time / 60) + self.district.travel_dist/self.input_data["travel_speed"])
+            time_worked = self.input_data['visit_times']['failed'] / 60 + \
+                              self.district.travel_dist / self.input_data["travel_speed"]
+
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
+
+            yield self.rep.env.timeout(time_worked)
 
     def working(self):
         """returns true or false depending on whether or not a CO is available at current date and time"""

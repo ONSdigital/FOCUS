@@ -633,6 +633,7 @@ def produce_rep_results(current_path):
             df_totals = pd.DataFrame()
             for rep in range(1, total_reps+1):
                 # could have a dict with number of dataframes equal to reps and go through only once...
+                # e.g. add all reps to dict with df before moving on...
                 df = pd.DataFrame()
                 for district in range(1, districts+1):
                     df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
@@ -713,6 +714,7 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_ri
     # use hh_record to get total hh in each lsoa
     n = len(hh_record)  # number of districts
     num_hh_lsoa = pd.Series()  # lsoa counts
+
     for i in range(1, n + 1):
         hh_count = hh_record[str(i)]
         # for count use only rep 1 figures
@@ -720,6 +722,8 @@ def sum_pyramid(hh_record, input_data_left, input_data_right, name_left, name_ri
         hh_count = hh_count[hh_count['rep'] == 1]
         hh_count = hh_count.groupby('lsoa11cd').size()
         num_hh_lsoa = num_hh_lsoa.add(hh_count, fill_value=0)
+
+    print('Overall response rate is: ', input_data_right['0'].sum()/num_hh_lsoa.sum())
 
     # divide returns by number of HH for each area and convert to percentage
     input_data_left = input_data_left.div(num_hh_lsoa, axis='index') * 100

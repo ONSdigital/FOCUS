@@ -86,6 +86,10 @@ def start_run(run_input, seeds, max_districts, out_path):
 
     visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
 
+    time_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+
+    time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+
     l.acquire()
     if oo.record_key_info:
         if not os.path.isdir(os.path.join(out_path, 'key info')):
@@ -116,6 +120,8 @@ def start_run(run_input, seeds, max_districts, out_path):
                    passive_totals,
                    visit_totals,
                    visit_summary,
+                   time_totals,
+                   time_summary,
                    rnd,
                    sim_hours,
                    start_date,
@@ -141,18 +147,23 @@ def start_run(run_input, seeds, max_districts, out_path):
     hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
     hp.output_summary(summary_path, visit_summary, 'visit_summary', c_run, c_rep)
     hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
+    hp.output_summary(summary_path, time_summary, 'time_summary', c_run, c_rep)
+    hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
 
 
 def produce_default_output(current_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
     # line chart of overall responses over time
-    pp.produce_rep_results(current_path)
+    pp.produce_rep_results(current_path)  # pass a list of paths to process here to pool
     active_response_path = os.path.join(current_path, 'summary', 'active_summary', 'digital')
     pp.plot_summary(active_response_path, 'responses', reps=False, cumulative=True, individual=False)
 
     visits_path = os.path.join(current_path, 'summary', 'visit_summary', 'la')
-    pp.plot_summary(visits_path, 'visits', reps=False, cumulative=False, individual=False)
+    pp.plot_summary(visits_path, 'visits', reps=False, cumulative=True, individual=False)
+
+    visits_path = os.path.join(current_path, 'summary', 'time_summary', 'la')
+    pp.plot_summary(visits_path, 'time', reps=False, cumulative=True, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates
     pandas_data = pp.csv_to_pandas(current_path, ['hh_record'])
@@ -162,6 +173,8 @@ def produce_default_output(current_path):
     name_right = 'Active'
 
     pp.sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=2)
+
+
 
 
 if __name__ == '__main__':
