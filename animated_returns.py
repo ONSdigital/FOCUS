@@ -44,7 +44,7 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', 'large_subset_lsoa_nomis 2017-08-02 15.46.47', 'summary', 'active_summary', 'la')
+default_path = os.path.join('outputs', 'lsoa_nomis_10 2017-08-07 13.22.38', 'summary', 'active_summary', 'la')
 data_list = plot_summary_animated(default_path, cumulative=False, reps=True)
 
 fig = plt.figure()

@@ -165,8 +165,6 @@ def produce_default_output(input_path):
     pp_pool.close()
     pp_pool.join()
 
-
-
 #   pp.produce_rep_results(current_path)  # pass a list of paths to process here to pool
     summary_outpath = os.path.join(input_path, 'summary')
 
