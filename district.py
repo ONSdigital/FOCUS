@@ -29,6 +29,7 @@ class District(object):
         self.travel_dist = 0  # average travel distance between hh for district
         self.early_responders = 0  # records number of hh who return prior to first interaction
         self.postal_delay = self.input_data['postal_delay']
+        self.total_responses = 0
 
         if self.input_data["census officer"]:
             self.create_co()
@@ -145,14 +146,14 @@ class District(object):
                 print("Error when creating CO type", co_type, " in run: ", self.rep.run)
                 sys.exit()
 
-    def return_household_geog(self, input_dict, district_name, hh_type, hh_digital):
-        # returns LA and LSOA codes for hh
+    def return_household_geog(self, input_dict, hh_type, hh_digital):
+        # returns LA and LSOA codes for current hh
 
         for la in input_dict:
             for lsoa in input_dict[la]:
                 if int(input_dict[la][lsoa]) > 0:
                     input_dict[la][lsoa] = int(input_dict[la][lsoa]) - 1
-                    return oo.hh_geography(la, lsoa, district_name, hh_type, hh_digital)
+                    return oo.hh_geography(la, lsoa, self.district, hh_type, hh_digital)
 
     def create_households(self):
 
@@ -168,7 +169,7 @@ class District(object):
                 hh_digital = h.set_preference(hh_input_data['paper_prop'], self.rnd)
 
                 # define where the hh is located
-                hh_geog = self.return_household_geog(hh_input_data['cca_makeup'], self.district, hh_type, hh_digital)
+                hh_geog = self.return_household_geog(hh_input_data['cca_makeup'], hh_type, hh_digital)
 
                 self.total_households += 1
 
@@ -179,6 +180,7 @@ class District(object):
                     # don't need an instance of a household just directly record response/return at correct time
 
                     self.rep.total_responses += 1
+                    self.total_responses += 1
                     if oo.record_responded:
                         self.rep.output_data['Return_sent'].append(oo.generic_output(self.rep.reps,
                                                                                      self.district,
@@ -205,11 +207,13 @@ class District(object):
                                                                                          time_to_use))
 
                     # add household to summary of responses
-                    for key, value in self.rep.active_summary.items():
-                        value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
+                    if oo.record_summary:
 
-                    for key, value in self.rep.active_totals.items():
-                        value[str(getattr(hh_geog, key))] += 1
+                        for key, value in self.rep.active_summary.items():
+                            value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
+
+                        for key, value in self.rep.active_totals.items():
+                            value[str(getattr(hh_geog, key))] += 1
 
                     if oo.record_responded:
                         self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,

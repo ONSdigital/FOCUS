@@ -63,32 +63,33 @@ def start_run(run_input, seeds, max_districts, out_path):
 
     the summaries and totals are at the levels in the keys.
     """
+    if oo.record_summary:
 
-    passive_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
-                       'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
-                       'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list)))
-                       }
+        passive_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                           'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
+                           'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list)))
+                           }
 
-    active_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
-                      'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
-                      'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))
-                      }
+        active_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                          'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
+                          'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))
+                          }
 
-    active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                     'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
-                     }
+        active_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                         'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                         }
 
-    passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                      'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
-                      }
+        passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                          'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                          }
 
-    visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+        visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
-    visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
+        visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
 
-    time_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+        time_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
-    time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+        time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
 
     l.acquire()
     if oo.record_key_info:
@@ -141,21 +142,22 @@ def start_run(run_input, seeds, max_districts, out_path):
     c_run = run_input['run_id']
     c_rep = run_input['rep_id']
 
-    hp.output_summary(summary_path, passive_summary, 'passive_summary', c_run, c_rep)
-    hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
-    hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
-    hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
-    hp.output_summary(summary_path, visit_summary, 'visit_summary', c_run, c_rep)
-    hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
-    hp.output_summary(summary_path, time_summary, 'time_summary', c_run, c_rep)
-    hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
+    if oo.record_summary:
+
+        hp.output_summary(summary_path, passive_summary, 'passive_summary', c_run, c_rep)
+        hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
+        hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
+        hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
+        hp.output_summary(summary_path, visit_summary, 'visit_summary', c_run, c_rep)
+        hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
+        hp.output_summary(summary_path, time_summary, 'time_summary', c_run, c_rep)
+        hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
 
 
 def produce_default_output(input_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
     # line chart of overall responses over time
-
     current_path = os.path.join(input_path, 'summary')
     folders = next(os.walk(current_path))[1]
     folders = [os.path.join(current_path, folder) for folder in folders]
@@ -165,9 +167,9 @@ def produce_default_output(input_path):
     pp_pool.close()
     pp_pool.join()
 
-#   pp.produce_rep_results(current_path)  # pass a list of paths to process here to pool
     summary_outpath = os.path.join(input_path, 'summary')
 
+    # plot line charts for the outputs of interest
     active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital')
     pp.plot_summary(active_response_path, summary_outpath, 'responses', reps=False, cumulative=True, individual=False)
 
@@ -177,7 +179,7 @@ def produce_default_output(input_path):
     visits_path = os.path.join(input_path, 'summary', 'time_summary', 'la')
     pp.plot_summary(visits_path, summary_outpath, 'time', reps=False, cumulative=True, individual=False)
 
-    # pyramid chart showing comparison of two strategies on LSOA return rates
+    # pyramid chart showing comparison of two strategies on LSOA return rates (or passive and active if one sim)
     pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
     input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
     name_left = 'Passive'
@@ -186,10 +188,11 @@ def produce_default_output(input_path):
 
     pp.sum_pyramid(pandas_data['hh_record'], summary_outpath, input_left, input_right, name_left, name_right, bin_size=2)
 
+
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = True
+    produce_default = False
     multiple_processors = True  # set to false to debug
     delete_old = True
     freeze_support()
@@ -330,8 +333,11 @@ if __name__ == '__main__':
         print('Simulation complete at time: ', dt.datetime.now())
 
         if produce_default:
-            print("Starting post processing.")
-            produce_default_output(current_output_path)
+            try:
+                print("Starting post processing.")
+                produce_default_output(current_output_path)
+            except:
+                print("Error in post processing. Check output options.")
 
         cet = dt.datetime.now()
         print(sim_counter, 'of', sims, 'complete at time', cet)

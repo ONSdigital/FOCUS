@@ -49,6 +49,7 @@ record_responded = True
 record_hh_record = True
 record_key_info = True
 """
+record_summary = True
 record_generic_output = False
 record_do_nothing = False
 record_call = False
@@ -69,7 +70,7 @@ record_warnings = False
 record_non_response = False
 record_letters = False
 record_posted = False
-record_visit = False
+record_visit = True
 record_visit_wasted = False
 record_visit_unnecessary = False
 record_visit_contact = False

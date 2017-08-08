@@ -12,12 +12,13 @@ def ret_rec(household, rep):
     if rep.total_responses % 100000 == 0:
         print(rep.total_responses)
 
-    # add household to summary of responses
-    for key, value in rep.active_summary.items():
-        value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
+    if oo.record_summary:
+        # add household to summary of responses
+        for key, value in rep.active_summary.items():
+            value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
 
-    for key, value in rep.active_totals.items():
-        value[str(getattr(household, key))] += 1
+        for key, value in rep.active_totals.items():
+            value[str(getattr(household, key))] += 1
 
     household.return_received = True
     if oo.record_return_received:
@@ -32,6 +33,7 @@ def ret_rec(household, rep):
     # currently every return gets counted as a response as soon as it is received - this may need to change
     household.responded = True
     rep.total_responses += 1
+    household.district.total_responses += 1
 
     # check size of output data - if over an amount, size or length write to file?
     if oo.record_responded:

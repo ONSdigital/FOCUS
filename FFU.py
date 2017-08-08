@@ -166,11 +166,13 @@ class CensusOfficer(object):
         household.priority += 1  # automatically lower the priority of this hh after a visit
         household.visits += 1
 
-        for key, value in self.rep.visit_summary.items():
-            value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += 1
+        if oo.record_summary:
 
-        for key, value in self.rep.visit_totals.items():
-            value[str(getattr(household, key))] += 1
+            for key, value in self.rep.visit_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += 1
+
+            for key, value in self.rep.visit_totals.items():
+                value[str(getattr(household, key))] += 1
 
         if oo.record_visit:
             self.rep.output_data['Visit'].append(oo.generic_output(self.rep.reps,
@@ -253,11 +255,13 @@ class CensusOfficer(object):
 
             time_worked = self.input_data["visit_times"]["out"]/60 + self.district.travel_dist / self.input_data["travel_speed"]
 
-            for key, value in self.rep.time_summary.items():
-                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+            if oo.record_summary:
 
-            for key, value in self.rep.time_totals.items():
-                value[str(getattr(household, key))] += time_worked
+                for key, value in self.rep.time_summary.items():
+                    value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+                for key, value in self.rep.time_totals.items():
+                    value[str(getattr(household, key))] += time_worked
 
             yield self.rep.env.timeout(time_worked)
 
@@ -268,11 +272,13 @@ class CensusOfficer(object):
 
         time_worked = self.input_data['visit_times']['query']/60
 
-        for key, value in self.rep.time_summary.items():
-            value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+        if oo.record_summary:
 
-        for key, value in self.rep.time_totals.items():
-            value[str(getattr(household, key))] += time_worked
+            for key, value in self.rep.time_summary.items():
+                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+            for key, value in self.rep.time_totals.items():
+                value[str(getattr(household, key))] += time_worked
 
         yield self.rep.env.timeout(time_worked)
 
@@ -285,11 +291,13 @@ class CensusOfficer(object):
 
             time_worked = self.input_data['visit_times']['convert']/60
 
-            for key, value in self.rep.time_summary.items():
-                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+            if oo.record_summary:
 
-            for key, value in self.rep.time_totals.items():
-                value[str(getattr(household, key))] += time_worked
+                for key, value in self.rep.time_summary.items():
+                    value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+                for key, value in self.rep.time_totals.items():
+                    value[str(getattr(household, key))] += time_worked
 
             yield self.rep.env.timeout(time_worked)
 
@@ -322,11 +330,13 @@ class CensusOfficer(object):
             time_worked = self.input_data['visit_times']['paper'] / 60 +\
                           self.district.travel_dist/self.input_data["travel_speed"]
 
-            for key, value in self.rep.time_summary.items():
-                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+            if oo.record_summary:
 
-            for key, value in self.rep.time_totals.items():
-                value[str(getattr(household, key))] += time_worked
+                for key, value in self.rep.time_summary.items():
+                    value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+                for key, value in self.rep.time_totals.items():
+                    value[str(getattr(household, key))] += time_worked
 
             yield self.rep.env.timeout(time_worked)
 
@@ -346,11 +356,13 @@ class CensusOfficer(object):
             time_worked = self.input_data['visit_times']['paper'] / 60 + \
                           self.district.travel_dist / self.input_data["travel_speed"]
 
-            for key, value in self.rep.time_summary.items():
-                value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+            if oo.record_summary:
 
-            for key, value in self.rep.time_totals.items():
-                value[str(getattr(household, key))] += time_worked
+                for key, value in self.rep.time_summary.items():
+                    value[str(getattr(household, key))][math.floor(self.rep.env.now / 24)] += time_worked
+
+                for key, value in self.rep.time_totals.items():
+                    value[str(getattr(household, key))] += time_worked
 
             yield self.rep.env.timeout(time_worked)
 

@@ -635,6 +635,7 @@ def produce_rep_results(current_path):
                 df = pd.DataFrame()
                 for district in range(1, districts+1):
                     df_to_add = pd.read_csv(os.path.join(str(district), str(rep) + ".csv"),  index_col=0)
+                    np.fromfile(os.path.join(str(district), str(rep) + ".csv"))
                     os.remove(os.path.join(str(district), str(rep) + ".csv"))
                     df = df.add(df_to_add, fill_value=0)
 
