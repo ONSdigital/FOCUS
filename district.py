@@ -167,6 +167,8 @@ class District(object):
 
                 # set if digital here?
                 hh_digital = h.set_preference(hh_input_data['paper_prop'], self.rnd)
+                # if digital but given paper some would use the paper...and easy effect???
+                # could represent here by switch some back to paper...record it....or do it in above function...
 
                 # define where the hh is located
                 hh_geog = self.return_household_geog(hh_input_data['cca_makeup'], hh_type, hh_digital)
@@ -175,6 +177,15 @@ class District(object):
 
                 # determine initial HH action
                 hh_action = self.initial_action(hh_input_data, self.first_interaction, hh_type, hh_geog, hh_digital)
+
+                if h.str2bool(hh_input_data["paper_allowed"]) and oo.record_summary:
+                    # add to the summary of the amount of paper given
+
+                    for key, value in self.rep.paper_summary.items():
+                        value[str(getattr(hh_geog, key))][0] += 1
+
+                    for key, value in self.rep.paper_totals.items():
+                        value[str(getattr(hh_geog, key))] += 1
 
                 if hh_action.type == 'early':
                     # don't need an instance of a household just directly record response/return at correct time
@@ -245,6 +256,7 @@ class District(object):
                                                                           hh_type,
                                                                           hh_action.type,
                                                                           hh_action.digital,
+                                                                          hh_input_data['paper_allowed'],
                                                                           hh_action.time))
                 if hh_action.type not in ['do_nothing', 'help']:
                     for key, value in self.rep.passive_summary.items():

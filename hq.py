@@ -105,6 +105,15 @@ class LetterPhase(object):
                 if self.letter_type == 'pq':
                     household.paper_allowed = True
 
+                    if oo.record_summary:
+                        # add to the summary of the amount of paper given
+
+                        for key, value in self.rep.paper_summary.items():
+                            value[str(getattr(household, key))][math.floor(self.env.now / 24)] += 1
+
+                        for key, value in self.rep.paper_totals.items():
+                            value[str(getattr(household, key))] += 1
+
                 self.env.process(self.co_send_letter(household, self.letter_type, self.input_data["delay"]))
 
         yield self.env.timeout(0)
@@ -125,6 +134,16 @@ class LetterPhase(object):
 
 
 def schedule_paper_drop(obj, contact_type, reminder_type, delay):
+
+    # add to summary of paper given out
+    if reminder_type == 'pq' and oo.record_summary:
+
+        for key, value in obj.rep.paper_summary.items():
+            value[str(getattr(obj, key))][math.floor(obj.rep.env.now / 24)] += 1
+
+        for key, value in obj.rep.paper_totals.items():
+            value[str(getattr(obj, key))] += 1
+
     output_type = contact_type + "_" + reminder_type + "_posted"   # use this as output key
 
     if oo.record_posted:

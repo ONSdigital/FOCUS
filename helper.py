@@ -64,6 +64,14 @@ def str2bool(value):
     return str(value).lower() in ("True", "true", "1")
 
 
+def bool2value(x):
+
+    if x == 'true' or x == 'True' or x == "1":
+        return 1
+    else:
+        return 0
+
+
 def beta_dist(rep, alpha, beta, sim_days_left):
     # return (rep.rnd.betavariate(alpha, beta))*(rep.sim_hours - rep.env.now)
     return int((rep.rnd.betavariate(alpha, beta))*sim_days_left)
@@ -123,9 +131,9 @@ def set_preference(paper_prop, rnd):
 
     if paper_test <= int(paper_prop):
 
-        return 0
+        return False  # paper
 
-    return 1
+    return True  # digital
 
 
 def set_behaviour(digital, input_data, behaviour, rnd):

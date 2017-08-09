@@ -49,7 +49,7 @@ def start_run(run_input, seeds, max_districts, out_path):
     la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
     lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
     district_list = [str(district) for district in range(1, max_districts+1)]
-    dig_list = ['0', '1']
+    dig_list = ['False', 'True']
     hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
 
     """
@@ -91,6 +91,10 @@ def start_run(run_input, seeds, max_districts, out_path):
 
         time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
 
+        paper_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+
+        paper_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+
     l.acquire()
     if oo.record_key_info:
         if not os.path.isdir(os.path.join(out_path, 'key info')):
@@ -123,6 +127,8 @@ def start_run(run_input, seeds, max_districts, out_path):
                    visit_summary,
                    time_totals,
                    time_summary,
+                   paper_totals,
+                   paper_summary,
                    rnd,
                    sim_hours,
                    start_date,
@@ -152,6 +158,8 @@ def start_run(run_input, seeds, max_districts, out_path):
         hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
         hp.output_summary(summary_path, time_summary, 'time_summary', c_run, c_rep)
         hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
+        hp.output_summary(summary_path, paper_summary, 'paper_summary', c_run, c_rep)
+        hp.output_summary(summary_path, paper_totals, 'paper_totals', c_run, c_rep)
 
 
 def produce_default_output(input_path):
@@ -179,6 +187,9 @@ def produce_default_output(input_path):
     visits_path = os.path.join(input_path, 'summary', 'time_summary', 'la')
     pp.plot_summary(visits_path, summary_outpath, 'time', reps=False, cumulative=True, individual=False)
 
+    paper_path = os.path.join(input_path, 'summary', 'paper_summary', 'la')
+    pp.plot_summary(paper_path, summary_outpath, 'paper', reps=False, cumulative=False, individual=False)
+
     # pyramid chart showing comparison of two strategies on LSOA return rates (or passive and active if one sim)
     pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
     input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
@@ -192,8 +203,8 @@ def produce_default_output(input_path):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
-    multiple_processors = True  # set to false to debug
+    produce_default = True
+    multiple_processors = False  # set to false to debug
     delete_old = True
     freeze_support()
 
@@ -260,6 +271,7 @@ if __name__ == '__main__':
                     now = dt.datetime.now()
                     seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                     seed = abs(now - seed_date).total_seconds() + int(district) + rep
+                    # seed = 10  # uncomment if error found before sim completes
                     seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
                     if not str(input_data[district]['run_id']) in dict_all:
                         dict_all[str(input_data[district]['run_id'])] = {}
