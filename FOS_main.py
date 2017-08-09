@@ -204,7 +204,7 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = True
-    multiple_processors = False  # set to false to debug
+    multiple_processors = True  # set to false to debug
     delete_old = True
     freeze_support()
 

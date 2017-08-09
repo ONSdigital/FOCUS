@@ -481,7 +481,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=11):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -566,7 +566,7 @@ subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_f
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 input_JSON_template = os.path.join(os.getcwd(), 'templates', 'template_new.JSON')  # JSON template to use
 #output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'subset_lsoa_nomis.JSON')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_12.JSON')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_11.JSON')
 
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
