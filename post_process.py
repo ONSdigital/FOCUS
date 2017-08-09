@@ -778,15 +778,15 @@ def sum_pyramid(hh_record, summary_outpath, input_data_left, input_data_right, n
     output_path = os.path.join(summary_outpath, filename)
     plt.savefig(output_path, dpi=450)
 
-#right_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-26 16.44.46')
-#left_current_path = os.path.join(os.getcwd(), 'outputs', '2017-07-26 18.02.50')
+right_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
+left_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_11 2017-08-09 15.16.00')
 
 #default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
 #plot_summary(default_path, reps=True, cumulative=False)
 
-#pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
-#input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_left = '10'
-#input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_right = '15'
-#sum_pyramid(pandas_data['hh_record'], input_left, input_right, name_left, name_right, bin_size=1)
+pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
+input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+name_left = '11'
+input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+name_right = '12'
+sum_pyramid(pandas_data['hh_record'], os.getcwd(), input_left, input_right, name_left, name_right, bin_size=1)
