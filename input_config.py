@@ -234,12 +234,12 @@ def remainder_over(cca_output, cca, la_code, lsoa_code, hh_remaining, htc, area,
 
     current_co += hh_remaining / input_ratio[htc-1]
 
-    if current_co < 12:
+    if current_co < 15:
         # return what to put in cca
         return [[cca, la_code, lsoa_code, hh_remaining, htc, area], current_co]
     else:
         # add proportion to current cca and the rest to the next
-        proportion_over = current_co - 12
+        proportion_over = current_co - 15
         hh_over = math.floor(proportion_over * input_ratio[htc-1])
         hh_to_add = hh_remaining - hh_over
         area_to_add = area*(hh_to_add/hh_remaining)
@@ -481,7 +481,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=11):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=15):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.

@@ -49,7 +49,13 @@ record_responded = True
 record_hh_record = True
 record_key_info = True
 """
-record_summary = True
+record_passive_summary = True
+record_active_summary = True
+record_active_paper_summary = True
+record_visit_summary = False
+record_time_summary = False
+record_paper_summary = False
+
 record_generic_output = False
 record_do_nothing = False
 record_call = False

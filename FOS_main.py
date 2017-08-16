@@ -45,32 +45,76 @@ def start_run(run_input, seeds, max_districts, out_path):
     for day in range(0, days):
         day_cols.append(day)
 
-    # generate list of codes for reference from raw inputs
-    la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
-    lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
-    district_list = [str(district) for district in range(1, max_districts+1)]
+    # generate list of codes for reference from input file where appropriate
     dig_list = ['False', 'True']
-    hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
+    la_list = []
+    lsoa_list = []
+    hh_type_list = []
+
+    # cycle through the input data to only include those household types, lsoa and la that exist to appear in the output
+    for d_key, d_value in run_input['districts'].items():
+        for hh_key, hh_value in d_value['households'].items():
+            if hh_key not in hh_type_list:
+                hh_type_list.append(hh_key)
+            for la_key, la_value in hh_value['cca_makeup'].items():
+                if la_key not in la_list:
+                    la_list.append(la_key)
+                for lsoa_key, lsoa_value in la_value.items():
+                    if lsoa_key not in lsoa_list:
+                        lsoa_list.append(lsoa_key)
+
+
 
     """
     passive_summary records a daily summary of returns that occur without any intervention
-    active_summary records all returns including those due to the interventions
     passive_totals records a simple total of returns without intervention
+
+    active_summary records all returns including those due to the interventions
     active_totals records a simple total of all returns
+
+    active_paper_summary paper returns over time
+    active_paper_totals total paper returns
 
     visit_summary records all visits over time by the level in the key
     visit_totals records simple sum of total visits by level in key
 
+    time_summary records time spent on task by the census officers
+    time_totals sum of total time on task
+
+    paper_summary summary of paper given out over time
+    paper_totals sum of paper given out
+
     the summaries and totals are at the levels in the keys.
     """
-    if oo.record_summary:
+
+    passive_summary = {}
+    passive_totals = {}
+    active_summary = {}
+    active_totals = {}
+    active_paper_summary = {}
+    active_paper_totals = {}
+    visit_totals = {}
+    visit_summary = {}
+    time_totals = {}
+    time_summary = {}
+    paper_totals = {}
+    paper_summary = {}
+
+    if oo.record_passive_summary:
 
         passive_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                           'lsoa': dict((lsoa_list[i], [0] * days) for i in range(0, len(lsoa_list))),
                            'digital': dict((dig_list[i], [0]*days) for i in range(0, len(dig_list))),
                            'hh_type': dict((hh_type_list[i], [0]*days) for i in range(0, len(hh_type_list)))
                            }
 
-        active_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+        passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                          'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                          }
+
+    if oo.record_active_summary:
+
+        active_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list))),
                           'digital': dict((dig_list[i], [0] * days) for i in range(0, len(dig_list))),
                           'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))
                           }
@@ -79,23 +123,36 @@ def start_run(run_input, seeds, max_districts, out_path):
                          'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
                          }
 
-        passive_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
-                          'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
-                          }
+    if oo.record_active_paper_summary:
+
+        active_paper_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list))),
+                                'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))
+                                }
+
+        active_paper_totals = {'lsoa': dict((lsoa_list[i], 0) for i in range(0, len(lsoa_list))),
+                               'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                               }
+
+    if oo.record_visit_summary:
 
         visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
         visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
 
+    if oo.record_time_summary:
+
         time_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
         time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+
+    if oo.record_paper_summary:
 
         paper_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
         paper_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
 
     l.acquire()
+
     if oo.record_key_info:
         if not os.path.isdir(os.path.join(out_path, 'key info')):
             os.mkdir(os.path.join(out_path, 'key info'))
@@ -120,15 +177,17 @@ def start_run(run_input, seeds, max_districts, out_path):
                    run_input,
                    output_data,
                    passive_summary,
+                   passive_totals,
                    active_summary,
                    active_totals,
-                   passive_totals,
-                   visit_totals,
+                   active_paper_summary,
+                   active_paper_totals,
                    visit_summary,
-                   time_totals,
+                   visit_totals,
                    time_summary,
-                   paper_totals,
+                   time_totals,
                    paper_summary,
+                   paper_totals,
                    rnd,
                    sim_hours,
                    start_date,
@@ -148,16 +207,32 @@ def start_run(run_input, seeds, max_districts, out_path):
     c_run = run_input['run_id']
     c_rep = run_input['rep_id']
 
-    if oo.record_summary:
+    if oo.record_passive_summary:
 
         hp.output_summary(summary_path, passive_summary, 'passive_summary', c_run, c_rep)
         hp.output_summary(summary_path, passive_totals, 'passive_totals', c_run, c_rep)
+
+    if oo.record_active_summary:
+
         hp.output_summary(summary_path, active_summary, 'active_summary', c_run, c_rep)
         hp.output_summary(summary_path, active_totals, 'active_totals', c_run, c_rep)
+
+    if oo.record_active_paper_summary:
+        hp.output_summary(summary_path, active_paper_summary, 'active_paper_summary', c_run, c_rep)
+        hp.output_summary(summary_path, active_paper_totals, 'active_paper_totals', c_run, c_rep)
+
+    if oo.record_visit_summary:
+
         hp.output_summary(summary_path, visit_summary, 'visit_summary', c_run, c_rep)
         hp.output_summary(summary_path, visit_totals, 'visit_totals', c_run, c_rep)
+
+    if oo.record_time_summary:
+
         hp.output_summary(summary_path, time_summary, 'time_summary', c_run, c_rep)
         hp.output_summary(summary_path, time_totals, 'time_totals', c_run, c_rep)
+
+    if oo.record_paper_summary:
+
         hp.output_summary(summary_path, paper_summary, 'paper_summary', c_run, c_rep)
         hp.output_summary(summary_path, paper_totals, 'paper_totals', c_run, c_rep)
 
@@ -176,6 +251,7 @@ def produce_default_output(input_path):
     pp_pool.join()
 
     summary_outpath = os.path.join(input_path, 'summary')
+    pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
 
     # plot line charts for the outputs of interest
     active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital')
@@ -191,7 +267,7 @@ def produce_default_output(input_path):
     pp.plot_summary(paper_path, summary_outpath, 'paper', reps=False, cumulative=False, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates (or passive and active if one sim)
-    pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
+
     input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
     name_left = 'Passive'
     input_right = pd.read_csv(os.path.join(input_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)

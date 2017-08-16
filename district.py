@@ -178,7 +178,7 @@ class District(object):
                 # determine initial HH action
                 hh_action = self.initial_action(hh_input_data, self.first_interaction, hh_type, hh_geog, hh_digital)
 
-                if h.str2bool(hh_input_data["paper_allowed"]) and oo.record_summary:
+                if h.str2bool(hh_input_data["paper_allowed"]) and oo.record_paper_summary:
                     # add to the summary of the amount of paper given
 
                     for key, value in self.rep.paper_summary.items():
@@ -218,7 +218,7 @@ class District(object):
                                                                                          time_to_use))
 
                     # add household to summary of responses
-                    if oo.record_summary:
+                    if oo.record_active_summary:
 
                         for key, value in self.rep.active_summary.items():
                             value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
@@ -258,7 +258,9 @@ class District(object):
                                                                           hh_action.digital,
                                                                           hh_input_data['paper_allowed'],
                                                                           hh_action.time))
-                if hh_action.type not in ['do_nothing', 'help']:
+
+                if hh_action.type not in ['do_nothing', 'help'] and oo.record_passive_summary:
+
                     for key, value in self.rep.passive_summary.items():
                         value[str(getattr(hh_geog, key))][math.floor(hh_action.time/24)] += 1
 

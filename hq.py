@@ -12,12 +12,20 @@ def ret_rec(household, rep):
     if rep.total_responses % 100000 == 0:
         print(rep.total_responses)
 
-    if oo.record_summary:
+    if oo.record_active_summary:
         # add household to summary of responses
         for key, value in rep.active_summary.items():
             value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
 
         for key, value in rep.active_totals.items():
+            value[str(getattr(household, key))] += 1
+
+    if oo.record_active_paper_summary and not household.digital:
+
+        for key, value in rep.active_paper_summary.items():
+            value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
+
+        for key, value in rep.active_paper_totals.items():
             value[str(getattr(household, key))] += 1
 
     household.return_received = True
@@ -105,7 +113,7 @@ class LetterPhase(object):
                 if self.letter_type == 'pq':
                     household.paper_allowed = True
 
-                    if oo.record_summary:
+                    if oo.record_paper_summary:
                         # add to the summary of the amount of paper given
 
                         for key, value in self.rep.paper_summary.items():
@@ -136,7 +144,7 @@ class LetterPhase(object):
 def schedule_paper_drop(obj, contact_type, reminder_type, delay):
 
     # add to summary of paper given out
-    if reminder_type == 'pq' and oo.record_summary:
+    if reminder_type == 'pq' and oo.record_paper_summary:
 
         for key, value in obj.rep.paper_summary.items():
             value[str(getattr(obj, key))][math.floor(obj.rep.env.now / 24)] += 1

@@ -13,24 +13,26 @@ import call_profiles as cp
 class Rep(object):
     """contains the methods and data for an individual replication"""
 
-    def __init__(self, env, input_data, output_data, passive_summary, active_summary, active_totals,
-                 passive_totals, visit_totals, visit_summary, time_totals, time_summary,  paper_totals, paper_summary,
-                 rnd, sim_hours, start_date, census_day, out_path, max_output_file_size):
+    def __init__(self, env, input_data, output_data, passive_summary, passive_totals, active_summary, active_totals,
+                 active_paper_summary, active_paper_totals, visit_summary, visit_totals, time_summary, time_totals,
+                 paper_summary, paper_totals, rnd, sim_hours, start_date, census_day, out_path, max_output_file_size):
 
         # values passed to the class
         self.env = env
         self.input_data = input_data
         self.output_data = output_data
         self.passive_summary = passive_summary
-        self.active_summary = active_summary
         self.passive_totals = passive_totals
+        self.active_summary = active_summary
         self.active_totals = active_totals
-        self.visit_totals = visit_totals
+        self.active_paper_summary = active_paper_summary
+        self.active_paper_totals = active_paper_totals
         self.visit_summary = visit_summary
-        self.time_totals = time_totals
+        self.visit_totals = visit_totals
         self.time_summary = time_summary
-        self.paper_totals = paper_totals
+        self.time_totals = time_totals
         self.paper_summary = paper_summary
+        self.paper_totals = paper_totals
         self.rnd = rnd
         self.sim_hours = sim_hours
         self.start_date = start_date

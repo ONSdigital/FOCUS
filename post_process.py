@@ -542,6 +542,22 @@ produce_return_charts(df2_loc, df1_loc, 'Active', 'Passive', df0_loc, ' returns 
 
 
 ######################
+
+def sum_hh(hh_record):
+    """ takes hh_record data and returns a simple sum of the households present"""
+
+    hh_count = 0
+
+    n = len(hh_record)  # number of districts
+
+    for i in range(1, n + 1):
+        hh_count_df = hh_record[str(i)]
+        # for count use only rep 1 figures
+        hh_count += len(hh_count_df[hh_count_df['rep'] == 1])
+
+    return hh_count
+
+
 def user_journey_single():
     """a function that allows the user to extract an individual user journey from the raw outputs only. Simply searches
      the csv output files that exists and prints a sorted list (by time) of events that household experienced. Primarily
@@ -656,11 +672,15 @@ def produce_rep_results(current_path):
     os.chdir(current_path)
 
 
-def plot_summary(summary_path, summary_outpath, output_name, reps=False, average=True, cumulative=True, individual=True):
+def plot_summary(summary_path, summary_outpath, output_name, reps=False, average=True, cumulative=True, individual=False,
+                 percent=0):
     """creates a plot using the summary data to show response over time. default is to show the average of all areas.
     If rep is True then it will also plot the individual rep results (faded). If individual is True it will plot the
     average response over time for each group in the dataset rather than the whole. If cumulative is false it will
     show daily return rates rather than cumulative."""
+
+
+    ####  possible change. Supply a list of paths and plot on same chart....###
 
     if average:
         df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
@@ -668,6 +688,10 @@ def plot_summary(summary_path, summary_outpath, output_name, reps=False, average
             df = df.sum(axis=0).cumsum(axis=0)
         else:
             df = df.sum(axis=0)
+
+        if percent > 0:
+            df = df.div(percent)*100
+
         df.rename = 'average'
         df.plot.line(label='total')
 
@@ -698,7 +722,10 @@ def plot_summary(summary_path, summary_outpath, output_name, reps=False, average
     if not reps:
         plt.legend(loc='best')
     plt.xlabel('days')
-    plt.ylabel('Count')
+    if percent:
+        plt.ylabel('Percent')
+    else:
+        plt.ylabel('Count')
     plt.savefig(output_path, dpi=450)
     plt.close()
 
@@ -778,15 +805,32 @@ def sum_pyramid(hh_record, summary_outpath, input_data_left, input_data_right, n
     output_path = os.path.join(summary_outpath, filename)
     plt.savefig(output_path, dpi=450)
 
-right_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
-left_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_11 2017-08-09 15.16.00')
 
-#default_path = os.path.join(current_path, 'summary', 'active_summary', 'la')
-#plot_summary(default_path, reps=True, cumulative=False)
+def map_totals():
+    """plot a bokeh map of the final return rates"""
 
-pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
-input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-name_left = '11'
-input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-name_right = '12'
-sum_pyramid(pandas_data['hh_record'], os.getcwd(), input_left, input_right, name_left, name_right, bin_size=1)
+    pass
+
+
+#####addition code to get data in right format - inc labels - for data vis map...#### not a priority
+
+
+
+#right_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
+#left_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_11 2017-08-09 15.16.00')
+
+#### change to allow display in % terms, just supply total to divide by
+#input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
+#pandas_data = csv_to_pandas(input_path, ['hh_record'])
+#default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58', 'summary', 'active_summary', 'la')
+#summary_outpath = os.path.join(input_path, 'summary')
+#percent = sum_hh(pandas_data['hh_record'])
+#plot_summary(default_path, summary_outpath, 'returns', reps=False, cumulative=True, percent=percent)
+
+
+#pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
+#input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_left = '11'
+#input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_right = '12'
+#sum_pyramid(pandas_data['hh_record'], os.getcwd(), input_left, input_right, name_left, name_right, bin_size=1)
