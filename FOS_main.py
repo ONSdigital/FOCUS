@@ -23,7 +23,7 @@ plt.style.use('ggplot')
 l = Lock()
 
 
-def start_run(run_input, seeds, max_districts, out_path):
+def start_run(run_input, seeds, out_path):
 
     max_output_file_size = 100000000
     start_date = dt.date(*map(int, run_input['start_date'].split(',')))
@@ -62,8 +62,6 @@ def start_run(run_input, seeds, max_districts, out_path):
                 for lsoa_key, lsoa_value in la_value.items():
                     if lsoa_key not in lsoa_list:
                         lsoa_list.append(lsoa_key)
-
-
 
     """
     passive_summary records a daily summary of returns that occur without any intervention
@@ -253,9 +251,14 @@ def produce_default_output(input_path):
     summary_outpath = os.path.join(input_path, 'summary')
     pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
 
-    # plot line charts for the outputs of interest
-    active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital')
-    pp.plot_summary(active_response_path, summary_outpath, 'responses', reps=False, cumulative=True, individual=False)
+    # produce a plot of the active and passive using bokeh
+    active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital', 'average.csv')
+    active_series = pd.read_csv(active_response_path, index_col=0).sum(axis=0)
+
+    passive_response_path = os.path.join(input_path, 'summary', 'passive_summary', 'digital', 'average.csv')
+    passive_series = pd.read_csv(passive_response_path, index_col=0).sum(axis=0)
+
+    pp.bokeh_line_chart(passive_series, active_series, 'passive', 'active', 'bokeh')
 
     visits_path = os.path.join(input_path, 'summary', 'visit_summary', 'la')
     pp.plot_summary(visits_path, summary_outpath, 'visits', reps=False, cumulative=True, individual=False)
@@ -281,7 +284,7 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
-    delete_old = False
+    delete_old = True
     freeze_support()
 
     # delete all old output files but not the main directory.
@@ -347,7 +350,7 @@ if __name__ == '__main__':
                     now = dt.datetime.now()
                     seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                     seed = abs(now - seed_date).total_seconds() + int(district) + rep
-                    # seed = 10  # uncomment if error found before sim completes
+                    seed = 10  # uncomment to use same random seed for debug
                     seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
                     if not str(input_data[district]['run_id']) in dict_all:
                         dict_all[str(input_data[district]['run_id'])] = {}
@@ -370,12 +373,12 @@ if __name__ == '__main__':
                     if multiple_processors:
                         pool = Pool(cpu_count())
                         pool.starmap(start_run,
-                                     zip(run_list, seed_list, repeat(districts), repeat(current_output_path)))
+                                     zip(run_list, seed_list, repeat(current_output_path)))
                         pool.close()
                         pool.join()
                     else:
                         for i in range(len(run_list)):
-                            start_run(run_list[i], seed_list[i], districts, current_output_path)
+                            start_run(run_list[i], seed_list[i], current_output_path)
 
                     # calculate finish time for current simulation and print progress
                     time_now = dt.datetime.now()

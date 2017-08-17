@@ -806,10 +806,69 @@ def sum_pyramid(hh_record, summary_outpath, input_data_left, input_data_right, n
     plt.savefig(output_path, dpi=450)
 
 
-def map_totals():
-    """plot a bokeh map of the final return rates"""
+def bokeh_line_chart(input1, input2, label1, label2, filename):
+    # takes two series objects and combines to produce a html bokeh chart with the labels and filename given
 
-    pass
+    label1 = label1.lower()
+    label2 = label2.lower()
+
+    label1_str = label1.capitalize()
+    label2_str = label2.capitalize()
+
+    combined = pd.concat([input1, input2], axis=1)
+    combined.reset_index(level=0, inplace=True)
+    # ensure values are same precision
+
+    combined.columns = ['day', label1, label2]
+
+    max_y = roundup(max(combined[[label1, label2]].max(axis=0)), 100)
+
+    source = ColumnDataSource(combined)
+
+    tools = 'box_zoom,' \
+            'crosshair,' \
+            'resize,' \
+            'reset,' \
+            'pan,' \
+            'wheel_zoom,' \
+            'save'
+
+    # Add lines to the figure p
+    p = figure(x_axis_label='Day', y_axis_label='Returns', width=1600, height=800, tools=tools, responsive=True)
+    p.line(x='day', y=label1, source=source, color='green', legend=label1_str)
+    p.line(x='day', y=label2, source=source, color='blue', legend=label2_str)
+
+    fu_day = (dt.datetime.strptime('2011-04-04', '%Y-%m-%d').date() -
+              dt.datetime.strptime('2011-03-08', '%Y-%m-%d').date()).days
+
+    p.line([fu_day, fu_day], [0, max_y], color='red')
+
+    hover = HoverTool(tooltips=
+                      [(label1_str, '@' + label1 + '{int}'),
+                       (label2_str, '@' + label2 + '{int}'),
+                       ('Day', '@day')
+                       ])
+
+    p.add_tools(hover)
+
+    # do some formatting
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.xgrid[0].ticker.desired_num_ticks = 11
+    p.xaxis.axis_label_text_font_size = '12pt'
+    p.xaxis.major_label_text_font_size = '12pt'
+
+    p.yaxis.axis_label_text_font_size = '12pt'
+    p.yaxis.major_label_text_font_size = '12pt'
+
+    p.legend.label_text_font_size = '12pt'
+    title_text = 'Effect of interventions on ' + filename[:-5]
+    p.title.text = title_text
+
+    # Specify the name of the output file and show the result
+    output_path = os.path.join(os.getcwd(), 'charts', filename)
+    output_file(output_path)
+    save(p)
+
 
 
 #####addition code to get data in right format - inc labels - for data vis map...#### not a priority

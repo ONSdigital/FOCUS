@@ -51,7 +51,7 @@ record_key_info = True
 """
 record_passive_summary = True
 record_active_summary = True
-record_active_paper_summary = True
+record_active_paper_summary = False
 record_visit_summary = False
 record_time_summary = False
 record_paper_summary = False
