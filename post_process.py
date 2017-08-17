@@ -806,8 +806,18 @@ def sum_pyramid(hh_record, summary_outpath, input_data_left, input_data_right, n
     plt.savefig(output_path, dpi=450)
 
 
-def bokeh_line_chart(input1, input2, label1, label2, filename):
-    # takes two series objects and combines to produce a html bokeh chart with the labels and filename given
+def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumulative=False):
+    """take two series objects to create a bokeh line chart with tooltips"""
+
+    if cumulative:
+
+        input1_df = pd.read_csv(input1, index_col=0).sum(axis=0).cumsum(axis=0)
+        input2_df = pd.read_csv(input2, index_col=0).sum(axis=0).cumsum(axis=0)
+
+    else:
+
+        input1_df = pd.read_csv(input1, index_col=0).sum(axis=0)
+        input2_df = pd.read_csv(input2, index_col=0).sum(axis=0)
 
     label1 = label1.lower()
     label2 = label2.lower()
@@ -815,7 +825,7 @@ def bokeh_line_chart(input1, input2, label1, label2, filename):
     label1_str = label1.capitalize()
     label2_str = label2.capitalize()
 
-    combined = pd.concat([input1, input2], axis=1)
+    combined = pd.concat([input1_df, input2_df], axis=1)
     combined.reset_index(level=0, inplace=True)
     # ensure values are same precision
 
@@ -861,11 +871,12 @@ def bokeh_line_chart(input1, input2, label1, label2, filename):
     p.yaxis.major_label_text_font_size = '12pt'
 
     p.legend.label_text_font_size = '12pt'
+    p.legend.location = 'top_left'
     title_text = 'Effect of interventions on ' + filename[:-5]
     p.title.text = title_text
 
     # Specify the name of the output file and show the result
-    output_path = os.path.join(os.getcwd(), 'charts', filename)
+    output_path = os.path.join(output_path, filename)
     output_file(output_path)
     save(p)
 
@@ -874,22 +885,25 @@ def bokeh_line_chart(input1, input2, label1, label2, filename):
 #####addition code to get data in right format - inc labels - for data vis map...#### not a priority
 
 
-
 #right_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
 #left_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_11 2017-08-09 15.16.00')
 
 #### change to allow display in % terms, just supply total to divide by
-#input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
 #pandas_data = csv_to_pandas(input_path, ['hh_record'])
-#default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58', 'summary', 'active_summary', 'la')
+#default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10', 'summary', 'active_summary', 'la')
 #summary_outpath = os.path.join(input_path, 'summary')
 #percent = sum_hh(pandas_data['hh_record'])
 #plot_summary(default_path, summary_outpath, 'returns', reps=False, cumulative=True, percent=percent)
 
+#input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
+#pandas_data = csv_to_pandas(input_path, ['hh_record'])
 
-#pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
-#input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_left = '11'
-#input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_right = '12'
-#sum_pyramid(pandas_data['hh_record'], os.getcwd(), input_left, input_right, name_left, name_right, bin_size=1)
+#input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_left = 'Passive'
+#input_right = pd.read_csv(os.path.join(input_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_right = 'Active'
+
+
+#sum_pyramid(pandas_data['hh_record'], os.path.join(input_path, 'summary'), input_left, input_right, name_left,
+#            name_right, bin_size=1)

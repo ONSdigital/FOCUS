@@ -51,10 +51,10 @@ record_key_info = True
 """
 record_passive_summary = True
 record_active_summary = True
-record_active_paper_summary = False
-record_visit_summary = False
-record_time_summary = False
-record_paper_summary = False
+record_active_paper_summary = True
+record_visit_summary = True
+record_time_summary = True
+record_paper_summary = True
 
 record_generic_output = False
 record_do_nothing = False

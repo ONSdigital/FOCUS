@@ -238,27 +238,30 @@ def start_run(run_input, seeds, out_path):
 def produce_default_output(input_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
-    # line chart of overall responses over time
-    current_path = os.path.join(input_path, 'summary')
-    folders = next(os.walk(current_path))[1]
-    folders = [os.path.join(current_path, folder) for folder in folders]
+    try:
+        # combine output files
+        current_path = os.path.join(input_path, 'summary')
+        folders = next(os.walk(current_path))[1]
+        folders = [os.path.join(current_path, folder) for folder in folders]
 
-    pp_pool = Pool(cpu_count())
-    pp_pool.starmap(pp.produce_rep_results, zip(folders))
-    pp_pool.close()
-    pp_pool.join()
+        pp_pool = Pool(cpu_count())
+        pp_pool.starmap(pp.produce_rep_results, zip(folders))
+        pp_pool.close()
+        pp_pool.join()
 
-    summary_outpath = os.path.join(input_path, 'summary')
-    pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
+    except:
+
+        print('failed in post processing')
 
     # produce a plot of the active and passive using bokeh
     active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital', 'average.csv')
-    active_series = pd.read_csv(active_response_path, index_col=0).sum(axis=0)
-
     passive_response_path = os.path.join(input_path, 'summary', 'passive_summary', 'digital', 'average.csv')
-    passive_series = pd.read_csv(passive_response_path, index_col=0).sum(axis=0)
+    output_path = os.path.join(input_path, 'summary')
+    pp.bokeh_line_chart(passive_response_path, active_response_path, 'passive', 'active', output_path, 'response.html',
+                        cumulative=True)
 
-    pp.bokeh_line_chart(passive_series, active_series, 'passive', 'active', 'bokeh')
+    summary_outpath = os.path.join(input_path, 'summary')
+    pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
 
     visits_path = os.path.join(input_path, 'summary', 'visit_summary', 'la')
     pp.plot_summary(visits_path, summary_outpath, 'visits', reps=False, cumulative=True, individual=False)
@@ -284,7 +287,7 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
-    delete_old = True
+    delete_old = False
     freeze_support()
 
     # delete all old output files but not the main directory.
@@ -424,11 +427,8 @@ if __name__ == '__main__':
         print('Simulation complete at time: ', dt.datetime.now())
 
         if produce_default:
-            try:
-                print("Starting post processing.")
-                produce_default_output(current_output_path)
-            except:
-                print("Error in post processing. Check output options.")
+            print("Starting post processing.")
+            produce_default_output(current_output_path)
 
         cet = dt.datetime.now()
         print(sim_counter, 'of', sims, 'complete at time', cet)
