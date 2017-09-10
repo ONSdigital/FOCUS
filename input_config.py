@@ -277,28 +277,29 @@ def generate_nomis_cca():
     and produces a flat csv file that details the makeup of E&W at household level
     """
 
-    nomis_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'NOMIS_lsoa_lower.csv'))
+    nomis_df = pd.read_csv(os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa 2017 htc.csv'))
 
     # parse first col into two
-    nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
-    nomis_df['lsoa11nm'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[1]
+    #nomis_df['lsoa11cd'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[0]
+    #nomis_df['lsoa11nm'] = nomis_df['2011 super output area - lower layer'].str.split(':').str[1]
     # remove any whitespaces
     nomis_df['lsoa11cd'] = nomis_df['lsoa11cd'].str.strip()
     nomis_df['lsoa11nm'] = nomis_df['lsoa11nm'].str.strip()
     # drop the original column
-    nomis_df.drop(['2011 super output area - lower layer'], axis=1, inplace=True)
+    #nomis_df.drop(['2011 super output area - lower layer'], axis=1, inplace=True)
 
     # rename cols
-    codes = [str(i) for i in range(1, 16)] + ['lsoa11cd', 'lsoa11nm']
+    codes = ['lsoa11cd', 'lsoa11nm'] + [str(i) for i in range(1, 91)]
     nomis_df.columns = codes
 
     # flatten and sort df
-    nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
+    #nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[:-2])
+    nomis_flat_df = pd.melt(nomis_df, id_vars=['lsoa11cd', 'lsoa11nm'], value_vars=codes[2:])
     nomis_flat_df.sort_values(['lsoa11cd'], axis=0, inplace=True)
 
     # map on other values
     #areas
-    area_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_area.csv'), skipinitialspace=True)
+    area_df = pd.read_csv(os.path.join(os.getcwd(), 'raw_inputs', 'LSOA_area.csv'), skipinitialspace=True)
 
     area_input_dict = dict(zip(area_df.LSOA11CD,
                                area_df.AREAKM
@@ -317,7 +318,7 @@ def generate_nomis_cca():
     nomis_flat_df['lad11nm'] = nomis_flat_df['lsoa11cd'].map(lanm_input_dict)
 
     # and lat and longs
-    ll_df = pd.read_csv(os.path.join(os.getcwd(), 'inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
+    ll_df = pd.read_csv(os.path.join(os.getcwd(), 'raw_inputs', 'LSOA_L&L.csv'), skipinitialspace=True)
 
     lat_input_dict = dict(zip(ll_df.LSOA11CD,
                               ll_df.LATITUDE
@@ -397,6 +398,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
 
     # read the flat nomis data
     raw_data = pd.read_csv(input_path)
+    raw_data.drop(raw_data.columns[0], axis=1, inplace=True)
 
     # if a subset is required
     if subset:
@@ -473,6 +475,14 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
             finish_time = time_now + dt.timedelta(seconds=time_left)
             print('Entry ', i, 'reached. Projected finish time is: ', finish_time)
 
+    print(cca_output)
+
+    # get rid of any rows with zero households
+    cca_output =cca_output[cca_output[3] != 0]
+    for row in cca_output:
+
+
+
     # write output to csv
     with open(output_path, "w") as f:
         # add a header
@@ -481,7 +491,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=11):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -552,24 +562,23 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=11):
     with open(os.path.join(output_JSON), 'w') as outfile:
         json.dump(output_data, outfile, indent=4, sort_keys=True)
 
+#generate_nomis_cca()
 
-# generate_nomis_cca()
-
-ratios = [650]*15  # this is the number of households per CO - same for now but likely to be different
+ratios = [650]*90  # this is the number of households per CO - same for now but likely to be different
 input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
-#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
+#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset.csv')
 output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
-subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa distances')
+subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
-#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
+create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
-input_JSON_template = os.path.join(os.getcwd(), 'templates', 'template_new.JSON')  # JSON template to use
+#input_JSON_template = os.path.join(os.getcwd(), 'templates', 'template_new.JSON')  # JSON template to use
 #output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'subset_lsoa_nomis.JSON')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_11.JSON')
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_11.JSON')
 
 
-generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
+#generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
 
 
 
