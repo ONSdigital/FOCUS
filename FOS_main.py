@@ -46,11 +46,23 @@ def start_run(run_input, seeds, max_districts, out_path):
         day_cols.append(day)
 
     # generate list of codes for reference from raw inputs
-    la_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'la lookup.csv'), 0)
-    lsoa_list = hp.generate_list(os.path.join(os.getcwd(), 'raw_inputs', 'lsoa lookup.csv'), 0)
-    district_list = [str(district) for district in range(1, max_districts+1)]
+
     dig_list = ['False', 'True']
-    hh_type_list = [str(hh_type) for hh_type in range(1, 16)]
+    la_list = []
+    lsoa_list = []
+    hh_type_list = []
+
+    # cycle through the input data to only include those household types, lsoa and la that exist to appear in the output
+    for d_key, d_value in run_input['districts'].items():
+        for hh_key, hh_value in d_value['households'].items():
+            if hh_key not in hh_type_list:
+                hh_type_list.append(hh_key)
+            for la_key, la_value in hh_value['cca_makeup'].items():
+                if la_key not in la_list:
+                    la_list.append(la_key)
+                for lsoa_key, lsoa_value in la_value.items():
+                    if lsoa_key not in lsoa_list:
+                        lsoa_list.append(lsoa_key)
 
     """
     passive_summary records a daily summary of returns that occur without any intervention

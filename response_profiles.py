@@ -14,7 +14,8 @@ def response_profiles_2011_all(census_day):
     # make all headers lowercase as they are used as keys
     responses.columns = map(str.lower, responses.columns)
     # don't need these columns
-    responses_only = responses.drop(['date', 'day'], axis=1)
+    #responses_only = responses.drop(['date', 'day'], axis=1)
+    responses_only = responses
 
     # do a reduction to better represent self response in 2011
     total_days = len(responses_only)
@@ -25,7 +26,7 @@ def response_profiles_2011_all(census_day):
 
     # convert to a probability distribution
     prob_response = responses_only.divide(responses_only.sum(axis=0), axis=1)
-    prob_response.to_csv('dist_data.csv')
+    #prob_response.to_csv('dist_data.csv')
 
     # create cumulative probability
     cum_prob_response = prob_response.cumsum(axis=0)
