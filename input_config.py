@@ -555,6 +555,9 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
 
 # generate_nomis_cca()
 
+####### use nomis age sex lsoa 2017 htc flat and the new template with a subset and test!!!!
+####### remover the zero households...look at the online code in master
+
 ratios = [650]*90  # this is the number of households per CO - same for now but likely to be different
 input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
 output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
