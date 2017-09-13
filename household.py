@@ -28,6 +28,7 @@ class Household(object):
         self.initial_status = initial_action.type
         self.digital = initial_action.digital
         self.initial_time = initial_action.time
+        self.engaged = initial_action.engaged
         self.district_name = district.district
 
         self.priority = self.input_data['priority']
@@ -355,11 +356,12 @@ class Household(object):
                                                                                           self.hh_id,
                                                                                           self.env.now,
                                                                                           reminder_type))
-
-        if not self.resp_planned and reminder_type == 'pq':
+        # set resp according to type of hh and reminder
+        if not self.resp_planned and reminder_type == 'pq' and self.engaged:
             self.paper_allowed = True
+            self.resp_level = 100  # so this assumes if you provide paper to those engaged they will respond
 
-        if not self.resp_planned:
+        elif not self.resp_planned:
             behaviour = self.default_behaviour()
             # and get relevant figures
             response_data = self.input_data["behaviours"][reminder_type][behaviour]
@@ -397,7 +399,7 @@ class Household(object):
         # now move on to the relevant action based on extracted values
         reminder_test = self.rnd.uniform(0, 100)
 
-        if not self.responded and reminder_test <= self.resp_level:
+        if not self.resp_planned and reminder_test <= self.resp_level:
             if oo.record_reminder_success:
                 self.rep.output_data[reminder_type + '_success'].append(oo.reminder_success(self.rep.reps,
                                                                                             self.district.district,
@@ -411,10 +413,17 @@ class Household(object):
             # change to a start delayed at appropriate time depending on day....
             delay = h.get_time_of_return(self.env.now, self.rep)
             # yield self.env.process(self.household_returns(self.calc_delay()))
+
+            ##########
+            # if this is a pq, but a digital household, calculate if the household retunrs via paper or digital?
+            # Or assume use preferred method for now?
+            # could use paper first paper prop to set this? so set digital to true or false...
+            ##########
+
             start_delayed(self.env, self.household_returns(self.calc_delay()), delay)
             yield self.env.timeout(0)
 
-        elif not self.responded and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
+        elif not self.resp_planned and (self.resp_level < reminder_test <= self.resp_level + self.help_level):
             # call for help...needs to be based on appropriate distribution...not a hardcoded uniform function!
             # also may not do this if intend to respond?
             yield self.env.timeout(self.rnd.uniform(0, 8))
@@ -430,7 +439,7 @@ class Household(object):
                                                                                      self.env.now))
 
             yield self.env.process(self.contact())
-        elif not self.responded:
+        else:
             # nowt
             if oo.record_do_nothing:
                 self.output_data[reminder_type + '_failed'].append(oo.generic_output(self.rep.reps,

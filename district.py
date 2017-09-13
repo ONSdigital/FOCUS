@@ -165,10 +165,14 @@ class District(object):
 
             for i in range(hh_input_data['number']):
 
+                # if allowed paper use different paper prop to if not...
+                if h.str2bool(hh_input_data['paper_allowed']):
+                    paper_prop = hh_input_data['paper_prop_pf']
+                else:
+                    paper_prop = hh_input_data['paper_prop_df']
+
                 # set if digital here?
-                hh_digital = h.set_preference(hh_input_data['paper_prop'], self.rnd)
-                # if digital but given paper some would use the paper...and easy effect???
-                # could represent here by switch some back to paper...record it....or do it in above function...
+                hh_digital = h.set_preference(paper_prop, self.rnd)
 
                 # define where the hh is located
                 hh_geog = self.return_household_geog(hh_input_data['cca_makeup'], hh_type, hh_digital)
@@ -183,7 +187,7 @@ class District(object):
                 else:
                     time_to_use = hh_action.time + hh_input_data['delay']['paper']
 
-                if h.str2bool(hh_input_data["paper_allowed"]) and oo.record_paper_summary:
+                if h.str2bool(hh_input_data['paper_allowed']) and oo.record_paper_summary:
                     # add to the summary of the amount of paper given
 
                     for key, value in self.rep.paper_summary.items():
@@ -300,19 +304,25 @@ class District(object):
 
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
 
+        # also at this point test if, if no barriers were in place, if they would be engaged or not...
+        if response_test <= input_data['behaviours']['default']['response']:
+            hh_eng = True
+        else:
+            hh_eng = False
+
         if response_test <= hh_resp:
             # respond but test when
-            return self.early_responder(input_data, hh_digital, first_interaction, hh_type, hh_geog)
+            return self.early_responder(input_data, hh_digital, first_interaction, hh_type, hh_eng)
 
         elif hh_resp < response_test <= hh_resp + hh_help:
             # call for help return when
-            return self.help(input_data, hh_digital, first_interaction, hh_type, hh_geog)
+            return self.help(input_data, hh_digital, first_interaction, hh_type, hh_eng)
         else:
             # do nothing return 0 time
-            return oo.initial_action('do_nothing', hh_digital, 0)
-            # return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_geog)
+            return oo.initial_action('do_nothing', hh_digital, 0, hh_eng)
+            # return self.do_nothing(input_data, digital, first_interaction, hh_type, hh_eng)
 
-    def early_responder(self, input_data, digital, first_interaction, hh_type, hh_geog):
+    def early_responder(self, input_data, digital, first_interaction, hh_type, hh_eng):
         # returns if the household will respond before any other interactions. "early" if yes "late" otherwise.
 
         response_time = h.set_household_response_time(self.rep,
@@ -325,26 +335,26 @@ class District(object):
             # add a counter to the district so we know how many hh have responded early
             self.early_responders += 1
 
-            return oo.initial_action('early', digital, response_time)
+            return oo.initial_action('early', digital, response_time, hh_eng)
 
         elif not digital and h.str2bool(input_data['paper_allowed']) \
                 and response_time + input_data['delay']['paper'] <= first_interaction:
 
             self.early_responders += 1
-            return oo.initial_action('early', digital, response_time)
+            return oo.initial_action('early', digital, response_time, hh_eng)
 
         else:
 
-            return oo.initial_action('late', digital, response_time)
+            return oo.initial_action('late', digital, response_time, hh_eng)
 
-    def help(self, input_data, digital, first_interaction, hh, hh_geog):
+    def help(self, input_data, digital, first_interaction, hh, hh_eng):
 
         # below uses response time profile - will need to update this to a "call" profile?
         response_time = h.set_household_call_time(self.rep)
 
-        return oo.initial_action('help', digital, response_time)
+        return oo.initial_action('help', digital, response_time, hh_eng)
 
-    #def do_nothing(self, input_data, digital, first_interaction, hh, hh_geog):
+    #def do_nothing(self, input_data, digital, first_interaction, hh, hh_eng):
 
         #return oo.initial_action('do_nothing', digital, 0)
 

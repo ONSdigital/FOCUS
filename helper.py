@@ -305,3 +305,10 @@ def output_summary(summary_out_path, input_dict, dict_name, run_id, rep_id):
         df.to_csv(temp_file_path)
         l.release()
 
+def time_from_start(rep, input_date):
+
+    date = dt.date(*map(int, input_date.split(',')))
+    # convert date to sim (simpy) time
+    date_sim = (date - rep.start_date).total_seconds() / 3600
+
+    return date_sim

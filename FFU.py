@@ -35,7 +35,10 @@ class StartFU(object):
             self.visit_list = [household for household in self.district.households
                                if not household.responded
                                and household.visits < household.input_data['max_visits']
-                               and household.input_data['FU_start_time'] <= self.env.now]
+                               and h.time_from_start(self.district.rep, household.input_data['FU_start_date']) <= self.env.now]
+
+
+
 
             # order by priority
             self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
@@ -383,7 +386,9 @@ class CensusOfficer(object):
                                                                                household.hh_type,
                                                                                household.hh_id,
                                                                                self.env.now))
+
             household.resp_planned = True
+
             yield self.rep.env.process(household.household_returns(household.calc_delay()))
 
             time_worked = self.input_data['visit_times']['success'] / 60 + \

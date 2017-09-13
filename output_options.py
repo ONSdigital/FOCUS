@@ -11,7 +11,7 @@ reminder_received = namedtuple('Reminder_received', ['rep', 'district', 'LA', 'l
 call_wait_times = namedtuple('Call_wait_times', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'time', 'wait_time'])
 hh_record = namedtuple('hh_record', ['rep', 'district', 'LA', 'lsoa11cd', 'hh_type', 'action', 'digital', 'start_paper', 'time'])
 warnings = namedtuple('Warnings', ['rep', 'warning', 'detail'])
-initial_action = namedtuple('Initial_action', ['type', 'digital', 'time'])
+initial_action = namedtuple('Initial_action', ['type', 'digital', 'time', 'engaged'])
 hh_geography = namedtuple('hh_geography', ['la', 'lsoa', 'district_name', 'hh_type', 'digital'])
 
 """

@@ -141,7 +141,8 @@ def start_run(run_input, seeds, out_path):
 
         time_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
-        time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+        time_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list))),
+                        'lsoa': dict((lsoa_list[i], [0] * days) for i in range(0, len(lsoa_list)))}
 
     if oo.record_paper_summary:
 
@@ -286,8 +287,8 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = True
-    multiple_processors = True  # set to false to debug
-    delete_old = False
+    multiple_processors = False  # set to false to debug
+    delete_old = True
     freeze_support()
 
     # delete all old output files but not the main directory.
