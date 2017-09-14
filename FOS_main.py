@@ -287,8 +287,8 @@ if __name__ == '__main__':
 
     create_new_config = False
     produce_default = True
-    multiple_processors = False  # set to false to debug
-    delete_old = True
+    multiple_processors = True  # set to false to debug
+    delete_old = False
     freeze_support()
 
     # delete all old output files but not the main directory.

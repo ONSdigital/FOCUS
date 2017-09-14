@@ -395,8 +395,10 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
     start_time = dt.datetime.now()
     print('Started at: ', start_time)
 
+    fields = ['lad11cd', 'lad11nm', 'long', 'lat', 'lsoa11cd', 'lsoa11nm', 'value', 'variable', 'area']
     # read the flat nomis data
-    raw_data = pd.read_csv(input_path)
+    raw_data = pd.read_csv(input_path, usecols=fields)
+    print(raw_data.head())
 
     # if a subset is required
     if subset:
@@ -546,7 +548,20 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
     # for each of the new districts add some CO...currently a fixed number but could vary by area if needed
     list_of_runs = sorted(list(output_data.keys()), key=str)
     for run in list_of_runs:
-        output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
+        # output_data[run]['districts'][run]['census officer']['standard']['number'] = CO_num
+        output_data[run]['districts'][run]['census officer']['standard_am']['number'] = CO_num / 2
+        output_data[run]['districts'][run]['census officer']['standard_pm']['number'] = CO_num / 2
+        # but also get rid of the household entries that are  to reduce file size
+        #
+        pop_list = []
+
+        for k, v in output_data[run]['districts'][run]['households'].items():
+
+            if v['number'] == 0:
+                pop_list.append(k)
+
+        for value in pop_list:
+            output_data[run]['districts'][run]['households'].pop(value, None)
 
     # output a JSON file
     with open(os.path.join(output_JSON), 'w') as outfile:
@@ -555,21 +570,18 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=12):
 
 # generate_nomis_cca()
 
-####### use nomis age sex lsoa 2017 htc flat and the new template with a subset and test!!!!
-####### remover the zero households...look at the online code in master
-
-ratios = [650]*90  # this is the number of households per CO - same for now but likely to be different
-input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_nomis_flat.csv')
-output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
-#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_cca_nomis.csv')
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
-subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
+#ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
+#input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa 2017 htc flat.csv')
+#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
+output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_lsoa_cca_nomis.csv')
+#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+#subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
-create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
+#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
-input_JSON_template = os.path.join(os.getcwd(), 'templates', 'template_new.JSON')  # JSON template to use
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'subset_lsoa_nomis.JSON')
-#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'lsoa_nomis_11.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON')  # JSON template to use
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017_subset.JSON')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017_lsoa_nomis_12_df.JSON')
 
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
