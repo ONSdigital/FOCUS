@@ -37,21 +37,26 @@ class StartFU(object):
                                and household.visits < household.input_data['max_visits']
                                and h.time_from_start(self.district.rep, household.input_data['FU_start_date']) <= self.env.now]
 
-
-
-
             # order by priority
             self.visit_list.sort(key=lambda hh: hh.priority, reverse=False)
 
-            num_of_co = len(self.district.district_co)
+            j = 0
+            temp_co_list = []
+            for co in self.district.district_co:
+                if h.date_between(co.rep, co.start_date, self.env.now, co.end_date):
+                    temp_co_list.append(co)
+
+            num_of_co = len(temp_co_list)
             action_plan_list = []
 
             for i in range(num_of_co):
                 action_plan = self.visit_list[i::num_of_co]
                 action_plan_list.append(action_plan)
 
-            j = 0
-            for co in self.district.district_co:
+            if co.rep.districts[0].district == "1":
+                print("time ", self.env.now, " action plans", len(action_plan_list), " co's ", len(temp_co_list))
+
+            for co in temp_co_list:
                 co.action_plan = action_plan_list[j]
                 j += 1
 

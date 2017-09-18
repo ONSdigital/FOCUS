@@ -313,3 +313,12 @@ def time_from_start(rep, input_date):
     date_sim = (date - rep.start_date).total_seconds() / 3600
 
     return date_sim
+
+
+def date_between(rep, start_date, simtime, end_date):
+
+    start_time = (start_date - rep.start_date).total_seconds() / 3600
+    end_time = (end_date - rep.start_date).total_seconds() / 3600
+
+    return start_time <= simtime < end_time
+

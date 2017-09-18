@@ -364,7 +364,10 @@ class Household(object):
         elif not self.resp_planned:
             behaviour = self.default_behaviour()
             # and get relevant figures
-            response_data = self.input_data["behaviours"][reminder_type][behaviour]
+            try:
+                response_data = self.input_data["behaviours"][reminder_type][behaviour]
+            except:
+                pass
             self.resp_level = response_data["response"]
             if self.rep.total_ad_instances > 0:
                 self.help_level = response_data["help"]
