@@ -133,9 +133,11 @@ def start_run(run_input, seeds, out_path):
 
     if oo.record_visit_summary:
 
-        visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
+        visit_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))
+                        }
 
-        visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list)))}
+        visit_summary = {'la': dict((la_list[i], [0]*days) for i in range(0, len(la_list))),
+                         'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))}
 
     if oo.record_time_summary:
 
@@ -148,7 +150,8 @@ def start_run(run_input, seeds, out_path):
 
         paper_totals = {'la': dict((la_list[i], 0) for i in range(0, len(la_list)))}
 
-        paper_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list)))}
+        paper_summary = {'la': dict((la_list[i], [0] * days) for i in range(0, len(la_list))),
+                         'hh_type': dict((hh_type_list[i], [0] * days) for i in range(0, len(hh_type_list)))}
 
     l.acquire()
 
@@ -240,6 +243,7 @@ def produce_default_output(input_path):
     """Produces default charts and outputs if turned on. If not leaves the raw data untouched."""
 
     try:
+        print('Rationalising log files')
         # combine output files
         current_path = os.path.join(input_path, 'summary')
         folders = next(os.walk(current_path))[1]
@@ -255,6 +259,7 @@ def produce_default_output(input_path):
         print('failed in post processing')
 
     # produce a plot of the active and passive using bokeh
+    print('Producing response plots')
     active_response_path = os.path.join(input_path, 'summary', 'active_summary', 'digital', 'average.csv')
     passive_response_path = os.path.join(input_path, 'summary', 'passive_summary', 'digital', 'average.csv')
     output_path = os.path.join(input_path, 'summary')
@@ -263,6 +268,8 @@ def produce_default_output(input_path):
 
     summary_outpath = os.path.join(input_path, 'summary')
     pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
+
+    print('Producing summary tables')
 
     visits_path = os.path.join(input_path, 'summary', 'visit_summary', 'la')
     pp.plot_summary(visits_path, summary_outpath, 'visits', reps=False, cumulative=True, individual=False)
@@ -274,6 +281,7 @@ def produce_default_output(input_path):
     pp.plot_summary(paper_path, summary_outpath, 'paper', reps=False, cumulative=False, individual=False)
 
     # pyramid chart showing comparison of two strategies on LSOA return rates (or passive and active if one sim)
+    print("Producing lsoa level summary")
 
     input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
     name_left = 'Passive'
@@ -354,7 +362,7 @@ if __name__ == '__main__':
                     now = dt.datetime.now()
                     seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                     seed = abs(now - seed_date).total_seconds() + int(district) + rep
-                    seed = 10  # uncomment to use same random seed for debug
+                    #seed = 10  # uncomment to use same random seed for debug
                     seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
                     if not str(input_data[district]['run_id']) in dict_all:
                         dict_all[str(input_data[district]['run_id'])] = {}
@@ -399,6 +407,7 @@ if __name__ == '__main__':
         # dict all contains the required seeds
 
         if create_new_config:
+            print("Saving config file")
 
             json_file_path = os.path.join(output_path, output_JSON_name)
 

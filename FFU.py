@@ -278,8 +278,7 @@ class CensusOfficer(object):
     def fu_visit_assist(self, household):
 
         da_test = self.rnd.uniform(0, 100)
-        # da_effectiveness = self.input_data['da_effectiveness'][household.hh_type]
-        da_effectiveness = self.input_data['da_effectiveness']['0']
+        da_effectiveness = self.input_data['da_effectiveness'][household.hh_type]
 
         time_worked = self.input_data['visit_times']['query']/60
 

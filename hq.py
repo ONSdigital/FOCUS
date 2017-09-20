@@ -9,8 +9,8 @@ import math
 
 def ret_rec(household, rep):
     # print out every 100000 returns?
-    if rep.total_responses % 100000 == 0:
-        print(rep.total_responses)
+    #if rep.total_responses % 100000 == 0:
+        #print(rep.total_responses)
 
     if oo.record_active_summary:
         # add household to summary of responses

@@ -230,6 +230,15 @@ class District(object):
                         for key, value in self.rep.active_totals.items():
                             value[str(getattr(hh_geog, key))] += 1
 
+                    # if paper and early also need to record???
+                    if oo.record_active_paper_summary and not hh_action.digital:
+
+                        for key, value in self.rep.active_paper_summary.items():
+                            value[str(getattr(hh_geog, key))][math.floor(time_to_use / 24)] += 1
+
+                        for key, value in self.rep.active_paper_totals.items():
+                            value[str(getattr(hh_geog, key))] += 1
+
                     if oo.record_responded:
                         self.rep.output_data['Responded'].append(oo.generic_output(self.rep.reps,
                                                                                    self.district,
