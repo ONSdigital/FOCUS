@@ -44,8 +44,8 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', 'lsoa_nomis_10 2017-08-07 13.22.38', 'summary', 'active_summary', 'la')
-data_list = plot_summary_animated(default_path, cumulative=False, reps=True)
+default_path = os.path.join('outputs', '12_co_pf_lowd_10_reps 2017-09-20 14.39.22', 'summary', 'active_summary', 'la')
+data_list = plot_summary_animated(default_path, cumulative=True, reps=True)
 
 fig = plt.figure()
 fig.suptitle('Overall return rates over time', fontsize=20)

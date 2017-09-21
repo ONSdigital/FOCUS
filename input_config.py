@@ -584,9 +584,9 @@ output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_lsoa_cca_nomis.c
 # only run "create_cca_data" if need to change the amount of CCA.
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
-input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template no co.JSON')  # JSON template to use
+input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON')  # JSON template to use
 #output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017_subset.JSON')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', '12_co_pf_lowd_10_reps.JSON')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'paper last visit.JSON')
 
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)

@@ -53,8 +53,8 @@ class StartFU(object):
                 action_plan = self.visit_list[i::num_of_co]
                 action_plan_list.append(action_plan)
 
-            if co.rep.districts[0].district == "1":
-                print("time ", self.env.now, " action plans", len(action_plan_list), " co's ", len(temp_co_list))
+            #if co.rep.districts[0].district == "1":
+            #    print("time ", self.env.now, " action plans", len(action_plan_list), " co's ", len(temp_co_list))
 
             for co in temp_co_list:
                 co.action_plan = action_plan_list[j]

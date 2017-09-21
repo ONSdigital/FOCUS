@@ -325,120 +325,126 @@ if __name__ == '__main__':
     # for each sim file in the input folder
     for sim in simulation_list:
 
-        os.chdir(first_cwd)  # reset to overall working directory each time
-        sim_name = os.path.basename(sim)[:-5]  # get filename without the .JSON extension
-        sub_path_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
-        output_JSON_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
-        current_output_path = os.path.join(output_path, sub_path_name)
-        if not os.path.isdir(current_output_path):
-            os.makedirs(current_output_path)
+        try:
 
-        with open(sim) as data_file:
-            input_data = json.load(data_file)
+            os.chdir(first_cwd)  # reset to overall working directory each time
+            sim_name = os.path.basename(sim)[:-5]  # get filename without the .JSON extension
+            sub_path_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S"))
+            output_JSON_name = sim_name + " " + str(dt.datetime.now().strftime("%Y""-""%m""-""%d %H.%M.%S")) + '.JSON'
+            current_output_path = os.path.join(output_path, sub_path_name)
+            if not os.path.isdir(current_output_path):
+                os.makedirs(current_output_path)
 
-        # get list of all districts in simulation
-        list_of_districts = sorted(list(input_data.keys()), key=int)
-        districts = max([int(district) for district in list_of_districts])
-        reps = input_data['1']['replications']  # extract replications
-        max_runs = reps * districts
+            with open(sim) as data_file:
+                input_data = json.load(data_file)
 
-        # define a list to be used to map all run/replication combinations to available processors
-        run_list = []
-        seed_dict = {}
-        seed_list = []
-        dict_all = defaultdict()
+            # get list of all districts in simulation
+            list_of_districts = sorted(list(input_data.keys()), key=int)
+            districts = max([int(district) for district in list_of_districts])
+            reps = input_data['1']['replications']  # extract replications
+            max_runs = reps * districts
 
-        st = dt.datetime.now()
-        print('Simulations started at: ', st)
-        counter = 0
+            # define a list to be used to map all run/replication combinations to available processors
+            run_list = []
+            seed_dict = {}
+            seed_list = []
+            dict_all = defaultdict()
 
-        # place, with random seeds, a copy of the run/rep into the run list
-        for district in list_of_districts:
-            input_data[district]['run_id'] = district
-            seed_dict[str(district)] = {}
-            for rep in range(1, input_data[district]['replications'] + 1):
+            st = dt.datetime.now()
+            print('Simulations started at: ', st)
+            counter = 0
 
-                if str(rep) not in input_data[district]['replication seeds']:
-                    now = dt.datetime.now()
-                    seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
-                    seed = abs(now - seed_date).total_seconds() + int(district) + rep
-                    #seed = 10  # uncomment to use same random seed for debug
-                    seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
-                    if not str(input_data[district]['run_id']) in dict_all:
-                        dict_all[str(input_data[district]['run_id'])] = {}
-                    dict_all[str(input_data[district]['run_id'])][str(rep)] = seed
-                    create_new_config = True
+            # place, with random seeds, a copy of the run/rep into the run list
+            for district in list_of_districts:
+                input_data[district]['run_id'] = district
+                seed_dict[str(district)] = {}
+                for rep in range(1, input_data[district]['replications'] + 1):
 
-                else:
-                    seed = input_data[district]['replication seeds'][str(rep)]
+                    if str(rep) not in input_data[district]['replication seeds']:
+                        now = dt.datetime.now()
+                        seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
+                        seed = abs(now - seed_date).total_seconds() + int(district) + rep
+                        #seed = 10  # uncomment to use same random seed for debug
+                        seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
+                        if not str(input_data[district]['run_id']) in dict_all:
+                            dict_all[str(input_data[district]['run_id'])] = {}
+                        dict_all[str(input_data[district]['run_id'])][str(rep)] = seed
+                        create_new_config = True
 
-                seed_list.append(seed)
-
-                input_data[district]['rep_id'] = rep
-                run_list.append(copy.deepcopy(input_data[district]))
-                counter += 1
-
-                # if run list len is chunk size run them...
-                if len(run_list) == cpu_count()*20 or (district == str(districts) and rep == reps):
-
-                    # different run methods - use single processor for debugging
-                    if multiple_processors:
-                        pool = Pool(cpu_count())
-                        pool.starmap(start_run,
-                                     zip(run_list, seed_list, repeat(current_output_path)))
-                        pool.close()
-                        pool.join()
                     else:
-                        for i in range(len(run_list)):
-                            start_run(run_list[i], seed_list[i], current_output_path)
+                        seed = input_data[district]['replication seeds'][str(rep)]
 
-                    # calculate finish time for current simulation and print progress
-                    time_now = dt.datetime.now()
-                    time_left = ((time_now - st).seconds / (counter / max_runs)) - (time_now - st).seconds
-                    finish_time = time_now + dt.timedelta(seconds=time_left)
+                    seed_list.append(seed)
 
-                    print(pp.roundup((counter / max_runs) * 100, 1), "percent of current simulation complete. "
-                                                                     "Projected finish time is:", finish_time)
-                    run_list = []
-                    seed_dict[str(district)] = {}
-                    seed_list = []
+                    input_data[district]['rep_id'] = rep
+                    run_list.append(copy.deepcopy(input_data[district]))
+                    counter += 1
 
-        # add back in the ability to output a record, with seeds, as to what has been run...
-        # dict all contains the required seeds
+                    # if run list len is chunk size run them...
+                    if len(run_list) == cpu_count()*20 or (district == str(districts) and rep == reps):
 
-        if create_new_config:
-            print("Saving config file")
+                        # different run methods - use single processor for debugging
+                        if multiple_processors:
+                            pool = Pool(cpu_count())
+                            pool.starmap(start_run,
+                                         zip(run_list, seed_list, repeat(current_output_path)))
+                            pool.close()
+                            pool.join()
+                        else:
+                            for i in range(len(run_list)):
+                                start_run(run_list[i], seed_list[i], current_output_path)
 
-            json_file_path = os.path.join(output_path, output_JSON_name)
+                        # calculate finish time for current simulation and print progress
+                        time_now = dt.datetime.now()
+                        time_left = ((time_now - st).seconds / (counter / max_runs)) - (time_now - st).seconds
+                        finish_time = time_now + dt.timedelta(seconds=time_left)
 
-            list_of_seed_runs = sorted(list(dict_all.keys()), key=int)
-            # first assign the seeds...
-            for run in list_of_seed_runs:
-                input_data[run]['replication seeds'] = dict_all[run]
-                # delete ids
-                del input_data[run]['run_id']
-                del input_data[run]['rep_id']
+                        print(pp.roundup((counter / max_runs) * 100, 1), "percent of current simulation complete. "
+                                                                         "Projected finish time is:", finish_time)
+                        run_list = []
+                        seed_dict[str(district)] = {}
+                        seed_list = []
 
-            with open(json_file_path, 'w') as outfile:
-                json.dump(input_data, outfile)
+            # add back in the ability to output a record, with seeds, as to what has been run...
+            # dict all contains the required seeds
 
-            with open(json_file_path, 'rb') as f_in:
-                with gzip.open(json_file_path + '.gz', 'w') as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+            if create_new_config:
+                print("Saving config file")
 
-            # delete orig JSON file
-            os.remove(json_file_path)
+                json_file_path = os.path.join(output_path, output_JSON_name)
 
-            """to read a gzip file
-            with gzip.open('file.txt.gz', 'rb') as f:
-                file_content = f.read()
-            """
+                list_of_seed_runs = sorted(list(dict_all.keys()), key=int)
+                # first assign the seeds...
+                for run in list_of_seed_runs:
+                    input_data[run]['replication seeds'] = dict_all[run]
+                    # delete ids
+                    del input_data[run]['run_id']
+                    del input_data[run]['rep_id']
 
-        print('Simulation complete at time: ', dt.datetime.now())
+                with open(json_file_path, 'w') as outfile:
+                    json.dump(input_data, outfile)
 
-        if produce_default:
-            print("Starting post processing.")
-            produce_default_output(current_output_path)
+                with open(json_file_path, 'rb') as f_in:
+                    with gzip.open(json_file_path + '.gz', 'w') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+
+                # delete orig JSON file
+                os.remove(json_file_path)
+
+                """to read a gzip file
+                with gzip.open('file.txt.gz', 'rb') as f:
+                    file_content = f.read()
+                """
+
+            print('Simulation complete at time: ', dt.datetime.now())
+
+            if produce_default:
+                print("Starting post processing.")
+                produce_default_output(current_output_path)
+
+        except:
+
+            print('simulation error encountered in simulation: ', sim)
 
         cet = dt.datetime.now()
         print(sim_counter, 'of', sims, 'complete at time', cet)
