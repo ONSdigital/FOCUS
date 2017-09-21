@@ -575,18 +575,18 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
 # generate_nomis_cca()
 
 #ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
-#ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
-#input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa 2017 htc flat.csv')
-#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
-output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_lsoa_cca_nomis.csv')
-#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
-#subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
+ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
+input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa 2017 htc flat.csv')
+output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_lsoa_cca_nomis.csv')
+#output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_lsoa_cca_nomis.csv')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', 'subset_filter.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
-#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
+create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON')  # JSON template to use
-#output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017_subset.JSON')
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'paper last visit.JSON')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'subset3.JSON')
+#output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'paper last visit.JSON')
 
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)

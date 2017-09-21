@@ -325,6 +325,8 @@ if __name__ == '__main__':
     # for each sim file in the input folder
     for sim in simulation_list:
 
+        print("Simulation ", sim_counter, " of ", len(simulation_list),  " started.")
+
         try:
 
             os.chdir(first_cwd)  # reset to overall working directory each time
@@ -351,7 +353,7 @@ if __name__ == '__main__':
             dict_all = defaultdict()
 
             st = dt.datetime.now()
-            print('Simulations started at: ', st)
+            print('Simulation started at: ', st)
             counter = 0
 
             # place, with random seeds, a copy of the run/rep into the run list
@@ -444,7 +446,7 @@ if __name__ == '__main__':
 
         except:
 
-            print('simulation error encountered in simulation: ', sim)
+            print('Simulation error encountered in simulation: ', sim)
 
         cet = dt.datetime.now()
         print(sim_counter, 'of', sims, 'complete at time', cet)
