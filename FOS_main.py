@@ -16,6 +16,8 @@ import pandas as pd
 import output_options as oo
 import glob
 import gzip
+import logging
+import traceback
 
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
@@ -383,7 +385,7 @@ if __name__ == '__main__':
                     counter += 1
 
                     # if run list len is chunk size run them...
-                    if len(run_list) == cpu_count()*20 or (district == str(districts) and rep == reps):
+                    if len(run_list) == cpu_count()*10 or (district == str(districts) and rep == reps):
 
                         # different run methods - use single processor for debugging
                         if multiple_processors:
@@ -444,8 +446,9 @@ if __name__ == '__main__':
                 print("Starting post processing.")
                 produce_default_output(current_output_path)
 
-        except:
+        except Exception as e:
 
+            logging.error(traceback.format_exc())
             print('Simulation error encountered in simulation: ', sim)
 
         cet = dt.datetime.now()

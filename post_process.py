@@ -882,11 +882,9 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
 
 
 
-#####addition code to get data in right format - inc labels - for data vis map...#### not a priority
 
-
-#right_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-09 09.51.58')
-#left_current_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_11 2017-08-09 15.16.00')
+#left_current_path = os.path.join(os.getcwd(), 'outputs', 'baseline 2017-09-21 14.00.28')
+#right_current_path = os.path.join(os.getcwd(), 'outputs', 'digital first 2017-09-21 22.11.03')
 
 #### change to allow display in % terms, just supply total to divide by
 #input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
@@ -897,15 +895,15 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
 #plot_summary(default_path, summary_outpath, 'returns', reps=False, cumulative=True, percent=percent)
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
-#pandas_data = csv_to_pandas(input_path, ['hh_record'])
+#pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
 
-#input_left = pd.read_csv(os.path.join(input_path, 'summary', 'passive_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_left = 'Passive'
-#input_right = pd.read_csv(os.path.join(input_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
-#name_right = 'Active'
+#input_left = pd.read_csv(os.path.join(left_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_left = 'Baseline'
+#input_right = pd.read_csv(os.path.join(right_current_path, 'summary', 'active_totals', 'lsoa', 'average.csv'), index_col=0)
+#name_right = 'Digital first'
 
 
-#sum_pyramid(pandas_data['hh_record'], os.path.join(input_path, 'summary'), input_left, input_right, name_left,
+#sum_pyramid(pandas_data['hh_record'], os.path.join(left_current_path, 'summary'), input_left, input_right, name_left,
 #            name_right, bin_size=1)
 
 
