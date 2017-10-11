@@ -522,50 +522,71 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
     for row in cca_data:
         cca_unique.add(row[0])
 
+    cca_limit = 6
+    run_count = 1
+    cca_count = 1
+    current_cca = 1
+
     # then run through each row adding a new run for each unique CCA
     for row in cca_data:
+        # if some counter... is zero create a new empty RUN
 
-        # if the cca is not yet in the output data add it
-        if not row[0] in output_data:
-            output_data[row[0]] = copy.deepcopy(run_template)
-            # add a new district
-            output_data[row[0]]['districts'][row[0]] = copy.deepcopy(district_template)
+        if int(row[0]) > current_cca:
+            current_cca = int(row[0])
+            cca_count += 1
+
+        if not output_data[str(run_count)]:
+            output_data[str(run_count)] = copy.deepcopy(run_template)
+        elif output_data[str(run_count)] and cca_count >= cca_limit:
+            cca_count = 1
+            run_count += 1
+            output_data[str(run_count)] = copy.deepcopy(run_template)
+
+        # if the cca is not yet in the output data RUN add a DISTRICT
+        if not row[0] in output_data[str(run_count)]['districts']:
+            output_data[str(run_count)]['districts'][row[0]] = copy.deepcopy(district_template)
             # set area to zero
-            output_data[row[0]]['districts'][row[0]]['district_area'] = 0
+            output_data[str(run_count)]['districts'][row[0]]['district_area'] = 0
 
         # now add the hh for the current row increasing the area as well
         hh_key = row[4]
         # if cca_makeup not defined add
-        if not 'cca_makeup' in output_data[row[0]]['districts'][row[0]]['households'][hh_key]:
+        if not 'cca_makeup' in output_data[str(run_count)]['districts'][row[0]]['households'][hh_key]:
             # hh type not in cca so add
-            output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
+            output_data[str(run_count)]['districts'][row[0]]['households'][hh_key]['cca_makeup'] = defaultdict(dict)
+
+        # at this point place the CCA at the higher level?
 
         # then add the actual data
-        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
-        output_data[row[0]]['districts'][row[0]]['district_area'] += float(row[5])
-        output_data[row[0]]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
+        output_data[str(run_count)]['districts'][row[0]]['households'][hh_key]['cca_makeup'][row[1]][row[2]] = row[3]
+        output_data[str(run_count)]['districts'][row[0]]['district_area'] += float(row[5])
+        output_data[str(run_count)]['districts'][row[0]]['households'][hh_key]['number'] += int(row[3])
 
     # for each of the new districts add some CO...currently a fixed number but could vary by area if needed
     list_of_runs = sorted(list(output_data.keys()), key=str)
     for run in list_of_runs:
+        # for each district....add the CO's
+        list_of_districts = sorted(list(output_data[run]['districts'].keys()), key=str)
 
-        output_data[run]['districts'][run]['census officer']['standard_am_t1']['number'] = CO_num[0]
-        output_data[run]['districts'][run]['census officer']['standard_pm_t1']['number'] = CO_num[1]
-        output_data[run]['districts'][run]['census officer']['standard_am_t2']['number'] = CO_num[2]
-        output_data[run]['districts'][run]['census officer']['standard_pm_t2']['number'] = CO_num[3]
-        output_data[run]['districts'][run]['census officer']['standard_am_t3']['number'] = CO_num[4]
-        output_data[run]['districts'][run]['census officer']['standard_pm_t3']['number'] = CO_num[5]
-        # but also get rid of the household entries that are  to reduce file size
-        #
-        pop_list = []
+        for district in list_of_districts:
 
-        for k, v in output_data[run]['districts'][run]['households'].items():
+            output_data[run]['districts'][district]['census officer']['standard_am_t1']['number'] = CO_num[0]
+            output_data[run]['districts'][district]['census officer']['standard_pm_t1']['number'] = CO_num[1]
+            output_data[run]['districts'][district]['census officer']['standard_am_t2']['number'] = CO_num[2]
+            output_data[run]['districts'][district]['census officer']['standard_pm_t2']['number'] = CO_num[3]
+            output_data[run]['districts'][district]['census officer']['standard_am_t3']['number'] = CO_num[4]
+            output_data[run]['districts'][district]['census officer']['standard_pm_t3']['number'] = CO_num[5]
+            # but also get rid of the household entries that are  to reduce file size
+            #
+            pop_list = []
 
-            if v['number'] == 0:
-                pop_list.append(k)
+            for k, v in output_data[run]['districts'][district]['households'].items():
 
-        for value in pop_list:
-            output_data[run]['districts'][run]['households'].pop(value, None)
+                if v['number'] == 0:
+                    pop_list.append(k)
+
+            for value in pop_list:
+                output_data[run]['districts'][district]['households'].pop(value, None)
 
     # output a JSON file
     with open(os.path.join(output_JSON), 'w') as outfile:
@@ -575,14 +596,14 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
 # generate_nomis_cca()
 
 #ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
-ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
-input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', '2017 test areas flat.csv')
+#ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
+#input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', '2017 test areas flat.csv')
 output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', '2017 test areas cca.csv')
 #output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017 test areas cca.csv')
-lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
-subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', '2017 subset.csv')
+#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+#subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', '2017 subset.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
-create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
+#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 
 input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON')  # JSON template to use
