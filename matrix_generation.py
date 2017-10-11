@@ -100,6 +100,6 @@ def produce_distance_matrix(input_data, geog, lat, long):
 # location of input data
 os.chdir(os.path.join(os.getcwd(), 'raw_inputs'))
 # input data to include
-produce_distance_matrix('LSOA_L_L.csv', 'lsoa11cd', 'lat', 'long')
+produce_distance_matrix('LSOA_L&L.csv', 'LSOA11CD', 'LATITUDE', 'LONGITUDE')
 
 
