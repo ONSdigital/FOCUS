@@ -483,7 +483,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5], cca_per_run = 1):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -522,7 +522,6 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
     for row in cca_data:
         cca_unique.add(row[0])
 
-    cca_limit = 6
     run_count = 1
     cca_count = 1
     current_cca = 1
@@ -537,7 +536,7 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
 
         if not output_data[str(run_count)]:
             output_data[str(run_count)] = copy.deepcopy(run_template)
-        elif output_data[str(run_count)] and cca_count >= cca_limit:
+        elif output_data[str(run_count)] and cca_count > cca_per_run:
             cca_count = 1
             run_count += 1
             output_data[str(run_count)] = copy.deepcopy(run_template)
@@ -569,6 +568,8 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,0,1,1,4,5]):
         list_of_districts = sorted(list(output_data[run]['districts'].keys()), key=str)
 
         for district in list_of_districts:
+
+            #### need to check output in same format for summary and processing
 
             output_data[run]['districts'][district]['census officer']['standard_am_t1']['number'] = CO_num[0]
             output_data[run]['districts'][district]['census officer']['standard_pm_t1']['number'] = CO_num[1]
@@ -610,7 +611,7 @@ input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON
 output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017 C1.JSON')
 
 
-generate_multirun(input_JSON_template, output_cca_path, output_JSON_path)
+generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=10)
 
 
 

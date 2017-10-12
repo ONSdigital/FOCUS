@@ -23,7 +23,7 @@ def response_profiles_2011_all(census_day):
     # make all headers lowercase as they are used as keys
     responses.columns = map(str.lower, responses.columns)
     # don't need these columns
-    #responses_only = responses.drop(['date', 'day'], axis=1)
+    responses.drop(['date', 'day'], axis=1, inplace=True)
     responses_only = responses
 
     # do a reduction to better represent self response in 2011
