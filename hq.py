@@ -97,19 +97,27 @@ class LetterPhase(object):
         self.blanket = h.str2bool(self.input_data["blanket"])
         self.targets = self.input_data["targets"]
         self.start_sim_time = h.get_event_time(self)
+        self.period = self.input_data["period"]
         # add process to decide who to send letters too...but with a delay
 
         start_delayed(self.env, self.fu_letter(), self.start_sim_time)
 
     def fu_letter(self):
 
-        # send a letter if conditions met
-        for household in self.district.households:
+        temp_letter_list = [household for household in self.district.households
+                           if (not self.blanket and household.hh_type in self.targets and not household.responded) or \
+                    (self.blanket and household.hh_type in self.targets)]
 
-            if (not self.blanket and household.hh_type in self.targets and not household.responded) or \
-                    (self.blanket and household.hh_type in self.targets):
+        # order by priority
+        temp_letter_list.sort(key=lambda hh: hh.priority, reverse=False)
 
-                # send a letter
+        for i in range(self.period):
+            current_letter_day = temp_letter_list[i::self.period]
+
+            for household in current_letter_day:
+
+                add_delay = i * 24
+
                 if self.letter_type == 'pq':
                     household.paper_allowed = True
 
@@ -117,12 +125,12 @@ class LetterPhase(object):
                         # add to the summary of the amount of paper given
 
                         for key, value in self.rep.paper_summary.items():
-                            value[str(getattr(household, key))][math.floor(self.env.now / 24)] += 1
+                            value[str(getattr(household, key))][math.floor((self.env.now + add_delay) / 24)] += 1
 
                         for key, value in self.rep.paper_totals.items():
                             value[str(getattr(household, key))] += 1
 
-                self.env.process(self.co_send_letter(household, self.letter_type, self.input_data["delay"]))
+                self.env.process(self.co_send_letter(household, self.letter_type, self.input_data["delay"] + add_delay))
 
         yield self.env.timeout(0)
 

@@ -611,7 +611,7 @@ input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON
 output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017 C1.JSON')
 
 
-generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=10)
+generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=11)
 
 
 
