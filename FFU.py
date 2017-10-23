@@ -183,13 +183,14 @@ class CensusOfficer(object):
                 value[str(getattr(household, key))] += 1
 
         if oo.record_visit:
-            self.rep.output_data['Visit'].append(oo.generic_output(self.rep.reps,
+            self.rep.output_data['Visit'].append(oo.visit_output(self.rep.reps,
                                                                    self.district.district,
                                                                    household.la,
                                                                    household.lsoa,
                                                                    household.digital,
                                                                    household.hh_type,
                                                                    household.hh_id,
+                                                                   household.visits,
                                                                    self.env.now))
 
         if household.responded:
@@ -383,13 +384,14 @@ class CensusOfficer(object):
         if not household.return_sent and household_returns:
             # hh have not responded yet and respond there and then either by paper or digital.
             if oo.record_visit_success:
-                self.rep.output_data['Visit_success'].append(oo.generic_output(self.rep.reps,
+                self.rep.output_data['Visit_success'].append(oo.visit_output(self.rep.reps,
                                                                                self.district.district,
                                                                                household.la,
                                                                                household.lsoa,
                                                                                household.digital,
                                                                                household.hh_type,
                                                                                household.hh_id,
+                                                                               household.visits,
                                                                                self.env.now))
 
             household.resp_planned = True

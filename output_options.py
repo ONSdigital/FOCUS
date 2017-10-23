@@ -4,6 +4,7 @@ output are recorded. The more output that is selected the slower the code will r
 from collections import namedtuple
 
 generic_output = namedtuple('Generic_output', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'time'])
+visit_output = namedtuple('Visit_output', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'visits', 'time'])
 reminder_wasted = namedtuple('Reminder_wasted', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'time','type'])
 reminder_unnecessary = namedtuple('Reminder_unnecessary', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
 reminder_success = namedtuple('Reminder_success', ['rep', 'district', 'LA', 'lsoa11cd', 'digital', 'hh_type', 'hh_id', 'time', 'type'])
@@ -76,14 +77,14 @@ record_warnings = False
 record_non_response = False
 record_letters = False
 record_posted = False
-record_visit = False
+record_visit = True
 record_visit_wasted = False
 record_visit_unnecessary = False
 record_visit_contact = False
 record_visit_out = False
 record_visit_convert = False
 record_visit_assist = False
-record_visit_success = False
+record_visit_success = True
 record_visit_failed = False
 record_return_received = False
 record_responded = False

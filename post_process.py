@@ -880,6 +880,34 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
     output_file(output_path)
     save(p)
 
+def visit_effectiveness(df_visits, df_visits_success, group = 'LA'):
+    """a function that returns the effectiveness of subsequent rounds of visits. df_visits is the location of the
+    dataframes with the data for each district (user defined collection of areas simulated)"""
+
+    # take visit file
+    # and visit success file
+    # groupby la, htc, other and visits
+    # divide
+
+    overall_result = pd.DataFrame()
+
+    for key, value in df_visits.items():
+        cat_sum = value.groupby([group, 'visits', 'rep'])['visits'].size().reset_index()
+        cat_sum.rename(columns={0: 'count'}, inplace=True)
+        cat_sum = cat_sum.groupby([group, 'visits'])['count'].mean().reset_index()
+        print(cat_sum.head())
+
+        overall_result = overall_result.append(cat_sum)
+
+
+    print(overall_result) #  this is count of all visits across all groups (la's)
+
+    # repeat above for success and divide!
+
+    return 0
+
+
+
 
 
 
@@ -887,8 +915,9 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
 #right_current_path = os.path.join(os.getcwd(), 'outputs', 'digital first 2017-09-21 22.11.03')
 
 #### change to allow display in % terms, just supply total to divide by
-#input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
-#pandas_data = csv_to_pandas(input_path, ['hh_record'])
+input_path = os.path.join(os.getcwd(), 'outputs', '2017 C1 2017-10-23 16.21.06')
+pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
+visit_effectiveness(pandas_data['Visit'], pandas_data['Visits_success'])
 #default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10', 'summary', 'active_summary', 'la')
 #summary_outpath = os.path.join(input_path, 'summary')
 #percent = sum_hh(pandas_data['hh_record'])
