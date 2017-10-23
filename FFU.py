@@ -411,7 +411,8 @@ class CensusOfficer(object):
         elif (not household.return_sent and not household_returns and
               h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
               household.visits == household.input_data['max_visits'] and
-              h.str2bool(household.input_data['paper_after_max_visits'])):
+              h.str2bool(household.input_data['paper_after_max_visits']) and
+              not household.paper_allowed):
             # hh have not responded but do not respond as a result of the visit.
             # need extra here for when you fail but not at max visits?
             if oo.record_visit_failed:
@@ -426,6 +427,15 @@ class CensusOfficer(object):
             # leave paper in hope they respond?
             household.paper_allowed = True
             hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq)
+
+            if oo.record_paper_summary:
+                # add to the summary of the amount of paper given
+
+                for key, value in self.rep.paper_summary.items():
+                    value[str(getattr(household, key))][0] += 1
+
+                for key, value in self.rep.paper_totals.items():
+                    value[str(getattr(household, key))] += 1
 
             time_worked = self.input_data['visit_times']['failed'] / 60 + \
                           self.district.travel_dist / self.input_data["travel_speed"]
