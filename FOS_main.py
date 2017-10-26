@@ -298,7 +298,7 @@ if __name__ == '__main__':
     create_new_config = False
     produce_default = True
     multiple_processors = True  # set to false to debug
-    delete_old = False
+    delete_old = True
     freeze_support()
 
     # delete all old output files but not the main directory.
@@ -385,7 +385,7 @@ if __name__ == '__main__':
                     counter += 1
 
                     # if run list len is chunk size run them...
-                    if len(run_list) == cpu_count()*10 or (district == str(districts) and rep == reps):
+                    if len(run_list) == cpu_count()*4 or (district == str(districts) and rep == reps):
 
                         # different run methods - use single processor for debugging
                         if multiple_processors:

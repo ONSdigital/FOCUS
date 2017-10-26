@@ -881,7 +881,7 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
     save(p)
 
 
-def visit_effectiveness(df_visits, df_visits_success, group = 'LA'):
+def visit_effectiveness(df_visits, df_visits_success, group='E&W'):
     """a function that returns the effectiveness of subsequent rounds of visits. df_visits is the location of the
     dataframes with the data for each district (user defined collection of areas simulated)"""
 
@@ -894,34 +894,44 @@ def visit_effectiveness(df_visits, df_visits_success, group = 'LA'):
         overall_totals = pd.DataFrame()
 
         for key, value in df_set.items():
-            district_sum = value.groupby([group, 'visits', 'rep'])['visits'].size().reset_index()
-            district_sum.rename(columns={0: 'count'}, inplace=True)
-            district_sum = district_sum.groupby([group, 'visits'])['count'].mean().reset_index()
+
+            if group == 'E&W':
+                district_sum = value.groupby(['visits', 'rep'])['visits'].size().reset_index()
+                district_sum.rename(columns={0: 'count'}, inplace=True)
+                district_sum = district_sum.groupby(['visits'])['count'].mean().reset_index()
+            else:
+                district_sum = value.groupby([group, 'visits', 'rep'])['visits'].size().reset_index()
+                district_sum.rename(columns={0: 'count'}, inplace=True)
+                district_sum = district_sum.groupby([group, 'visits'])['count'].mean().reset_index()
 
             if overall_totals.empty:
                 overall_totals = overall_totals.append(district_sum)
             else:
-                overall_totals = pd.merge(overall_totals, district_sum, how='outer', on=['LA', 'visits'])
-                overall_totals['count'] = overall_totals.count_x.fillna(0) + overall_totals.count_y.fillna(0)
+                if group == 'E&W':
+                    overall_totals = pd.merge(overall_totals, district_sum, how='outer', on=['visits'])
+                    overall_totals['count'] = overall_totals.count_x.fillna(0) + overall_totals.count_y.fillna(0)
 
-        cols = [2, 3]
-        overall_totals.drop(overall_totals.columns[cols], axis=1, inplace=True)
-        print(overall_totals)
+                else:
+                    overall_totals = pd.merge(overall_totals, district_sum, how='outer', on=[group, 'visits'])
+                    overall_totals['count'] = overall_totals.count_x.fillna(0) + overall_totals.count_y.fillna(0)
+
+                if group == 'E&W':
+                    cols = [1, 2]
+                else:
+                    cols = [2, 3]
+
+                overall_totals.drop(overall_totals.columns[cols], axis=1, inplace=True)
 
         if totals.empty:
             totals = totals.append(overall_totals)
         else:
-            totals = pd.merge(totals, overall_totals, how='outer', on=['LA', 'visits'])
-
-
+            if group == 'E&W':
+                totals = pd.merge(totals, overall_totals, how='outer', on=['visits'])
+            else:
+                totals = pd.merge(totals, overall_totals, how='outer', on=[group, 'visits'])
 
     totals['percent_success'] = totals['count_y']/totals['count_x']
     print(totals)  # this is count of all visits across all groups (la's)
-
-    return 0
-
-
-
 
 
 
@@ -929,9 +939,11 @@ def visit_effectiveness(df_visits, df_visits_success, group = 'LA'):
 #right_current_path = os.path.join(os.getcwd(), 'outputs', 'digital first 2017-09-21 22.11.03')
 
 #### change to allow display in % terms, just supply total to divide by
-input_path = os.path.join(os.getcwd(), 'outputs', '2017 C1 2017-10-23 16.21.06')
+
+input_path = os.path.join(os.getcwd(), 'outputs', 'test data 2017-10-26 08.25.41')
 pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
 visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
+
 #default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10', 'summary', 'active_summary', 'la')
 #summary_outpath = os.path.join(input_path, 'summary')
 #percent = sum_hh(pandas_data['hh_record'])
