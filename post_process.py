@@ -940,7 +940,7 @@ def visit_effectiveness(df_visits, df_visits_success, group='E&W'):
 
 #### change to allow display in % terms, just supply total to divide by
 
-input_path = os.path.join(os.getcwd(), 'outputs', 'test data 2017-10-26 08.25.41')
+input_path = os.path.join(os.getcwd(), 'outputs', 'test data 2017-10-26 09.54.58')
 pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
 visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 

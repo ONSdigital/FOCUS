@@ -623,8 +623,8 @@ output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa te
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 
-input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template test.JSON')  # JSON template to use
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'test data.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 template.JSON')  # JSON template to use
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017 c1 d4.JSON')
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=10)
 
