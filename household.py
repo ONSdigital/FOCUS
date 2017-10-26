@@ -369,7 +369,6 @@ class Household(object):
             except:
                 pass
             self.resp_level = response_data["response"]
-
             if self.rep.total_ad_instances > 0:
                 self.help_level = response_data["help"]
             else:
