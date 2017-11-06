@@ -1202,12 +1202,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 20.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 20.0
               },
               "postcard": {
                 "alt": {
@@ -1400,12 +1400,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 21.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 21.0
               },
               "postcard": {
                 "alt": {
@@ -1598,12 +1598,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 23.5,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 23.5
               },
               "postcard": {
                 "alt": {
@@ -1796,12 +1796,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 27.6,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 27.6
               },
               "postcard": {
                 "alt": {
@@ -1994,12 +1994,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 30.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 30.1
               },
               "postcard": {
                 "alt": {
@@ -2192,12 +2192,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 21.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 21.9
               },
               "postcard": {
                 "alt": {
@@ -2390,12 +2390,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 22.7,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 22.7
               },
               "postcard": {
                 "alt": {
@@ -2588,12 +2588,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 24.4,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 24.4
               },
               "postcard": {
                 "alt": {
@@ -2786,12 +2786,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 27.7,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 27.7
               },
               "postcard": {
                 "alt": {
@@ -2984,12 +2984,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.7,
+                "help": 30.3,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.7
+                "response": 30.3
               },
               "postcard": {
                 "alt": {
@@ -3182,12 +3182,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 22.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 22.0
               },
               "postcard": {
                 "alt": {
@@ -3380,12 +3380,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 23.7,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 23.7
               },
               "postcard": {
                 "alt": {
@@ -3578,12 +3578,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 26.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 26.1
               },
               "postcard": {
                 "alt": {
@@ -3776,12 +3776,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 30.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 30.1
               },
               "postcard": {
                 "alt": {
@@ -3974,12 +3974,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 33.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 33.0
               },
               "postcard": {
                 "alt": {
@@ -4172,12 +4172,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 24.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 24.0
               },
               "postcard": {
                 "alt": {
@@ -4370,12 +4370,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 25.4,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 25.4
               },
               "postcard": {
                 "alt": {
@@ -4568,12 +4568,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 26.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 26.9
               },
               "postcard": {
                 "alt": {
@@ -4766,12 +4766,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 30.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 33.2
               },
               "postcard": {
                 "alt": {
@@ -4964,12 +4964,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 33.2,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 33.2
               },
               "postcard": {
                 "alt": {
@@ -5162,12 +5162,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 24.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 24.0
               },
               "postcard": {
                 "alt": {
@@ -5360,12 +5360,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 26.2,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 26.2
               },
               "postcard": {
                 "alt": {
@@ -5558,12 +5558,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 29.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 29.0
               },
               "postcard": {
                 "alt": {
@@ -5756,12 +5756,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 32.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 32.9
               },
               "postcard": {
                 "alt": {
@@ -5954,12 +5954,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 35.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 35.9
               },
               "postcard": {
                 "alt": {
@@ -6152,12 +6152,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 26.3,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 26.3
               },
               "postcard": {
                 "alt": {
@@ -6350,12 +6350,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 28.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 28.1
               },
               "postcard": {
                 "alt": {
@@ -6548,12 +6548,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 29.8,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 29.8
               },
               "postcard": {
                 "alt": {
@@ -6746,12 +6746,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 32.8,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 32.8
               },
               "postcard": {
                 "alt": {
@@ -6944,12 +6944,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 61.6,
+                "help": 36.1,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 61.6
+                "response": 36.1
               },
               "postcard": {
                 "alt": {
@@ -7142,12 +7142,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 30.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 30.9
               },
               "postcard": {
                 "alt": {
@@ -7340,12 +7340,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 33.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 33.0
               },
               "postcard": {
                 "alt": {
@@ -7538,12 +7538,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 35.6,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 35.6
               },
               "postcard": {
                 "alt": {
@@ -7736,12 +7736,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 40.0,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 40.0
               },
               "postcard": {
                 "alt": {
@@ -7934,12 +7934,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 42.6,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 42.6
               },
               "postcard": {
                 "alt": {
@@ -8132,12 +8132,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 31.8,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 31.8
               },
               "postcard": {
                 "alt": {
@@ -8330,12 +8330,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 33.9,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 33.9
               },
               "postcard": {
                 "alt": {
@@ -8528,12 +8528,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 35.8,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 35.8
               },
               "postcard": {
                 "alt": {
@@ -8726,12 +8726,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 39.7,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 39.7
               },
               "postcard": {
                 "alt": {
@@ -8924,12 +8924,12 @@
             "FU_start_date": "2017,4,13",
             "behaviours": {
               "alt": {
-                "help": 76.7,
+                "help": 42.4,
                 "response": 0
               },
               "default": {
                 "help": 0,
-                "response": 76.7
+                "response": 42.4
               },
               "postcard": {
                 "alt": {
