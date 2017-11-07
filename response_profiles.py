@@ -18,7 +18,7 @@ def response_profiles_2011_all(census_day):
     """
     # generates a profile to use for response rates based on 2011 data
 
-    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'summary_returns.csv')
+    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'summary_returns_2017.csv')
     responses = pd.read_csv(input_path)
     # make all headers lowercase as they are used as keys
     responses.columns = map(str.lower, responses.columns)
