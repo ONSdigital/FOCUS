@@ -296,8 +296,8 @@ def produce_default_output(input_path):
 if __name__ == '__main__':
 
     create_new_config = False
-    produce_default = False
-    multiple_processors = False  # set to false to debug
+    produce_default = True
+    multiple_processors = True  # set to false to debug
     delete_old = False
     freeze_support()
 

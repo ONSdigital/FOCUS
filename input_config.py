@@ -609,7 +609,7 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,1,0,0,0,0], 
 #generate_nomis_cca()
 
 #ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
-#ratios = [660]*9
+#ratios = [200000]*90
 #input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_test_nomis.csv')
 output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_test_cca.csv')
 #output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa test only cca.csv')
