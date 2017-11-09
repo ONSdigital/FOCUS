@@ -266,7 +266,7 @@ def produce_default_output(input_path):
     passive_response_path = os.path.join(input_path, 'summary', 'passive_summary', 'digital', 'average.csv')
     output_path = os.path.join(input_path, 'summary')
     pp.bokeh_line_chart(passive_response_path, active_response_path, 'passive', 'active', output_path, 'response.html',
-                        cumulative=True)
+                        cumulative=False)
 
     summary_outpath = os.path.join(input_path, 'summary')
     pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
