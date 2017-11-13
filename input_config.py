@@ -495,7 +495,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[0,0,0,0,0,0], cca_per_run = 1):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,1,0,0,0,0], cca_per_run = 1):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -619,8 +619,8 @@ output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_test_cca.csv')
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 
-input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 do nothing template.JSON')  # JSON template to use
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', '2017 do nothing.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 C2EO331 and C2SO331.JSON')  # JSON template to use
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'C1EO331D4 and C1SO331D4.JSON')
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=1)
 

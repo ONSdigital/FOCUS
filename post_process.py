@@ -848,8 +848,8 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
     p.line(x='day', y=label1, source=source, color='green', legend=label1_str)
     p.line(x='day', y=label2, source=source, color='blue', legend=label2_str)
 
-    fu_day = (dt.datetime.strptime('2011-04-04', '%Y-%m-%d').date() -
-              dt.datetime.strptime('2011-03-08', '%Y-%m-%d').date()).days
+    fu_day = (dt.datetime.strptime('2017-04-19', '%Y-%m-%d').date() -
+              dt.datetime.strptime('2017-03-22', '%Y-%m-%d').date()).days
 
     p.line([fu_day, fu_day], [0, max_y], color='red')
 

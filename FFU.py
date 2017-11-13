@@ -336,7 +336,7 @@ class CensusOfficer(object):
               h.str2bool(household.input_data['paper_after_max_visits'])):
 
             household.paper_allowed = True
-            hq.schedule_paper_drop(household, 'Visit', 'pq',  self.has_pq)
+            self.env.process(hq.schedule_paper_drop(household, 'Visit', 'pq',  self.has_pq))
 
             time_worked = self.input_data['visit_times']['paper'] / 60 +\
                           self.district.travel_dist/self.input_data["travel_speed"]
