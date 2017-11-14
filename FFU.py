@@ -297,8 +297,9 @@ class CensusOfficer(object):
         if household.digital or household.return_sent or household.paper_allowed:
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
-        # if not digital try to persuade them to complete online.
-        elif not household.digital and da_test <= da_effectiveness:
+        # if not digital have not sent a return then try to persuade them to complete online.
+        elif da_test <= da_effectiveness:
+            # convert
 
             time_worked = self.input_data['visit_times']['convert']/60
 
@@ -325,21 +326,20 @@ class CensusOfficer(object):
 
             yield self.rep.env.process(self.fu_visit_outcome(household))
 
-        # not digital, do not convince to go online but allowed to use paper so go to outcome
-        elif not household.digital and da_test > da_effectiveness and household.paper_allowed:
-            yield self.rep.env.process(self.fu_visit_outcome(household))
+        # if not digital, have not sent a return , do not convince to complete online, engaged OR
+        # if not digital, have not sent a return , do not convince to complete online, not engaged, max visits reached,
+        # then give paper if an option.
+        elif household.engaged or (h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
+                                   household.visits == household.input_data['max_visits'] and
+                                   h.str2bool(household.input_data['paper_after_max_visits'])):
 
-        # if not digital, do not convince to complete online, and trigger and max visits not reached give paper if on.
-        elif (not household.digital and da_test > da_effectiveness and
-              h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
-              household.visits == household.input_data['max_visits'] and
-              h.str2bool(household.input_data['paper_after_max_visits'])):
+            # give paper
 
             household.paper_allowed = True
-            self.env.process(hq.schedule_paper_drop(household, 'Visit', 'pq',  self.has_pq))
+            self.env.process(hq.schedule_paper_drop(household, 'Visit', 'pq', self.has_pq))
 
-            time_worked = self.input_data['visit_times']['paper'] / 60 +\
-                          self.district.travel_dist/self.input_data["travel_speed"]
+            time_worked = self.input_data['visit_times']['paper'] / 60 + \
+                          self.district.travel_dist / self.input_data["travel_speed"]
 
             if oo.record_time_summary:
 
@@ -352,8 +352,7 @@ class CensusOfficer(object):
             yield self.rep.env.timeout(time_worked)
 
         else:
-            # or suggest other forms of assistance to be decided...
-            # non implemented at present so another visit will be scheduled.
+            # none of the above true so do no more at this visit
             if oo.record_visit_assist:
                 self.rep.output_data['Visit_assist'].append(oo.generic_output(self.rep.reps,
                                                                               self.district.district,
