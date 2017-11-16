@@ -608,19 +608,19 @@ def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,1,0,0,0,0], 
 
 #generate_nomis_cca()
 
-#ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
+ratios = [660]*30 + [830]*30 + [950]*30  # this is the number of households per CO - same for now but likely to be different
 #ratios = [200000]*90
-#input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_test_nomis.csv')
-output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', '2017_test_cca.csv')
+input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis_all.csv')
+output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis_all_cca.csv')
 #output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis age sex lsoa test only cca.csv')
-#lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
+lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
 #subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', '2017 subset.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
-#create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
+create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 
 input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017 C2EO331 and C2SO331.JSON')  # JSON template to use
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'C1EO331D4 and C1SO331D4.JSON')
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'test_all.JSON')
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=1)
 

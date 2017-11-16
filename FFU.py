@@ -330,7 +330,7 @@ class CensusOfficer(object):
         # if not digital, have not sent a return , do not convince to complete online, not engaged, max visits reached,
         # then give paper if an option.
         elif household.engaged or (h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
-                                   household.visits == household.input_data['max_visits'] and
+                                   household.visits >= 1 and not household.digital and not household.paper_allowed and
                                    h.str2bool(household.input_data['paper_after_max_visits'])):
 
             # give paper
