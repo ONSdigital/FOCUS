@@ -111,7 +111,6 @@ class CensusOfficer(object):
     def return_next_visit(self, live=False):
         # if live tests if a return has been received since the action plans have been created.
 
-        # add a check to see if the hh has requested a visit - if yes go at optimal time for hh type
         if self.action_plan:
             household = self.action_plan.pop(0)
         else:
@@ -228,7 +227,6 @@ class CensusOfficer(object):
                                                                                household.hh_id,
                                                                                self.env.now))
 
-            # household.visits_contacted += 1
             yield self.rep.env.process(self.fu_visit_assist(household))
 
         elif (not household_is_in and household.visits == household.input_data['max_visits'] and

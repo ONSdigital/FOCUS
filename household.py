@@ -399,6 +399,7 @@ class Household(object):
                                                                                                     self.hh_id,
                                                                                                     self.env.now,
                                                                                                     reminder_type))
+
         # now move on to the relevant action based on extracted values
         reminder_test = self.rnd.uniform(0, 100)
 

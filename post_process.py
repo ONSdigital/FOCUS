@@ -934,6 +934,28 @@ def visit_effectiveness(df_visits, df_visits_success, group='E&W'):
     print(totals)  # this is count of all visits across all groups (la's)
 
 
+def count_reminders(df_list):
+    """simple returns by type the number of reminders sent"""
+
+    total_reminders = 0
+
+    for df_set in df_list:
+
+        reminder_count = 0
+
+        for key, value in df_set.items():
+            reminder_count += df_set[key].shape[0]
+
+        print(reminder_count*0.3)
+        total_reminders += reminder_count
+
+    print("total: ", total_reminders*0.3)
+
+
+input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331 and C2SO331 2017-11-22 10.44.47')
+pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
+count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
+
 
 #left_current_path = os.path.join(os.getcwd(), 'outputs', 'baseline 2017-09-21 14.00.28')
 #right_current_path = os.path.join(os.getcwd(), 'outputs', 'digital first 2017-09-21 22.11.03')

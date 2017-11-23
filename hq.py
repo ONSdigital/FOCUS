@@ -8,9 +8,6 @@ import math
 
 
 def ret_rec(household, rep):
-    # print out every 100000 returns?
-    #if rep.total_responses % 100000 == 0:
-        #print(rep.total_responses)
 
     if oo.record_active_summary:
         # add household to summary of responses
@@ -21,6 +18,7 @@ def ret_rec(household, rep):
             value[str(getattr(household, key))] += 1
 
     if oo.record_active_paper_summary and not household.digital:
+        # record just the paper summaries
 
         for key, value in rep.active_paper_summary.items():
             value[str(getattr(household, key))][math.floor(rep.env.now / 24)] += 1
@@ -43,7 +41,7 @@ def ret_rec(household, rep):
     rep.total_responses += 1
     household.district.total_responses += 1
 
-    # check size of output data - if over an amount, size or length write to file?
+    # check size of output data - if over an amount, size or length write to file
     if oo.record_responded:
         rep.output_data['Responded'].append(oo.generic_output(rep.reps,
                                                               household.district.district,
