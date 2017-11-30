@@ -8,7 +8,7 @@ import pandas as pd
 import post_process as pp
 
 
-def plot_summary_animated(summary_path, reps=True, average=True, cumulative=True):
+def plot_summary_animated(summary_path, reps=True, average=True, cumulative=True, percent=0):
     """creates a plot using the summary data to show response over time. default is to show the average only.
     if rep is True then it will also plot the individual reps results (faded). If cumulative is false it will
     show the daily return rates. """
@@ -21,6 +21,10 @@ def plot_summary_animated(summary_path, reps=True, average=True, cumulative=True
             df = df.sum(axis=0).cumsum(axis=0)
         else:
             df = df.sum(axis=0)
+
+        if percent > 0:
+            df = df.div(percent) * 100
+
         df.rename = 'average'
         plot_list.append(df)
 
@@ -33,6 +37,10 @@ def plot_summary_animated(summary_path, reps=True, average=True, cumulative=True
                 df = df.sum(axis=0).cumsum(axis=0)
             else:
                 df = df.sum(axis=0)
+
+            if percent > 0:
+                df = df.div(percent) * 100
+
             df.rename = 'reps'
             plot_list.append(df)
 
@@ -44,8 +52,11 @@ def plotlist(n):
     return data_list[n]
 
 print(os.getcwd())
-default_path = os.path.join('outputs', '12_co_pf_lowd_10_reps 2017-09-20 14.39.22', 'summary', 'active_summary', 'la')
-data_list = plot_summary_animated(default_path, cumulative=True, reps=True)
+default_path = os.path.join('outputs', 'C2EO331_C2SO331 2017-11-29 15.30.54', 'summary', 'active_summary', 'la')
+input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-11-29 15.30.54')
+pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
+percent = pp.sum_hh(pandas_data['hh_record'])
+data_list = plot_summary_animated(default_path, cumulative=True, reps=True, percent=percent)
 
 fig = plt.figure()
 fig.suptitle('Overall return rates over time', fontsize=20)
@@ -53,7 +64,7 @@ plt.xlabel('Day', fontsize=16)
 plt.ylabel('returns', fontsize=16)
 
 n = len(data_list)  # Number of frames
-ymax = pp.roundup(max([max(lst) for lst in data_list]), 200)
+ymax = pp.roundup(max([max(lst) for lst in data_list]), 3)
 
 
 def init():

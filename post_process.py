@@ -554,6 +554,7 @@ def sum_hh(hh_record):
         hh_count_df = hh_record[str(i)]
         # for count use only rep 1 figures
         hh_count += len(hh_count_df[hh_count_df['rep'] == 1])
+        print(hh_count)
 
     return hh_count
 
@@ -704,6 +705,10 @@ def plot_summary(summary_path, summary_outpath, output_name, reps=False, average
                 df = df.sum(axis=0).cumsum(axis=0)
             else:
                 df = df.sum(axis=0)
+
+            if percent > 0:
+                df = df.div(percent) * 100
+
             df.rename = 'reps'
             df.plot.line(alpha=0.1, color='blue')
 
@@ -946,15 +951,15 @@ def count_reminders(df_list):
         for key, value in df_set.items():
             reminder_count += df_set[key].shape[0]
 
-        print(reminder_count*0.3)
+        print(reminder_count/50)
         total_reminders += reminder_count
 
-    print("total: ", total_reminders*0.3)
+    print("total: ", total_reminders/50)
 
 
-input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331 and C2SO331 2017-11-22 10.44.47')
-pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
-count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-11-29 16.32.38')
+#pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
+#count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
 
 
 #left_current_path = os.path.join(os.getcwd(), 'outputs', 'baseline 2017-09-21 14.00.28')
@@ -966,10 +971,12 @@ count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pa
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
 #visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 
-#default_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10', 'summary', 'active_summary', 'la')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01')
+#pandas_data = csv_to_pandas(input_path, ['hh_record'])
+#default_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01', 'summary', 'active_summary', 'la')
 #summary_outpath = os.path.join(input_path, 'summary')
 #percent = sum_hh(pandas_data['hh_record'])
-#plot_summary(default_path, summary_outpath, 'returns', reps=False, cumulative=True, percent=percent)
+#plot_summary(default_path, summary_outpath, 'returns', average=True, reps=True, cumulative=True, percent=percent)
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
 #pandas_data = csv_to_pandas(left_current_path, ['hh_record'])
