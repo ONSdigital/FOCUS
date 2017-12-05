@@ -951,13 +951,13 @@ def count_reminders(df_list):
         for key, value in df_set.items():
             reminder_count += df_set[key].shape[0]
 
-        print(reminder_count/50)
+        print(reminder_count)
         total_reminders += reminder_count
 
-    print("total: ", total_reminders/50)
+    print("total: ", total_reminders)
 
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-11-29 16.32.38')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-12-05 14.45.21')
 #pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
 #count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
 

@@ -339,6 +339,11 @@ class District(object):
                                                       hh_type,
                                                       digital)
 
+        # addition to catch if a paper response is received after the cut off period - if yes count as do nothing
+        if response_time + input_data['delay']['paper'] > self.rep.sim_hours:
+
+            return oo.initial_action('do_nothing', digital, 0, hh_eng)
+
         if digital and response_time + input_data['delay']['digital'] <= first_interaction:
 
             # add a counter to the district so we know how many hh have responded early

@@ -105,6 +105,7 @@ class Household(object):
             # so provide paper if the conditions are met...
 
             self.paper_allowed = True
+            self.engaged = True
             self.priority += 5  # lower the priority as more likely to reply
             # call to ask so may need to up the level of response above default here? Extra optional variable?
             yield self.env.process(hq.schedule_paper_drop(self, 'Call', 'pq', self.district.postal_delay))
