@@ -495,7 +495,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[0,0,0,0,0,0], cca_per_run = 1):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[1,1,0,0,0,0], cca_per_run = 1):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -633,15 +633,15 @@ def split_file(input_path, filter_path, split_by='LSOA'):
 #ratios = [200000]*90
 #input_nomis_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis_all.csv')
 #output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'nomis_all_cca.csv')
-output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'C2EO300_cca.csv')
+output_cca_path = os.path.join(os.getcwd(), 'raw_inputs', 'C1_2017_test_cca.csv')
 #lookup_csv = os.path.join(os.getcwd(), 'raw_inputs', 'lsoa_distances')
 #subset_filter = os.path.join(os.getcwd(), 'raw_inputs', 'subset_data', '2017 subset.csv')
 # only run "create_cca_data" if need to change the amount of CCA.
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios, subset=True, subset_filter=subset_filter)
 #create_cca_data(input_nomis_path, output_cca_path, lookup_csv, ratios)
 
-input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017_C2EO332.JSON')  # JSON template to use
-output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'C2EO332.JSON')
+input_JSON_template = os.path.join(os.getcwd(), 'templates', '2017_C1EO331D4_C1SO331D4.JSON')  # JSON template to use
+output_JSON_path = os.path.join(os.getcwd(), 'inputs', 'C1EO331D4_C1SO331D4.JSON')
 
 generate_multirun(input_JSON_template, output_cca_path, output_JSON_path, cca_per_run=1)
 

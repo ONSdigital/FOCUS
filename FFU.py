@@ -160,10 +160,14 @@ class CensusOfficer(object):
     def household_test(self, household, input_type):
         # tests if hh is in or is converted to a return!
 
+        temp_factor = 1
+        if input_type == "contact_rate":
+            temp_factor = 0.5
+
         test_value = self.rnd.uniform(0, 100)
         dict_value = household.input_data[input_type][str(h.current_day(self))]
 
-        if test_value <= dict_value[h.return_time_key(dict_value, self.env.now)]:
+        if test_value <= dict_value[h.return_time_key(dict_value, self.env.now)]*temp_factor:
             return True
         else:
             return False
@@ -328,7 +332,7 @@ class CensusOfficer(object):
         # if not digital, have not sent a return , do not convince to complete online, not engaged, max visits reached,
         # then give paper if an option.
         elif household.engaged or (h.responses_to_date(self.district) < self.district.input_data['paper_trigger'] and
-                                   household.visits >= 1 and not household.digital and not household.paper_allowed and
+                                   household.visits >= 2 and not household.digital and not household.paper_allowed and
                                    h.str2bool(household.input_data['paper_after_max_visits'])):
 
             # give paper

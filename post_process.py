@@ -937,6 +937,7 @@ def visit_effectiveness(df_visits, df_visits_success, group='E&W'):
 
     totals['percent_success'] = totals['count_y']/totals['count_x']
     print(totals)  # this is count of all visits across all groups (la's)
+    print(totals['count_x'].sum(), totals['count_y'].sum(), totals['count_y'].sum()/totals['count_x'].sum(), )
 
 
 def count_reminders(df_list):
@@ -957,6 +958,8 @@ def count_reminders(df_list):
     print("total: ", total_reminders)
 
 
+
+
 #input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-12-05 14.45.21')
 #pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
 #count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
@@ -967,9 +970,9 @@ def count_reminders(df_list):
 
 #### change to allow display in % terms, just supply total to divide by
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'test data 2017-10-26 09.54.58')
-#pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
-#visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
+input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-06 16.49.07')
+pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
+visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01')
 #pandas_data = csv_to_pandas(input_path, ['hh_record'])
