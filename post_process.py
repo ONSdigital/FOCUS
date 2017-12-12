@@ -680,9 +680,6 @@ def plot_summary(summary_path, summary_outpath, output_name, reps=False, average
     average response over time for each group in the dataset rather than the whole. If cumulative is false it will
     show daily return rates rather than cumulative."""
 
-
-    ####  possible change. Supply a list of paths and plot on same chart....###
-
     if average:
         df = pd.read_csv(os.path.join(summary_path, 'average.csv'), index_col=0)
         if cumulative:
@@ -958,7 +955,29 @@ def count_reminders(df_list):
     print("total: ", total_reminders)
 
 
+def rep_dist(input_path):
+    # function to produce graphical representation of the spread of results and SD
+    # simply sums the contents of sumamry files and adds to list
+    file_list = glob.glob(os.path.join(input_path, 'reps_combined', '*.csv'))
+    results_list = []
 
+    for file in file_list:
+        df = pd.read_csv(file, index_col=0)
+        total = df.values.sum()
+
+        results_list.append(total)
+
+    print(np.mean(results_list), np.std(results_list))
+    # once have a list of the results plot, produce SD and...
+    plt.hist(results_list)
+    plt.show()
+
+
+
+
+
+#response_data = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 15.57.25', 'summary', 'active_summary', 'la' )
+#rep_dist(response_data)
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-12-05 14.45.21')
 #pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
@@ -970,9 +989,9 @@ def count_reminders(df_list):
 
 #### change to allow display in % terms, just supply total to divide by
 
-input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-06 16.49.07')
-pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
-visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-06 16.49.07')
+#pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
+#visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01')
 #pandas_data = csv_to_pandas(input_path, ['hh_record'])
