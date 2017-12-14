@@ -10,7 +10,7 @@ def call_profiles_2011_all():
     # generates a profile to use for calls to the help line based on 2011 data
 
     fields = ['Total Contacts']
-    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'call profile 2017.csv')
+    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'call profile 2011.csv')
     calls = pd.read_csv(input_path, skipinitialspace=True, usecols=fields)
     # convert to a probability distribution
     prob_calls = calls.divide(calls.sum(axis=0), axis=1)    # ans now create cumulative probability

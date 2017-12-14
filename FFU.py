@@ -160,6 +160,7 @@ class CensusOfficer(object):
     def household_test(self, household, input_type):
         # tests if hh is in or is converted to a return!
 
+        # added to quickly test dropping effectiveness of visits from lfs values - not final!!
         temp_factor = 1
         if input_type == "contact_rate":
             temp_factor = 0.5
