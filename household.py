@@ -419,12 +419,6 @@ class Household(object):
             delay = h.get_time_of_return(self.env.now, self.rep)
             # yield self.env.process(self.household_returns(self.calc_delay()))
 
-            ##########
-            # if this is a pq, but a digital household, calculate if the household retunrs via paper or digital?
-            # Or assume use preferred method for now?
-            # could use paper first paper prop to set this? so set digital to true or false...
-            ##########
-
             start_delayed(self.env, self.household_returns(self.calc_delay()), delay)
             yield self.env.timeout(0)
 

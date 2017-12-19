@@ -18,7 +18,7 @@ def response_profiles_2011_all(census_day):
     """
     # generates a profile to use for response rates based on 2011 data
 
-    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'summary_returns_2011.csv')
+    input_path = os.path.join(os.getcwd(), 'raw_inputs', 'summary_returns_2017.csv')
     responses = pd.read_csv(input_path)
     # make all headers lowercase as they are used as keys
     responses.columns = map(str.lower, responses.columns)
@@ -27,11 +27,11 @@ def response_profiles_2011_all(census_day):
     responses_only = responses
 
     # do a reduction to better represent self response in 2011
-    total_days = len(responses_only)
-    for i in range(total_days):
-        if i > census_day:
-            reduction = (i - census_day)/(total_days-census_day)
-            responses_only.iloc[i] *= (1-reduction)
+    #total_days = len(responses_only)
+    #for i in range(total_days):
+    #    if i > census_day:
+    #        reduction = (i - census_day)/(total_days-census_day)
+    #        responses_only.iloc[i] *= (1-reduction)
 
     responses_only['generic'] = responses_only.sum(axis=1)
 

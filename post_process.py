@@ -949,10 +949,10 @@ def count_reminders(df_list):
         for key, value in df_set.items():
             reminder_count += df_set[key].shape[0]
 
-        print(reminder_count)
+        print(reminder_count/20)
         total_reminders += reminder_count
 
-    print("total: ", total_reminders)
+    print("total: ", total_reminders/20)
 
 
 def rep_dist(input_path):
@@ -979,9 +979,9 @@ def rep_dist(input_path):
 #response_data = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 15.57.25', 'summary', 'active_summary', 'la' )
 #rep_dist(response_data)
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO331_C2SO331 2017-12-05 14.45.21')
-#pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
-#count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO332 2017-12-19 11.23.34')
+#pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'pq_sent'])
+#count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['pq_sent']])
 
 
 #left_current_path = os.path.join(os.getcwd(), 'outputs', 'baseline 2017-09-21 14.00.28')

@@ -368,7 +368,7 @@ if __name__ == '__main__':
                         now = dt.datetime.now()
                         seed_date = dt.datetime(2012, 4, 12, 19, 00, 00)
                         seed = abs(now - seed_date).total_seconds() + int(district) + rep
-                        #seed = 10  # uncomment to use same random seed for debug
+                        seed = 10  # uncomment to use same random seed for debug
                         seed_dict[str(input_data[district]['run_id'])][str(rep)] = seed
                         if not str(input_data[district]['run_id']) in dict_all:
                             dict_all[str(input_data[district]['run_id'])] = {}
