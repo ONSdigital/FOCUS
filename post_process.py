@@ -1022,7 +1022,7 @@ def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
 #### change to allow display in % terms, just supply total to divide by
 
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-19 16.46.46')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-19 16.52.41')
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_unnecessary'])
 #visit_unnecessary(pandas_data['Visit'], pandas_data['Visit_unnecessary'])
 
