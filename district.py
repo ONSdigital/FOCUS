@@ -314,16 +314,16 @@ class District(object):
         response_test = self.rnd.uniform(0, 100)  # represents the COA to be taken.
 
         # also at this point test if, if no barriers were in place, if they would be engaged or not...
-        if response_test <= input_data['behaviours']['default']['response']:
+        if response_test <= input_data['behaviours']['default']['response']*1.15:
             hh_eng = True
         else:
             hh_eng = False
 
-        if response_test <= hh_resp:
+        if response_test <= hh_resp*1.15:
             # respond but test when
             return self.early_responder(input_data, hh_digital, first_interaction, hh_type, hh_eng)
 
-        elif hh_resp < response_test <= hh_resp + hh_help:
+        elif hh_resp < response_test <= hh_resp*1.15 + hh_help:
             # call for help return when
             return self.help(input_data, hh_digital, first_interaction, hh_type, hh_eng)
         else:

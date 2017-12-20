@@ -949,10 +949,10 @@ def count_reminders(df_list):
         for key, value in df_set.items():
             reminder_count += df_set[key].shape[0]
 
-        print(reminder_count/20)
+        print(reminder_count)
         total_reminders += reminder_count
 
-    print("total: ", total_reminders/20)
+    print("total: ", total_reminders)
 
 
 def rep_dist(input_path):
@@ -973,15 +973,47 @@ def rep_dist(input_path):
     plt.show()
 
 
+def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
+    """a function that returns the number of visits that were not required by hh_type for the whole simulation)"""
 
+    df_list = [df_visits, df_visit_unnecessary]
+
+    totals = pd.DataFrame()
+
+    for df_set in df_list:
+
+        overall_totals = pd.DataFrame()
+
+        for key, value in df_set.items():
+
+            district_sum = value.groupby(['hh_type', 'rep'])['hh_id'].size().reset_index()
+            district_sum.rename(columns={0: 'count'}, inplace=True)
+            district_sum = district_sum.groupby(['hh_type'])['count'].mean().reset_index()
+
+            if overall_totals.empty:
+                overall_totals = overall_totals.append(district_sum)
+            else:
+                overall_totals = pd.merge(overall_totals, district_sum, how='outer', on=['hh_type'])
+                overall_totals['count'] = overall_totals.count_x.fillna(0) + overall_totals.count_y.fillna(0)
+
+                overall_totals.drop(overall_totals.columns[[1, 2]], axis=1, inplace=True)
+
+        if totals.empty:
+            totals = totals.append(overall_totals)
+        else:
+            totals = pd.merge(totals, overall_totals, how='outer', on=['hh_type'])
+
+    totals['percent_success'] = (totals['count_y'] / totals['count_x'])*100
+    print(totals)  # this is count of all visits across all groups (la's)
+    print(totals['count_x'].sum(), totals['count_y'].sum(), totals['count_y'].sum() / totals['count_x'].sum(), )
 
 
 #response_data = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 15.57.25', 'summary', 'active_summary', 'la' )
 #rep_dist(response_data)
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO332 2017-12-19 11.23.34')
-#pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'pq_sent'])
-#count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['pq_sent']])
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-19 16.02.53')
+#pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
+#count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
 
 
 #left_current_path = os.path.join(os.getcwd(), 'outputs', 'baseline 2017-09-21 14.00.28')
@@ -989,7 +1021,13 @@ def rep_dist(input_path):
 
 #### change to allow display in % terms, just supply total to divide by
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-06 16.49.07')
+
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-19 16.46.46')
+#pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_unnecessary'])
+#visit_unnecessary(pandas_data['Visit'], pandas_data['Visit_unnecessary'])
+
+
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-19 16.02.13')
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
 #visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 

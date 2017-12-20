@@ -357,23 +357,6 @@ class Household(object):
                                                                                           self.hh_id,
                                                                                           self.env.now,
                                                                                           reminder_type))
-        # set resp according to type of hh and reminder
-        if not self.resp_planned and reminder_type == 'pq' and self.engaged:
-            self.paper_allowed = True
-            self.resp_level = 100  # so this assumes if you provide paper to those engaged they will respond
-
-        elif not self.resp_planned:
-            behaviour = self.default_behaviour()
-            # and get relevant figures
-            try:
-                response_data = self.input_data["behaviours"][reminder_type][behaviour]
-            except:
-                pass
-            self.resp_level = response_data["response"]
-            if self.rep.total_ad_instances > 0:
-                self.help_level = response_data["help"]
-            else:
-                self.help_level = 0
 
         # recorded if wasted, unnecessary or successful
         if self.responded:
@@ -400,6 +383,23 @@ class Household(object):
                                                                                                     self.hh_id,
                                                                                                     self.env.now,
                                                                                                     reminder_type))
+        # set resp according to type of hh and reminder
+        if not self.resp_planned and reminder_type == 'pq' and self.engaged:
+            self.paper_allowed = True
+            self.resp_level = 70  # so this assumes if you provide paper to those engaged they will respond
+
+        elif not self.resp_planned:
+            behaviour = self.default_behaviour()
+            # and get relevant figures
+            try:
+                response_data = self.input_data["behaviours"][reminder_type][behaviour]
+            except:
+                pass
+            self.resp_level = response_data["response"]
+            if self.rep.total_ad_instances > 0:
+                self.help_level = response_data["help"]
+            else:
+                self.help_level = 0
 
         # now move on to the relevant action based on extracted values
         reminder_test = self.rnd.uniform(0, 100)
