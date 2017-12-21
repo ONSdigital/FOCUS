@@ -68,9 +68,12 @@ def plotlist(n):
     # return the nth list...
     return data_list[n]
 
+
+input_folder = 'C2EO300 2017-12-21 10.31.46'
+
 print(os.getcwd())
-default_path = os.path.join('outputs', 'C2EO300 2017-12-12 11.01.18', 'summary', 'active_summary', 'la')
-input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 11.01.18')
+default_path = os.path.join('outputs', input_folder, 'summary', 'active_summary', 'la')
+input_path = os.path.join(os.getcwd(), 'outputs', input_folder)
 raw_data_path = os.path.join(os.getcwd(), 'raw_inputs', 'summary_returns_2017.csv')
 pandas_data = pp.csv_to_pandas(input_path, ['hh_record'])
 percent = pp.sum_hh(pandas_data['hh_record'])

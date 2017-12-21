@@ -850,10 +850,11 @@ def bokeh_line_chart(input1, input2, label1, label2, output_path, filename, cumu
     p.line(x='day', y=label1, source=source, color='green', legend=label1_str)
     p.line(x='day', y=label2, source=source, color='blue', legend=label2_str)
 
-    fu_day = (dt.datetime.strptime('2017-04-19', '%Y-%m-%d').date() -
-              dt.datetime.strptime('2017-03-22', '%Y-%m-%d').date()).days
+    # uncomment and adjust date to obtain a vertical red line at desired point
+    #fu_day = (dt.datetime.strptime('2017-04-19', '%Y-%m-%d').date() -
+    #          dt.datetime.strptime('2017-03-22', '%Y-%m-%d').date()).days
 
-    p.line([fu_day, fu_day], [0, max_y], color='red')
+    #p.line([fu_day, fu_day], [0, max_y], color='red')
 
     hover = HoverTool(tooltips=
                       [(label1_str, '@' + label1 + '{int}'),
@@ -949,10 +950,10 @@ def count_reminders(df_list):
         for key, value in df_set.items():
             reminder_count += df_set[key].shape[0]
 
-        print(reminder_count)
+        print(reminder_count/20)
         total_reminders += reminder_count
 
-    print("total: ", total_reminders)
+    print("total: ", total_reminders/20)
 
 
 def rep_dist(input_path):
@@ -1011,7 +1012,7 @@ def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
 #response_data = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 15.57.25', 'summary', 'active_summary', 'la' )
 #rep_dist(response_data)
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-19 16.02.53')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-21 10.45.09')
 #pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
 #count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
 
@@ -1022,7 +1023,7 @@ def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
 #### change to allow display in % terms, just supply total to divide by
 
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-19 16.52.41')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-21 10.45.09')
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_unnecessary'])
 #visit_unnecessary(pandas_data['Visit'], pandas_data['Visit_unnecessary'])
 
