@@ -6,7 +6,6 @@ import output_options as oo
 import helper as h
 import math
 import datetime as dt
-import call_profiles as cp
 
 
 class Household(object):
@@ -386,7 +385,7 @@ class Household(object):
         # set resp according to type of hh and reminder
         if not self.resp_planned and reminder_type == 'pq' and self.engaged:
             self.paper_allowed = True
-            self.resp_level = 70  # so this assumes if you provide paper to those engaged they will respond
+            self.resp_level = 70  # so this assumes if you provide paper to those engaged most will respond
 
         elif not self.resp_planned:
             behaviour = self.default_behaviour()

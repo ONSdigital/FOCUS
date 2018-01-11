@@ -951,14 +951,14 @@ def count_reminders(df_list):
             reminder_count += df_set[key].shape[0]
 
         print(reminder_count/20)
-        total_reminders += reminder_count
+        total_reminders += reminder_count/20
 
     print("total: ", total_reminders/20)
 
 
 def rep_dist(input_path):
     # function to produce graphical representation of the spread of results and SD
-    # simply sums the contents of sumamry files and adds to list
+    # simply sums the contents of summary files and adds to list
     file_list = glob.glob(os.path.join(input_path, 'reps_combined', '*.csv'))
     results_list = []
 
@@ -1004,15 +1004,15 @@ def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
         else:
             totals = pd.merge(totals, overall_totals, how='outer', on=['hh_type'])
 
-    totals['percent_success'] = (totals['count_y'] / totals['count_x'])*100
+    totals['percent_un'] = (totals['count_y'] / totals['count_x'])*100
     print(totals)  # this is count of all visits across all groups (la's)
     print(totals['count_x'].sum(), totals['count_y'].sum(), totals['count_y'].sum() / totals['count_x'].sum(), )
 
 
-#response_data = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-12-12 15.57.25', 'summary', 'active_summary', 'la' )
+#response_data = os.path.join(os.getcwd(), 'outputs', 'C2EP331_C2SP331 2018-01-09 13.28.26', 'summary', 'active_summary', 'la' )
 #rep_dist(response_data)
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-21 10.45.09')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EP331_C2SP331 2018-01-09 15.11.41d')
 #pandas_data = csv_to_pandas(input_path, ['reminder_sent', 'reminder2_sent', 'IAC_rem_sent'])
 #count_reminders([pandas_data['reminder_sent'], pandas_data['reminder2_sent'], pandas_data['IAC_rem_sent']])
 
@@ -1023,21 +1023,21 @@ def visit_unnecessary(df_visits, df_visit_unnecessary, group='E&W'):
 #### change to allow display in % terms, just supply total to divide by
 
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2017-12-21 10.45.09')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2018-01-02 16.41.14')
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_unnecessary'])
 #visit_unnecessary(pandas_data['Visit'], pandas_data['Visit_unnecessary'])
 
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-19 16.02.13')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D10_C1SO331D10 2018-01-08 11.54.43')
 #pandas_data = csv_to_pandas(input_path, ['hh_record', 'Visit', 'Visit_success'])
 #visit_effectiveness(pandas_data['Visit'], pandas_data['Visit_success'])
 
-#input_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01')
+#input_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-21 10.39.22')
 #pandas_data = csv_to_pandas(input_path, ['hh_record'])
-#default_path = os.path.join(os.getcwd(), 'outputs', 'C2EO300 2017-11-29 13.48.01', 'summary', 'active_summary', 'la')
+#default_path = os.path.join(os.getcwd(), 'outputs', 'C1EO331D4_C1SO331D4 2017-12-21 10.39.22', 'summary', 'active_summary', 'la')
 #summary_outpath = os.path.join(input_path, 'summary')
 #percent = sum_hh(pandas_data['hh_record'])
-#plot_summary(default_path, summary_outpath, 'returns', average=True, reps=True, cumulative=True, percent=percent)
+#plot_summary(default_path, summary_outpath, 'returns', average=True, reps=True, cumulative=False, percent=percent)
 
 #input_path = os.path.join(os.getcwd(), 'outputs', 'lsoa_nomis_12 2017-08-17 13.06.10')
 #pandas_data = csv_to_pandas(left_current_path, ['hh_record'])

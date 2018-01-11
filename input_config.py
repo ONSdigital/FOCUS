@@ -14,7 +14,6 @@ import glob
 import ntpath
 
 
-
 def calc_dist(inlat1, inlat2, inlong1, inlong2):
     """calculates distance bewtween two latitudes and longitudes taking earths curvature into account"""
     # approximate radius of earth in km
@@ -32,8 +31,6 @@ def calc_dist(inlat1, inlat2, inlong1, inlong2):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     return R * c
-
-
 
 
 # generate new runs from a template and source csv
@@ -495,7 +492,7 @@ def create_cca_data(input_path, output_path, lookup_table, input_ratios=(), subs
         writer.writerows(cca_output)
 
 
-def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[0,0,0,0,0,0], cca_per_run=1):
+def generate_multirun(input_JSON, input_csv, output_JSON, CO_num=[0,0,0,0,0], cca_per_run=1):
     """config function used to split each enumeration district, as defined in input, into separate runs. Takes a JSON
     file as a template and csv input file (of format below) with info on the enumeration districts - which have been
     built on the assumption the workload should be approximately even.
@@ -612,6 +609,7 @@ def split_file(input_path, filter_path, split_by='LSOA'):
     raw_data = pd.read_csv(input_path)
     # read in the filter to apply
     filter_list = list(pd.read_csv(filter_path, header=-1)[0])
+
 
     # subset nomis data to only include the lsoa in the filter
     raw_data_filter = raw_data[raw_data[split_by].isin(filter_list)]
